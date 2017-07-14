@@ -1,0 +1,12 @@
+AddDefaultCharset UTF-8
+
+RewriteEngine on
+RewriteBase /
+RewriteRule print.php - [L]
+RewriteRule download.php - [L]
+RewriteRule phpinfo.php - [L]
+RewriteRule ^(barcode) - [L]
+RewriteRule (phpmysql) - [L]
+RewriteRule (wiki) - [L]
+
+RewriteRule !\.(js|ico|txt|gif|jpg|png|css|pdf|mp4|swf|fla|svg|woff|eot|ttf)$ index.php
