@@ -146,18 +146,15 @@ class MSSQL_Core extends SQL_Base
             $uuid = $this->GetUUID();
 
             if ($uuid) {
-                $key = $uuid . '::' . Timestamp() . '::' . rand(0, 10000);
-                $elastic = [];
-                $elastic[$key] = [
-                    'db_table'    => static::$database . '.' . static::$table,
-                    'uuid' => $uuid,
-                    'changes'     => json_encode($this->_change_log),
-                    'user_id' => is_object($User) ? $User->U_ID : null,
-                    'created_at'  => Timestamp(),
-                    'object_type' => static::TableToClass(static::$database, static::$table),
-                    'is_deleted'  => true,
-                ];
-                ElasticEdge::Insert('logs', 'change_log', $elastic);
+                $cl = new MSSQL_ChangeLog();
+                $cl->db_table =     static::$database . '.' . static::$table;
+                $cl->uuid = $uuid;
+                $cl->changes = json_encode($this->_change_log);
+                $cl->user_id = is_object($User) ? $User->U_ID : null;
+                $cl->created_at = Timestamp();
+                $cl->object_type = static::TableToClass(static::$database, static::$table);
+                $cl->is_deleted = true;
+                $cl->Save();
             }
         }
 
@@ -762,18 +759,15 @@ class MSSQL_Core extends SQL_Base
         if($this->HasChangeLog()) {
             $uuid = $this->GetUUID();
             if ($uuid) {
-                $key = $uuid . '::' . Timestamp() . '::' . rand(0, 10000);
-                $elastic = [];
-                $elastic[$key] = [
-                    'db_table'    => static::$database . '.' . static::$table,
-                    'uuid' => $uuid,
-                    'changes'     => json_encode($this->_change_log),
-                    'user_id' => is_object($User) ? $User->U_ID : null,
-                    'created_at'  => Timestamp(),
-                    'object_type' => static::TableToClass(static::$database, static::$table),
-                    'is_deleted'  => false,
-                ];
-                ElasticEdge::Insert('logs', 'change_log', $elastic);
+                $cl = new MSSQL_ChangeLog();
+                $cl->db_table =     static::$database . '.' . static::$table;
+                $cl->uuid = $uuid;
+                $cl->changes = json_encode($this->_change_log);
+                $cl->user_id = is_object($User) ? $User->U_ID : null;
+                $cl->created_at = Timestamp();
+                $cl->object_type = static::TableToClass(static::$database, static::$table);
+                $cl->is_deleted = true;
+                $cl->Save();
             }
         }
         return $res;

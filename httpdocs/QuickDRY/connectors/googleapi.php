@@ -3,7 +3,7 @@
 /**
  * Class googleRequest
  */
-class googleRequest {
+class GoogleAPI {
 
 	var $gKey;
 	var $code;

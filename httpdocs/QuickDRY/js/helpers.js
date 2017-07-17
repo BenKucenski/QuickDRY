@@ -154,23 +154,7 @@ function createDialog(id, title, optionObj, closeFunCall)
     return dlg;
 }
 
-/**
- * Function that open dialog for given div.
- * @param {String} id of the div
- */
-function openDialog(id)
-{
-    $( "#"+id ).dialog("open");
-}
 
-/**
- * Function that close dialog for given div.
- * @param {String} id of the div
- */
-function closeDialog(id)
-{
-    $( "#"+id ).dialog("close");
-}
 
 var QueryString = function() {
 	// This function is anonymous, is executed immediately and
@@ -295,68 +279,16 @@ function ShowSideTab(id) {
 	SetBack();
 }
 
-function ShowTab(current_tab) {
-	var _current_tab = $('#current_tab').val();
 
-	if (_current_tab > -1 && _current_tab != current_tab) {
-		$('#tab_' + _current_tab).addClass('tab');
-		$('#tab_' + _current_tab).removeClass('tab_selected');
-		$('#tab_s_' + _current_tab).hide();
-	}
-	$('#tab_' + current_tab).addClass('tab_selected');
-	$('#tab_' + current_tab).removeClass('tab');
-	$('#tab_s_' + current_tab).show();
-	$('#current_tab').val(current_tab);
-	SetCookie('current_tab',current_tab);
-	if(current_tab != 0)
-		window.location.hash = current_tab;
-	else
-		window.location.hash = '';
 
-	SetBack();
-}
 
-function SetBack() {
-	var url = QueryString.base_url;
-	var params = [];
-	for(var param in QueryString) {
-		if(param == 'base_url')
-			continue;
-
-		if(param == 'current_tab') {
-
-		}
-		else
-		if(param == 'current_side_tab') {
-
-		}
-		else
-			params.push(param + '=' + QueryString[param]);
-	}
-	params.push('current_tab=' + GetCookie('current_tab'));
-	params.push('current_side_tab=' + GetCookie('current_side_tab'));
-
-	SetCookie('back', url + '?' + params.join('&'));
-}
 
 var mouse_x;
 var mouse_y;
 
-function GetHash() {
-	return window.location.hash.replace(/^.*?(#|$)/,'');
-}
-
 $(document).ready(function() {
 	InitDatePickers();
 
-	if(GetHash()) {
-		if(isNaN(GetHash()))
-		{
-			return;
-		}
-
-		ShowTab(GetHash());
-	}
    $(document).mousemove(function(e){
 	   mouse_x = e.pageX;
 	   mouse_y = e.pageY;
@@ -393,6 +325,24 @@ $(document).ready(function() {
         var $clicked = $(e.target);
         if (! $clicked.parents().hasClass("dropdown"))
             $(".dropdown dd ul").hide();
+    });
+
+    // don't use  data-toggle="tab"
+    var hash = window.location.hash;
+    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+    $('.nav-tabs a').click(function (e) {
+        $(this).tab('show');
+        var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+        window.location.hash = this.hash;
+        $('html,body').scrollTop(scrollmem);
+    });
+
+    $('.nav-pills a').click(function (e) {
+        $(this).tab('show');
+        var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+        window.location.hash = this.hash;
+        $('html,body').scrollTop(scrollmem);
     });
 
     //setTimeout('CheckTimeout();',5000);

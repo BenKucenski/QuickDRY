@@ -2,7 +2,7 @@
 class UTMClass
 {
 // http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
-public static $pi = 3.14159265358979;
+    public static $pi = 3.14159265358979;
 
     /* Ellipsoid model constants (actual values here are for WGS84) */
     public static $sm_a = 6378137.0;
@@ -295,5 +295,38 @@ public static $pi = 3.14159265358979;
 
         $xy = self::LatLonToUTMXY(self::DegToRad($lat), self::DegToRad($lon), $zone);
         return $xy;
+    }
+
+    public static function AddKmToLatLon($lat, $lon, $distance, $bearing)
+    {
+        $earthRadius = 6371;
+        $lat1 = deg2rad($lat);
+        $lon1 = deg2rad($lon);
+        $bearing = deg2rad($bearing);
+
+        $lat2 = asin(sin($lat1) * cos($distance / $earthRadius) + cos($lat1) * sin($distance / $earthRadius) * cos($bearing));
+        $lon2 = $lon1 + atan2(sin($bearing) * sin($distance / $earthRadius) * cos($lat1), cos($distance / $earthRadius) - sin($lat1) * sin($lat2));
+
+        //Debug([$lat, $lon, $distance, 'lat'=>rad2deg($lat2),'lon'=>rad2deg($lon2)],null,true,false,false);
+        return ['lat' => rad2deg($lat2), 'lon' => rad2deg($lon2)];
+    }
+
+    public static function GetBoundary($lat, $lon, $distance)
+    {
+        $res = [];
+
+        $t = self::AddKmToLatLon($lat, $lon, $distance, 0);
+        $res['max_lat'] = $t['lat'];
+
+        $t = self::AddKmToLatLon($lat, $lon, $distance, 90);
+        $res['max_lon'] = $t['lon'];
+
+        $t = self::AddKmToLatLon($lat, $lon, $distance, 180);
+        $res['min_lat'] = $t['lat'];
+
+        $t = self::AddKmToLatLon($lat, $lon, $distance, 270);
+        $res['min_lon'] = $t['lon'];
+
+        return $res;
     }
 }

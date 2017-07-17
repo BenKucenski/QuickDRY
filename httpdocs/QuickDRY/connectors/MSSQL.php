@@ -91,6 +91,7 @@ function ms_escape_query($sql, $params) {
 }
 
 
+require_once 'mssql/MSSQL_ChangeLog.php';
 require_once 'mssql/MSSQL_Core.php';
 require_once 'mssql/MSSQL_TableColumn.php';
 require_once 'mssql/MSSQL_ForeignKey.php';
