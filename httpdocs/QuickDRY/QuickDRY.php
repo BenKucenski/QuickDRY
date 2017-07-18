@@ -16,6 +16,7 @@ require_once 'utilities/BarcodeClass.php';
 require_once 'utilities/Calendar.php';
 require_once 'utilities/NavigationClass.php';
 require_once 'utilities/UploadHandler.php';
+require_once 'utilities/Mailer.php';
 
 require_once 'connectors/CoreClass.php';
 require_once 'connectors/SQL_Base.php';
@@ -30,6 +31,7 @@ require_once 'web/BasePage.php';
 require_once 'web/Session.php';
 require_once 'web/Cookie.php';
 require_once 'web/Request.php';
+require_once 'web/Server.php';
 require_once 'web/BrowserOS.php';
 require_once 'web/FileClass.php';
 require_once 'web/UserClass.php';

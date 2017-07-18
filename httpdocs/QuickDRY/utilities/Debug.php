@@ -31,14 +31,18 @@ function Debug($var, $msg = null, $print = false, $exit = false, $backtrace = tr
         $finalMsg .=  debug_string_backtrace();
     $finalMsg .=  '</pre>' .PHP_EOL;
 
+    if(defined('IS_PRODUCTION') && IS_PRODUCTION) {
+        $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, 'HALT: ' . $_SERVER['REQUEST_URI'], $finalMsg);
+        $t->Send();
+        exit('An Error Occured.  Please Try Again Later.');
+    }
     if ($print !== false) {
         echo $finalMsg;
-    } else {
-        //LogError(-1,$finalMsg,'','');
     }
 
-    if($exit)
+    if($exit) {
         exit();
+    }
 }
 
 /**

@@ -6,6 +6,9 @@ $opts .= 'u::';
 $opts .= 'v::';
 $opts .= 'i::';
 $opts .= 'm::';
+$opts .= 'p::';
+$opts .= 'l::';
+$opts .= 'f::';
 
 $options = getopt($opts);
 
@@ -16,16 +19,21 @@ $_USER_CLASS = isset($options['u']) ? $options['u'] : '';
 $_USER_VAR = isset($options['v']) ? $options['v'] : '';
 $_USER_ID_COLUMN = isset($options['i']) ? $options['i'] : '';
 $_MASTERPAGE = isset($options['m']) ? $options['m'] : '';
+$_USE_DATABASE_PREFIX = isset($options['p']) ? $options['p'] : '';
+$_LOWERCASE_TABLE = isset($options['l']) ? $options['l'] : '';
+$_USE_FK_COLUMN_NAME = isset($options['f']) ? $options['f'] : '';
 
 if(!$_HOST || !$_DATABASE) {
     exit(basename(__FILE__) . ' usage: -h<host> -d<database> -c<database constant optional> -u<user class> -v<user variable> -i<user id column>' . PHP_EOL);
 }
+
+$_DATABASE_PREFIX = $_DATABASE_CONSTANT ? $_DATABASE_CONSTANT : $_DATABASE;
 
 include '../httpdocs/localsettings.php';
 include '../httpdocs/init.php';
 
 
 $CodeGen = new MSSQL_CodeGen();
-$CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE);
+$CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE, $_LOWERCASE_TABLE, $_USE_DATABASE_PREFIX, $_USE_FK_COLUMN_NAME);
 $CodeGen->GenerateClasses();
 $CodeGen->GenerateJSON();
