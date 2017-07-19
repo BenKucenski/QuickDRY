@@ -12,6 +12,10 @@ class NavigationClass
      */
     public function Combine($_ADD)
     {
+        if(!is_array($_ADD)) {
+            return;
+        }
+
         foreach ($_ADD as $key => $settings) {
             if (isset($settings['onclick']))
                 $this->_MENU[$key]['onclick'] = $settings['onclick'];
