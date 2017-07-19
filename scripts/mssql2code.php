@@ -6,7 +6,6 @@ $opts .= 'u::';
 $opts .= 'v::';
 $opts .= 'i::';
 $opts .= 'm::';
-$opts .= 'p::';
 $opts .= 'l::';
 $opts .= 'f::';
 
@@ -19,7 +18,6 @@ $_USER_CLASS = isset($options['u']) ? $options['u'] : '';
 $_USER_VAR = isset($options['v']) ? $options['v'] : '';
 $_USER_ID_COLUMN = isset($options['i']) ? $options['i'] : '';
 $_MASTERPAGE = isset($options['m']) ? $options['m'] : '';
-$_USE_DATABASE_PREFIX = isset($options['p']) ? $options['p'] : '';
 $_LOWERCASE_TABLE = isset($options['l']) ? $options['l'] : '';
 $_USE_FK_COLUMN_NAME = isset($options['f']) ? $options['f'] : '';
 
@@ -34,6 +32,6 @@ include '../httpdocs/init.php';
 
 
 $CodeGen = new MSSQL_CodeGen();
-$CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE, $_LOWERCASE_TABLE, $_USE_DATABASE_PREFIX, $_USE_FK_COLUMN_NAME);
+$CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE, $_LOWERCASE_TABLE, $_USE_FK_COLUMN_NAME);
 $CodeGen->GenerateClasses();
 $CodeGen->GenerateJSON();

@@ -20,25 +20,22 @@ class SQL_Base
      *
      * @return string
      */
-    public static function TableToClass($database, $table, $use_database, $lowercase_table)
+    public static function TableToClass($database_prefix, $table, $lowercase_table, $database_type_prefix)
     {
         if($lowercase_table) {
             $table = strtolower($table);
         }
-        $database = strtolower($database);
 
-        if($use_database) {
-            $t = explode('_', $database . '_' . $table);
-        } else {
-            $t = explode('_', $table);
-        }
+        $database_prefix = strtolower($database_prefix);
+        $t = explode('_', $database_prefix . '_' . $table);
+
         $type = '';
         foreach($t as $w)
             $type .= preg_replace('/[^a-z0-9]/si','',ucfirst($w));
         $type .= 'Class';
         if(is_numeric($type[0]))
             $type = 'i' . $type;
-        return $type;
+        return $database_type_prefix . '_' . $type;
     }
 
     /**
@@ -993,7 +990,7 @@ class SQL_Base
      */
     protected static function _EasySelect($selected, $id, $value, $order_by, $display = "", $where = '1=1')
     {
-        $type = self::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+        $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
 
         $items = [];
         eval("\$items = " . $type . "::GetAll(\"$order_by\",\"asc\",\"$where\");");

@@ -10,10 +10,10 @@ class MSSQL_CodeGen extends SafeClass
     private $MasterPage;
     private $Tables;
     private $LowerCaseTables;
-    private $UseDatabasePrefix;
     private $UseFKColumnName;
+    private $DatabaseTypePrefix = 'ms';
 
-    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_database_prefix, $use_fk_column_name)
+    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name)
     {
         $this->Database = $database;
         $this->DatabaseConstant = $database_constant;
@@ -23,7 +23,6 @@ class MSSQL_CodeGen extends SafeClass
         $this->MasterPage = $master_page;
         $this->DatabasePrefix = $this->DatabaseConstant ? $this->DatabaseConstant : $this->Database;
         $this->LowerCaseTables = $lowercase_tables;
-        $this->UseDatabasePrefix = $use_database_prefix;
         $this->UseFKColumnName = $use_fk_column_name;
 
         MSSQL_A::SetDatabase($this->Database);
@@ -35,15 +34,15 @@ class MSSQL_CodeGen extends SafeClass
 
         if (!is_dir('class'))
             mkdir('class');
-        if (!is_dir('class/ms_' . strtolower($this->DatabasePrefix)))
-            mkdir('class/ms_' . strtolower($this->DatabasePrefix));
+        if (!is_dir('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
+            mkdir('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
 
         if (!is_dir('db'))
             mkdir('db');
-        if (!is_dir('db/ms_' . strtolower($this->DatabasePrefix)))
-            mkdir('db/ms_' . strtolower($this->DatabasePrefix));
-        if (!is_dir('db/ms_' . strtolower($this->DatabasePrefix) . '/db'))
-            mkdir('db/ms_' . strtolower($this->DatabasePrefix) . '/db');
+        if (!is_dir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
+            mkdir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
+        if (!is_dir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db'))
+            mkdir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db');
 
         if (!is_dir('phpunit'))
             mkdir('phpunit');
@@ -64,11 +63,11 @@ class MSSQL_CodeGen extends SafeClass
 
             $columns = MSSQL_A::GetTableColumns($table_name);
             $mod = $this->GenerateClass($table_name, $columns);
-            $modules[] = 'require_once \'common/ms_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php\';';
-            $modules[] = 'require_once \'common/ms_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php\';';
+            $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php\';';
+            $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php\';';
         }
 
-        $fp = fopen('includes/ms_' . strtolower($this->DatabasePrefix) . '.php', 'w');
+        $fp = fopen('includes/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
         fwrite($fp, "<?php\r\n\r\n" . implode("\r\n", $modules));
         fclose($fp);
     }
@@ -77,12 +76,13 @@ class MSSQL_CodeGen extends SafeClass
     {
         $class_props = array();
 
-        $c_name = 'ms_' . SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->UseDatabasePrefix, $this->LowerCaseTables);
+        $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
         Log::Insert($c_name, true);
 
         $props = '';
         $unique = MSSQL_A::GetUniqueKeys($table_name);
         $primary = MSSQL_A::GetPrimaryKey($table_name);
+
 
         foreach ($cols as $col) {
             $class_props[] = ' * @property ' . ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field;
@@ -111,7 +111,7 @@ class MSSQL_CodeGen extends SafeClass
             }
             $seens_vars[] = $var;
 
-            $class_props[] = ' * @property ms_' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . ' ' . $var;
+            $class_props[] = ' * @property ' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . ' ' . $var;
             $foreign_key_props[] = 'protected $_' . $var . ' = null;';
 
             if(is_array($fk->column_name)) {
@@ -125,7 +125,7 @@ class MSSQL_CodeGen extends SafeClass
                 $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && " . implode(' && ', $isset) . ") {
-                    \$this->_$var = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::Get([" . implode(', ', $get_params) . "]);
+                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_$var;
             ";
@@ -133,7 +133,7 @@ class MSSQL_CodeGen extends SafeClass
                 $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && \$this->" . $fk->column_name . ") {
-                    \$this->_$var = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::Get(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_$var;
             ";
@@ -157,7 +157,7 @@ class MSSQL_CodeGen extends SafeClass
             }
             $seens_vars[] = $var;
 
-            $class_props[] = ' * @property ms_' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . '[] ' . $var;
+            $class_props[] = ' * @property ' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . '[] ' . $var;
             $class_props[] = ' * @property int ' . $var . 'Count';
 
 
@@ -175,13 +175,13 @@ class MSSQL_CodeGen extends SafeClass
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && " . implode(' && ', $isset) . ") {
-                    \$this->_$var = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::GetAll([" . implode(', ', $get_params) . "]);
+                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_$var;
 
             case '{$var}Count':
                 if(is_null(\$this->_{$var}Count) && " . implode(' && ', $isset) . ") {
-                    \$this->_{$var}Count = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::GetCount([" . implode(', ', $get_params) . "]);
+                    \$this->_{$var}Count = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_{$var}Count;
             ";
@@ -190,13 +190,13 @@ class MSSQL_CodeGen extends SafeClass
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && \$this->" . $fk->column_name . ") {
-                    \$this->_$var = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::GetAll(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_$var;
 
             case '{$var}Count':
                 if(is_null(\$this->_{$var}Count) && \$this->" . $fk->column_name . ") {
-                    \$this->_{$var}Count = ms_" . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables) . "::GetCount(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_{$var}Count = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_{$var}Count;
             ";
@@ -222,11 +222,20 @@ class MSSQL_CodeGen extends SafeClass
 class db_' . $c_name . ' extends MSSQL_A
 {
     public static $_primary = [\'' . implode('\',\'', $primary) . '\'];
-    public static $_unique = [' . (sizeof($unique) ? '\'' . implode('\',\'', $unique) . '\'' : '') . '];
+    public static $_unique = [
+    ';
 
+        foreach($unique as $key => $columns) {
+            $code .= '        [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+    }
+
+
+$code .= '
+        ];
     protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $table = \'' . $table_name . '\';
-    protected static $UseDatabase = ' . ($this->UseDatabasePrefix ? 1 : 0) . ';
+    protected static $DatabasePrefix = \'' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . '\';
+    protected static $DatabaseTypePrefix = \'' . $this->DatabaseTypePrefix . '\';
     protected static $LowerCaseTable = ' . ($this->LowerCaseTables ? 1 : 0) . ';
 
     protected static $prop_definitions = array(
@@ -314,7 +323,7 @@ class db_' . $c_name . ' extends MSSQL_A
     }
 }
 ';
-        $fp = fopen('db/ms_' . strtolower($this->DatabasePrefix) . '/db/db_' . $c_name . '.php', 'w');
+        $fp = fopen('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $c_name . '.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
 
@@ -349,7 +358,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
 ';
 
-        $fp = fopen('class/ms_' . strtolower($this->DatabasePrefix) . '/' . $c_name . '.php', 'w');
+        $fp = fopen('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $c_name . '.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
 
@@ -373,7 +382,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
             $column_names[] = $col->field;
         }
 
-        $c_name = 'ms_' . SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->UseDatabasePrefix, $this->LowerCaseTables);
+        $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
 
         $unique = MSSQL_A::GetUniqueKeys($table_name);
         $primary = MSSQL_A::GetPrimaryKey($table_name);
@@ -514,10 +523,12 @@ exit_json($returnvals);
         $u_seq = [];
         $u_ret = [];
         if (sizeof($unique)) {
-            foreach ($unique as $u) {
-                $u_req[] = '$Request->' . $u;
-                $u_seq[] = "'$u'=>\$Request->$u";
-                $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
+            foreach ($unique as $key => $cols) {
+                foreach($cols as $u) {
+                    $u_req[] = '$Request->' . $u;
+                    $u_seq[] = "'$u'=>\$Request->$u";
+                    $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
+                }
             }
 
             $unique_php = '
@@ -633,7 +644,7 @@ exit_json($returnvals);
         foreach ($res as $fk) {
             if(!is_array($fk->column_name)) {
                 /* @var $fk MSSQL_ForeignKey */
-                $refs[$fk->column_name] = 'ms_' . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->UseDatabasePrefix, $this->LowerCaseTables);
+                $refs[$fk->column_name] = SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
             }
         }
 

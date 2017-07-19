@@ -93,7 +93,7 @@ class MySQL_Core extends SQL_Base
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->U_ID : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
                 $cl->is_deleted = true;
                 $cl->Save();
             }
@@ -595,7 +595,7 @@ class MySQL_Core extends SQL_Base
 
             if($unique_set && !$this->$primary)
             {
-                $type = self::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+                $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
                 $t = $type::Get($params);
 
                 if(!is_null($t))
@@ -681,7 +681,7 @@ class MySQL_Core extends SQL_Base
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->U_ID : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
                 $cl->is_deleted = false;
                 $cl->Save();
             }

@@ -2,6 +2,7 @@
 
 class MSSQL_Core extends SQL_Base
 {
+    protected static $DatabaseTypePrefix = 'ms';
     /**
      * @return array
      */
@@ -152,7 +153,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->U_ID : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
                 $cl->is_deleted = true;
                 $cl->Save();
             }
@@ -653,33 +654,35 @@ class MSSQL_Core extends SQL_Base
 
         if(sizeof(static::$_unique))
         { // if we have a unique key defined then check it and load the object if it exists
-            $params = [];
-            $unique_set = 0;
 
-            foreach(static::$_unique as $col)
+            foreach(static::$_unique as $cols)
             {
-                if(is_null($this->$col))
-                    $params[$col] = 'null';
-                else
-                {
-                    $params[$col] = $this->$col;
-                    $unique_set++;
+                $params = [];
+                $unique_set = 0;
+
+                foreach($cols as $col) {
+                    if (is_null($this->$col))
+                        $params[$col] = 'null';
+                    else {
+                        $params[$col] = $this->$col;
+                        $unique_set++;
+                    }
                 }
-            }
-
-            if($unique_set && !$this->$primary)
-            {
-                $type = self::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
-                $t = $type::Get($params);
-
-                if(!is_null($t))
+                if($unique_set && !$this->$primary)
                 {
-                    if($t->$primary)
-                        $this->$primary = $t->$primary;
-                    $vars = $t->GetValues($User);
-                    foreach($vars as $k => $v)
-                        if(isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
-                            $this->$k = $v;
+                    $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+                    $t = $type::Get($params);
+
+                    if(!is_null($t))
+                    {
+                        if($t->$primary)
+                            $this->$primary = $t->$primary;
+                        $vars = $t->ToArray();
+                        foreach($vars as $k => $v)
+                            if(isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
+                                $this->$k = $v;
+                        break; // only find the first match with unique key definition
+                    }
                 }
             }
         }
@@ -765,7 +768,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->U_ID : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$database, static::$table, static::$UseDatabase, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
                 $cl->is_deleted = true;
                 $cl->Save();
             }

@@ -615,14 +615,59 @@ class MSSQL_Connection
         return $indexes;
     }
 
+    private static $_UniqueKeys = null;
+
     /**
      * @param $table_name
      *
      * @return null
      */
+
     public function GetUniqueKeys($table_name)
     {
-        return null;
+        if(is_null(self::$_UniqueKeys)) {
+            // https://stackoverflow.com/questions/765867/list-of-all-index-index-columns-in-sql-server-db
+            $sql = '
+SELECT 
+     TableName = t.name,
+     IndexName = ind.name,
+     IndexId = ind.index_id,
+     ColumnId = ic.index_column_id,
+     ColumnName = col.name,
+     ind.*,
+     ic.*,
+     col.* 
+FROM 
+     sys.indexes ind 
+INNER JOIN 
+     sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+INNER JOIN 
+     sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
+INNER JOIN 
+     sys.tables t ON ind.object_id = t.object_id 
+
+ORDER BY 
+     t.name, ind.name, ind.index_id, ic.index_column_id        
+        
+        ';
+
+            $res = MSSQL_A::Query($sql);
+            if($res['error']) {
+                Halt($res);
+            }
+            foreach($res['data'] as $row) {
+                if($row['is_unique'] && !$row['is_primary_key']) {
+                    if(!isset(self::$_UniqueKeys[$row['TableName']][$row['IndexName']])) {
+                        self::$_UniqueKeys[$row['TableName']][$row['IndexName']] = [];
+                    }
+                    self::$_UniqueKeys[$row['TableName']][$row['IndexName']][] = $row['ColumnName'];
+                }
+            }
+        }
+        if(!isset(self::$_UniqueKeys[$table_name])) {
+            self::$_UniqueKeys[$table_name] = [];
+        }
+        return self::$_UniqueKeys[$table_name];
     }
 
     /**
