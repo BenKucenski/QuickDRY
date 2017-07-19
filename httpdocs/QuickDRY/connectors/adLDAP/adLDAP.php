@@ -809,7 +809,7 @@ class adLDAP
         $ret_groups = [];
 
         $groups = $this->group_info($group, ["memberof"]);
-        if (is_array($groups[0]["memberof"])) {
+        if (isset($groups[0]["memberof"]) && is_array($groups[0]["memberof"])) {
             $groups = $groups[0]["memberof"];
 
             if ($groups) {
@@ -1050,7 +1050,7 @@ class adLDAP
             return (false);
         }
 
-        $filter = "samaccountname=" . $username;
+        $filter = "samaccountname=$username";
         if ($fields === NULL) {
             $fields = ["samaccountname", "mail", "memberof", "department", "displayname", "telephonenumber", "primarygroupid", "objectsid"];
         }
@@ -2351,9 +2351,13 @@ class adLDAP
      */
     protected function ldap_slashes($str)
     {
+        return str_replace('\\', '\\\\', $str);
+
+        /* // /e is deprecated
         return preg_replace('/([\x00-\x1F\*\(\)\\\\])/e',
             '"\\\\\".join("",unpack("H2","$1"))',
             $str);
+        */
     }
 
     /**
