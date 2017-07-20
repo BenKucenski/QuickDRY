@@ -20,18 +20,20 @@ class UserClass extends SafeClass
         $ldap = new adLDAP();
         if($ldap->authenticate($username, $password)) {
 
-            $ldamin = new adLDAP();
-            $ldamin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
+            // May not be necessary to use an administrative account to get role information
+            $ldadmin = new adLDAP();
+            $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
 
             $user = new self();
             $user->Username = $username;
             $user->id = md5($username);
-            $user->Roles = $ldamin->user_groups($username, true);
+            $user->Roles = $ldadmin->user_groups($username, true);
 
+            // user may log in with email address but roles may be linked to root account name
             if(!sizeof($user->Roles)) {
                 $username = explode('@', $username);
                 $username = $username[0];
-                $user->Roles = $ldamin->user_groups($username, true);
+                $user->Roles = $ldadmin->user_groups($username, true);
             }
             return $user;
 

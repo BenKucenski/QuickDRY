@@ -2,16 +2,25 @@
 $_NAVIGATION = new NavigationClass();
 
 if (!$Session->user) {
-    $_NAVIGATION->Combine($_MENU[ROLE_ID_DEFAULT]);
-} else {
-    if(isset($_MENU[ROLE_ID_DEFAULT_USER])) {
-        $_NAVIGATION->Combine($_MENU[ROLE_ID_DEFAULT_USER]);
-
+    if(defined('ROLE_ID_DEFAULT')) {
+        $_NAVIGATION->Combine($_MENU_ACCESS[ROLE_ID_DEFAULT]);
     }
-    foreach($CurrentUser->Roles as $role) {
-        if(isset($_MENU[$role])) {
-            $_NAVIGATION->Combine($_MENU[$role]);
+} else {
+    if(defined('ROLE_ID_DEFAULT_USER')) {
+        if (isset($_MENU_ACCESS[ROLE_ID_DEFAULT_USER])) {
+            $_NAVIGATION->Combine($_MENU_ACCESS[ROLE_ID_DEFAULT_USER]);
 
         }
     }
+    if(is_array($CurrentUser->Roles)) {
+        foreach ($CurrentUser->Roles as $role) {
+            if (isset($_MENU_ACCESS[$role])) {
+                $_NAVIGATION->Combine($_MENU_ACCESS[$role]);
+
+            }
+        }
+    }
 }
+
+$_NAVIGATION->SetMenu($_MENU);
+
