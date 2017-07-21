@@ -15,6 +15,7 @@ class BasePage extends SafeClass
     public $Cookie;
     public $CurrentUser;
     public $IncludeMenu;
+    public $PostData;
 
     protected $Errors = [];
 
@@ -26,6 +27,7 @@ class BasePage extends SafeClass
         $this->Cookie = $Cookie;
         $this->Session = $Session;
         $this->CurrentUser = $CurrentUser;
+        $this->PostData = json_decode(file_get_contents('php://input'),false); // return a standard object
     }
 
 

@@ -204,7 +204,7 @@ function AdjustedTime($time = 0)
 {
     if(!$time) $time = time();
 
-    if(!is_numeric($time)) $time = strotime($time);
+    if(!is_numeric($time)) $time = strtotime($time);
 
     return $time;
 }

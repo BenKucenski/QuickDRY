@@ -42,9 +42,21 @@ function exit_javascript($url, $title) {
     exit;
 }
 
-function exit_json($json)
+function exit_json($json, $HTTP_STATUS = HTTP_STATUS_OK)
 {
+    if($HTTP_STATUS) {
+        header('HTTP/1.1 ' . $HTTP_STATUS . ': ' . HTTPStatus::GetDescription($HTTP_STATUS));
+    }
     header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT');
+    header(
+        'Access-Control-Allow-Headers: X-User-Email, X-User-Token, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+    );
+    if (!is_array($json)) { // used by api/v2/sheets/json.get.php to indicate the data is already json encoded
+        exit($json);
+    }
     exit(json_encode(fix_json($json), JSON_PRETTY_PRINT));
 }
 

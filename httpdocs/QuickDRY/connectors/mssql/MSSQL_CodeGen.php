@@ -271,16 +271,18 @@ $code .= '
 
     public function VisibleTo(' . $this->UserClass . ' &$user)
     {
-        if($user->Is([USER_ROLE_ADMIN]))
+        if($user->Is([ROLE_ID_ADMIN])) {
             return true;
+        }
 
         return false;
     }
 
     public function CanDelete(' . $this->UserClass . ' &$user)
     {
-        if($user->Is([USER_ROLE_ADMIN]))
+        if($user->Is([ROLE_ID_ADMIN])) {
             return true;
+        }
 
         return false;
     }
@@ -411,7 +413,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
         $save = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\']);
+    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -422,14 +424,16 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 	{
 		$req = PostFromSerialized($_POST[\'serialized\']);
 		$primary = isset(' . $c_name . '::$_primary[0]) ? ' . $c_name . '::$_primary[0] : \'id\';
-		if(isset($req[$primary]) && $req[$primary])
+		if(isset($req[$primary]) && $req[$primary]) {
 			$c = ' . $c_name . '::Get([$primary=>$req[$primary]]);
-		else
+		} else {
 			$c = new ' . $c_name . '();
+        }
 			
 		$c->FromRequest($req, false);
-		if(!$c->VisibleTo($' . $this->UserVar . '))
-			exit_json([\'error\'=>\'Invalid Request\']);
+		if(!$c->VisibleTo($' . $this->UserVar . ')) {
+			exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
 		$res = $c->FromRequest($req);
 
 		if(!isset($res[\'error\']) || !$res[\'error\'])
@@ -462,7 +466,7 @@ exit_json($returnvals);
 
 $get = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\']);
+    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -471,8 +475,9 @@ if(isset($Request->uuid))
 {
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
-	if(!$c->VisibleTo($' . $this->UserVar . '))
-		exit_json([\'error\'=>\'Invalid Request\']);
+	if(!$c->VisibleTo($' . $this->UserVar . ')) {
+		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    }
 
 	$returnvals[\'serialized\'] = $c->ToArray();
 	$returnvals[\'can_delete\'] = $c->CanDelete($' . $this->UserVar . ') ? 1 : 0;
@@ -492,7 +497,7 @@ fclose($fp);
     {
         $lookup = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\']);
+    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -543,7 +548,7 @@ if(' . implode(' && ', $u_req) . ')
 
         $delete = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\']);
+    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -554,8 +559,9 @@ if($Request->uuid)
 {
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
-	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . '))
-		exit_json([\'error\'=>\'Invalid Request\']);
+	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
+		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    }
 
 	$res = $c->Remove($' . $this->UserVar . ');
 	if(!isset($res[\'error\']) || !$res[\'error\'])
@@ -563,12 +569,12 @@ if($Request->uuid)
 		$returnvals[\'success\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' Removed\';
 		$returnvals[\'uuid\'] = $Request->uuid;
 		' . implode("\r\n\t\t", $u_ret) . '
-	}
-	else
+	} else {
 		$returnvals[\'error\'] = $res[\'error\'];
-}
-else
+    }
+} else {
 	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
+}
 
 exit_json($returnvals);
 ';
@@ -582,13 +588,14 @@ exit_json($returnvals);
     {
         $history = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\']);
+    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 /* @var $item ' . $c_name . ' */
 $item = ' . $c_name . '::Get($Request->uuid);
-if(!$item->VisibleTo($CurrentUser))
-	exit_json([\'error\'=>\'Invalid Request\']);
+if(!$item->VisibleTo($CurrentUser)) {
+	exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+}
 
 ob_start();
 ?>
