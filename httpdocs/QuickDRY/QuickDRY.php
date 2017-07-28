@@ -36,7 +36,6 @@ require_once 'web/BrowserOS.php';
 require_once 'web/FileClass.php';
 require_once 'web/UserClass.php';
 require_once 'web/Meta.php';
-require_once 'web/HTTPStatus.php';
 
 require_once 'form/FormClass.php';
 require_once 'form/GenderClass.php';

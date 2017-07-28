@@ -52,11 +52,16 @@ class MSSQL_CodeGen extends SafeClass
 
         if (!is_dir('manage'))
             mkdir('manage');
+
+        if (!is_dir('common'))
+            mkdir('common');
     }
 
     public function GenerateClasses()
     {
-        $modules = array();
+        $modules = [];
+        $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
+        $this->GenerateDatabaseClass();
 
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
@@ -72,6 +77,57 @@ class MSSQL_CodeGen extends SafeClass
         fclose($fp);
     }
 
+    function GenerateDatabaseClass()
+    {
+        $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+        $stored_procs = MSSQL_A::GetStoredProcs();
+
+        $sp_code = [];
+        foreach($stored_procs as $sp) {
+            $sp_class = $class_name . '_' . $sp->SPECIFIC_NAME . 'Class';
+            $sp_params = MSSQL_A::GetStoredProcParams($sp->SPECIFIC_NAME);
+            $params = [];
+            $sql_params = [];
+            foreach($sp_params as $param) {
+                $params[] = str_replace('@','$', $param->Parameter_name);
+                $sql_params[] = $param->Parameter_name . ' = {{}}';
+            }
+
+            $sp_code[] = '
+            
+    /**
+     * @return ' . $sp_class . '[]
+     */
+    public static function ' . $sp->SPECIFIC_NAME . '(' . implode(', ', $params) . ') 
+    {
+        $sql = \'
+        EXEC	\' . ' . $this->DatabaseConstant . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
+        ' . implode(",\r\n\t\t", $sql_params)  . '
+        
+        \';
+        /* @var $rows ' . $sp_class . '[] */
+        $rows = MSSQL_A::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
+            return new ' . $sp_class . '($row);
+        });
+
+        if (isset($rows[\'error\'])) {
+            Halt($rows);
+        }
+        return $rows;
+    }
+            ';
+        }
+        $code = '<?php
+class sp_' . $class_name . ' extends MSSQL_A 
+{
+' . implode("\r\n", $sp_code) . '
+}
+        ';
+
+        $fp = fopen('common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
+        fwrite($fp, $code);
+        fclose($fp);
+    }
     function GenerateClass($table_name, $cols)
     {
         $class_props = array();
@@ -271,18 +327,16 @@ $code .= '
 
     public function VisibleTo(' . $this->UserClass . ' &$user)
     {
-        if($user->Is([ROLE_ID_ADMIN])) {
+        if($user->Is([USER_ROLE_ADMIN]))
             return true;
-        }
 
         return false;
     }
 
     public function CanDelete(' . $this->UserClass . ' &$user)
     {
-        if($user->Is([ROLE_ID_ADMIN])) {
+        if($user->Is([USER_ROLE_ADMIN]))
             return true;
-        }
 
         return false;
     }
@@ -413,7 +467,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
         $save = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    exit_json([\'error\'=>\'Invalid Request\']);
 }
 
 $returnvals = [];
@@ -424,16 +478,14 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 	{
 		$req = PostFromSerialized($_POST[\'serialized\']);
 		$primary = isset(' . $c_name . '::$_primary[0]) ? ' . $c_name . '::$_primary[0] : \'id\';
-		if(isset($req[$primary]) && $req[$primary]) {
+		if(isset($req[$primary]) && $req[$primary])
 			$c = ' . $c_name . '::Get([$primary=>$req[$primary]]);
-		} else {
+		else
 			$c = new ' . $c_name . '();
-        }
 			
 		$c->FromRequest($req, false);
-		if(!$c->VisibleTo($' . $this->UserVar . ')) {
-			exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
-        }
+		if(!$c->VisibleTo($' . $this->UserVar . '))
+			exit_json([\'error\'=>\'Invalid Request\']);
 		$res = $c->FromRequest($req);
 
 		if(!isset($res[\'error\']) || !$res[\'error\'])
@@ -466,7 +518,7 @@ exit_json($returnvals);
 
 $get = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    exit_json([\'error\'=>\'Invalid Request\']);
 }
 
 $returnvals = [];
@@ -475,9 +527,8 @@ if(isset($Request->uuid))
 {
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
-	if(!$c->VisibleTo($' . $this->UserVar . ')) {
-		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
-    }
+	if(!$c->VisibleTo($' . $this->UserVar . '))
+		exit_json([\'error\'=>\'Invalid Request\']);
 
 	$returnvals[\'serialized\'] = $c->ToArray();
 	$returnvals[\'can_delete\'] = $c->CanDelete($' . $this->UserVar . ') ? 1 : 0;
@@ -497,7 +548,7 @@ fclose($fp);
     {
         $lookup = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    exit_json([\'error\'=>\'Invalid Request\']);
 }
 
 $returnvals = [];
@@ -548,7 +599,7 @@ if(' . implode(' && ', $u_req) . ')
 
         $delete = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    exit_json([\'error\'=>\'Invalid Request\']);
 }
 
 $returnvals = [];
@@ -559,9 +610,8 @@ if($Request->uuid)
 {
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
-	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
-		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
-    }
+	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . '))
+		exit_json([\'error\'=>\'Invalid Request\']);
 
 	$res = $c->Remove($' . $this->UserVar . ');
 	if(!isset($res[\'error\']) || !$res[\'error\'])
@@ -569,12 +619,12 @@ if($Request->uuid)
 		$returnvals[\'success\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' Removed\';
 		$returnvals[\'uuid\'] = $Request->uuid;
 		' . implode("\r\n\t\t", $u_ret) . '
-	} else {
+	}
+	else
 		$returnvals[\'error\'] = $res[\'error\'];
-    }
-} else {
-	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
 }
+else
+	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
 
 exit_json($returnvals);
 ';
@@ -588,14 +638,13 @@ exit_json($returnvals);
     {
         $history = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    exit_json([\'error\'=>\'Invalid Request\']);
 }
 
 /* @var $item ' . $c_name . ' */
 $item = ' . $c_name . '::Get($Request->uuid);
-if(!$item->VisibleTo($CurrentUser)) {
-	exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
-}
+if(!$item->VisibleTo($CurrentUser))
+	exit_json([\'error\'=>\'Invalid Request\']);
 
 ob_start();
 ?>
@@ -941,8 +990,10 @@ class ' . $page_dir . ' extends BasePage
     public function Init()
     {
         $this->MasterPage = \'' . $this->MasterPage . '\';
-        $this->IncludeMenu = true;
-
+    }
+    
+    public function Get() 
+    {
         $items = ' . $c_name . '::GetAllPaginated(null, null, PAGE, PER_PAGE);
         $this->TableHeader = ' . $c_name . '::GetHeader(SORT_BY, SORT_DIR, true);
         $this->' . $page_dir . ' = $items[\'items\'];

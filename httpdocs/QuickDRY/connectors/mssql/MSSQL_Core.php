@@ -54,6 +54,28 @@ class MSSQL_Core extends SQL_Base
         return static::$connection->GetLinkedTables($table_name);
     }
 
+    /**
+     * @return MSSQL_StoredProc[]
+     */
+    public static function GetStoredProcs()
+    {
+        static::_connect();
+
+        return static::$connection->GetStoredProcs();
+    }
+
+    /**
+     * @param $stored_proc
+     * @return MSSQL_StoredProcParam[]
+     */
+    public static function GetStoredProcParams($stored_proc)
+    {
+        static::_connect();
+
+        return static::$connection->GetStoredProcParams($stored_proc);
+    }
+
+
     public static function GetPrimaryKey($table_name)
     {
         static::_connect();

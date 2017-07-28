@@ -810,4 +810,68 @@ ORDER BY
             $list[] = $col['column_name'];
         return $list;
     }
+
+    /**
+     * @return MSSQL_StoredProc[]
+     */
+    public function GetStoredProcs()
+    {
+        $sql = '
+select * 
+  from information_schema.routines 
+ where routine_type = \'PROCEDURE\'
+ ORDER BY SPECIFIC_NAME        
+        ';
+        /* @var $res MSSQL_StoredProc[] */
+        $res = $this->Query($sql, null, function($row) {
+            return new MSSQL_StoredProc($row);
+        });
+        if(isset($res['error'])) {
+            CleanHalt($res);
+        }
+        return $res;
+    }
+
+    private $_StoredProcParams = [];
+
+    /**
+     * @param $stored_proc
+     * @return MSSQL_StoredProcParam[]
+     */
+    public function GetStoredProcParams($stored_proc)
+    {
+        if(sizeof($this->_StoredProcParams)) {
+            return isset($this->_StoredProcParams[$stored_proc]) ? $this->_StoredProcParams[$stored_proc] : [];
+        }
+
+        $sql = '
+select  
+  \'StoredProc\' = object_name(object_id),
+   \'Parameter_name\' = name,  
+   \'Type\'   = type_name(user_type_id),  
+   \'Length\'   = max_length,  
+   \'Prec\'   = case when type_name(system_type_id) = \'uniqueidentifier\' 
+              then precision  
+              else OdbcPrec(system_type_id, max_length, precision) end,  
+   \'Scale\'   = OdbcScale(system_type_id, scale),  
+   \'Param_order\'  = parameter_id,  
+   \'Collation\'   = convert(sysname, 
+                   case when system_type_id in (35, 99, 167, 175, 231, 239)  
+                   then ServerProperty(\'collation\') end)  
+
+  from sys.parameters   
+  ORDER BY parameter_id
+        ';
+
+        $res = $this->Query($sql);
+        foreach($res['data'] as $row) {
+            if(!isset($this->_StoredProcParams[$row['StoredProc']])) {
+                $this->_StoredProcParams[$row['StoredProc']] = [];
+            }
+            $this->_StoredProcParams[$row['StoredProc']][] = new MSSQL_StoredProcParam($row);
+        }
+
+        Log::Insert('Got Stored Procs', true);
+        return isset($this->_StoredProcParams[$stored_proc]) ? $this->_StoredProcParams[$stored_proc] : [];
+    }
 }

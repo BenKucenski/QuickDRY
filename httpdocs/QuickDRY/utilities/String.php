@@ -349,16 +349,10 @@ function fix_json($json)
                 if($json[$i] instanceof DateTime){
                     $json[$i] = SolrTime($json[$i]);
                 } else {
-                    if($json[$i] instanceof SafeClass) {
-                        $json[$i] = $json[$i]->ToArray();
-                    } else {
-                        Halt(['error' => 'fix_json unknown object', $json[$i]]);
-                    }
+                    Halt($json[$i]);
                 }
             }
-            if(!is_array($json[$i])) {
-                $json[$i] = iconv('UTF-8', 'UTF-8//IGNORE', utf8_encode($json[$i]));
-            }
+            $json[$i] = iconv('UTF-8', 'UTF-8//IGNORE', utf8_encode($json[$i]));
         }
     }
     return $json;

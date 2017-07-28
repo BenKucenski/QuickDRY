@@ -47,7 +47,6 @@ class NavigationClass
         }
 
         if (!$test) {
-            Halt([$_CUR_PAGE, $this->_MENU, $this->_PERMISSIONS]);
             RedirectError('You do not have permission to view that page');
         }
         return false;
