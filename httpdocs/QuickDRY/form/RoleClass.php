@@ -1,7 +1,4 @@
 <?php
-define('USER_ROLE_ADMIN','ADMIN');
-
-
 /**
  * Class YesNoClass
  */
@@ -9,7 +6,7 @@ class RoleClass extends FormClass
 {
     protected static $_options = [
         '' => 'Not Set',
-        USER_ROLE_ADMIN	=> 'Site Admin',
+        'Administrator'	=> 'Site Admin',
     ];
 
     /**
