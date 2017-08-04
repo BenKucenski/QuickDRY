@@ -1,6 +1,6 @@
 <?php
 
-class ElasticBase extends SafeClass
+class Elastic_Base extends SafeClass
 {
     protected $_id = null;
     protected static $_index = null;

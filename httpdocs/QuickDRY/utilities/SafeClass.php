@@ -8,6 +8,7 @@ class SafeClass
 
     public function __set($name, $value) {
         Halt('public $' . $name . '; is not a property of ' . get_class($this));
+        return $value;
     }
 
     public function ToArray($ignore_empty = false)

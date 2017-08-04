@@ -68,6 +68,9 @@ class Curl
         $header[] = "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)";
         $header[] = "Connection: Keep-Alive";
 
+        if(!defined('COOKIE_FILE')) {
+            define('COOKIE_FILE', './cookie.txt');
+        }
         curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -122,7 +125,7 @@ class Curl
      *
      * @return Curl
      */
-    public static function Get($path, $params, $username = null, $password = null)
+    public static function Get($path, $params = null, $username = null, $password = null)
     {
         if(is_array($params)) {
             $params = self::params_to_string($params);
@@ -145,6 +148,10 @@ class Curl
         $header[] = "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)";
         $header[] = "Connection: Keep-Alive";
 
+        if(!defined('COOKIE_FILE')) {
+            define('COOKIE_FILE', './cookie.txt');
+        }
+
         curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -157,7 +164,11 @@ class Curl
 
 
         // Pass our values
-        curl_setopt($ch, CURLOPT_URL, $path . '?' . $params);
+        if($params) {
+            curl_setopt($ch, CURLOPT_URL, $path . '?' . $params);
+        } else {
+            curl_setopt($ch, CURLOPT_URL, $path);
+        }
 
         $content = curl_exec($ch);
 
