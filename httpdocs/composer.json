@@ -1,0 +1,7 @@
+{
+    "require": {
+        "elasticsearch/elasticsearch": "~5.0",
+        "google/apiclient": "^2.0",
+        "facebook/graph-sdk": "^5.5"
+    }
+}
