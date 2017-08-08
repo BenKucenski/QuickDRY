@@ -9,7 +9,7 @@ class Elastic_Core extends Elastic_Base
     public static $query_count = 0;
     public static $query_time = 0;
 
-    private static function Log($query, $time)
+    private static function LogQuery($query, $time)
     {
         if (!self::$use_log) {
             return;
@@ -28,7 +28,7 @@ class Elastic_Core extends Elastic_Base
         }
 
         if (is_null(static::$client)) {
-            static::$client = new Elasticsearch\Client(['hosts' => [static::$ACTIVE_ELASTIC_URL]]);
+            static::$client = \Elasticsearch\ClientBuilder::create()->setHosts([static::$ACTIVE_ELASTIC_URL])->build();
         }
 
         if (!static::$client) {
@@ -47,7 +47,10 @@ class Elastic_Core extends Elastic_Base
         if (!$this->_id) {
             $vars = [$this->ToArray(true)];
             $res = static::_Insert(static::$_index, static::$_type, $vars);
-            $this->_id = $res['items'][0]['create']['_id'];
+            if(!isset($res['items'][0]['index']['_id'])) {
+                CleanHalt($res['items']);
+            }
+            $this->_id = $res['items'][0]['index']['_id'];
         } else {
             $vars = $this->ToArray();
             $vars = [$this->_id => $vars];
@@ -62,21 +65,10 @@ class Elastic_Core extends Elastic_Base
      *
      * @return mixed|null
      */
-    public static function InsertUpdate($index, $type, &$json)
+    public static function InsertUpdate(&$json)
     {
-        return static::_InsertUpdate($index, $type, $json);
+        return static::_InsertUpdate(static::$_index, static::$_type, $json);
     }
-
-    /**
-     * @param $elastic_id
-     *
-     * @return mixed|null
-     */
-    public static function Remove($index, $type, $elastic_id)
-    {
-        return static::_Remove($index, $type, $elastic_id);
-    }
-
 
     public static function DeleteIndexType($index, $type)
     {
@@ -86,6 +78,16 @@ class Elastic_Core extends Elastic_Base
     public static function DeleteIndex($index)
     {
         return static::_DeleteIndex($index);
+    }
+
+    public static function Delete($params)
+    {
+        return static::_Delete(static::$_index, static::$_type, $params);
+    }
+
+    public static function Truncate()
+    {
+        return static::_Truncate(static::$_index, static::$_type);
     }
 
     public static function CreateIndex($index, $json)
@@ -103,18 +105,16 @@ class Elastic_Core extends Elastic_Base
         return static::_SearchQuery(static::$_index, static::$_type, $query, $page, $per_page);
     }
 
-    public static function SimpleSearch(
-        $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
-    )
+    public static function Aggregation($query)
     {
-        return static::_SimpleSearch(static::$_index, static::$_type, $where, $page, $per_page, $order_by, $fields);
+        return static::_Aggregation(static::$_index, static::$_type, $query);
     }
 
     public static function Search(
-        $where, $page = 0, $per_page = 20, $order_by = null, $facets = null, $mincount = 0, $fq = null, $fields = null
+        $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
     )
     {
-        return static::_Search(static::$_index, static::$_type, $where, $page, $per_page, $order_by, $facets, $mincount, $fq, $fields);
+        return static::_Search(static::$_index, static::$_type, $where, $page, $per_page, $order_by, $fields);
     }
 
     public static function Stats($index, $type, $query, $fields = null, $is_numeric = true)
@@ -206,6 +206,31 @@ class Elastic_Core extends Elastic_Base
         return $res;
     }
 
+    protected static function _Aggregation($index, $type, $query)
+    {
+        global $Request;
+        if (!static::_connect()) {
+            if ($Request->query_log) {
+                exit('could not connect');
+            }
+            return null;
+        }
+
+        if (!is_array($query)) {
+            $query = json_decode($query, true);
+        }
+        $query['size'] = 0;
+
+        $query = json_encode(fix_json($query));
+        $params['index'] = $index;
+        $params['type'] = $type;
+        $params['body'] = $query;
+
+        $array = static::$client->search($params);
+
+        return isset($array['aggregations']) ? $array['aggregations'] : [];
+    }
+
     protected static function _SearchQuery($index, $type, $query, $page = 0, $per_page = 20)
     {
         global $Request;
@@ -248,93 +273,12 @@ class Elastic_Core extends Elastic_Base
         }
 
         Metrics::Stop('ELASTIC');
-        self::Log($query, microtime(true) - $start_time);
+        self::LogQuery($query, microtime(true) - $start_time);
         return $list;
     }
-
-    protected static function _SimpleSearch(
-        $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
-    )
-    {
-        $start_time = microtime(true);
-        Metrics::Start('ELASTIC');
-
-        if (is_null($page))
-            $page = 0;
-
-        if (is_null($per_page))
-            $per_page = 20;
-
-        $params = [];
-        $params[] = 'q=' . urlencode(implode(' AND ', $where));
-        if ($fields) {
-            $params[] = 'fields=' . implode(',', $fields);
-        }
-
-        $params[] = 'from=' . ($page * $per_page);
-        $params[] = 'size=' . ($per_page);
-        $params[] = 'pretty';
-
-
-        if ($order_by) {
-            if (is_array($order_by))
-                $order_by = implode(',', $order_by);
-            $params[] = 'sort=' . urlencode($order_by);
-        }
-
-
-        $url = rtrim(static::$ACTIVE_ELASTIC_URL, '/\\ ') . '/' . $index . '/' . $type . '/_search/';
-
-        // can't use POST with ElasticSearch
-        $res = Curl::Get($url, implode('&', $params));
-
-        $array = @json_decode($res->Body, true, 512, JSON_BIGINT_AS_STRING);
-
-        if (isset($array['error']) && $array['error']) {
-            return [];
-        }
-
-        if (isset($array['_shards']['failures']) && $array['_shards']['failures']) {
-            return [];
-        }
-
-        if (!isset($array['hits'])) {
-            return [];
-        }
-        $list = [];
-        $list['count'] = $array['hits']['total'];
-        $list['qtime'] = $array['took'];
-        //$list['error'] = isset($array['error']) ? $array['error']['msg'] . ' (' . $array['error']['code'] .  ')': '';
-
-        $list['data'] = [];
-        if (isset($array['hits']['hits'])) {
-            foreach ($array['hits']['hits'] as $row) {
-                if ($fields) {
-                    $t = [];
-                    foreach ($row['fields'] as $field => $vals) {
-                        $t[$field] = $vals[0];
-                    }
-                    $list['data'][] = $t;
-                } else {
-                    $t = $row['_source'];
-                    $t['_id'] = $row['_id'];
-
-                    $list['data'][] = $t;
-                }
-            }
-        }
-        $list['query'] = implode(' AND ', $where);
-        $list['url'] = $url;
-
-        Metrics::Stop('ELASTIC');
-        self::Log($list['query'], microtime(true) - $start_time);
-
-        return $list;
-    }
-
 
     protected static function _Search(
-        $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $facets = null, $mincount = 0, $fq = null, $fields = null
+        $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
     )
     {
         $start_time = microtime(true);
@@ -370,8 +314,8 @@ class Elastic_Core extends Elastic_Base
         $array = json_decode($res->Body, true);
 
         $list = [];
-        $list['count'] = $array['hits']['total'];
-        $list['qtime'] = $array['took'];
+        $list['count'] = isset($array['hits']['total']) ? $array['hits']['total'] : 0;
+        $list['qtime'] = isset($array['took']) ? $array['took'] : 0;
         //$list['error'] = isset($array['error']) ? $array['error']['msg'] . ' (' . $array['error']['code'] .  ')': '';
 
         $list['data'] = [];
@@ -395,7 +339,7 @@ class Elastic_Core extends Elastic_Base
         $list['url'] = $url;
 
         Metrics::Stop('ELASTIC');
-        self::Log($list['query'], microtime(true) - $start_time);
+        self::LogQuery($list['query'], microtime(true) - $start_time);
 
         return $list;
     }
@@ -500,12 +444,47 @@ class Elastic_Core extends Elastic_Base
      *
      * @return mixed|null
      */
-    protected static function _Remove($index, $type, $elastic_id)
+    protected static function _Delete($index, $type, $params)
     {
         if (!static::_connect()) {
             return null;
         }
-        return null;
+
+        $query = [
+            'index' => $index,
+            'type'  => $type,
+            'body'  => [
+                'query' => [
+                    'match' => $params
+                ]
+            ]
+        ];
+
+        $res = static::$client->deleteByQuery($query);
+
+        return $res;
+    }
+
+    protected static function _Truncate($index, $type)
+    {
+        if (!static::_connect()) {
+            return null;
+        }
+
+        // (object) is required for match_all to turn the [] into {} in JSON as expected
+        $query = [
+            'index' => $index,
+            'type'  => $type,
+            'body'  => [
+                'query' => [
+                    'match_all' => (object)[]
+                ]
+            ]
+        ];
+
+        $res = static::$client->deleteByQuery($query);
+
+        return $res;
     }
 
     public static function Execute($path, $command, $json)

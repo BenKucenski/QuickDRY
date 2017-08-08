@@ -6,8 +6,9 @@ class Elastic_CodeGen extends SafeClass
     public $Indexes;
     public $SchemaPath;
     public $ClassPath;
+    public $ExcludeStartsWith;
 
-    public function __construct($ConnectionClassName, $ClassPrefix)
+    public function __construct($ConnectionClassName, $ClassPrefix, $ExcludeStartsWith = [])
     {
         if(!class_exists($ConnectionClassName)) {
             CleanHalt(['$ConnectionClassName ' . $ConnectionClassName . ' does not exist']);
@@ -47,6 +48,8 @@ class Elastic_CodeGen extends SafeClass
         $this->ConnectionClassName = $ConnectionClassName;
         $this->ClassPrefix = $ClassPrefix;
 
+        $this->ExcludeStartsWith = $ExcludeStartsWith;
+
         $this->GetIndexes();
         $modules = $this->GenerateCode();
 
@@ -62,6 +65,22 @@ class Elastic_CodeGen extends SafeClass
     {
         $connection = $this->ConnectionClassName;
         $this->Indexes = $connection::GetIndexes();
+        if(!is_array($this->ExcludeStartsWith) || !sizeof($this->ExcludeStartsWith)) {
+            return;
+        }
+
+        foreach($this->Indexes as $index => $settings) {
+            foreach($this->ExcludeStartsWith as $item) {
+                $item = trim($item);
+                if(!$item) {
+                    continue;
+                }
+                if(strcasecmp(substr($index,0,strlen($item)), $item) == 0) {
+                    Log::Insert([$index, $item], true);
+                    unset($this->Indexes[$index]);
+                }
+            }
+        }
     }
 
     private function GenerateCode()

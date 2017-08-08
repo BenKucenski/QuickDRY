@@ -19,25 +19,33 @@ class Elastic_A extends Elastic_Core
 
     public static function GetAll($where)
     {
-        $res = self::SimpleSearch($where);
-        $list = [];
         $return_type = get_called_class();
-        foreach($res['data'] as $row) {
-            $l = new $return_type();
-            $l->FromRow($row);
-            $list[] = $l;
+
+        $res = $return_type::Search($where, 0, 0);
+        $count = $res['count'];
+        if(!$count) {
+            return [];
+        }
+        $list = [];
+        $page = 0;
+        $per_page = 10000; // arbitrary limit
+        $max_page = ceil($count / $per_page);
+        while($page < $max_page) {
+            $res = $return_type::Search($where, $page, $per_page);
+            foreach($res['data'] as $row) {
+                $list[] = new $return_type($row);
+            }
+            $page++;
         }
         return $list;
     }
 
     public static function Get($where)
     {
-        $res = self::SimpleSearch($where, 0 ,1);
+        $res = self::Search($where, 0 ,1);
         $return_type = get_called_class();
         foreach($res['data'] as $row) {
-            $l = new $return_type();
-            $l->FromRow($row);
-            return $l;
+            return new $return_type($row);
         }
         return null;
     }

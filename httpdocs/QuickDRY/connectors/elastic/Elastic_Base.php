@@ -7,6 +7,13 @@ class Elastic_Base extends SafeClass
     protected static $_type = null;
     protected static $_strong_type = null;
 
+    public function __construct($row = null)
+    {
+        if ($row) {
+            $this->FromRow($row);
+        }
+    }
+
     public function __get($name)
     {
         switch ($name) {
