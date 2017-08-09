@@ -217,7 +217,7 @@ function AdjustedTime($time = 0)
  */
 function StandardDate($time = 0, $null = null, $last_month = null, $last_year = null)
 {
-    if(!$time && $null) {
+    if(!$time && !is_null($null)) {
         return $null;
     }
 
