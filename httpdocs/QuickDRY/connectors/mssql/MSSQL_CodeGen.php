@@ -44,6 +44,13 @@ class MSSQL_CodeGen extends SafeClass
         if (!is_dir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db'))
             mkdir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db');
 
+        if (!is_dir('sp'))
+            mkdir('sp');
+        if (!is_dir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
+            mkdir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
+        if (!is_dir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp'))
+            mkdir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp');
+
         if (!is_dir('phpunit'))
             mkdir('phpunit');
 
@@ -53,8 +60,32 @@ class MSSQL_CodeGen extends SafeClass
         if (!is_dir('manage'))
             mkdir('manage');
 
-        if (!is_dir('common'))
-            mkdir('common');
+        if (!is_dir('_common'))
+            mkdir('_common');
+    }
+
+    public function GenerateSPClassFile($sp_class)
+    {
+        $code = '<?php
+
+/**
+ * Class ' . $sp_class . '
+ */
+class ' . $sp_class . ' extends SafeClass
+{
+    public function __construct($row = null)
+    {
+        if($row) {
+            CleanHalt($row);
+            $this->FromRow($row);
+        }
+    }
+}
+';
+        $file = 'sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp/' . $sp_class . '.php';
+        $fp = fopen($file, 'w');
+        fwrite($fp, $code);
+        fclose($fp);
     }
 
     public function GenerateClasses()
@@ -82,9 +113,15 @@ class MSSQL_CodeGen extends SafeClass
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
         $stored_procs = MSSQL_A::GetStoredProcs();
 
+        $sp_require = [];
         $sp_code = [];
         foreach($stored_procs as $sp) {
             $sp_class = $class_name . '_' . $sp->SPECIFIC_NAME . 'Class';
+
+            $this->GenerateSPClassFile($sp_class);
+
+            $sp_require[] = 'require_once \'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp/' . $sp_class . '.php\';';
+
             $sp_params = MSSQL_A::GetStoredProcParams($sp->SPECIFIC_NAME);
             $params = [];
             $sql_params = [];
@@ -118,13 +155,15 @@ class MSSQL_CodeGen extends SafeClass
             ';
         }
         $code = '<?php
+' . implode("\r\n", $sp_require) . '
+
 class sp_' . $class_name . ' extends MSSQL_A 
 {
 ' . implode("\r\n", $sp_code) . '
 }
         ';
 
-        $fp = fopen('common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
+        $fp = fopen('_common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
     }

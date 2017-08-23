@@ -10,6 +10,7 @@ class MySQL_A extends MySQL_Core
     protected static function _connect()
     {
         if(is_null(static::$connection)) {
+            static::$DB_HOST = MYSQLA_HOST;
             static::$connection = new MySQL_Connection(MYSQLA_HOST, MYSQLA_USER, MYSQLA_PASS, MYSQLA_PORT);
         }
     }

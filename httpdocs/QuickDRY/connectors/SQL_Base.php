@@ -51,12 +51,16 @@ class SQL_Base
      */
     public function HasChangeLog()
     {
-        return false;
-        if(defined('DISABLE_CHANGE_LOG') && DISABLE_CHANGE_LOG) {
-            return;
+        if (defined('DISABLE_CHANGE_LOG') && DISABLE_CHANGE_LOG) {
+            return false;
         }
-        if(strcmp(static::$table,'change_log') == 0) // don't change log the change log
-            return;
+        if (strcmp(static::$table, 'change_log') == 0) { // don't change log the change log
+            return false;
+        }
+
+        if (!sizeof($this->_change_log)) { // don't log when nothing changed
+            return false;
+        }
 
         return !isset(static::$_use_change_log) || static::$_use_change_log;
     }
@@ -336,49 +340,51 @@ class SQL_Base
      */
     protected function set_property($name, $value)
     {
-        if(is_array($value)) {
+        if (!array_key_exists($name, $this->props)) {
+            throw new Exception($name . ' is not a property of ' . get_class($this) . '<pre>Object<br/>' . debug_backtrace() . '</pre>');
+        }
+
+        if (is_array($value)) {
             Halt(['properties must be string or number', $value]);
         }
 
-        if(is_object($value)) {
+        if (is_object($value)) {
             Halt(['properties must be string or number', $value]);
         }
 
-        if(strcasecmp($value,'null') == 0) {
+        if (strcasecmp($value, 'null') == 0) {
             $value = null;
         }
 
-        if(array_key_exists($name, $this->props))
-        {
-            $old_val = $this->StrongType($name, $this->props[$name]);
-            $new_val = $this->StrongType($name, $value);
+        $old_val = $this->StrongType($name, $this->props[$name]);
+        $new_val = $this->StrongType($name, $value);
 
-            $changed = false;
-            if(is_null($old_val) && !is_null($new_val))
+        $changed = false;
+        if (is_null($old_val) && !is_null($new_val)) {
+            $changed = true;
+        } else {
+            if (!is_null($old_val) && is_null($new_val)) {
                 $changed = true;
-            else
-                if(!is_null($old_val) && is_null($new_val))
+            } else {
+                if (is_numeric($old_val) && is_numeric($new_val) && $new_val != $old_val) {
                     $changed = true;
-                else
-                    if(is_numeric($old_val) && is_numeric($new_val) && $new_val != $old_val)
+                } else {
+                    if (strcmp($new_val, $old_val) != 0) {
                         $changed = true;
-                    else
-                        if(strcmp($new_val,$old_val) != 0)
-                            $changed = true;
-
-            if($changed)
-            {
-                if(is_null($new_val))
-                    $new_val = 'null';
-                if(is_null($old_val));
-                $old_Val = 'null';
-                $this->_change_log[$name] = ['new'=>$new_val,'old'=>$old_val];
+                    }
+                }
             }
-
-            $this->props[$name] = $value;
         }
-        else
-            throw new Exception($name . ' is not a property of ' . get_class($this) . '<pre>Object<br/>' . debug_backtrace() . '</pre>');
+        if ($changed) {
+            if (is_null($new_val)) {
+                $new_val = 'null';
+            }
+            if (is_null($old_val)) {
+                $old_val = 'null';
+            }
+            $this->_change_log[$name] = ['new' => $new_val, 'old' => $old_val];
+        }
+        $this->props[$name] = $value;
     }
 
     /**
@@ -626,7 +632,7 @@ class SQL_Base
      */
     public function ToRow($modify = false, $swap = [], $add = [], $ignore = [], $custom_link = '', $row_style ='', $column_order = [])
     {
-        $res = '<tr style="' . $row_style . '">';
+        $res = '<tr>';
         $columns = [];
 
         foreach($this->props as $name => $value)
@@ -638,14 +644,17 @@ class SQL_Base
                     $value = $this->ValueToNiceValue($name, $this->$name);
 
 
-                $class = 'data_text';
                 if(!is_object($value))
                 {
                     if(is_array($value))
                         $value = implode(',',$value);
-                    if(is_numeric(str_replace('-','',$value)))
-                        $class = 'data_num';
-                    $columns[$name] = '<td class="' . $class . '">' . $value . '</td>';
+                    $columns[$name] = '<td>' . $value . '</td>';
+                } else {
+                    if($value instanceof DateTime) {
+                        $columns[$name] = '<td>' . Timestamp($value) . '</td>';
+                    } else {
+                        $columns[$name] = '<td><i>Object: </i>' . get_class($value) . '</td>';
+                    }
                 }
 
             }
@@ -669,7 +678,7 @@ class SQL_Base
                 if(is_numeric(str_replace('-','',$value)))
                     $class = 'data_num';
 
-                $columns[$name] = '<td class="' . $class . '">' . $value . '</td>';
+                $columns[$name] = '<td>' . $value . '</td>';
             }
         if(sizeof($column_order) > 0)
         {
@@ -990,7 +999,7 @@ class SQL_Base
      */
     protected static function _EasySelect($selected, $id, $value, $order_by, $display = "", $where = '1=1')
     {
-        $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
+        $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
 
         $items = [];
         eval("\$items = " . $type . "::GetAll(\"$order_by\",\"asc\",\"$where\");");

@@ -53,4 +53,10 @@ class UserClass extends SafeClass
         }
         return false;
     }
+
+    public function GetUUID()
+    {
+        // used by change log to identify who made the change
+        return $this->Username;
+    }
 }

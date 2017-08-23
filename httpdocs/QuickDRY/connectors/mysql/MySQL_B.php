@@ -10,7 +10,8 @@ class MySQL_B extends MySQL_Core
     protected static function _connect()
     {
         if(is_null(static::$connection)) {
-            static::$connection = new MySQL_Connection(MYSQL_1330_HOST, MYSQL_1330_USER, MYSQL_1330_PASS, MYSQL_1330_PORT);
+            static::$DB_HOST = MYSQLB_HOST;
+            static::$connection = new MySQL_Connection(MYSQLB_HOST, MYSQLB_USER, MYSQLB_PASS, MYSQLB_PORT);
         }
     }
 }

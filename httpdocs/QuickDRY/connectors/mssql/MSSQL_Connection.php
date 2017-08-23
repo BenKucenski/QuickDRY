@@ -178,6 +178,18 @@ class MSSQL_Connection
 
     }
 
+    private static function SQLErrorsToString()
+    {
+        $errs = sqlsrv_errors();
+
+        $res = [];
+
+        foreach($errs as $err) {
+            $res[] = $err['SQLSTATE'] . ', ' . $err['code'] . ': ' . $err['message'];
+        }
+        return implode("\r\n", $res);
+    }
+
     /**
      * @param       $sql
      * @param array $params
@@ -220,7 +232,7 @@ class MSSQL_Connection
 
             if(!$result)
             {
-                $returnval = ['error'=>sqlsrv_errors(),'query'=>$query,'params'=>$params];
+                $returnval = ['error'=>static::SQLErrorsToString(),'query'=>$query,'params'=>$params];
                 if($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
                     Halt($returnval);
             }
@@ -416,7 +428,7 @@ class MSSQL_Connection
             } else {
                 $result = sqlsrv_query($this->db, $query);
                 if (!$result) {
-                    $returnval = ['error' => sqlsrv_errors(),
+                    $returnval = ['error' => static::SQLErrorsToString(),
                                   'query' => $query];
                 } else {
                     $returnval['error'] = '';

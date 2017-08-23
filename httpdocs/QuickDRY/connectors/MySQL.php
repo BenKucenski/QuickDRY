@@ -34,7 +34,6 @@ function mysql_escape_query($conn, $sql, $params) {
     }, $sql);
 }
 
-require_once 'mysql/MySQL_ChangeLog.php';
 require_once 'mysql/MySQL_Core.php';
 require_once 'mysql/MySQL_Connection.php';
 require_once 'mysql/MySQL_A.php'; // 1860

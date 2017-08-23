@@ -5,7 +5,7 @@
  */
 class MySQL_Core extends SQL_Base
 {
-
+    protected static $DB_HOST;
     /**
      * @return array
      */
@@ -22,6 +22,7 @@ class MySQL_Core extends SQL_Base
 
         static::$connection->SetDatabase($db_base);
     }
+
     /**
      * @param      $sql
      * @param null $params
@@ -33,7 +34,7 @@ class MySQL_Core extends SQL_Base
     {
         static::_connect();
 
-        if(isset(static::$database))
+        if (isset(static::$database))
             static::$connection->SetDatabase(static::$database);
         return static::$connection->Execute($sql, $params, $large);
     }
@@ -51,10 +52,10 @@ class MySQL_Core extends SQL_Base
         static::_connect();
 
         $return_type = null;
-        if($objects_only)
+        if ($objects_only)
             $return_type = get_called_class();
 
-        if(isset(static::$database))
+        if (isset(static::$database))
             static::$connection->SetDatabase(static::$database);
 
         return static::$connection->Query($sql, $params, $return_type, $map_function);
@@ -69,31 +70,33 @@ class MySQL_Core extends SQL_Base
 
         return static::$connection->LastID();
     }
+
     /**
      * @return array|null
      */
     public function Remove(UserClass &$User)
     {
-        if(!$this->CanDelete($User))
+        if (!$this->CanDelete($User))
             return null;
 
         // if this instance wasn't loaded from the database
         // don't try to remove it
-        if(!$this->_from_db)
+        if (!$this->_from_db)
             return null;
 
-        if($this->HasChangeLog())
-        {
+        if ($this->HasChangeLog()) {
             $uuid = $this->GetUUID();
 
             if ($uuid) {
-                $cl = new MSSQL_ChangeLog();
-                $cl->db_table =     static::$database . '.' . static::$table;
+                $cl = new ChangeLog();
+                $cl->host = static::$DB_HOST;
+                $cl->database = static::$database;
+                $cl->table = static::$table;
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
-                $cl->user_id = is_object($User) ? $User->U_ID : null;
+                $cl->user_id = is_object($User) ? $User->GetUUID() : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = true;
                 $cl->Save();
             }
@@ -103,22 +106,18 @@ class MySQL_Core extends SQL_Base
         $params = [];
         // rows are removed based on the columns which
         // make the row unique
-        if(sizeof(static::$_primary) > 0)
-        {
-            foreach(static::$_primary as $column) {
+        if (sizeof(static::$_primary) > 0) {
+            foreach (static::$_primary as $column) {
                 $where[] = $column . ' = {{}}';
                 $params[] = $this->{$column};
             }
-        }
-        else
-            if(sizeof(static::$_unique) > 0)
-            {
-                foreach(static::$_unique as $column) {
+        } else
+            if (sizeof(static::$_unique) > 0) {
+                foreach (static::$_unique as $column) {
                     $where[] = $column . ' = {{}}';
                     $params[] = $this->{$column};
                 }
-            }
-            else
+            } else
                 exit('unique or primary key required');
 
 
@@ -126,11 +125,11 @@ class MySQL_Core extends SQL_Base
 			DELETE FROM
 				' . static::$table . '
 			WHERE
-				' . implode(' AND ',$where) . '
+				' . implode(' AND ', $where) . '
 		';
         $res = static::Execute($sql, $params);
 
-        if(method_exists($this, 'SolrRemove'))
+        if (method_exists($this, 'SolrRemove'))
             $this->SolrRemove();
 
         return $res;
@@ -145,91 +144,70 @@ class MySQL_Core extends SQL_Base
     protected static function _parse_col_val($col, $val)
     {
         // extra + symbols allow us to do AND on the same column
-        $col = str_replace('+','',$col);
+        $col = str_replace('+', '', $col);
         $col = '`' . $col . '`';
 
-        if(is_array($val)) {
-            Halt(['invalid value in query',$col, $val]);
+        if (is_array($val)) {
+            Halt(['invalid value in query', $col, $val]);
         }
         // adding a space to ensure that "in_" is not mistaken for an IN query
         // and the parameter must START with the special SQL command
-        if(substr($val,0,3) === 'IN ')
-        {
-            $val = explode(',',trim(str_replace('IN','',$val)));
-            if(($key = array_search('null', $val)) !== false) {
+        if (substr($val, 0, 3) === 'IN ') {
+            $val = explode(',', trim(str_replace('IN', '', $val)));
+            if (($key = array_search('null', $val)) !== false) {
                 $col = '(' . $col . ' IS NULL OR ' . $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val) - 1) . '))';
                 unset($val[$key]);
             } else {
                 $col = $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val)) . ')';
             }
-        }
-        else
-            if(substr($val,0,6) === 'NLIKE ')
-            {
+        } else
+            if (substr($val, 0, 6) === 'NLIKE ') {
                 $col = $col . ' NOT LIKE {{}} ';
-                $val = trim(str_replace('NLIKE','',$val));
-            }
-            else
-                if(substr($val,0,7) === 'NILIKE ')
-                {
+                $val = trim(str_replace('NLIKE', '', $val));
+            } else
+                if (substr($val, 0, 7) === 'NILIKE ') {
                     $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
-                    $val = strtolower(trim(str_replace('NILIKE','',$val)));
-                }
-                else
-                    if(substr($val,0,6) === 'ILIKE ')
-                    {
+                    $val = strtolower(trim(str_replace('NILIKE', '', $val)));
+                } else
+                    if (substr($val, 0, 6) === 'ILIKE ') {
                         $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
-                        $val = strtotlower(trim(str_replace('ILIKE','',$val)));
-                    }
-                    else
-                        if(substr($val,0,5) === 'LIKE ')
-                        {
+                        $val = strtotlower(trim(str_replace('ILIKE', '', $val)));
+                    } else
+                        if (substr($val, 0, 5) === 'LIKE ') {
                             $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
-                            $val = trim(str_replace('LIKE','',$val));
-                        }
-                        else
-                            if(stristr($val,'<=') !== false)
-                            {
+                            $val = trim(str_replace('LIKE', '', $val));
+                        } else
+                            if (stristr($val, '<=') !== false) {
                                 $col = $col . ' <= {{}} ';
-                                $val = trim(str_replace('<=','',$val));
-                            }
-                            else
-                                if(stristr($val,'>=') !== false)
-                                {
+                                $val = trim(str_replace('<=', '', $val));
+                            } else
+                                if (stristr($val, '>=') !== false) {
                                     $col = $col . ' >= {{}} ';
-                                    $val = trim(str_replace('>=','',$val));
-                                }
-                                else
-                                    if(stristr($val,'<>') !== false)
-                                    {
-                                        $val = trim(str_replace('<>','',$val));
-                                        if($val !== 'null')
+                                    $val = trim(str_replace('>=', '', $val));
+                                } else
+                                    if (stristr($val, '<>') !== false) {
+                                        $val = trim(str_replace('<>', '', $val));
+                                        if ($val !== 'null')
                                             $col = $col . ' <> {{}} ';
                                         else
                                             $col = $col . ' IS NOT NULL';
-                                    }
-                                    else
-                                        if(stristr($val,'<') !== false)
-                                        {
+                                    } else
+                                        if (stristr($val, '<') !== false) {
                                             $col = $col . ' < {{}} ';
-                                            $val = trim(str_replace('<','',$val));
-                                        }
-                                        else
-                                            if(stristr($val,'>') !== false)
-                                            {
+                                            $val = trim(str_replace('<', '', $val));
+                                        } else
+                                            if (stristr($val, '>') !== false) {
                                                 $col = $col . ' > {{}} ';
-                                                $val = trim(str_replace('>','',$val));
-                                            }
-                                            else
-                                            {
-                                                if($val !== 'null') {
+                                                $val = trim(str_replace('>', '', $val));
+                                            } else {
+                                                if ($val !== 'null') {
                                                     $col = $col . ' = {{}} ';
                                                 } else {
                                                     $col = $col . ' IS NULL ';
                                                 }
                                             }
 
-        return ['col'=>$col,'val'=>$val];
+        return ['col' => $col, 'val' => $val];
     }
 
     /**
@@ -239,18 +217,17 @@ class MySQL_Core extends SQL_Base
      */
     protected static function _Get($where)
     {
-        if(!is_array($where))
+        if (!is_array($where))
             Halt("$where must be an array");
 
         $params = [];
         $t = [];
-        foreach($where as $c => $v)
-        {
+        foreach ($where as $c => $v) {
             $cv = self::_parse_col_val($c, $v);
             $v = $cv['val'];
 
-            if(is_array($v)) {
-                foreach($v as $vv) {
+            if (is_array($v)) {
+                foreach ($v as $vv) {
                     $params[] = $vv;
                 }
             } else {
@@ -260,7 +237,7 @@ class MySQL_Core extends SQL_Base
             }
             $t[] = $cv['col'];
         }
-        $sql_where = implode(" AND ",$t);
+        $sql_where = implode(" AND ", $t);
 
         $sql = '
 			SELECT
@@ -272,7 +249,7 @@ class MySQL_Core extends SQL_Base
 			';
 
         $res = static::Query($sql, $params, true);
-        foreach($res as $t) {
+        foreach ($res as $t) {
             return $t;
         }
         return null;
@@ -280,34 +257,32 @@ class MySQL_Core extends SQL_Base
 
     /**
      * @param array $where
-     * @param null  $order_by
-     * @param null  $limit
+     * @param null $order_by
+     * @param null $limit
      *
      * @return array
      */
-    protected static function _GetAll($where= [], $order_by = null, $limit = null)
+    protected static function _GetAll($where = [], $order_by = null, $limit = null)
     {
         $params = [];
 
-        $sql_order ='';
-        if(is_array($order_by)) {
-            foreach($order_by as $col => $dir) {
+        $sql_order = '';
+        if (is_array($order_by)) {
+            foreach ($order_by as $col => $dir) {
                 $sql_order[] .= '`' . trim($col) . '` ' . $dir;
             }
             $sql_order = 'ORDER BY ' . implode(', ', $sql_order);
         }
 
-        $sql_where ='1=1';
-        if(is_array($where))
-        {
+        $sql_where = '1=1';
+        if (is_array($where)) {
             $t = [];
-            foreach($where as $c => $v)
-            {
+            foreach ($where as $c => $v) {
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if(is_array($v)) {
-                    foreach($v as $vv) {
+                if (is_array($v)) {
+                    foreach ($v as $vv) {
                         $params[] = $vv;
                     }
                 } else {
@@ -317,7 +292,7 @@ class MySQL_Core extends SQL_Base
                 }
                 $t[] = $cv['col'];
             }
-            $sql_where = implode(" AND ",$t);
+            $sql_where = implode(" AND ", $t);
         }
 
         $sql = '
@@ -330,7 +305,7 @@ class MySQL_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
-        if($limit)
+        if ($limit)
             $sql .= ' LIMIT ' . ($limit * 1.0);
 
 
@@ -343,20 +318,18 @@ class MySQL_Core extends SQL_Base
      *
      * @return int
      */
-    protected static function _GetCount($where= [])
+    protected static function _GetCount($where = [])
     {
-        $sql_where ='1=1';
+        $sql_where = '1=1';
         $params = [];
-        if(is_array($where))
-        {
+        if (is_array($where)) {
             $t = [];
-            foreach($where as $c => $v)
-            {
+            foreach ($where as $c => $v) {
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if(is_array($v)) {
-                    foreach($v as $vv) {
+                if (is_array($v)) {
+                    foreach ($v as $vv) {
                         $params[] = $vv;
                     }
                 } else {
@@ -366,7 +339,7 @@ class MySQL_Core extends SQL_Base
                 }
                 $t[] = $cv['col'];
             }
-            $sql_where = implode(" AND ",$t);
+            $sql_where = implode(" AND ", $t);
         }
 
         $sql = '
@@ -378,7 +351,7 @@ class MySQL_Core extends SQL_Base
 				' . $sql_where . '
 		';
 
-        $res = static::Query($sql,$params);
+        $res = static::Query($sql, $params);
         foreach ($res['data'] as $r) {
             return $r['cnt'];
         }
@@ -387,13 +360,13 @@ class MySQL_Core extends SQL_Base
     }
 
     /**
-     * @param null   $order_by
+     * @param null $order_by
      * @param string $dir
-     * @param int    $page
-     * @param int    $per_page
+     * @param int $page
+     * @param int $per_page
      * @param string $sql_where
-     * @param int    $left_join
-     * @param int    $limit
+     * @param int $left_join
+     * @param int $limit
      *
      * @return array
      */
@@ -401,39 +374,36 @@ class MySQL_Core extends SQL_Base
     {
         $params = [];
 
-        $sql_order ='';
-        if(is_array($order_by) && sizeof($order_by)) {
-            foreach($order_by as $col => $dir) {
+        $sql_order = '';
+        if (is_array($order_by) && sizeof($order_by)) {
+            foreach ($order_by as $col => $dir) {
                 $sql_order[] .= '`' . trim($col) . '` ' . $dir;
             }
             $sql_order = 'ORDER BY ' . implode(', ', $sql_order);
         }
 
-        $sql_where ='1=1';
-        if(is_array($where) && sizeof($where))
-        {
+        $sql_where = '1=1';
+        if (is_array($where) && sizeof($where)) {
             $t = [];
-            foreach($where as $c => $v)
-            {
-                $c = str_replace('.','`.`', $c);
+            foreach ($where as $c => $v) {
+                $c = str_replace('.', '`.`', $c);
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if(strtolower($v) !== 'null') {
+                if (strtolower($v) !== 'null') {
                     $params[] = $cv['val'];
                 }
                 $t[] = $cv['col'];
             }
-            $sql_where = implode(" AND ",$t);
+            $sql_where = implode(" AND ", $t);
         }
 
         $sql_left = '';
-        if(is_array($left_join))
-        {
+        if (is_array($left_join)) {
             $sql_left = '';
-            foreach($left_join as $join) {
+            foreach ($left_join as $join) {
                 if (!isset($join['database'])) {
-                    Halt($join,'invalid join');
+                    Halt($join, 'invalid join');
                 }
                 $sql_left .= 'LEFT JOIN  `' . $join['database'] . '`.`' . $join['table'] . '` AS ' . $join['as'] . ' ON ' . $join['on']
                     . "\r\n";
@@ -442,7 +412,7 @@ class MySQL_Core extends SQL_Base
 
         $primary = isset(static::$_primary) ? static::$_primary[0] : 'id';
 
-        if(!$limit) {
+        if (!$limit) {
             $sql = '
 				SELECT
 					COUNT(*) AS num
@@ -452,9 +422,7 @@ class MySQL_Core extends SQL_Base
 				WHERE
 					' . $sql_where . '
 				';
-        }
-        else
-        {
+        } else {
             $sql = '
 				SELECT COUNT(*) AS num FROM (SELECT * FROM `' . static::$database . '`.`' . static::$table . '`
 					' . $sql_left . '
@@ -468,8 +436,7 @@ class MySQL_Core extends SQL_Base
         $res = static::Query($sql, $params);
         $count = isset($res['data'][0]['num']) ? $res['data'][0]['num'] : 0;
         $list = [];
-        if($count > 0)
-        {
+        if ($count > 0) {
             $sql = '
 				SELECT
 					`' . static::$table . '`.*
@@ -480,8 +447,7 @@ class MySQL_Core extends SQL_Base
 					 ' . $sql_where . '
 					' . $sql_order . '
 			';
-            if($per_page != 0)
-            {
+            if ($per_page != 0) {
                 $sql .= '
 				LIMIT ' . ($per_page * $page) . ', ' . $per_page . '
 				';
@@ -489,7 +455,7 @@ class MySQL_Core extends SQL_Base
 
             $list = static::Query($sql, $params, true);
         }
-        return ['count'=>$count, 'items' => $list, 'sql'=>$sql,'res'=>$res];
+        return ['count' => $count, 'items' => $list, 'sql' => $sql, 'res' => $res];
     }
 
     /**
@@ -499,8 +465,7 @@ class MySQL_Core extends SQL_Base
      */
     protected static function IsNumeric($name)
     {
-        switch(static::$prop_definitions[$name]['type'])
-        {
+        switch (static::$prop_definitions[$name]['type']) {
             case 'date':
                 return false;
 
@@ -530,19 +495,17 @@ class MySQL_Core extends SQL_Base
      */
     protected static function StrongType($name, $value)
     {
-        if(is_object($value) || is_array($value))
+        if (is_object($value) || is_array($value))
             return;
 
-        if(strcasecmp($value,'null') == 0)
-        {
-            if(!static::$prop_definitions[$name]['nullable'])
+        if (strcasecmp($value, 'null') == 0) {
+            if (!static::$prop_definitions[$name]['nullable'])
                 throw new Exception($name . ' cannot be null');
             return null;
         }
 
 
-        switch(static::$prop_definitions[$name]['type'])
-        {
+        switch (static::$prop_definitions[$name]['type']) {
             case 'date':
                 return $value ? Datestamp($value) : null;
 
@@ -568,57 +531,50 @@ class MySQL_Core extends SQL_Base
      */
     protected function _Save($force_insert = false)
     {
-        global $User;
+        /* @var $CurrentUser UserClass */
+        global $CurrentUser;
 
-        if(!sizeof($this->_change_log)) {
+        if (!sizeof($this->_change_log)) {
             return null;
         }
 
         $primary = isset(static::$_primary[0]) && static::$_primary[0] ? static::$_primary[0] : null;
-        $params =  [];
+        $params = [];
 
-        if(sizeof(static::$_unique))
-        { // if we have a unique key defined then check it and load the object if it exists
+        if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
             $params = [];
             $unique_set = 0;
 
-            foreach(static::$_unique as $col)
-            {
-                if(is_null($this->$col))
+            foreach (static::$_unique as $col) {
+                if (is_null($this->$col))
                     $params[$col] = 'null';
-                else
-                {
+                else {
                     $params[$col] = $this->$col;
                     $unique_set++;
                 }
             }
 
-            if($unique_set && !$this->$primary)
-            {
-                $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
+            if ($unique_set && !$this->$primary) {
+                $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $t = $type::Get($params);
 
-                if(!is_null($t))
-                {
-                    if($t->$primary)
+                if (!is_null($t)) {
+                    if ($t->$primary)
                         $this->$primary = $t->$primary;
                     $vars = $t->ToArray();
-                    foreach($vars as $k => $v)
-                        if(isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
+                    foreach ($vars as $k => $v)
+                        if (isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
                             $this->$k = $v;
                 }
             }
         }
 
         $changed_only = false;
-        if(!$primary || !$this->$primary || $force_insert)
-        {
+        if (!$primary || !$this->$primary || $force_insert) {
             $sql = "
 				INSERT IGNORE INTO
 			";
-        }
-        else
-        {
+        } else {
             $changed_only = true;
             // ignore cases where the unique key isn't sufficient to avoid duplicate inserts
             $sql = "
@@ -632,24 +588,24 @@ class MySQL_Core extends SQL_Base
 				";
 
 
-        foreach($this->props as $name => $value)
-        {
-            if($changed_only && !isset($this->_change_log[$name])) {
+        foreach ($this->props as $name => $value) {
+            if ($changed_only && !isset($this->_change_log[$name])) {
                 continue;
             }
 
-            if(!is_null($User))
-                if(static::$prop_definitions[$name]['type'] === 'datetime')
-                {
-                    if($value)
-                        $value = Timestamp(strtotime(Timestamp($value)) - $User->hours_diff * 3600);
+            if (!is_null($CurrentUser))
+                if (static::$prop_definitions[$name]['type'] === 'datetime') {
+                    if ($value) {
+                        // this is where we can auto adjust time entries in the database
+                        //$value = Timestamp(strtotime(Timestamp($value)) - $CurrentUser->hours_diff * 3600);
+                    }
                 }
 
             $st_value = static::StrongType($name, $value);
 
-            if(strcmp($name,$primary) == 0 && $this->$primary && !$force_insert) continue;
+            if (strcmp($name, $primary) == 0 && $this->$primary && !$force_insert) continue;
 
-            if(is_null($st_value) || strtolower(trim($st_value)) === 'null')
+            if (is_null($st_value) || strtolower(trim($st_value)) === 'null')
                 $sql .= '`' . $name . '` = NULL,';
             else {
                 $sql .= '`' . $name . '` = {{}},';
@@ -657,9 +613,9 @@ class MySQL_Core extends SQL_Base
             }
         }
 
-        $sql = substr($sql,0,strlen($sql) - 1);
+        $sql = substr($sql, 0, strlen($sql) - 1);
 
-        if($primary && $this->$primary && !$force_insert) {
+        if ($primary && $this->$primary && !$force_insert) {
             $sql .= "
 				WHERE
 					`" . $primary . "` = {{}}
@@ -669,19 +625,21 @@ class MySQL_Core extends SQL_Base
 
         $res = static::Execute($sql, $params);
 
-        if($primary && !$this->$primary)
+        if ($primary && !$this->$primary)
             $this->$primary = $res['last_id'];
 
-        if($this->HasChangeLog()) {
+        if ($this->HasChangeLog()) {
             $uuid = $this->GetUUID();
             if ($uuid) {
-                $cl = new MSSQL_ChangeLog();
-                $cl->db_table =     static::$database . '.' . static::$table;
+                $cl = new ChangeLog();
+                $cl->host = static::$DB_HOST;
+                $cl->database = static::$database;
+                $cl->table = static::$table;
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
-                $cl->user_id = is_object($User) ? $User->U_ID : null;
+                $cl->user_id = is_object($CurrentUser) ? $CurrentUser->GetUUID() : null;
                 $cl->created_at = Timestamp();
-                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable);
+                $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = false;
                 $cl->Save();
             }

@@ -17,7 +17,11 @@ require_once 'utilities/Calendar.php';
 require_once 'utilities/NavigationClass.php';
 require_once 'utilities/UploadHandler.php';
 require_once 'utilities/Mailer.php';
+require_once 'utilities/FineDiff.php';
+require_once 'utilities/SimpleExcel_Column.php';
+require_once 'utilities/SimpleExcel.php';
 
+require_once 'connectors/ChangeLog.php';
 require_once 'connectors/CoreClass.php';
 require_once 'connectors/SQL_Base.php';
 require_once 'connectors/MySQL.php';
