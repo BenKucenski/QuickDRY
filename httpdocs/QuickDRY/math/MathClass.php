@@ -43,7 +43,7 @@ class MathClass
 		while (abs($calc_p - $payment) > 0.01 && $tries++ < 64)
 		{
 			$cur = ($high + $low) / 2.0;
-			$calc_p = math::monthly_payment($cur, $principle, $periods / 12.0);
+			$calc_p = MathClass::monthly_payment($cur, $principle, $periods / 12.0);
 			if ($calc_p > $payment) $high = $cur; else $low = $cur;
 		}
 		return $cur;

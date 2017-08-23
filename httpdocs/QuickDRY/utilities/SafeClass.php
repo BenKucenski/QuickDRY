@@ -25,6 +25,9 @@ class SafeClass
     }
 
     public function FromRow($row) {
+        if(!is_array($row)) {
+            Halt($row);
+        }
         foreach($row as $k => $v) {
             $this->$k = is_object($v) ? $v : fix_json($v);
         }
