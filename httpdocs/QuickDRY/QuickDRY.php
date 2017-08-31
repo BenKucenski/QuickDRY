@@ -13,7 +13,7 @@ require_once 'utilities/helpers.php';
 require_once 'utilities/PHPExcel.php';
 require_once 'utilities/phpmailer.php';
 require_once 'utilities/BarcodeClass.php';
-require_once 'utilities/Calendar.php';
+require_once 'utilities/HTMLCalendar.php';
 require_once 'utilities/NavigationClass.php';
 require_once 'utilities/UploadHandler.php';
 require_once 'utilities/Mailer.php';

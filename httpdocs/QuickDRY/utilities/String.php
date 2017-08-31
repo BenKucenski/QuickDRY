@@ -251,7 +251,7 @@ function Numeric($val)
 {
     $res = trim(preg_replace('/[^0-9\.-]/si','',$val) * 1.0);
     if(!$res) {
-        return $val;
+        return $val * 1.0;
     }
     return $res;
 }

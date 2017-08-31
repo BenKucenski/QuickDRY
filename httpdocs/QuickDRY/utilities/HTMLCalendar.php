@@ -4,7 +4,7 @@
 #  see example at http://keithdevens.com/weblog
 # License: http://keithdevens.com/software/license
 
-class Calendar
+class HTMLCalendar
 {
 
 
