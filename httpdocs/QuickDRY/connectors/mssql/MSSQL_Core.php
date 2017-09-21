@@ -361,7 +361,7 @@ class MSSQL_Core extends SQL_Base
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if ($v === 'null')
+                if (strtolower($v) === 'null')
                     $t[] = '' . $c . ' IS NULL';
                 else {
                     $v = $cv['val'];
