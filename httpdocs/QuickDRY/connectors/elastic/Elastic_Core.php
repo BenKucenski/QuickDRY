@@ -95,6 +95,11 @@ class Elastic_Core extends Elastic_Base
         return static::_CreateIndex($index, $json);
     }
 
+    public static function UpdateIndex($index, $json)
+    {
+        return static::_UpdateIndex($index, $json);
+    }
+
     public static function CreateIndexType($index, $type, $json)
     {
         return static::_CreateIndexType($index, $type, $json);
@@ -164,6 +169,19 @@ class Elastic_Core extends Elastic_Base
         $res = static::$client->indices()->create($params);
         return $res;
     }
+
+    protected static function _UpdateIndex($index, $json)
+    {
+        if (!static::_connect()) {
+            return null;
+        }
+        $params['index'] = $index;
+        $params['body'] = $json;
+
+        $res = static::$client->indices()->putSettings($params);
+        return $res;
+    }
+
 
     protected static function _DeleteRemoved($index, $type)
     {
@@ -284,11 +302,13 @@ class Elastic_Core extends Elastic_Base
         $start_time = microtime(true);
         Metrics::Start('ELASTIC');
 
-        if (is_null($page))
+        if (is_null($page)) {
             $page = 0;
+        }
 
-        if (is_null($per_page))
+        if (is_null($per_page)) {
             $per_page = 20;
+        }
 
         $params = [];
         $params[] = 'q=' . urlencode(implode(' AND ', $where));

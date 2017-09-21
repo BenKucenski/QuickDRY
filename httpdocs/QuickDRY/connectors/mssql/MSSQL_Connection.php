@@ -241,7 +241,26 @@ class MSSQL_Connection
                 while($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
                     $list[] = is_null($map_function) ? $r : call_user_func($map_function, $r);
                 }
-                $returnval = ['data'=>$list,'error'=>'', 'time'=>microtime(true) - $start,'query'=>$query,'params'=>$params,'sql'=>$sql];
+                $more = [];
+                $i = 0;
+                while (sqlsrv_next_result($result)) {
+                    $more[$i] = [];
+                    while($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                        $more[$i][] = is_null($map_function) ? $r : call_user_func($map_function, $r);
+                    }
+                    $i++;
+                }
+                $returnval = [
+                    'data'=>$list,
+                    'error'=>'',
+                    'time'=>microtime(true) - $start,
+                    'query'=>$query,
+                    'params'=>$params,
+                    'sql'=>$sql
+                ];
+                if(sizeof($more)) {
+                    $returnval['more'] = $more;
+                }
                 sqlsrv_free_stmt( $result);
             }
         }

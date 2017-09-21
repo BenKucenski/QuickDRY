@@ -23,16 +23,16 @@ class Elastic_A extends Elastic_Core
 
         $res = $return_type::Search($where, 0, 0);
         $count = $res['count'];
-        if(!$count) {
+        if (!$count) {
             return [];
         }
         $list = [];
         $page = 0;
         $per_page = 10000; // arbitrary limit
         $max_page = ceil($count / $per_page);
-        while($page < $max_page) {
+        while ($page < $max_page) {
             $res = $return_type::Search($where, $page, $per_page);
-            foreach($res['data'] as $row) {
+            foreach ($res['data'] as $row) {
                 $list[] = new $return_type($row);
             }
             $page++;

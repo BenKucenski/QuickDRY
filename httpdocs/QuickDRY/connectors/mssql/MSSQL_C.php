@@ -3,15 +3,15 @@
 /**
  * Class MSSQL_Base
  */
-class MSSQL_B extends MSSQL_Core
+class MSSQL_C extends MSSQL_Core
 {
     protected static $connection =  null;
 
     protected static function _connect()
     {
         if(is_null(static::$connection)) {
-            static::$DB_HOST = MSSQLB_HOST;
-            static::$connection = new MSSQL_Connection(MSSQLB_HOST, MSSQLB_USER, MSSQLB_PASS);
+            static::$DB_HOST = MSSQLC_HOST;
+            static::$connection = new MSSQL_Connection(MSSQLC_HOST, MSSQLC_USER, MSSQLC_PASS);
         }
     }
 }

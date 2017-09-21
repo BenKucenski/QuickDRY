@@ -95,9 +95,10 @@ require_once 'mssql/MSSQL_Core.php';
 require_once 'mssql/MSSQL_TableColumn.php';
 require_once 'mssql/MSSQL_ForeignKey.php';
 require_once 'mssql/MSSQL_Connection.php';
-require_once 'mssql/MSSQL_A.php'; // edge
-require_once 'mssql/MSSQL_B.php'; // datacenter - unused
-require_once 'mssql/MSSQL_Queue.php'; // datacenter - unused
+require_once 'mssql/MSSQL_A.php';
+require_once 'mssql/MSSQL_B.php';
+require_once 'mssql/MSSQL_C.php';
+require_once 'mssql/MSSQL_Queue.php';
 require_once 'mssql/MSSQL_StoredProcParam.php';
 require_once 'mssql/MSSQL_StoredProc.php';
 require_once 'mssql/MSSQL_CodeGen.php';

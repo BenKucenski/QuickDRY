@@ -7,6 +7,7 @@ class SQL_Base
 {
     protected $props = [];
     protected static $table = null;
+    protected static $database = null;
 
     protected $_change_log = [];
     protected $_history = null;
@@ -160,8 +161,9 @@ class SQL_Base
         switch($name)
         {
             case 'history':
-                if(is_null($this->_history))
+                if(is_null($this->_history)) {
                     $this->_history = $this->_history();
+                }
                 return $this->_history;
 
             default:
@@ -190,8 +192,9 @@ class SQL_Base
      */
     private function _history()
     {
-        //$res = TbLogsChangeLogClass::GetAll('created_at','desc','uuid=' . self::Escape($this->GetUUID()) . ' AND table_name = ' . self::Escape(static::$table));
-        //return $res;
+        if(class_exists('ChangeLogHandler')) {
+            return ChangeLogHandler::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
+        }
     }
 
     /**

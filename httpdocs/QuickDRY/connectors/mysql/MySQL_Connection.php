@@ -19,17 +19,16 @@ class MySQL_Connection
     protected $DB_PASS;
     protected $DB_PORT;
 
-    public function __construct($host, $user, $pass, $port)
+    public function __construct($host, $user, $pass, $port = null)
     {
         $this->DB_HOST = $host;
         $this->DB_USER = $user;
         $this->DB_PASS = $pass;
-        $this->DB_PORT = $port;
+        $this->DB_PORT = $port ? $port : 3306;
     }
 
     private function _connect()
     {
-
         // p: means persistent
         if (!is_null($this->current_db)) {
             $this->SetDatabase($this->current_db);
@@ -56,6 +55,10 @@ class MySQL_Connection
      */
     public function SetDatabase($db_base)
     {
+        if(!$db_base) {
+            $db_base = $this->current_db;
+        }
+
         if($this->db && !mysqli_ping($this->db)) {
             $this->db_conns[$this->current_db] = null;
             $this->current_db = null;
@@ -391,9 +394,227 @@ host = ' . MYSQLA_HOST . '
         $tables = [];
 
         foreach ($res['data'] as $d) {
-            $tables[$d['Tables_in_' . $this->current_db]] = strtoupper($d['Tables_in_' . $this->current_db]);
+            $tables[$d['Tables_in_' . $this->current_db]] = $d['Tables_in_' . $this->current_db];
         }
 
         return $tables;
+    }
+
+    public function GetTableColumns($table)
+    {
+        $sql = '
+			SHOW COLUMNS FROM
+			    `{{nq}}`;
+		';
+        $res = $this->Query($sql, [$table]);
+        if($res['error']) {
+            Halt($res);
+        }
+
+        $list = [];
+        foreach($res['data'] as $row) {
+            $l = new MySQL_TableColumn();
+            $l->FromRow($row);
+            $list[] = $l;
+        }
+        return $list;
+    }
+
+    private static $_LinkedTables = null;
+
+    public function GetLinkedTables($table_name)
+    {
+        if (!isset(self::$_LinkedTables[$this->current_db])) {
+            $sql = '
+		SELECT
+				table_name AS referenced_table_name,
+				column_name AS referenced_column_name,
+				referenced_table_name AS table_name,
+				referenced_column_name AS column_name,
+				CONSTRAINT_NAME
+		FROM
+				info_schema.key_column_usage
+		WHERE
+				referenced_table_schema = \'' . $this->current_db . '\'
+		  		AND referenced_table_name IS NOT NULL
+		ORDER BY column_name
+
+		';
+            $res = $this->Query($sql);
+
+            /* @var $fk MSSQL_ForeignKey */
+            if (isset($res['data'])) {
+                foreach ($res['data'] as $row) {
+                    if (!isset($fks[$row['CONSTRAINT_NAME']])) {
+                        $fk = new MSSQL_ForeignKey();
+                        $fk->FromRow($row);
+                    } else {
+                        $fk = self::$_LinkedTables[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']];
+                        $fk->AddRow($row);
+                    }
+
+                    if (!isset(self::$_LinkedTables[$this->current_db][$row['table_name']])) {
+                        self::$_LinkedTables[$this->current_db][$row['table_name']] = [];
+                    }
+                    self::$_LinkedTables[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']] = $fk;
+                }
+            }
+        }
+        if (!isset(self::$_LinkedTables[$this->current_db][$table_name])) {
+            self::$_LinkedTables[$this->current_db][$table_name] = [];
+        }
+
+        return self::$_LinkedTables[$this->current_db][$table_name];
+    }
+
+
+    private static $_ForeignKeys = null;
+
+    public function GetForeignKeys($table_name)
+    {
+        if (!isset(self::$_ForeignKeys[$this->current_db])) {
+
+
+            $sql = '
+		SELECT
+				table_name,
+				column_name,
+				referenced_table_name,
+				referenced_column_name,
+				CONSTRAINT_NAME
+		FROM
+				info_schema.key_column_usage
+		WHERE
+				referenced_table_schema = \'' . $this->current_db . '\'
+		  		AND referenced_table_name IS NOT NULL
+		ORDER BY column_name
+
+		';
+            $res = $this->Query($sql);
+            self::$_ForeignKeys[$this->current_db] = [];
+            foreach ($res['data'] as $row) {
+                if (!isset(self::$_ForeignKeys[$this->current_db][$row['table_name']])) {
+                    self::$_ForeignKeys[$this->current_db][$row['table_name']] = [];
+                }
+
+                /* @var $fk MySQL_ForeignKey */
+                if (!isset(self::$_ForeignKeys[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']])) {
+                    $fk = new MySQL_ForeignKey();
+                    $fk->FromRow($row);
+                } else {
+                    $fk = self::$_ForeignKeys[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']];
+                    $fk->AddRow($row);
+                }
+
+                self::$_ForeignKeys[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']] = $fk;
+            }
+        }
+        if (!isset(self::$_ForeignKeys[$this->current_db][$table_name])) {
+            self::$_ForeignKeys[$this->current_db][$table_name] = [];
+        }
+
+        return self::$_ForeignKeys[$this->current_db][$table_name];
+    }
+
+    private static $_PrimaryKey = null;
+
+    /**
+     * @param $table_name
+     *
+     * @return null
+     */
+
+    public function GetPrimaryKey($table_name)
+    {
+        if(is_null(self::$_PrimaryKey) || !isset(self::$_PrimaryKey[$table_name])) {
+
+            $sql = '
+SHOW INDEXES FROM
+`'  . $table_name . '`     
+        
+        ';
+
+            $res = MySQL_A::Query($sql);
+            if($res['error']) {
+                Halt($res);
+            }
+            foreach($res['data'] as $row) {
+                if(!$row['Non_unique'] && $row['Key_name'] === 'PRIMARY') {
+                    if(!isset(self::$_PrimaryKey[$row['Table']][$row['Key_name']])) {
+                        self::$_PrimaryKey[$row['Table']] = [];
+                    }
+                    self::$_PrimaryKey[$row['Table']][] = $row['Column_name'];
+                }
+            }
+        }
+        if(!isset(self::$_PrimaryKey[$table_name])) {
+            self::$_PrimaryKey[$table_name] = [];
+        }
+        return self::$_PrimaryKey[$table_name];
+    }
+
+    private static $_UniqueKeys = null;
+
+    /**
+     * @param $table_name
+     *
+     * @return null
+     */
+
+    public function GetUniqueKeys($table_name)
+    {
+        if(is_null(self::$_UniqueKeys) || !isset(self::$_UniqueKeys[$table_name])) {
+
+            $sql = '
+SHOW INDEXES FROM
+`'  . $table_name . '`     
+        
+        ';
+
+            $res = MySQL_A::Query($sql);
+            if($res['error']) {
+                Halt($res);
+            }
+            foreach($res['data'] as $row) {
+                if(!$row['Non_unique'] && $row['Key_name'] !== 'PRIMARY') {
+                    if(!isset(self::$_UniqueKeys[$row['Table']][$row['Key_name']])) {
+                        self::$_UniqueKeys[$row['Table']][$row['Key_name']] = [];
+                    }
+                    self::$_UniqueKeys[$row['Table']][$row['Key_name']][] = $row['Column_name'];
+                }
+            }
+        }
+        if(!isset(self::$_UniqueKeys[$table_name])) {
+            self::$_UniqueKeys[$table_name] = [];
+        }
+        return self::$_UniqueKeys[$table_name];
+    }
+
+    public function GetStoredProcs()
+    {
+        $sql = '
+			SHOW PROCEDURE STATUS;
+		';
+        $res = $this->Query($sql);
+        if($res['error'] || sizeof($res['data'])) {
+            Halt($res);
+        }
+        return null;
+    }
+
+    public function CopyInfoSchema()
+    {
+        $this->SetDatabase('INFORMATION_SCHEMA');
+        $this->Execute("DROP DATABASE IF EXISTS `info_schema`;",null, true);
+        $this->Execute("CREATE DATABASE  `info_schema` ;       ",null, true);
+        $this->Execute("CREATE TABLE info_schema.key_column_usage LIKE INFORMATION_SCHEMA.key_column_usage;",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ENGINE = INNODB;",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_schema`);",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_name`);",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_column_name`);",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_schema`);",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_name`);",null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`column_name`);",null, true);
+        $this->Execute("INSERT INTO info_schema.key_column_usage SELECT * FROM INFORMATION_SCHEMA.key_column_usage;",null, true);
     }
 }

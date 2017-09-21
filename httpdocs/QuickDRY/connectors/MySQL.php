@@ -35,8 +35,14 @@ function mysql_escape_query($conn, $sql, $params) {
 }
 
 require_once 'mysql/MySQL_Core.php';
+require_once 'mysql/MySQL_TableColumn.php';
+require_once 'mysql/MySQL_ForeignKey.php';
 require_once 'mysql/MySQL_Connection.php';
-require_once 'mysql/MySQL_A.php'; // 1860
-require_once 'mysql/MySQL_B.php'; // 1330
-require_once 'mysql/MySQL_C.php'; // datacenter - unused
-require_once 'mysql/MYSQL_Queue.php';
+require_once 'mysql/MySQL_A.php';
+require_once 'mysql/MySQL_B.php';
+require_once 'mysql/MySQL_C.php';
+require_once 'mysql/MySQL_Queue.php';
+require_once 'mysql/MySQL_StoredProcParam.php';
+require_once 'mysql/MySQL_StoredProc.php';
+require_once 'mysql/MySQL_CodeGen.php';
+

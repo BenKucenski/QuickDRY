@@ -13,7 +13,7 @@ class MySQL_Core extends SQL_Base
     {
         static::_connect();
 
-        return self::GetTables();
+        return static::$connection->GetTables();
     }
 
     public static function SetDatabase($db_base)
@@ -21,6 +21,55 @@ class MySQL_Core extends SQL_Base
         static::_connect();
 
         static::$connection->SetDatabase($db_base);
+    }
+
+    public static function CopyInfoSchema()
+    {
+        static::_connect();
+
+        static::$connection->CopyInfoSchema();
+    }
+
+    public static function GetTableColumns($table)
+    {
+        static::_connect();
+
+        return static::$connection->GetTableColumns($table);
+    }
+
+    public static function GetUniqueKeys($table)
+    {
+        static::_connect();
+
+        return static::$connection->GetUniqueKeys($table);
+    }
+
+    public static function GetForeignKeys($table)
+    {
+        static::_connect();
+
+        return static::$connection->GetForeignKeys($table);
+    }
+
+    public static function GetLinkedTables($table)
+    {
+        static::_connect();
+
+        return static::$connection->GetLinkedTables($table);
+    }
+
+    public static function GetPrimaryKey($table)
+    {
+        static::_connect();
+
+        return static::$connection->GetPrimaryKey($table);
+    }
+
+    public static function GetStoredProcs()
+    {
+        static::_connect();
+
+        return static::$connection->GetStoredProcs();
     }
 
     /**

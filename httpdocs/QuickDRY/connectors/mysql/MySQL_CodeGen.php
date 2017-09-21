@@ -1,5 +1,5 @@
 <?php
-class MSSQL_CodeGen extends SafeClass
+class MySQL_CodeGen extends SafeClass
 {
     private $Database;
     private $DatabaseConstant;
@@ -11,7 +11,7 @@ class MSSQL_CodeGen extends SafeClass
     private $Tables;
     private $LowerCaseTables;
     private $UseFKColumnName;
-    private $DatabaseTypePrefix = 'ms';
+    private $DatabaseTypePrefix = 'my';
 
     public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name)
     {
@@ -25,9 +25,12 @@ class MSSQL_CodeGen extends SafeClass
         $this->LowerCaseTables = $lowercase_tables;
         $this->UseFKColumnName = $use_fk_column_name;
 
-        MSSQL_A::SetDatabase($this->Database);
+        MySQL_A::CopyInfoSchema();
 
-        $this->Tables = MSSQL_A::GetTables();
+        MySQL_A::SetDatabase($this->Database);
+
+        Log::Insert('$this->Tables = MySQL_A::GetTables();', true);
+        $this->Tables = MySQL_A::GetTables();
 
         if (!is_dir('includes'))
             mkdir('includes');
@@ -97,7 +100,7 @@ class ' . $sp_class . ' extends SafeClass
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
 
-            $columns = MSSQL_A::GetTableColumns($table_name);
+            $columns = MySQL_A::GetTableColumns($table_name);
             $mod = $this->GenerateClass($table_name, $columns);
             $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php\';';
             $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php\';';
@@ -111,22 +114,25 @@ class ' . $sp_class . ' extends SafeClass
     function GenerateDatabaseClass()
     {
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-        $stored_procs = MSSQL_A::GetStoredProcs();
+        $stored_procs = MySQL_A::GetStoredProcs();
 
+        if(!$stored_procs) {
+            return;
+        }
         $sp_require = [];
         $sp_code = [];
-        foreach($stored_procs as $sp) {
+        foreach ($stored_procs as $sp) {
             $sp_class = $class_name . '_' . $sp->SPECIFIC_NAME . 'Class';
 
             $this->GenerateSPClassFile($sp_class);
 
             $sp_require[] = 'require_once \'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp/' . $sp_class . '.php\';';
 
-            $sp_params = MSSQL_A::GetStoredProcParams($sp->SPECIFIC_NAME);
+            $sp_params = MySQL_A::GetStoredProcParams($sp->SPECIFIC_NAME);
             $params = [];
             $sql_params = [];
-            foreach($sp_params as $param) {
-                $params[] = str_replace('@','$', $param->Parameter_name);
+            foreach ($sp_params as $param) {
+                $params[] = str_replace('@', '$', $param->Parameter_name);
                 $sql_params[] = $param->Parameter_name . ' = {{}}';
             }
 
@@ -139,11 +145,11 @@ class ' . $sp_class . ' extends SafeClass
     {
         $sql = \'
         EXEC	\' . ' . $this->DatabaseConstant . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
-        ' . implode(",\r\n\t\t", $sql_params)  . '
+        ' . implode(",\r\n\t\t", $sql_params) . '
         
         \';
         /* @var $rows ' . $sp_class . '[] */
-        $rows = MSSQL_A::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
+        $rows =  MySQL_A::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
             return new ' . $sp_class . '($row);
         });
 
@@ -157,7 +163,7 @@ class ' . $sp_class . ' extends SafeClass
         $code = '<?php
 ' . implode("\r\n", $sp_require) . '
 
-class sp_' . $class_name . ' extends MSSQL_A 
+class sp_' . $class_name . ' extends MySQL_A 
 {
 ' . implode("\r\n", $sp_code) . '
 }
@@ -167,6 +173,7 @@ class sp_' . $class_name . ' extends MSSQL_A
         fwrite($fp, $code);
         fclose($fp);
     }
+
     function GenerateClass($table_name, $cols)
     {
         $class_props = array();
@@ -175,8 +182,8 @@ class sp_' . $class_name . ' extends MSSQL_A
         Log::Insert($c_name, true);
 
         $props = '';
-        $unique = MSSQL_A::GetUniqueKeys($table_name);
-        $primary = MSSQL_A::GetPrimaryKey($table_name);
+        $unique = MySQL_A::GetUniqueKeys($table_name);
+        $primary = MySQL_A::GetPrimaryKey($table_name);
 
 
         foreach ($cols as $col) {
@@ -185,34 +192,34 @@ class sp_' . $class_name . ' extends MSSQL_A
         }
 
 
-        $refs = MSSQL_A::GetForeignKeys($table_name);
+        $refs = MySQL_A::GetForeignKeys($table_name);
         $gets = array();
         $foreign_key_props = array();
 
         $seens_vars = [];
 
         foreach ($refs as $fk) {
-            if(is_array($fk->column_name)) {
-                $column_name = $this->UseFKColumnName ? '_' .  implode('_', $fk->column_name) : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_',  str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+            if (is_array($fk->column_name)) {
+                $column_name = $this->UseFKColumnName ? '_' . implode('_', $fk->column_name) : '';
+                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
             } else {
                 $column_name = $this->UseFKColumnName ? '_' . $fk->column_name : '';
                 $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
             }
 
-            if(in_array($var, $seens_vars)) {
+            if (in_array($var, $seens_vars)) {
                 Log::Insert(['duplicate FK', $fk], true);
                 continue;
             }
             $seens_vars[] = $var;
 
-            $class_props[] = ' * @property ' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . ' ' . $var;
+            $class_props[] = ' * @property ' . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . ' ' . $var;
             $foreign_key_props[] = 'protected $_' . $var . ' = null;';
 
-            if(is_array($fk->column_name)) {
+            if (is_array($fk->column_name)) {
                 $isset = [];
                 $get_params = [];
-                foreach($fk->column_name as $i => $col) {
+                foreach ($fk->column_name as $i => $col) {
                     $isset[] = '$this->' . $col;
                     $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
                 }
@@ -220,7 +227,7 @@ class sp_' . $class_name . ' extends MSSQL_A
                 $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && " . implode(' && ', $isset) . ") {
-                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get([" . implode(', ', $get_params) . "]);
+                    \$this->_$var = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_$var;
             ";
@@ -228,41 +235,41 @@ class sp_' . $class_name . ' extends MSSQL_A
                 $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && \$this->" . $fk->column_name . ") {
-                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_$var = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_$var;
             ";
             }
         }
 
-        $refs = MSSQL_A::GetLinkedTables($table_name);
+        $refs = MySQL_A::GetLinkedTables($table_name);
         foreach ($refs as $fk) {
-            if(is_array($fk->column_name)) {
-                $column_name = $this->UseFKColumnName ? '_' .  str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_',  str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+            if (is_array($fk->column_name)) {
+                $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
+                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
             } else {
                 $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', $fk->column_name) : '';
                 $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
             }
 
 
-            if(in_array($var, $seens_vars)) {
+            if (in_array($var, $seens_vars)) {
                 Log::Insert(['duplicate FK', $fk], true);
                 continue;
             }
             $seens_vars[] = $var;
 
-            $class_props[] = ' * @property ' . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . '[] ' . $var;
+            $class_props[] = ' * @property ' . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . '[] ' . $var;
             $class_props[] = ' * @property int ' . $var . 'Count';
 
 
             $foreign_key_props[] = 'protected $_' . $var . ' = null;';
             $foreign_key_props[] = 'protected $_' . $var . 'Count = null;';
 
-            if(is_array($fk->column_name)) {
+            if (is_array($fk->column_name)) {
                 $isset = [];
                 $get_params = [];
-                foreach($fk->column_name as $i => $col) {
+                foreach ($fk->column_name as $i => $col) {
                     $isset[] = '$this->' . $col;
                     $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
                 }
@@ -270,13 +277,13 @@ class sp_' . $class_name . ' extends MSSQL_A
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && " . implode(' && ', $isset) . ") {
-                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll([" . implode(', ', $get_params) . "]);
+                    \$this->_$var = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_$var;
 
             case '{$var}Count':
                 if(is_null(\$this->_{$var}Count) && " . implode(' && ', $isset) . ") {
-                    \$this->_{$var}Count = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount([" . implode(', ', $get_params) . "]);
+                    \$this->_{$var}Count = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_{$var}Count;
             ";
@@ -285,19 +292,18 @@ class sp_' . $class_name . ' extends MSSQL_A
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && \$this->" . $fk->column_name . ") {
-                    \$this->_$var = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_$var = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_$var;
 
             case '{$var}Count':
                 if(is_null(\$this->_{$var}Count) && \$this->" . $fk->column_name . ") {
-                    \$this->_{$var}Count = " . MSSQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
+                    \$this->_{$var}Count = " . MySQL_A::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetCount(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_{$var}Count;
             ";
             }
         }
-
 
 
         $code = '<?php
@@ -314,18 +320,18 @@ class sp_' . $class_name . ' extends MSSQL_A
  *
  */
 
-class db_' . $c_name . ' extends MSSQL_A
+class db_' . $c_name . ' extends MySQL_A
 {
     public static $_primary = [\'' . implode('\',\'', $primary) . '\'];
     public static $_unique = [
     ';
 
-        foreach($unique as $key => $columns) {
+        foreach ($unique as $key => $columns) {
             $code .= '        [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
-    }
+        }
 
 
-$code .= '
+        $code .= '
         ];
     protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $table = \'' . $table_name . '\';
@@ -475,7 +481,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
 
-            $columns = MSSQL_A::GetTableColumns($table_name);
+            $columns = MySQL_A::GetTableColumns($table_name);
             $this->_GenerateJSON($table_name, $columns);
         }
     }
@@ -489,8 +495,8 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
         $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
 
-        $unique = MSSQL_A::GetUniqueKeys($table_name);
-        $primary = MSSQL_A::GetPrimaryKey($table_name);
+        $unique = MySQL_A::GetUniqueKeys($table_name);
+        $primary = MySQL_A::GetPrimaryKey($table_name);
         $dlg_name = 'dlg_' . $c_name;
 
         if (!is_dir('json/_' . $c_name)) {
@@ -510,7 +516,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
     private function SaveJSON($c_name, $column_names, $table_name, $cols, $unique, $primary, $dlg_name)
     {
-        if(!isset($primary[0])) {
+        if (!isset($primary[0])) {
             return;
         }
 
@@ -563,11 +569,11 @@ exit_json($returnvals);
 
     private function GetJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
     {
-        if(!isset($primary[0])) {
+        if (!isset($primary[0])) {
             return;
         }
 
-$get = '<?php
+        $get = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -585,15 +591,15 @@ if(isset($Request->uuid))
 	$returnvals[\'serialized\'] = $c->ToArray();
 	$returnvals[\'can_delete\'] = $c->CanDelete($' . $this->UserVar . ') ? 1 : 0;
 } else {
-	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class','',$c_name)) . ' - Get: Bad params passed in!\';
+	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\';
 }
 
 exit_json($returnvals);
 	';
 
-$fp = fopen('json/_' . $c_name . '/get.json.php','w');
-fwrite($fp,$get);
-fclose($fp);
+        $fp = fopen('json/_' . $c_name . '/get.json.php', 'w');
+        fwrite($fp, $get);
+        fclose($fp);
     }
 
     private function LookupJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
@@ -622,7 +628,7 @@ exit_json($returnvals);
 
     private function DeleteJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
     {
-        if(!isset($primary[0])) {
+        if (!isset($primary[0])) {
             return;
         }
 
@@ -632,7 +638,7 @@ exit_json($returnvals);
         $u_ret = [];
         if (sizeof($unique)) {
             foreach ($unique as $key => $cols) {
-                foreach($cols as $u) {
+                foreach ($cols as $u) {
                     $u_req[] = '$Request->' . $u;
                     $u_seq[] = "'$u'=>\$Request->$u";
                     $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
@@ -689,7 +695,7 @@ exit_json($returnvals);
 
     private function HistoryJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
     {
-        if(!isset($primary[0])) {
+        if (!isset($primary[0])) {
             return;
         }
         $history = '<?php
@@ -706,7 +712,7 @@ if(isset($Request->uuid))
     }
 
 } else {
-	exit_json(\'' . CapsToSpaces(str_replace('Class','',$c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
+	exit_json(\'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
 }
 
 
@@ -763,15 +769,15 @@ exit_json($returnvals);
             return;
         }
 
-        if(!sizeof($primary)) {
+        if (!sizeof($primary)) {
             return;
         }
 
-        $res = MSSQL_A::GetForeignKeys($table_name);
+        $res = MySQL_A::GetForeignKeys($table_name);
         $refs = array();
 
         foreach ($res as $fk) {
-            if(!is_array($fk->column_name)) {
+            if (!is_array($fk->column_name)) {
                 /* @var $fk MSSQL_ForeignKey */
                 $refs[$fk->column_name] = SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
             }
