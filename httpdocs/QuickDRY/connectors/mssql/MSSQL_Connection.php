@@ -682,7 +682,7 @@ ORDER BY
         
         ';
 
-            $res = MSSQL_A::Query($sql);
+            $res = $this->Query($sql);
             if($res['error']) {
                 Halt($res);
             }

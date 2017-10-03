@@ -15,6 +15,51 @@ class SimpleExcel extends SafeClass
     public $Columns;
     public $Title;
 
+    /**
+     * @param string $filename
+     * @param SimpleExcel[] $reports
+     */
+    public static function MultiSheet($filename, $reports)
+    {
+        $objPHPExcel = new \PHPExcel();
+
+        foreach($reports as $sheet => $report) {
+            if($sheet > 0) {
+                $objPHPExcel->createSheet($sheet);
+            }
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->setTitle($report->Title);
+            $sheet_row = 1;
+
+
+            $sheet_column = 'A';
+            foreach ($report->Columns as $column) {
+                self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
+                $sheet_column++;
+            }
+            $sheet_row++;
+            foreach ($report->Report as $item) {
+                $sheet_column = 'A';
+                foreach ($report->Columns as $column) {
+                    self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+                    $sheet_column++;
+                }
+                $sheet_row++;
+            }
+        }
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
+
+    }
+
+    /**
+     * @param SimpleExcel $report
+     */
     public static function SingleSheet(SimpleExcel $report)
     {
         $objPHPExcel = new \PHPExcel();

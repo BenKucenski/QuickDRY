@@ -310,10 +310,12 @@ class Elastic_Core extends Elastic_Base
             $per_page = 20;
         }
 
-        $params = [];
-        $params[] = 'q=' . urlencode(implode(' AND ', $where));
-        if ($fields) {
-            $params[] = 'fields=' . implode(',', $fields);
+        if($where && sizeof($where)) {
+            $params = [];
+            $params[] = 'q=' . urlencode(implode(' AND ', $where));
+            if ($fields) {
+                $params[] = 'fields=' . implode(',', $fields);
+            }
         }
 
         $params[] = 'from=' . ($page * $per_page);
@@ -355,7 +357,11 @@ class Elastic_Core extends Elastic_Base
                 }
             }
         }
-        $list['query'] = implode(' AND ', $where);
+        if($where && sizeof($where)) {
+            $list['query'] = implode(' AND ', $where);
+        } else {
+            $list['query'] = '';
+        }
         $list['url'] = $url;
 
         Metrics::Stop('ELASTIC');

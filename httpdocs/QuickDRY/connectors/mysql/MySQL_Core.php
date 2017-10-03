@@ -249,7 +249,7 @@ class MySQL_Core extends SQL_Base
                                                 $col = $col . ' > {{}} ';
                                                 $val = trim(str_replace('>', '', $val));
                                             } else {
-                                                if ($val !== 'null') {
+                                                if (strtolower($val) !== 'null') {
                                                     $col = $col . ' = {{}} ';
                                                 } else {
                                                     $col = $col . ' IS NULL ';
@@ -354,9 +354,9 @@ class MySQL_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
-        if ($limit)
+        if ($limit) {
             $sql .= ' LIMIT ' . ($limit * 1.0);
-
+        }
 
         $res = static::Query($sql, $params, true);
         return $res;

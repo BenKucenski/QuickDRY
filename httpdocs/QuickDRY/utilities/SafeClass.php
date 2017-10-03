@@ -1,22 +1,53 @@
 <?php
 class SafeClass
 {
-    public function __get($name) {
-       Halt('public $' . $name . '; is not a property of ' . get_class($this));
-       return null;
-     }
+    private $_HaltOnError = true;
+    private $_MissingProperties = [];
 
-    public function __set($name, $value) {
-        Halt('public $' . $name . '; is not a property of ' . get_class($this));
+    public function HasMissingProperties()
+    {
+        return sizeof($this->_MissingProperties) > 0;
+    }
+
+    public function GetMissingPropeties()
+    {
+        return implode("\n", $this->_MissingProperties);
+    }
+
+    public function HaltOnError($true_or_false)
+    {
+        $this->_HaltOnError = $true_or_false ? true : false;
+    }
+
+    public function __get($name)
+    {
+        if ($this->_HaltOnError) {
+            Halt('public $' . $name . '; is not a property of ' . get_class($this));
+        } else {
+            $this->_MissingProperties[] = 'public $' . $name . ';';
+        }
+        return null;
+    }
+
+    public function __set($name, $value)
+    {
+        if ($this->_HaltOnError) {
+            Halt('public $' . $name . '; is not a property of ' . get_class($this));
+        } else {
+            $this->_MissingProperties[] = 'public $' . $name . ';';
+        }
         return $value;
     }
 
     public function ToArray($ignore_empty = false)
     {
         $res = get_object_vars($this);
-        if($ignore_empty) {
+        if ($ignore_empty) {
             foreach ($res as $key => $val) {
                 if (!$val) {
+                    unset($res[$key]);
+                }
+                if ($key[0] == '_') {
                     unset($res[$key]);
                 }
             }
@@ -24,11 +55,12 @@ class SafeClass
         return $res;
     }
 
-    public function FromRow($row) {
-        if(!is_array($row)) {
+    public function FromRow($row)
+    {
+        if (!is_array($row)) {
             Halt($row);
         }
-        foreach($row as $k => $v) {
+        foreach ($row as $k => $v) {
             $this->$k = is_object($v) ? $v : fix_json($v);
         }
     }
@@ -43,7 +75,7 @@ class SafeClass
      */
     public static function ToXLS($array, $filename)
     {
-        if(!isset(static::$headers)) {
+        if (!isset(static::$headers)) {
             Halt('You must define public static $headers in your class');
         }
 
