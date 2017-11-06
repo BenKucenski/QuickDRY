@@ -122,8 +122,9 @@ class MSSQL_Core extends SQL_Base
             };
         }
 
-        if (isset(static::$database))
+        if (isset(static::$database)) {
             static::$connection->SetDatabase(static::$database);
+        }
 
         return static::$connection->Query($sql, $params, $map_function);
     }
@@ -201,7 +202,7 @@ class MSSQL_Core extends SQL_Base
 
         $sql = '
 			DELETE FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				' . static::$database . '.dbo.[' . static::$table . ']
 			WHERE
 				' . implode(' AND ', $where) . '
 		';
@@ -314,7 +315,7 @@ class MSSQL_Core extends SQL_Base
 			SELECT
 				*
 			FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				' . static::$database . '.dbo.[' . static::$table . ']
 			WHERE
 				' . $where_sql . '
 			';
@@ -377,7 +378,7 @@ class MSSQL_Core extends SQL_Base
 			' . ($limit ? 'TOP ' . $limit : '') . '
 				*
 			FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				' . static::$database . '.dbo.[' . static::$table . ']
 			WHERE
 				' . $sql_where . '
 				' . $sql_order . '
@@ -418,7 +419,7 @@ class MSSQL_Core extends SQL_Base
 			SELECT
 				COUNT(*) AS cnt
 			FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				' . static::$database . '.dbo.[' . static::$table . ']
 			WHERE
 				' . $sql_where . '
 		';
@@ -498,14 +499,14 @@ class MSSQL_Core extends SQL_Base
 				SELECT
 					COUNT(*) AS num
 				FROM
-					[' . static::$database . '].dbo.[' . static::$table . ']
+					' . static::$database . '.dbo.[' . static::$table . ']
 					' . $sql_left . '
 				WHERE
 					' . $sql_where . '
 				';
         } else {
             $sql = '
-				SELECT COUNT(*) AS num FROM (SELECT * FROM [' . static::$database . '].dbo.[' . static::$table . ']
+				SELECT COUNT(*) AS num FROM (SELECT * FROM ' . static::$database . '.dbo.[' . static::$table . ']
 					' . $sql_left . '
 				WHERE
 					' . $sql_where . '
@@ -526,7 +527,7 @@ class MSSQL_Core extends SQL_Base
 				SELECT
 					[' . static::$table . '].*
 				FROM
-					[' . static::$database . '].dbo.[' . static::$table . ']
+					' . static::$database . '.dbo.[' . static::$table . ']
 					' . $sql_left . '
 				WHERE
 					 ' . $sql_where . '

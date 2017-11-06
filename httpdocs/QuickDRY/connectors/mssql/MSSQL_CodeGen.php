@@ -621,9 +621,9 @@ if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserI
 
 $returnvals = [];
 
-$search = strtoupper($_GET[\'term\']);
+$search = strtoupper($Request->term);
 if(strlen($search) < 1) {
-	$returnvals[] = array(\'id\' => 0, \'value\' => \'No Results Found\');
+	$returnvals[] = [\'id\' => 0, \'value\' => \'No Results Found\'];
 	exit_json($returnvals);
 }
 

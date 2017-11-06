@@ -12,6 +12,7 @@ class MSSQL_Connection
     public $query_count = 0;
 
     private $_usesqlsrv = false;
+    private $_LastConnection;
 
     protected $db_conns = [];
     protected $db = null;
@@ -32,10 +33,11 @@ class MSSQL_Connection
     private function _connect()
     {
         // p: means persistent
-        if(!is_null($this->current_db))
+        if (!is_null($this->current_db)) {
             $this->SetDatabase($this->current_db);
-        else
+        } else {
             $this->SetDatabase('');
+        }
     }
 
     /**
@@ -76,15 +78,26 @@ class MSSQL_Connection
 
     public function SetDatabase($db_base)
     {
+        $this->_LastConnection['database'] = $db_base;
+        $this->_LastConnection['DB_HOST'] = $this->DB_HOST;
+        $this->_LastConnection['UID'] = $this->DB_USER;
+        $this->_LastConnection['error'] = '';
+        $this->_LastConnection['reuse connection'] = '';
+        $this->_LastConnection['_usesqlsrv'] = '';
+
         $time = microtime(true);
         $error = '';
 
-        if($db_base && strcmp($this->current_db,$db_base) == 0)
+        if($db_base && strcmp($this->current_db,$db_base) == 0 && $this->db) {
+            $this->_LastConnection['reuse connection'] = $this->current_db . ' = ' . $db_base;
             return;
+        }
 
 
-        if(!$this->_usesqlsrv && IsWindows() && function_exists('sqlsrv_connect'))
+        if(!$this->_usesqlsrv && IsWindows() && function_exists('sqlsrv_connect')) {
             $this->_usesqlsrv = true;
+            $this->_LastConnection['_usesqlsrv'] = 'true';
+        }
 
         if(!isset($this->db_conns[$db_base]) || is_null($this->db_conns[$db_base])) {
             try {
@@ -103,7 +116,11 @@ class MSSQL_Connection
                     }
                 } else {
                     sqlsrv_errors(SQLSRV_ERR_ERRORS);
-                    $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["Database"=>$db_base, "UID"=>$this->DB_USER, "PWD"=>$this->DB_PASS]);
+                    if(stristr($db_base,'.') !== false) { // linked server support
+                        $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
+                    } else {
+                        $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["Database" => $db_base, "UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
+                    }
                     $error = print_r(sqlsrv_errors(),true);
                     if(isset($error['message']) && $error['message']) {
                         throw new Exception($error);
@@ -116,11 +133,18 @@ class MSSQL_Connection
             }
         }
 
+        $this->_LastConnection['error'] = $error;
+
         $this->db = $this->db_conns[$db_base];
+        if(!$this->db) {
+            Halt($this->_LastConnection);
+        }
         $this->current_db = $db_base;
         $time = microtime(true) - $time;
         $this->query_time += $time;
-        $this->Log[] = ['sql' => $db_base, 'err' => '', 'time'=>$time];
+        self::Log($db_base, null, $time, $error);
+
+        $this->_LastConnection['current_db'] = $db_base;
 
         if(!$this->_usesqlsrv) {
             //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
@@ -221,7 +245,7 @@ class MSSQL_Connection
         if(!$this->db)
         {
             // Notify that DB is crashed
-            $returnval['error'] = 'No DB Connection';
+            $returnval['error'] = ['QueryWindows No DB Connection', $this->_LastConnection, $this->db_conns];
             Metrics::Stop('MSSQL');
             return $returnval;
         }
@@ -320,7 +344,7 @@ class MSSQL_Connection
         {
             Metrics::Stop('MSSQL');
             // Notify that DB is crashed
-            $returnval['error'] = 'No DB Connection';
+            $returnval['error'] = 'Query No DB Connection';
             return $returnval;
         }
         try
@@ -409,7 +433,7 @@ class MSSQL_Connection
         // If still no link, then the query will not run...
         if (!$this->db) {
             // Notify that DB is crashed
-            $returnval['error'] = 'No DB Connection';
+            $returnval['error'] = 'ExecuteWindows No DB Connection';
 
             return $returnval;
         }
@@ -431,7 +455,9 @@ class MSSQL_Connection
                 fclose($fp);
                 $output = [];
                 // -x turns off variable interpretation - must be set
-                $cmd = 'sqlcmd  -a 32767 -x -U' . MSSQL_USER . ' -P"' . MSSQL_PASS . '" -S' . MSSQL_HOST . ' -i' . $fname;
+                // https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
+                // adding -l 0 to avoid login timeout errors
+                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . MSSQL_USER . ' -P"' . MSSQL_PASS . '" -S' . MSSQL_HOST . ' -i' . $fname;
                 if(self::$keep_files) {
                     Log::Insert($cmd, true);
                 }
@@ -509,7 +535,7 @@ class MSSQL_Connection
         if(!$this->db)
         {
             // Notify that DB is crashed
-            $returnval['error'] = 'No DB Connection';
+            $returnval['error'] = 'Execute No DB Connection';
             return $returnval;
         }
         try
@@ -554,7 +580,7 @@ class MSSQL_Connection
      */
     public function GetTables()
     {
-        $sql = 'SELECT * FROM information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
+        $sql = 'SELECT * FROM '  . $this->current_db. '.information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
         $res = $this->Query($sql);
         $list = [];
         foreach($res['data'] as $row)
@@ -579,7 +605,7 @@ class MSSQL_Connection
 			SELECT
 				*
 			FROM
-				INFORMATION_SCHEMA.COLUMNS
+				'  . $this->current_db. '.INFORMATION_SCHEMA.COLUMNS
 			WHERE
 				TABLE_NAME={{}}
 		';
@@ -622,10 +648,10 @@ class MSSQL_Connection
 				IC.[is_descending_key],
 				IC.[is_included_column]
 			FROM
-				sys.[tables] AS T
-  			INNER JOIN sys.[indexes] I ON T.[object_id] = I.[object_id]
-  			INNER JOIN sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
-  			INNER JOIN sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
+				'  . $this->current_db. '.sys.[tables] AS T
+  			INNER JOIN '  . $this->current_db. '.sys.[indexes] I ON T.[object_id] = I.[object_id]
+  			INNER JOIN '  . $this->current_db. '.sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
+  			INNER JOIN '  . $this->current_db. '.sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
 			WHERE
 				T.[is_ms_shipped] = 0
 				AND I.[type_desc] <> \'HEAP\'
@@ -669,13 +695,13 @@ SELECT
      ic.*,
      col.* 
 FROM 
-     sys.indexes ind 
+     '  . $this->current_db. '.sys.indexes ind 
 INNER JOIN 
-     sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+     '  . $this->current_db. '.sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
 INNER JOIN 
-     sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
+     '  . $this->current_db. '.sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
 INNER JOIN 
-     sys.tables t ON ind.object_id = t.object_id 
+     '  . $this->current_db. '.sys.tables t ON ind.object_id = t.object_id 
 
 ORDER BY 
      t.name, ind.name, ind.index_id, ic.index_column_id        
@@ -724,14 +750,14 @@ ORDER BY
 			    ,KCU2.TABLE_NAME AS REFERENCED_TABLE_NAME
 			    ,KCU2.COLUMN_NAME AS REFERENCED_COLUMN_NAME
 			    ,KCU2.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+			FROM '  . $this->current_db. '.INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
-			LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
 			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
 			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
 			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
 
-			LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
 			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
 			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
 			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
@@ -779,14 +805,14 @@ ORDER BY
 			    ,KCU1.TABLE_NAME AS REFERENCED_TABLE_NAME
 			    ,KCU1.COLUMN_NAME AS REFERENCED_COLUMN_NAME
 			    ,KCU1.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+			FROM '  . $this->current_db. '.INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
-			LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
 			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
 			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
 			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
 
-			LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
 			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
 			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
 			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
@@ -830,15 +856,19 @@ ORDER BY
 			SELECT
 				column_name
 			FROM
-				INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+				'  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 			WHERE
 				OBJECTPROPERTY(OBJECT_ID(constraint_name), \'IsPrimaryKey\') = 1
 				AND table_name = {{}}
 		';
         $res = $this->Query($sql, [$table_name]);
+        if($res['error']) {
+            Halt($res);
+        }
         $list = [];
-        foreach($res['data'] as $col)
+        foreach($res['data'] as $col) {
             $list[] = $col['column_name'];
+        }
         return $list;
     }
 
@@ -849,7 +879,7 @@ ORDER BY
     {
         $sql = '
 select * 
-  from information_schema.routines 
+  from '  . $this->current_db. '.information_schema.routines 
  where routine_type = \'PROCEDURE\'
  ORDER BY SPECIFIC_NAME        
         ';
@@ -890,7 +920,7 @@ select
                    case when system_type_id in (35, 99, 167, 175, 231, 239)  
                    then ServerProperty(\'collation\') end)  
 
-  from sys.parameters   
+  from '  . $this->current_db. '.sys.parameters   
   ORDER BY parameter_id
         ';
 

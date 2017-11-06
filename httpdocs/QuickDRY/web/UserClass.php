@@ -14,8 +14,12 @@ class UserClass extends SafeClass
         return parent::__get($name); 
     }
 
-    public static function LogInLDAP($username, $password)
+    public static function LogInLDAP($username, $password, $default_host = null)
     {
+        if($default_host && strstr($username, '@') === false) {
+            $username .= '@' . $default_host;
+        }
+
         // https://stackoverflow.com/questions/6222641/how-to-php-ldap-search-to-get-user-ou-if-i-dont-know-the-ou-for-base-dn
         $ldap = new adLDAP();
         if($ldap->authenticate($username, $password)) {
