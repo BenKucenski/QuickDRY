@@ -24,6 +24,26 @@ class UTMClass
     }
 
 
+    public static function GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
+    {
+        $lat_a_r = self::DegToRad($lat_a);
+        $lon_a_r = self::DegToRad($lon_a);
+        $lat_b_r = self::DegToRad($lat_b);
+        $lon_b_r = self::DegToRad($lon_b);
+
+        $phi = $lat_b_r - $lat_a_r;
+        $theta = $lon_b_r - $lon_a_r;
+
+        $a = sin($phi / 2.0) * sin($phi / 2.0) + cos($lat_a_r) * cos($lat_b_r) * sin($theta / 2.0) * sin($theta / 2.0);
+        $c = 2.0 * atan2(sqrt($a), sqrt((1 - $a)));
+        return self::$sm_a * $c / 1000.0;
+    }
+
+    public static function GetMilesFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
+    {
+        return self::GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b) / 1.6093;
+    }
+
     /*
     * RadToDeg
     *
@@ -62,10 +82,10 @@ class UTMClass
         //var result;
 
         /* Precalculate n */
-        $n = (self::$sm_a - self::$sm_b) / ($sm_a + $sm_b);
+        $n = (self::$sm_a - self::$sm_b) / (self::$sm_a + self::$sm_b);
 
         /* Precalculate alpha */
-        $alpha = (($sm_a + $sm_b) / 2.0) * (1.0 + (pow($n, 2.0) / 4.0) + (pow($n, 4.0) / 64.0));
+        $alpha = ((self::$sm_a + self::$sm_b) / 2.0) * (1.0 + (pow($n, 2.0) / 4.0) + (pow($n, 4.0) / 64.0));
 
         /* Precalculate beta */
         $beta = (-3.0 * $n / 2.0) + (9.0 * pow($n, 3.0) / 16.0) + (-3.0 * pow($n, 5.0) / 32.0);
@@ -196,16 +216,14 @@ class UTMClass
         //var l3coef, l4coef, l5coef, l6coef, l7coef, l8coef;
         //var tmp;
 
-        global $sm_a, $sm_b;
-
         /* Precalculate ep2 */
-        $ep2 = (pow($sm_a, 2.0) - pow($sm_b, 2.0)) / pow($sm_b, 2.0);
+        $ep2 = (pow(self::$sm_a, 2.0) - pow(self::$sm_b, 2.0)) / pow(self::$sm_b, 2.0);
 
         /* Precalculate nu2 */
         $nu2 = $ep2 * pow(cos($phi), 2.0);
 
         /* Precalculate N */
-        $N = pow($sm_a, 2.0) / ($sm_b * sqrt(1 + $nu2));
+        $N = pow(self::$sm_a, 2.0) / (self::$sm_b * sqrt(1 + $nu2));
 
         /* Precalculate t */
         $t = tan($phi);
@@ -283,18 +301,30 @@ class UTMClass
     }
 
 
-    /*
-    * btnToUTM_OnClick
-    *
-    * Called when the btnToUTM button is clicked.
-    *
-    */
-    public static function to_utm($lat, $lon)
+    /**
+     * @param $lat
+     * @param $lon
+     * @return array
+     */
+    public static function ToUTM($lat, $lon)
     {
         $zone = floor(($lon + 180.0) / 6) + 1;
 
         $xy = self::LatLonToUTMXY(self::DegToRad($lat), self::DegToRad($lon), $zone);
         return $xy;
+    }
+
+    public static function GetDistance($xy_a, $xy_b)
+    {
+        $a = $xy_a[0] - $xy_b[0];
+        $b = $xy_a[1] - $xy_b[1];
+
+        return sqrt($a * $a + $b * $b) / 1000;
+    }
+
+    public static function GetMiles($xy_a, $xy_b)
+    {
+        return self::GetDistance($xy_a, $xy_b) / 1.6093;
     }
 
     public static function AddKmToLatLon($lat, $lon, $distance, $bearing)

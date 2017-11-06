@@ -30,6 +30,7 @@ require_once 'connectors/adLDAP.php';
 require_once 'connectors/oauth.php';
 require_once 'connectors/Curl.php';
 require_once 'connectors/elastic.php';
+require_once 'connectors/GoogleAPI.php';
 
 
 require_once 'web/BasePage.php';

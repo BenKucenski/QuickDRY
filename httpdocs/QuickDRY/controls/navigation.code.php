@@ -17,5 +17,7 @@ if (!$Session->user) {
 
 $_NAVIGATION->SetMenu($_MENU);
 
-$_NAVIGATION->CheckPermissions(CURRENT_PAGE);
+if(!$_NAVIGATION->CheckPermissions(CURRENT_PAGE, true)) {
+    CleanHalt([$CurrentUser->Roles, MenuAccess::GetPageRoles(CURRENT_PAGE)]);
+}
 
