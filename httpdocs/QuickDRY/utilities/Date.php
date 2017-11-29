@@ -167,6 +167,14 @@ function FancyDate($date)
  */
 function ShortDate($date)
 {
+    if($date instanceof DateTime){
+        $date = $date->getTimestamp();
+
+        if(!$date) {
+            return ''; // don't return null
+        }
+    }
+
     if(is_null($date))
         return '<i>Not Set</i>';
 
@@ -177,6 +185,50 @@ function ShortDate($date)
         return '<i>Not Set</i>';
 
     return date('n/j/y', $date);
+}
+
+function ShortDateYear($date)
+{
+    if($date instanceof DateTime){
+        $date = $date->getTimestamp();
+
+        if(!$date) {
+            return ''; // don't return null
+        }
+    }
+
+    if(is_null($date))
+        return '<i>Not Set</i>';
+
+    if(!is_numeric($date))
+        $date = strtotime($date);
+
+    if($date == 0)
+        return '<i>Not Set</i>';
+
+    return date('M Y', $date);
+}
+
+function LongDateYear($date)
+{
+    if($date instanceof DateTime){
+        $date = $date->getTimestamp();
+
+        if(!$date) {
+            return ''; // don't return null
+        }
+    }
+
+    if(is_null($date))
+        return '<i>Not Set</i>';
+
+    if(!is_numeric($date))
+        $date = strtotime($date);
+
+    if($date == 0)
+        return '<i>Not Set</i>';
+
+    return date('F Y', $date);
 }
 
 /**
