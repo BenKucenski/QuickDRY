@@ -85,8 +85,11 @@ class ' . $sp_class . ' extends SafeClass
     public function __construct($row = null)
     {
         if($row) {
-            CleanHalt($row);
+            $this->HaltOnError(false);
             $this->FromRow($row);
+            if($this->HasMissingProperties()) {
+                Halt($this->GetMissingPropeties());
+            }
         }
     }
 }
@@ -1096,7 +1099,7 @@ class ' . $page_dir . ' extends BasePage
 
     public function Init()
     {
-        $this->MasterPage = \'' . $this->MasterPage . '\';
+        $this->MasterPage = ' . $this->MasterPage . ';
     }
     
     public function Get() 

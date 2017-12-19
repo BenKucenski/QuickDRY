@@ -74,11 +74,13 @@ class Mailer extends SafeClass
         $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
 
         if (defined('SMTP_USER') && defined('SMTP_PASS')) {
-            $mail->Password = SMTP_PASS;
-            $mail->Username = SMTP_USER;
-            $mail->AuthType = SMTP_AUTH;
-            $mail->SMTPAuth = true;
-            $mail->SMTPSecure = 'tls';
+            if(SMTP_USER && SMTP_PASS) {
+                $mail->Password = SMTP_PASS;
+                $mail->Username = SMTP_USER;
+                $mail->AuthType = SMTP_AUTH;
+                $mail->SMTPAuth = true;
+                $mail->SMTPSecure = 'tls';
+            }
         }
         $mail->Mailer = 'smtp';
 

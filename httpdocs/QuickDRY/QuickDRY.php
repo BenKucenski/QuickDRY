@@ -20,6 +20,7 @@ require_once 'utilities/Mailer.php';
 require_once 'utilities/FineDiff.php';
 require_once 'utilities/SimpleExcel_Column.php';
 require_once 'utilities/SimpleExcel.php';
+require_once 'utilities/SimpleExcel_Reader.php';
 
 require_once 'connectors/ChangeLog.php';
 require_once 'connectors/CoreClass.php';

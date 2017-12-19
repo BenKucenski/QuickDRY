@@ -632,13 +632,16 @@ class PHPExcel_Calculation_LookupRef {
      * @param $b
      * @return int
      */
-    private static function _vlookupSort($a,$b) {
+    private static function _vlookupSort(&$a,&$b) {
 		$f = array_keys($a);
 		$firstColumn = array_shift($f);
+		return strcasecmp($a[$firstColumn], $b[$firstColumn]);
+/**
 		if (strtolower($a[$firstColumn]) == strtolower($b[$firstColumn])) {
 			return 0;
 		}
 		return (strtolower($a[$firstColumn]) < strtolower($b[$firstColumn])) ? -1 : 1;
+ **/
 	}	//	function _vlookupSort()
 
 

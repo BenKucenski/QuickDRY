@@ -2598,7 +2598,7 @@ class PHPExcel_Calculation {
      * @return mixed|string|void
      * @throws Exception
      */
-    private static function _convertMatrixReferences($formula) {
+    private function _convertMatrixReferences($formula) {
 		static $matrixReplaceFrom = ['{',';','}'];
 		static $matrixReplaceTo = ['MKMATRIX(MKMATRIX(','),MKMATRIX(','))'];
 
@@ -2665,7 +2665,7 @@ class PHPExcel_Calculation {
      * @throws Exception
      */
     private function _parseFormula($formula, PHPExcel_Cell $pCell = null) {
-		if (($formula = self::_convertMatrixReferences(trim($formula))) === false) {
+		if (($formula = $this->_convertMatrixReferences(trim($formula))) === false) {
 			return false;
 		}
 
@@ -3655,6 +3655,7 @@ class PHPExcel_Calculation {
 		$this->formulaError = $errorMessage;
 		if (!$this->suppressFormulaErrors) throw new Exception($errorMessage);
 		trigger_error($errorMessage, E_USER_ERROR);
+		return null;
 	}	//	function _raiseFormulaError()
 
 
