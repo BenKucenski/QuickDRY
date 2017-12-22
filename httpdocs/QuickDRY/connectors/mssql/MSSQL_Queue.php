@@ -46,7 +46,7 @@ class MSSQL_Queue
      */
     public function Queue($sql, $params)
     {
-        $t = ms_escape_query($sql, $params);
+        $t = MSSQL::EscapeQuery($sql, $params);
         $this->_sql[] = $t;
         $this->strlen += strlen($t);
 

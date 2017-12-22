@@ -118,7 +118,7 @@ class Mailer extends SafeClass
             return 0;
         }
         $this->is_sent = true;
-        $this->sent_at = Timestamp(time());
+        $this->sent_at = Date::Timestamp(time());
 
         return 1;
     }

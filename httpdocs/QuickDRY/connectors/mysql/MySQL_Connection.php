@@ -144,7 +144,7 @@ class MySQL_Connection
             $start = microtime(true);
 
             if ($params) {
-                $sql = mysql_escape_query($this->db, $sql, $params);
+                $sql = MySQL::EscapeQuery($this->db, $sql, $params);
             }
 
             $exec = '';
@@ -268,7 +268,7 @@ host = ' . MYSQLA_HOST . '
         ];
 
         if ($params) {
-            $sql = mysql_escape_query($this->db, $sql, $params);
+            $sql = MySQL::EscapeQuery($this->db, $sql, $params);
         }
 
         $start = microtime(true);

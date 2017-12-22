@@ -1,15 +1,99 @@
 <?php
 /** DO NOT USE THIS CLASS DIRECTLY **/
 
-if(!function_exists('sqlsrv_connect')) {
-    function sqlsrv_connect() {
+if (!function_exists('sqlsrv_connect')) {
+    function sqlsrv_connect()
+    {
         exit('sqlsrv_connect not loaded as an extension and is not actually available.');
     }
 }
 
-if(!function_exists('sqlsrv_query')) {
-    function sqlsrv_query() {
+if (!function_exists('sqlsrv_query')) {
+    function sqlsrv_query()
+    {
         exit('sqlsrv_query not loaded as an extension and is not actually available.');
+    }
+}
+
+class MSSQL extends SafeClass
+{
+    /**
+     * @param $data
+     *
+     * @return string
+     */
+    public static function EscapeString($data)
+    {
+        if (is_array($data)) {
+            Halt($data);
+        }
+        if (is_numeric($data)) return "'" . $data . "'";
+
+        if ($data instanceof DateTime) {
+            $data = Date::Timestamp($data);
+        }
+
+        $non_displayables = [
+            '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
+            '/%1[0-9a-f]/',             // url encoded 16-31
+            '/[\x00-\x08]/',            // 00-08
+            '/\x0b/',                   // 11
+            '/\x0c/',                   // 12
+            '/[\x0e-\x1f]/'             // 14-31
+        ];
+        foreach ($non_displayables as $regex) {
+            $data = preg_replace($regex, '', $data);
+        }
+        $data = str_replace("'", "''", $data);
+        if (strcasecmp($data, 'null') == 0) {
+            return 'null';
+        }
+
+        return "'" . $data . "'";
+    }
+
+    /**
+     * @param $sql
+     * @param $params
+     *
+     * @return mixed
+     */
+    public static function EscapeQuery($sql, $params)
+    {
+        $count = 0;
+        return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
+        use ($params, &$count, $sql) {
+            if (isset($result[1])) {
+                if (isset($params[$count])) {
+                    $count++;
+                    switch ($result[1]) {
+                        case 'nullstring':
+                            if (!$params[$count - 1] || $params[$count - 1] === 'null') {
+                                return 'null';
+                            }
+                            return MSSQL::EscapeString($params[$count - 1]);
+
+                        case 'nullnumeric':
+                            if (!$params[$count - 1] || $params[$count - 1] === 'null') {
+                                return 'null';
+                            }
+                            return $params[$count - 1] * 1.0;
+
+                        case 'nq':
+                            return $params[$count - 1];
+
+                        default:
+                            return MSSQL::EscapeString($params[$count - 1]);
+                    }
+                }
+
+                if (isset($params[$result[1]]))
+                    return MSSQL::EscapeString($params[$result[1]]);
+
+                throw new Exception(print_r([json_encode($params, JSON_PRETTY_PRINT), $count, $result, $sql], true) . ' does not have a matching parameter (ms_escape_query).');
+            }
+            return '';
+        }, $sql);
     }
 }
 
@@ -18,33 +102,9 @@ if(!function_exists('sqlsrv_query')) {
  *
  * @return string
  */
-function ms_escape_string($data) {
-	if(is_array($data)) {
-		Halt($data);
-	}
-    if ( is_numeric($data) ) return "'" . $data . "'";
-
-    if($data instanceof DateTime) {
-        $data = Timestamp($data);
-    }
-
-    $non_displayables = [
-        '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
-        '/%1[0-9a-f]/',             // url encoded 16-31
-        '/[\x00-\x08]/',            // 00-08
-        '/\x0b/',                   // 11
-        '/\x0c/',                   // 12
-        '/[\x0e-\x1f]/'             // 14-31
-    ];
-    foreach ( $non_displayables as $regex ) {
-        $data = preg_replace($regex, '', $data);
-    }
-    $data = str_replace("'", "''", $data );
-    if(strcasecmp($data,'null') == 0) {
-        return 'null';
-    }
-
-    return "'" . $data . "'";
+function ms_escape_string($data)
+{
+    return MSSQL::EscapeString($data);
 }
 
 /**
@@ -53,41 +113,9 @@ function ms_escape_string($data) {
  *
  * @return mixed
  */
-function ms_escape_query($sql, $params) {
-    $count = 0;
-    return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
-    use ($params, &$count, $sql) {
-        if (isset($result[1])) {
-            if(isset($params[$count])) {
-                $count++;
-                switch($result[1]) {
-                	case 'nullstring':
-                		if(!$params[$count-1] || $params[$count - 1] === 'null') {
-                			return 'null';
-                		}
-                		return ms_escape_string($params[$count-1]);
-
-                	case 'nullnumeric':
-                		if(!$params[$count-1] || $params[$count - 1] === 'null') {
-                			return 'null';
-                		}
-                		return $params[$count-1] * 1.0;
-
-                	case 'nq':
-               			return $params[$count-1];
-
-                	default:
-                		return ms_escape_string($params[$count-1]);
-                }
-            }
-
-            if(isset($params[$result[1]]))
-                return ms_escape_string($params[$result[1]]);
-
-            throw new Exception(print_r([json_encode($params,JSON_PRETTY_PRINT),$count,$result, $sql],true) . ' does not have a matching parameter (ms_escape_query).');
-        }
-        return '';
-    }, $sql);
+function ms_escape_query($sql, $params)
+{
+    return MSSQL::EscapeQuery($sql, $params);
 }
 
 

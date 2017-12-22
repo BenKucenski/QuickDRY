@@ -336,7 +336,7 @@ class MSSQL_Connection
             'params' => $params
         ];
 
-        $query = ms_escape_query($sql, $params);
+        $query = MSSQL::EscapeQuery($sql, $params);
         $returnval['query'] = $query;
 
         // If still no link, then the query will not run...
@@ -351,7 +351,7 @@ class MSSQL_Connection
         {
             $list = [];
             $result = false;
-            $query = ms_escape_query($sql, $params);
+            $query = MSSQL::EscapeQuery($sql, $params);
 
             if(defined('QUERY_RETRY')) {
                 $count = 0;
@@ -512,7 +512,7 @@ class MSSQL_Connection
 
         $start = microtime(true);
         if(!is_null($params) && sizeof($params)) {
-            $query = ms_escape_query($sql, $params);
+            $query = MSSQL::EscapeQuery($sql, $params);
         } else {
             $query = $sql;
         }

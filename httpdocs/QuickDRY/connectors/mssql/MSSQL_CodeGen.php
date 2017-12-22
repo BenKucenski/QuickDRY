@@ -405,11 +405,11 @@ $code .= '
     public function ValueToNiceValue($column_name, $value = null)
     {
         if($value instanceof DateTime) {
-            return Timestamp($value, \'\');
+            return Date::Timestamp($value, \'\');
         }
 
         if($this->$column_name instanceof DateTime) {
-            return Timestamp($this->$column_name, \'\');
+            return Date::Timestamp($this->$column_name, \'\');
         }
             
         return $value ? $value : $this->$column_name;
@@ -535,7 +535,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
         $save = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -544,7 +544,7 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 {
 	if(isset($_POST[\'serialized\']))
 	{
-		$req = PostFromSerialized($_POST[\'serialized\']);
+		$req = HTTP::PostFromSerialized($_POST[\'serialized\']);
 		$primary = isset(' . $c_name . '::$_primary[0]) ? ' . $c_name . '::$_primary[0] : \'id\';
 		if(isset($req[$primary]) && $req[$primary]) {
 			$c = ' . $c_name . '::Get([$primary=>$req[$primary]]);
@@ -554,7 +554,7 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 			
 		$c->FromRequest($req, false);
 		if(!$c->VisibleTo($' . $this->UserVar . ')) {
-			exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+			HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
         }
 		$res = $c->FromRequest($req);
 
@@ -573,7 +573,7 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Save: Bad Request sent!\';
 }
 
-exit_json($returnvals);
+HTTP::ExitJSON($returnvals);
 	';
         $fp = fopen('json/_' . $c_name . '/save.json.php', 'w');
         fwrite($fp, $save);
@@ -588,7 +588,7 @@ exit_json($returnvals);
 
 $get = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -598,7 +598,7 @@ if(isset($Request->uuid))
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
 	if(!$c || !$c->VisibleTo($' . $this->UserVar . ')) {
-		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
 
 	$returnvals[\'serialized\'] = $c->ToArray();
@@ -607,7 +607,7 @@ if(isset($Request->uuid))
 	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class','',$c_name)) . ' - Get: Bad params passed in!\';
 }
 
-exit_json($returnvals);
+HTTP::ExitJSON($returnvals);
 	';
 
 $fp = fopen('json/_' . $c_name . '/get.json.php','w');
@@ -619,7 +619,7 @@ fclose($fp);
     {
         $lookup = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -627,11 +627,11 @@ $returnvals = [];
 $search = strtoupper($Request->term);
 if(strlen($search) < 1) {
 	$returnvals[] = [\'id\' => 0, \'value\' => \'No Results Found\'];
-	exit_json($returnvals);
+	HTTP::ExitJSON($returnvals);
 }
 
 $returnvals = ' . $c_name . '::Suggest($search, $CurrentUser);
-exit_json($returnvals);
+HTTP::ExitJSON($returnvals);
 	';
 
         $fp = fopen('json/_' . $c_name . '/lookup.json.php', 'w');
@@ -646,31 +646,42 @@ exit_json($returnvals);
         }
 
         $unique_php = '';
-        $u_req = [];
-        $u_seq = [];
+        $unique_cols = [];
         $u_ret = [];
         if (sizeof($unique)) {
             foreach ($unique as $key => $cols) {
+                if(!sizeof($cols)) {
+                    continue;
+                }
+
+                $u_req = [];
+                $u_seq = [];
+
                 foreach($cols as $u) {
                     $u_req[] = '$Request->' . $u;
                     $u_seq[] = "'$u'=>\$Request->$u";
-                    $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
+                    if(!in_array($u, $unique_cols)) {
+                        $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
+                        $unique_cols[] = $u;
+                    }
                 }
-            }
 
-            $unique_php = '
-if(' . implode(' && ', $u_req) . ')
-{
+                $unique_php .= '
+if(' . implode(' && ', $u_req) . ') {
 	$t = ' . $c_name . '::Get([' . implode(', ', $u_seq) . ']);
-	$Request->uuid = $t->' . ($primary[0] ? $primary[0] : $unique[0]) . ';
+	if($t) {
+	    $Request->uuid = $t->' . ($primary[0] ? $primary[0] : $unique[0]) . ';
+	}
 }
 ';
+
+            }
         }
 
 
         $delete = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 $returnvals = [];
@@ -682,7 +693,7 @@ if($Request->uuid)
 	/* @var $c ' . $c_name . ' */
 	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
 	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
-		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
 
 	$res = $c->Remove($' . $this->UserVar . ');
@@ -698,7 +709,7 @@ if($Request->uuid)
 	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
 }
 
-exit_json($returnvals);
+HTTP::ExitJSON($returnvals);
 ';
 
         $fp = fopen('json/_' . $c_name . '/delete.json.php', 'w');
@@ -713,7 +724,7 @@ exit_json($returnvals);
         }
         $history = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
-    exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
 if(isset($Request->uuid))
@@ -721,11 +732,11 @@ if(isset($Request->uuid))
 	/* @var $item ' . $c_name . ' */
 	$item = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
 	if(!$item || !$item->VisibleTo($' . $this->UserVar . ')) {
-		exit_json([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
 
 } else {
-	exit_json(\'' . CapsToSpaces(str_replace('Class','',$c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
+	HTTP::ExitJSON(\'' . CapsToSpaces(str_replace('Class','',$c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
 }
 
 
@@ -757,7 +768,7 @@ ob_start();
 	<td><?php echo $item->ValueToNiceValue($column); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->old); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->new); ?></td>
-	<td style="white-space: nowrap;"><?php echo StandardDateTime($cl->created_at); ?></td>
+	<td style="white-space: nowrap;"><?php echo Date::StandardDateTime($cl->created_at); ?></td>
 	<td style="white-space: nowrap;"><?php echo $cl->GetUser(); ?></td>
 </tr>
 <?php } ?>
@@ -768,7 +779,7 @@ ob_start();
 $html = ob_get_clean();
 $returnvals[\'html\'] = $html;
 
-exit_json($returnvals);
+HTTP::ExitJSON($returnvals);
 ';
 
         $fp = fopen('json/_' . $c_name . '/history.json.php', 'w');

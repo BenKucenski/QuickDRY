@@ -22,25 +22,29 @@ class UserClass extends SafeClass
 
         // https://stackoverflow.com/questions/6222641/how-to-php-ldap-search-to-get-user-ou-if-i-dont-know-the-ou-for-base-dn
         $ldap = new adLDAP();
-        if($ldap->authenticate($username, $password)) {
+        try {
+            if ($ldap->authenticate($username, $password)) {
 
-            // May not be necessary to use an administrative account to get role information
-            $ldadmin = new adLDAP();
-            $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
+                // May not be necessary to use an administrative account to get role information
+                $ldadmin = new adLDAP();
+                $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
 
-            $user = new self();
-            $user->Username = $username;
-            $user->id = md5($username);
-            $user->Roles = $ldadmin->user_groups($username, true);
-
-            // user may log in with email address but roles may be linked to root account name
-            if(!sizeof($user->Roles)) {
-                $username = explode('@', $username);
-                $username = $username[0];
+                $user = new self();
+                $user->Username = $username;
+                $user->id = md5($username);
                 $user->Roles = $ldadmin->user_groups($username, true);
-            }
-            return $user;
 
+                // user may log in with email address but roles may be linked to root account name
+                if (!sizeof($user->Roles)) {
+                    $username = explode('@', $username);
+                    $username = $username[0];
+                    $user->Roles = $ldadmin->user_groups($username, true);
+                }
+                return $user;
+
+            }
+        } catch (Exception $ex) {
+            return null;
         }
         return null;
     }

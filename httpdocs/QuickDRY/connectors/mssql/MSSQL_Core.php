@@ -179,7 +179,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->GetUUID() : null;
-                $cl->created_at = Timestamp();
+                $cl->created_at = Date::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = true;
                 $cl->Save();
@@ -191,11 +191,11 @@ class MSSQL_Core extends SQL_Base
         // make the row unique
         if (sizeof(static::$_primary) > 0) {
             foreach (static::$_primary as $column)
-                $where[] = $column . ' = ' . ms_escape_string($this->{$column});
+                $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
         } else
             if (sizeof(static::$_unique) > 0) {
                 foreach (static::$_unique as $column)
-                    $where[] = $column . ' = ' . ms_escape_string($this->{$column});
+                    $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
             } else
                 exit('unique or primary key required');
 
@@ -705,7 +705,7 @@ class MSSQL_Core extends SQL_Base
             if ($this->$primary && !$force_insert)
                 $sql .= "
 				WHERE
-					" . $primary . " = " . ms_escape_string($this->$primary) . "
+					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
 				";
 
             $res = static::Execute($sql, $params);
@@ -734,7 +734,7 @@ class MSSQL_Core extends SQL_Base
             if ($this->$primary && !$force_insert)
                 $sql .= "
 				WHERE
-					" . $primary . " = " . ms_escape_string($this->$primary) . "
+					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
 				";
 
             $res = static::Execute($sql, $params);
@@ -753,7 +753,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($CurrentUser) ? $CurrentUser->GetUUID() : null;
-                $cl->created_at = Timestamp();
+                $cl->created_at = Date::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = false;
                 $cl->Save();

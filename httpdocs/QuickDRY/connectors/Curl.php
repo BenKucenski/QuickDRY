@@ -6,57 +6,23 @@ class Curl
     public $HeaderHash;
     public $Header;
 
-    public static function json_err_str($err_code)
-    {
-        switch ($err_code) {
-            case JSON_ERROR_NONE:
-                return ' - No errors';
-            case JSON_ERROR_DEPTH:
-                return ' - Maximum stack depth exceeded';
-            case JSON_ERROR_STATE_MISMATCH:
-                return ' - Underflow or the modes mismatch';
-            case JSON_ERROR_CTRL_CHAR:
-                return ' - Unexpected control character found';
-            case JSON_ERROR_SYNTAX:
-                return ' - Syntax error, malformed JSON';
-            case JSON_ERROR_UTF8:
-                return ' - Malformed UTF-8 characters, possibly incorrectly encoded';
-            default:
-                return ' - Unknown error';
-        }
-    }
-
-    /**
-     * @param $params
-     *
-     * @return string
-     */
-    public static function params_to_string($params)
-    {
-        $res = [];
-        foreach($params as $k=>$v)
-            $res[] = urlencode($k) .'=' . urlencode($v);
-
-        return implode('&',$res);
-    }
-
     /**
      * @param        $path
      * @param        $params
-     * @param bool   $get
+     * @param bool $get
      * @param string $host
      *
      * @return Curl
      */
     public static function Post($path, $params)
     {
-        if(is_array($params)) {
-            $params = self::params_to_string($params);
+        if (is_array($params)) {
+            $params = http_build_query($params);
         }
         // Initiate CURL
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_POST,        true);
+        curl_setopt($ch, CURLOPT_POST, true);
 
         $parts = parse_url($path);
         $host = isset($parts['host']) ? $parts['host'] : '';
@@ -68,7 +34,7 @@ class Curl
         $header[] = "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)";
         $header[] = "Connection: Keep-Alive";
 
-        if(!defined('COOKIE_FILE')) {
+        if (!defined('COOKIE_FILE')) {
             define('COOKIE_FILE', './cookie.txt');
         }
         curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
@@ -85,13 +51,13 @@ class Curl
         // Pass our values
         curl_setopt($ch, CURLOPT_URL, $path);
 
-        if($params != "") curl_setopt($ch, CURLOPT_POSTFIELDS,     $params);
+        if ($params != "") curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 
 
         $content = curl_exec($ch);
 
         $err = curl_error($ch);
-        if($err) {
+        if ($err) {
             Halt($err);
         }
 
@@ -101,13 +67,13 @@ class Curl
         curl_close($ch);
 
 
-        $head = explode("\n",$header);
+        $head = explode("\n", $header);
         $head_hash = [];
-        foreach($head as $val)
-        {
-            $val = explode(": ",$val);
-            if(isset($val[1]))
-                $head_hash[$val[0]]=$val[1];
+        foreach ($head as $val) {
+            $val = explode(": ", $val);
+            if (isset($val[1])) {
+                $head_hash[$val[0]] = $val[1];
+            }
         }
 
         $res = new Curl();
@@ -120,22 +86,22 @@ class Curl
     /**
      * @param        $path
      * @param        $params
-     * @param bool   $get
+     * @param bool $get
      * @param string $host
      *
      * @return Curl
      */
     public static function Get($path, $params = null, $username = null, $password = null)
     {
-        if(is_array($params)) {
-            $params = self::params_to_string($params);
+        if (is_array($params)) {
+            $params = http_build_query($params);
         }
         // Initiate CURL
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_POST,        false);
+        curl_setopt($ch, CURLOPT_POST, false);
 
-        if($username && $password) {
+        if ($username && $password) {
             curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
         }
         $parts = parse_url($path);
@@ -148,7 +114,7 @@ class Curl
         $header[] = "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)";
         $header[] = "Connection: Keep-Alive";
 
-        if(!defined('COOKIE_FILE')) {
+        if (!defined('COOKIE_FILE')) {
             define('COOKIE_FILE', './cookie.txt');
         }
 
@@ -164,7 +130,7 @@ class Curl
 
 
         // Pass our values
-        if($params) {
+        if ($params) {
             curl_setopt($ch, CURLOPT_URL, $path . '?' . $params);
         } else {
             curl_setopt($ch, CURLOPT_URL, $path);
@@ -173,7 +139,7 @@ class Curl
         $content = curl_exec($ch);
 
         $err = curl_error($ch);
-        if($err) {
+        if ($err) {
             Halt($err);
         }
 
@@ -183,13 +149,13 @@ class Curl
         curl_close($ch);
 
 
-        $head = explode("\n",$header);
+        $head = explode("\n", $header);
         $head_hash = [];
-        foreach($head as $val)
-        {
-            $val = explode(": ",$val);
-            if(isset($val[1]))
-                $head_hash[$val[0]]=$val[1];
+        foreach ($head as $val) {
+            $val = explode(": ", $val);
+            if (isset($val[1])) {
+                $head_hash[$val[0]] = $val[1];
+            }
         }
 
         $res = new Curl();

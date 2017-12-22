@@ -39,7 +39,7 @@ class MYSQL_Queue
         $this->_sql[] = $sql;
         foreach ($params as $param) {
             if($param instanceof DateTime) {
-		        $param = Timestamp($param);
+		        $param = Date::Timestamp($param);
 		    }
             $this->_params[] = $param;
         }

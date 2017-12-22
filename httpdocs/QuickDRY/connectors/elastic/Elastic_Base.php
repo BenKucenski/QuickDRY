@@ -33,7 +33,7 @@ class Elastic_Base extends SafeClass
     private static function _strong_type($name, $value)
     {
         if ($value instanceof DateTime) {
-            return SolrTime($value);
+            return Date::SolrTime($value);
         }
 
         if (isset(static::$_strong_type[$name])) {
@@ -47,7 +47,7 @@ class Elastic_Base extends SafeClass
                     break;
                 case 'date':
                     if ($value) {
-                        $value = SolrTime($value);
+                        $value = Date::SolrTime($value);
                     } else {
                         $value = null;
                     }

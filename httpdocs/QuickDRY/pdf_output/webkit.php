@@ -62,7 +62,7 @@ unset($Session->name);
 
 
 if (!file_exists($FileName)) {
-    Debug(['file not created', 'file' => $FileName, 'cmd' => $cmd, 'output' => $output]);
+    Debug::Halt(['file not created', 'file' => $FileName, 'cmd' => $cmd, 'output' => $output]);
 }
 
 if ($Session->post_pdf_redirect) {

@@ -32,6 +32,24 @@ if (!defined('PHPEXCEL_ROOT')) {
 	require(PHPEXCEL_ROOT . 'PHPExcel/Autoloader.php');
 }
 
+/**
+ * @param $var
+ */
+
+
+if (!function_exists('money_format')) {
+    // this seems to be a very deprecated issue but just in case, here it is.  This function is built into PHP so this should never be needed
+    /**
+     * @param $format
+     * @param $key
+     *
+     * @return mixed
+     */
+    function money_format($format, $key)
+    {
+        return $key;
+    }
+}
 
 /**
  * PHPExcel

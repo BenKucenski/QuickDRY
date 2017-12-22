@@ -10,7 +10,7 @@ class LogFile
 
     public function Insert($filename, $message, $echo = false)
     {
-        $f = preg_replace('/[^a-z]/si','_', $filename) . '.' . Datestamp();
+        $f = preg_replace('/[^a-z]/si','_', $filename) . '.' . Date::Datestamp();
         $log_path = DOC_ROOT_PATH . '/logs/' . $f . '.log';
 
         $fp = fopen($log_path,'a');
@@ -24,7 +24,7 @@ class LogFile
         $msg = [];
         $msg []= GUID;
         $msg []= time();
-        $msg []= Timestamp();
+        $msg []= Date::Timestamp();
         $msg [] = getcwd() . '/' . $filename;
         $msg [] = Network::Interfaces();
 		$msg [] = is_array($message) ? json_encode($message) : $message;
@@ -39,7 +39,7 @@ class LogFile
             $msg [] = Network::Interfaces();
             $msg [] = is_array($message) ? json_encode($message) : $message;
             $msg = implode("\t", $msg);
-            EchoTime($msg);
+            echo Date::TimeString($msg);
         }
     }
 }

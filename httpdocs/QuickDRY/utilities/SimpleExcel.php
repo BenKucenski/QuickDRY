@@ -27,7 +27,11 @@ class SimpleExcel extends SafeClass
             if ($sheet > 0) {
                 $objPHPExcel->createSheet($sheet);
             }
-            $objPHPExcel->setActiveSheetIndex($sheet);
+            try {
+                $objPHPExcel->setActiveSheetIndex($sheet);
+            } catch (Exception $ex) {
+                Debug::Halt($ex);
+            }
             $objPHPExcel->getActiveSheet()->setTitle($report->Title);
             $sheet_row = 1;
 
@@ -38,7 +42,7 @@ class SimpleExcel extends SafeClass
                 $sheet_column++;
             }
             $sheet_row++;
-            if($report->Report && is_array($report->Report)) {
+            if ($report->Report && is_array($report->Report)) {
                 foreach ($report->Report as $item) {
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
@@ -50,11 +54,15 @@ class SimpleExcel extends SafeClass
             }
         }
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
+        try {
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            $objWriter->save('php://output');
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         exit;
 
     }
@@ -71,7 +79,11 @@ class SimpleExcel extends SafeClass
             if ($sheet > 0) {
                 $objPHPExcel->createSheet($sheet);
             }
-            $objPHPExcel->setActiveSheetIndex($sheet);
+            try {
+                $objPHPExcel->setActiveSheetIndex($sheet);
+            } catch (Exception $ex) {
+                Debug::Halt($ex);
+            }
             $objPHPExcel->getActiveSheet()->setTitle($report->Title);
             $sheet_row = 1;
 
@@ -82,7 +94,7 @@ class SimpleExcel extends SafeClass
                 $sheet_column++;
             }
             $sheet_row++;
-            if($report->Report && is_array($report->Report)) {
+            if ($report->Report && is_array($report->Report)) {
                 foreach ($report->Report as $item) {
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
@@ -94,11 +106,15 @@ class SimpleExcel extends SafeClass
             }
         }
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-        $objWriter->save('php://output');
+        try {
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            $objWriter->save('php://output');
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         exit;
 
     }
@@ -110,7 +126,11 @@ class SimpleExcel extends SafeClass
     {
         $objPHPExcel = new \PHPExcel();
 
-        $objPHPExcel->setActiveSheetIndex(0);
+        try {
+            $objPHPExcel->setActiveSheetIndex(0);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         $objPHPExcel->getActiveSheet()->setTitle($report->Title);
         $sheet_row = 1;
 
@@ -131,11 +151,15 @@ class SimpleExcel extends SafeClass
         }
 
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
+        try {
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
+            header('Cache-Control: max-age=0');
+            $objWriter->save('php://output');
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         exit;
     }
 
@@ -167,44 +191,59 @@ class SimpleExcel extends SafeClass
         }
 
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-        $objWriter->save('php://output');
+        try {
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
+            header('Cache-Control: max-age=0');
+            $objWriter->save('php://output');
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         exit;
     }
 
     private static function _SetCellValue(\PHPExcel &$objPHPExcel, $sheet_column, $sheet_row, $value, $property_type = '')
     {
-        if(is_object($value)) {
+        if (is_object($value)) {
             if ($value instanceof DateTime) {
-                $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Datestamp($value, '') : Timestamp($value, '');
+                $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Date::Datestamp($value, '') : Date::Timestamp($value, '');
             }
         }
 
+        $sheet = $objPHPExcel->getActiveSheet();
+
         if ($property_type === SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {
-            $objPHPExcel->getActiveSheet()
-                ->getStyle($sheet_column . $sheet_row)
-                ->getNumberFormat()
-                ->setFormatCode(
-                    \PHPExcel_Style_NumberFormat::FORMAT_TEXT
-                );
-            $objPHPExcel->getActiveSheet()->setCellValueExplicit($sheet_column . $sheet_row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
-        } else {
-            if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
-                $objPHPExcel->getActiveSheet()
+            try {
+                $sheet
                     ->getStyle($sheet_column . $sheet_row)
                     ->getNumberFormat()
                     ->setFormatCode(
-                        \PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        \PHPExcel_Style_NumberFormat::FORMAT_TEXT
                     );
+            } catch (Exception $ex) {
+                Debug::Halt($ex);
             }
 
-            if(is_array($value)) {
-                Halt(['value cannot be an array', $value]);
+            $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+        } else {
+            if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
+                try {
+                    $sheet
+                        ->getStyle($sheet_column . $sheet_row)
+                        ->getNumberFormat()
+                        ->setFormatCode(
+                            \PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        );
+                } catch (Exception $ex) {
+                    Debug::Halt($ex);
+                }
             }
-            $objPHPExcel->getActiveSheet()->setCellValue($sheet_column . $sheet_row, $value);
+
+            if (is_array($value)) {
+                Debug::Halt(['value cannot be an array', $value]);
+            }
+            $sheet->setCellValue($sheet_column . $sheet_row, $value);
         }
     }
 }

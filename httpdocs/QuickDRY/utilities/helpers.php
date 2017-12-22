@@ -2,15 +2,15 @@
 
 function ToArray($arr)
 {
-    foreach($arr as $k => $v) {
-        if(is_object($v) && get_class($v) === 'DateTime') {
-            $arr[$k] = Timestamp($v);
+    foreach ($arr as $k => $v) {
+        if (is_object($v) && get_class($v) === 'DateTime') {
+            $arr[$k] = Date::Timestamp($v);
         }
     }
     return $arr;
 }
 
-function echo_memory_usage()
+function EchoMemoryUsage()
 {
     $mem_usage = memory_get_usage(true);
 
@@ -24,10 +24,10 @@ function echo_memory_usage()
     return round($mem_usage / 1048576, 2) . " megabytes";
 }
 
-function EmailDevelopers($product, $section, $summary, $message) {
+function EmailDevelopers($product, $section, $summary, $message)
+{
 
 }
-
 
 
 function LogQuery($sql, $err, $time)
@@ -39,8 +39,6 @@ function LogError($errno, $errstr, $errfile, $errline)
 {
 
 }
-
-
 
 
 function IsWindows()
@@ -57,12 +55,9 @@ function mysql_password_hash($input, $hex = true)
 } //END function mysql_password_hash
 
 
-
-
 function GUID()
 {
-    if (function_exists('com_create_guid') === true)
-    {
+    if (function_exists('com_create_guid') === true) {
         return trim(com_create_guid(), '{}');
     }
 
@@ -71,14 +66,12 @@ function GUID()
 
 function RecID()
 {
-    if (function_exists('com_create_guid') === true)
-    {
+    if (function_exists('com_create_guid') === true) {
         return trim(com_create_guid(), '{}');
     }
 
     return sprintf('%04X%04X%04X%04X%04X%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 }
-
 
 
 /**
@@ -89,49 +82,31 @@ function RecID()
 
 function LoadFile($filename)
 {
-    if(!file_exists($filename)) {
+    if (!file_exists($filename)) {
         Halt($filename . ' doesn\'t exist');
     }
 
-    if(filesize($filename) == 0) {
+    if (filesize($filename) == 0) {
         return '';
     }
 
-    $fp = fopen($filename,'r');
-    $f = fread($fp,filesize($filename));
+    $fp = fopen($filename, 'r');
+    $f = fread($fp, filesize($filename));
     fclose($fp);
     return $f;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 function run_in_background($cmd)
 {
-    if(IsWindows())
-    {
+    if (IsWindows()) {
         pclose(popen("start " . $cmd, "r"));
         return 0;
     }
 
     $PID = exec("nohup $cmd 1>/dev/null & echo $!");
-    return($PID);
+    return ($PID);
 }
-
-
-
-
-
 
 
 /**
@@ -141,21 +116,20 @@ function run_in_background($cmd)
  */
 function ColumnTypeToProperty($col_type)
 {
-	switch(strtolower($col_type))
-	{
+    switch (strtolower($col_type)) {
         case 'varchar':
         case 'char':
             return 'string';
 
-		case 'tinyint unsigned':
-		case 'bigint unsigned':
-		case 'int unsigned':
-			return 'uint';
+        case 'tinyint unsigned':
+        case 'bigint unsigned':
+        case 'int unsigned':
+            return 'uint';
 
         case 'numeric':
             return 'int';
-	}
-	return $col_type;
+    }
+    return $col_type;
 }
 
 /**
@@ -165,11 +139,11 @@ function ColumnTypeToProperty($col_type)
  */
 function FieldToDisplay($field)
 {
-	$t = ucwords(implode(' ',explode('_',$field)));
-	$t = str_replace(' ','',$t);
-	if(strcasecmp(substr($t,-2),'id')==0)
-		$t = substr($t,0,strlen($t)-2);
-	return CapsToSpaces($t);
+    $t = ucwords(implode(' ', explode('_', $field)));
+    $t = str_replace(' ', '', $t);
+    if (strcasecmp(substr($t, -2), 'id') == 0)
+        $t = substr($t, 0, strlen($t) - 2);
+    return CapsToSpaces($t);
 }
 
 /**
@@ -179,9 +153,9 @@ function FieldToDisplay($field)
  */
 function CapsToSpaces($str)
 {
-	$results = [];
-	preg_match_all('/[A-Z\d][^A-Z\d]*/',$str,$results);
-	return implode(' ', $results[0]);
+    $results = [];
+    preg_match_all('/[A-Z\d][^A-Z\d]*/', $str, $results);
+    return implode(' ', $results[0]);
 }
 
 /**
@@ -191,33 +165,35 @@ function CapsToSpaces($str)
  */
 function BufferInclude($file)
 {
-	ob_start();
-	include $file;
-	$_PAGE_HTML = ob_get_contents();
-	ob_end_clean();
-	return $_PAGE_HTML;
+    ob_start();
+    include $file;
+    $_PAGE_HTML = ob_get_contents();
+    ob_end_clean();
+    return $_PAGE_HTML;
 }
 
 
-function getTinyUrl($url)  {
-	$ch = curl_init();
-	$timeout = 5;
-	curl_setopt($ch,CURLOPT_URL,'http://tinyurl.com/api-create.php?url='.$url);
-	curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-	curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
-	$data = curl_exec($ch);
-	curl_close($ch);
-	return $data;
+function getTinyUrl($url)
+{
+    $ch = curl_init();
+    $timeout = 5;
+    curl_setopt($ch, CURLOPT_URL, 'http://tinyurl.com/api-create.php?url=' . $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
 }
 
-function isSecure() {
-    if(!isset($_SERVER['HTTPS'])) {
+function isSecure()
+{
+    if (!isset($_SERVER['HTTPS'])) {
         return false;
     }
 
-	return
-		(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-		|| $_SERVER['SERVER_PORT'] == 443;
+    return
+        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || $_SERVER['SERVER_PORT'] == 443;
 }
 
 /**
@@ -229,17 +205,17 @@ function isSecure() {
  * @param null $_URL
  * @return string
  */
-function BootstrapPaginationLinks($count,$params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
+function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
 {
-    if($params == null) {
+    if ($params == null) {
         $params = [];
-        foreach($_GET as $k => $v) {
-            if(!in_array($k,['sort_by','dir','page','per_page'])) {
+        foreach ($_GET as $k => $v) {
+            if (!in_array($k, ['sort_by', 'dir', 'page', 'per_page'])) {
                 $params[] = $k . '=' . $v;
             }
         }
     }
-    if(is_array($params)) {
+    if (is_array($params)) {
         $params = implode('&', $params);
     }
 
@@ -249,38 +225,34 @@ function BootstrapPaginationLinks($count,$params = null, $_SORT_BY = null, $_SOR
     $_PER_PAGE = $_PER_PAGE ? $_PER_PAGE : PER_PAGE;
     $_URL = $_URL ? $_URL : CURRENT_PAGE;
 
-    if($_PER_PAGE > 0)
-    {
-        $num_pages = ceil( $count / $_PER_PAGE);
-        if($num_pages <= 1) return '';
+    if ($_PER_PAGE > 0) {
+        $num_pages = ceil($count / $_PER_PAGE);
+        if ($num_pages <= 1) return '';
 
         $start_page = PAGE - 10;
         $end_page = PAGE + 10;
-        if($start_page < 0)
+        if ($start_page < 0)
             $start_page = 0;
-        if($start_page >= $num_pages)
+        if ($start_page >= $num_pages)
             $start_page = $num_pages - 1;
-        if($end_page < 0)
+        if ($end_page < 0)
             $end_page = 0;
-        if($end_page >= $num_pages)
+        if ($end_page >= $num_pages)
             $end_page = $num_pages - 1;
 
         $html = '<ul class="pagination">';
-        if(PAGE > 10)
-        {
+        if (PAGE > 10) {
             $html .= '<li class="first"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (0) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;&lt;</a></li>';
             $html .= '<li class="previous"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE - 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;</a></li>';
         }
 
-        for($j = $start_page; $j <= $end_page; $j++)
-        {
-            if($j != PAGE)
-                $html .= '<li class="page_number"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j+1) . '</a></li>';
+        for ($j = $start_page; $j <= $end_page; $j++) {
+            if ($j != PAGE)
+                $html .= '<li class="page_number"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j + 1) . '</a></li>';
             else
-                $html .= '<li class="page_number"><a href="#">' . ($j+1) . '</a></li>';
+                $html .= '<li class="page_number"><a href="#">' . ($j + 1) . '</a></li>';
         }
-        if(PAGE < $num_pages - 10 && $num_pages > 10)
-        {
+        if (PAGE < $num_pages - 10 && $num_pages > 10) {
             $html .= '<li class="next"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
             $html .= '<li class="last"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . ($num_pages - 1) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;&gt;</a></li>';
         }

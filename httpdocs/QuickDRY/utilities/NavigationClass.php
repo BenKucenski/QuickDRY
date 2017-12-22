@@ -25,7 +25,7 @@ class NavigationClass
     }
 
     /**
-     * @param $_CUR_PAGE
+     * @param string $_CUR_PAGE
      * @param bool $test
      * @return bool
      */
@@ -37,6 +37,7 @@ class NavigationClass
         if(is_array($_CUR_PAGE)) {
             Halt($_CUR_PAGE);
         }
+
         $t = explode('/', $_CUR_PAGE);
         if (stristr($t[sizeof($t) - 1],'json') !== FALSE) {
             return true;
@@ -47,7 +48,7 @@ class NavigationClass
         }
 
         if (!$test) {
-            RedirectError('You do not have permission to view that page');
+            HTTP::RedirectError('You do not have permission to view that page');
         }
         return false;
     }

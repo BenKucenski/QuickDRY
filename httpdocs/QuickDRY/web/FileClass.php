@@ -34,4 +34,9 @@ class FileClass extends SafeClass
         }
         return $dir . $hash . '.' . $ext;
     }
+
+    public function Save()
+    {
+        // TODO: add database table to store these records into
+    }
 }

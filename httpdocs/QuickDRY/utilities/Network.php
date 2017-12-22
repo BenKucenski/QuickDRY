@@ -33,6 +33,7 @@ class Network
 
             return static::$interfaces;
         }
+        return null;
     }
 
     // https://mebsd.com/coding-snipits/php-ipcalc-coding-subnets-ip-addresses.html
@@ -65,7 +66,7 @@ class Network
 
     // convert netmask to cidr
     // e.g. 255.255.255.128 = 25
-    public static function netmask2cidr($netmask)
+    private static function netmask2cidr($netmask)
     {
         $bits = 0;
         $netmask = explode(".", $netmask);
@@ -80,7 +81,7 @@ class Network
     // is ip in subnet
     // e.g. is 10.5.21.30 in 10.5.16.0/20 == true
     //      is 192.168.50.2 in 192.168.30.0/23 == false
-    public static function cidr_match($ip, $network, $cidr)
+    private static function cidr_match($ip, $network, $cidr)
     {
         if(!is_numeric($cidr)) {
             $cidr = static::netmask2cidr($cidr);

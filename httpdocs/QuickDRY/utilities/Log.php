@@ -3,11 +3,13 @@
 
 /**
  * Class Log
- * @property LogFile $_log_file
  */
-class Log
+class Log extends SafeClass
 {
-    private static $_log_file = null;
+    /**
+     * @var $_log_file LogFile
+     */
+    private static $_log_file;
 
     private static function _init()
     {

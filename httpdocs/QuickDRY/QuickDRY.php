@@ -8,7 +8,7 @@ require_once 'utilities/Log.php';
 require_once 'utilities/Debug.php';
 require_once 'utilities/Date.php';
 require_once 'utilities/HTTP.php';
-require_once 'utilities/String.php';
+require_once 'utilities/Strings.php';
 require_once 'utilities/helpers.php';
 require_once 'utilities/PHPExcel.php';
 require_once 'utilities/phpmailer.php';
@@ -53,5 +53,7 @@ require_once 'form/RoleClass.php';
 require_once 'form/StatesClass.php';
 require_once 'form/YesNoClass.php';
 
+require_once 'math/Debt.php';
+require_once 'math/PrincipleInterest.php';
 require_once 'math/MathClass.php';
 require_once 'math/UTMClass.php';
