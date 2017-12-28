@@ -335,7 +335,7 @@ class db_' . $c_name . ' extends MySQL_A
         ];
     protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $table = \'' . $table_name . '\';
-    protected static $DatabasePrefix = \'' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . '\';
+    protected static $DatabasePrefix = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $DatabaseTypePrefix = \'' . $this->DatabaseTypePrefix . '\';
     protected static $LowerCaseTable = ' . ($this->LowerCaseTables ? 1 : 0) . ';
 

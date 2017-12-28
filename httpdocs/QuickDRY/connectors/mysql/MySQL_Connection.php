@@ -596,7 +596,7 @@ SHOW INDEXES FROM
 			SHOW PROCEDURE STATUS;
 		';
         $res = $this->Query($sql);
-        if($res['error'] || sizeof($res['data'])) {
+        if($res['error'] || !sizeof($res['data'])) {
             Halt($res);
         }
         return null;
