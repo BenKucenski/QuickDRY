@@ -61,7 +61,7 @@ class MSSQL extends SafeClass
     public static function EscapeQuery($sql, $params)
     {
         $count = 0;
-        return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
+        return preg_replace_callback("/@(.*?)\s+/si", function ($result)
         use ($params, &$count, $sql) {
             if (isset($result[1])) {
                 if (isset($params[$count])) {
@@ -87,8 +87,9 @@ class MSSQL extends SafeClass
                     }
                 }
 
-                if (isset($params[$result[1]]))
+                if (isset($params[$result[1]])) {
                     return MSSQL::EscapeString($params[$result[1]]);
+                }
 
                 throw new Exception(print_r([json_encode($params, JSON_PRETTY_PRINT), $count, $result, $sql], true) . ' does not have a matching parameter (ms_escape_query).');
             }
