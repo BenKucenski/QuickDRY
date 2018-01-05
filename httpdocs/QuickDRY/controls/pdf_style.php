@@ -48,16 +48,16 @@ table.pdf_report tr td {
 
 #header {
 	position: fixed;
-	left: 0px;
-	right: 0px;
+	left: 0;
+	right: 0;
 	background-color: #fff;
 }
 
 #footer {
 	position: fixed;
-	left: 0px;
-	bottom: 0px;
-	right: 0px;
+	left: 0;
+	bottom: 0;
+	right: 0;
 	height: 0;
 	background-color: #fff;
 }

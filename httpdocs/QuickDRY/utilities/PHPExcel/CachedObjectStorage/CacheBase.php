@@ -81,7 +81,6 @@ class PHPExcel_CachedObjectStorage_CacheBase {
 	 *	Is a value set in the current PHPExcel_CachedObjectStorage_ICache for an indexed cell?
 	 *
 	 *	@param	string		$pCoord		Coordinate address of the cell to check
-	 *	@return	void
 	 *	@return	boolean
 	 */
 	public function isDataSet($pCoord) {
@@ -97,7 +96,7 @@ class PHPExcel_CachedObjectStorage_CacheBase {
      *	Add or Update a cell in cache
      *
      *	@param	PHPExcel_Cell	$cell		Cell to update
-	 *	@return	void
+	 *	@return	PHPExcel_Cell
      *	@throws	Exception
      */
 	public function updateCacheData(PHPExcel_Cell $cell) {
@@ -137,7 +136,7 @@ class PHPExcel_CachedObjectStorage_CacheBase {
 	/**
 	 *	Sort the list of all cell addresses currently held in cache by row and column
 	 *
-	 *	@return	void
+	 *	@return	[]
 	 */
 	public function getSortedCellList() {
 		$sortKeys = [];

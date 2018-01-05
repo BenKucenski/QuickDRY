@@ -19,14 +19,27 @@ class Services_Twilio_PartialApplicationHelper
         $this->callbacks = array();
     }
 
+    /**
+     * @param $method
+     * @param $callback
+     * @param array $args
+     * @return bool
+     */
     public function set($method, $callback, array $args)
     {
         if (!is_callable($callback)) {
             return FALSE;
         }
         $this->callbacks[$method] = array($callback, $args);
+        return true;
     }
 
+    /**
+     * @param $method
+     * @param $args
+     * @return mixed
+     * @throws Exception
+     */
     public function __call($method, $args)
     {
         if (!isset($this->callbacks[$method])) {

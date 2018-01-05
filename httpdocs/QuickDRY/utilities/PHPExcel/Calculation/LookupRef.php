@@ -103,36 +103,41 @@ class PHPExcel_Calculation_LookupRef {
      *    If cell reference is omitted, and the function is being called through the calculation engine, then it is assumed to be the
      *        reference of the cell in which the COLUMN function appears; otherwise this function returns 0.
      *
-     * @param A|null $cellAddress
-     * @return int or array of integer
-     * @internal param A $cellAddress reference to a range of cells for which you want the column numbers
+     * @param string|null $cellAddress
+     * @return int|array
+     * @internal param $cellAddress reference to a range of cells for which you want the column numbers
      */
 	public static function COLUMN($cellAddress=Null) {
 		if (is_null($cellAddress) || trim($cellAddress) === '') { return 0; }
 
-		if (is_array($cellAddress)) {
-			foreach($cellAddress as $columnKey => $value) {
-				$columnKey = preg_replace('/[^a-z]/i','',$columnKey);
-				return (integer) PHPExcel_Cell::columnIndexFromString($columnKey);
-			}
-		} else {
-			if (strpos($cellAddress,'!') !== false) {
-				list($sheet,$cellAddress) = explode('!',$cellAddress);
-			}
-			if (strpos($cellAddress,':') !== false) {
-				list($startAddress,$endAddress) = explode(':',$cellAddress);
-				$startAddress = preg_replace('/[^a-z]/i','',$startAddress);
-				$endAddress = preg_replace('/[^a-z]/i','',$endAddress);
-				$returnValue = [];
-				do {
-					$returnValue[] = (integer) PHPExcel_Cell::columnIndexFromString($startAddress);
-				} while ($startAddress++ != $endAddress);
-				return $returnValue;
-			} else {
-				$cellAddress = preg_replace('/[^a-z]/i','',$cellAddress);
-				return (integer) PHPExcel_Cell::columnIndexFromString($cellAddress);
-			}
-		}
+		try {
+            if (is_array($cellAddress)) {
+                foreach ($cellAddress as $columnKey => $value) {
+                    $columnKey = preg_replace('/[^a-z]/i', '', $columnKey);
+                    return PHPExcel_Cell::columnIndexFromString($columnKey);
+                }
+            } else {
+                if (strpos($cellAddress, '!') !== false) {
+                    list($sheet, $cellAddress) = explode('!', $cellAddress);
+                }
+                if (strpos($cellAddress, ':') !== false) {
+                    list($startAddress, $endAddress) = explode(':', $cellAddress);
+                    $startAddress = preg_replace('/[^a-z]/i', '', $startAddress);
+                    $endAddress = preg_replace('/[^a-z]/i', '', $endAddress);
+                    $returnValue = [];
+                    do {
+                        $returnValue[] = PHPExcel_Cell::columnIndexFromString($startAddress);
+                    } while ($startAddress++ != $endAddress);
+                    return $returnValue;
+                } else {
+                    $cellAddress = preg_replace('/[^a-z]/i', '', $cellAddress);
+                    return PHPExcel_Cell::columnIndexFromString($cellAddress);
+                }
+            }
+        } catch(Exception $ex) {
+		    exit(print_r($ex));
+        }
+		return null;
 	}	//	function COLUMN()
 
 
@@ -141,9 +146,9 @@ class PHPExcel_Calculation_LookupRef {
      *
      *    Returns the number of columns in an array or reference.
      *
-     * @param An|null $cellAddress
+     * @param string|null $cellAddress
      * @return int
-     * @internal param An $cellAddress array or array formula, or a reference to a range of cells for which you want the number of columns
+     * @internal param $cellAddress array or array formula, or a reference to a range of cells for which you want the number of columns
      */
 	public static function COLUMNS($cellAddress=Null) {
 		if (is_null($cellAddress) || $cellAddress === '') {
@@ -173,7 +178,7 @@ class PHPExcel_Calculation_LookupRef {
      *    If cell reference is omitted, and the function is being called through the calculation engine, then it is assumed to be the
      *        reference of the cell in which the ROW function appears; otherwise this function returns 0.
      *
-     * @param A|null $cellAddress
+     * @param string|null $cellAddress
      * @return int or array of integer
      * @internal param A $cellAddress reference to a range of cells for which you want the row numbers
      */

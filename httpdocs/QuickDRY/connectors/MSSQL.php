@@ -58,10 +58,16 @@ class MSSQL extends SafeClass
      *
      * @return mixed
      */
-    public static function EscapeQuery($sql, $params)
+    public static function EscapeQuery($sql, $params, $test =  false)
     {
+        $pattern = '/@([\w\d]*)?/si';
+        if($test) {
+            $matches = [];
+            preg_match_all($pattern, $sql, $matches);
+            CleanHalt($matches);
+        }
         $count = 0;
-        return preg_replace_callback("/@(.*?)\s+/si", function ($result)
+        return preg_replace_callback($pattern, function ($result)
         use ($params, &$count, $sql) {
             if (isset($result[1])) {
                 if (isset($params[$count])) {

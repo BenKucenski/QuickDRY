@@ -120,7 +120,6 @@ class MySQL_Connection
      * @param null $params
      *
      * @return array
-     * @throws Exception
      */
     public function Execute($sql, $params = null, $large = false)
     {
@@ -233,6 +232,7 @@ host = ' . MYSQLA_HOST . '
         } catch (Exception $e) {
             Halt($e);
         }
+        return null;
     }
 
     /**
@@ -530,8 +530,8 @@ host = ' . MYSQLA_HOST . '
 
             $sql = '
 SHOW INDEXES FROM
-`'  . $table_name . '`     
-        
+`'  . $table_name . '`
+
         ';
 
             $res = MySQL_A::Query($sql);
@@ -567,8 +567,8 @@ SHOW INDEXES FROM
 
             $sql = '
 SHOW INDEXES FROM
-`'  . $table_name . '`     
-        
+`'  . $table_name . '`
+
         ';
 
             $res = MySQL_A::Query($sql);

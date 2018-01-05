@@ -2248,6 +2248,7 @@ class PHPMailer {
       6 => 'inline',
       7 => $cid
     ];
+    return true;
   }
 
   /**

@@ -62,7 +62,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
 	/**
 	 * Cacheable collection of cells
 	 *
-	 * @var PHPExcel_CachedObjectStorage_xxx
+	 * @var PHPExcel_CachedObjectStorage_ICache
 	 */
 	private $_cellCollection = null;
 
@@ -1140,7 +1140,6 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
 	/**
 	 * Get default style of workbork.
 	 *
-	 * @deprecated
 	 * @return	PHPExcel_Style
 	 * @throws	Exception
 	 */
@@ -2381,6 +2380,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
 	 * Get hyperlink
 	 *
 	 * @param string $pCellCoordinate	Cell coordinate to get hyperlink for
+     * @return PHPExcel_Cell_Hyperlink
 	 */
 	public function getHyperlink($pCellCoordinate = 'A1')
 	{
@@ -2437,6 +2437,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
 	 * Get data validation
 	 *
 	 * @param string $pCellCoordinate	Cell coordinate to get data validation for
+     * @return PHPExcel_Cell_DataValidation
 	 */
 	public function getDataValidation($pCellCoordinate = 'A1')
 	{

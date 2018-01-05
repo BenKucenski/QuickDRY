@@ -21,7 +21,7 @@
             </div>
             <div class="span5 fileupload-progress fade">
                 <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="bar" style="width:0%;"></div>
+                    <div class="bar" style="width:0;"></div>
                 </div>
                 <div class="progress-extended">&nbsp;</div>
             </div>
@@ -99,7 +99,7 @@ $(function() {
 			{
 
 				<?php echo $_UPLOAD_POSTHOOK; ?>_count--;
-				if(typeof(<?php echo $_UPLOAD_POSTHOOK; ?>) == 'function')
+				if(typeof(<?php echo $_UPLOAD_POSTHOOK; ?>) === 'function')
 					<?php echo $_UPLOAD_POSTHOOK; ?>(data.result[0], <?php echo $_UPLOAD_POSTHOOK; ?>_count == 0);	
 			}
 	);

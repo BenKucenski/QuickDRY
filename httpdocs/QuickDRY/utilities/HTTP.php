@@ -16,6 +16,18 @@ class HTTP extends SafeClass
         exit();
     }
 
+    public static function RedirectNotice($notice, $url = '/')
+    {
+        global $Session;
+        $Session->notice = $notice;
+        if(isset($_SERVER['HTTP_REFERER']))
+            header('location: ' . $_SERVER['HTTP_REFERER']);
+        else {
+            header('location: ' . $url);
+        }
+        exit();
+    }
+
     public static function ReloadPage()
     {
         header('location: ' . $_SERVER['REQUEST_URI']);

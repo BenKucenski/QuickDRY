@@ -65,6 +65,7 @@ class PHPExcel_Autoloader
 		}
 
 		require($pObjectFilePath);
+        return true;
 	}	//	function Load()
 
 }

@@ -154,7 +154,6 @@ class PHPExcel_Worksheet_CellIterator extends CachingIterator
      * Set loop only existing cells
      *
      * @param bool $value
-     * @return bool
      */
     public function setIterateOnlyExistingCells($value = true) {
     	$this->_onlyExistingCells = $value;

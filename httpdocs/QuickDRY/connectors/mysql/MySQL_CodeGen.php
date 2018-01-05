@@ -137,16 +137,16 @@ class ' . $sp_class . ' extends SafeClass
             }
 
             $sp_code[] = '
-            
+
     /**
      * @return ' . $sp_class . '[]
      */
-    public static function ' . $sp->SPECIFIC_NAME . '(' . implode(', ', $params) . ') 
+    public static function ' . $sp->SPECIFIC_NAME . '(' . implode(', ', $params) . ')
     {
         $sql = \'
         EXEC	\' . ' . $this->DatabaseConstant . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
         ' . implode(",\r\n\t\t", $sql_params) . '
-        
+
         \';
         /* @var $rows ' . $sp_class . '[] */
         $rows =  MySQL_A::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
@@ -163,7 +163,7 @@ class ' . $sp_class . ' extends SafeClass
         $code = '<?php
 ' . implode("\r\n", $sp_require) . '
 
-class sp_' . $class_name . ' extends MySQL_A 
+class sp_' . $class_name . ' extends MySQL_A
 {
 ' . implode("\r\n", $sp_code) . '
 }
@@ -176,7 +176,7 @@ class sp_' . $class_name . ' extends MySQL_A
 
     function GenerateClass($table_name, $cols)
     {
-        $class_props = array();
+        $class_props = [];
 
         $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
         Log::Insert($c_name, true);
@@ -188,13 +188,13 @@ class sp_' . $class_name . ' extends MySQL_A
 
         foreach ($cols as $col) {
             $class_props[] = ' * @property ' . ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field;
-            $props .= "'" . $col->field . "'=>array('display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . (strcasecmp($col->null, 'no') == 0 ? 'false' : 'true') . "),\r\n\t\t";
+            $props .= "'" . $col->field . "'=>['display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . (strcasecmp($col->null, 'no') == 0 ? 'false' : 'true') . "],\r\n\t\t";
         }
 
 
         $refs = MySQL_A::GetForeignKeys($table_name);
-        $gets = array();
-        $foreign_key_props = array();
+        $gets = [];
+        $foreign_key_props = [];
 
         $seens_vars = [];
 
@@ -339,9 +339,9 @@ class db_' . $c_name . ' extends MySQL_A
     protected static $DatabaseTypePrefix = \'' . $this->DatabaseTypePrefix . '\';
     protected static $LowerCaseTable = ' . ($this->LowerCaseTables ? 1 : 0) . ';
 
-    protected static $prop_definitions = array(
+    protected static $prop_definitions = [
         ' . $props . '
-    );
+    ];
 
     ' . implode("\r\n\t", $foreign_key_props) . '
 
@@ -362,7 +362,7 @@ class db_' . $c_name . ' extends MySQL_A
 
     public static function Suggest($search, ' . $this->UserClass . ' &$user)
     {
-        exit(\'Suggest not implemented\');
+        HTTP::ExitJSON([\'error\' => \'Suggest not implemented\', \'search\' => $search, \'user\' => $user]);
     }
 
     public function IsReferenced()
@@ -402,13 +402,13 @@ class db_' . $c_name . ' extends MySQL_A
         if($this->$column_name instanceof DateTime) {
             return Date::Timestamp($this->$column_name, \'\');
         }
-            
+
         return $value ? $value : $this->$column_name;
     }
 
     public static function IgnoreColumn($column_name)
     {
-        return in_array($column_name, array(\'id\', \'created_at\', \'created_by_id\', \'edited_at\', \'edited_by_id\'));
+        return in_array($column_name, [\'id\', \'created_at\', \'created_by_id\', \'edited_at\', \'edited_by_id\']);
     }
 
     /**
@@ -488,7 +488,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
     private function _GenerateJSON($table_name, $cols)
     {
-        $column_names = array();
+        $column_names = [];
         foreach ($cols as $col) {
             $column_names[] = $col->field;
         }
@@ -504,17 +504,17 @@ class ' . $c_name . ' extends db_' . $c_name . '
             mkdir('json/_' . $c_name . '/controls');
         }
 
-        $this->SaveJSON($c_name, $column_names, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->GetJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->LookupJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->DeleteJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->HistoryJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->Add($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->History($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
-        $this->Manage($c_name, $table_name, $cols, $unique, $primary, $dlg_name);
+        $this->SaveJSON($c_name, $primary);
+        $this->GetJSON($c_name, $primary);
+        $this->LookupJSON($c_name);
+        $this->DeleteJSON($c_name, $unique, $primary);
+        $this->HistoryJSON($c_name, $primary);
+        $this->Add($c_name, $table_name, $cols, $primary);
+        $this->History($c_name);
+        $this->Manage($c_name);
     }
 
-    private function SaveJSON($c_name, $column_names, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function SaveJSON($c_name, $primary)
     {
         if (!isset($primary[0])) {
             return;
@@ -526,7 +526,7 @@ if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserI
 }
 
 $returnvals = [];
-		
+
 if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 {
 	if(isset($_POST[\'serialized\']))
@@ -538,7 +538,7 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 		} else {
 			$c = new ' . $c_name . '();
         }
-			
+
 		$c->FromRequest($req, false);
 		if(!$c->VisibleTo($' . $this->UserVar . ')) {
 			HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
@@ -567,7 +567,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    private function GetJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function GetJSON($c_name, $primary)
     {
         if (!isset($primary[0])) {
             return;
@@ -602,7 +602,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    private function LookupJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function LookupJSON($c_name)
     {
         $lookup = '<?php
 if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserIdColumn . ') {
@@ -626,7 +626,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    private function DeleteJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function DeleteJSON($c_name, $unique, $primary)
     {
         if (!isset($primary[0])) {
             return;
@@ -693,7 +693,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    private function HistoryJSON($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function HistoryJSON($c_name, $primary)
     {
         if (!isset($primary[0])) {
             return;
@@ -731,9 +731,9 @@ ob_start();
 		<th>By</th>
 	</tr>
 </thead>
-<?php $m = sizeof($item->history); foreach($item->history as $i => $cl) {  
-    /* @var $cl ChangeLogClass */ 
-    foreach($cl->changes_list as $column => $change) { 
+<?php $m = sizeof($item->history); foreach($item->history as $i => $cl) {
+    /* @var $cl ChangeLogClass */
+    foreach($cl->changes_list as $column => $change) {
     if($item->IgnoreColumn($column)) {
         continue;
     }
@@ -763,7 +763,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    private function Add($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function Add($c_name, $table_name, $cols, $primary)
     {
         if (!sizeof($cols)) {
             return;
@@ -774,7 +774,7 @@ HTTP::ExitJSON($returnvals);
         }
 
         $res = MySQL_A::GetForeignKeys($table_name);
-        $refs = array();
+        $refs = [];
 
         foreach ($res as $fk) {
             if (!is_array($fk->column_name)) {
@@ -967,7 +967,7 @@ var ' . $c_name . ' = {
             return;
         }
         this._active = false;
-        
+
         ConfirmDeleteObject(this._class, this.title, {uuid: $("#" + this._class + "_' . $primary[0] . '").val()}, "", this._delete_callback, this._dialog);
     }
 };
@@ -980,7 +980,7 @@ var ' . $c_name . ' = {
 
     }
 
-    private function History($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function History($c_name)
     {
         $add = '<script src="/pages/json/_' . $c_name . '/controls/history.js"></script>
 
@@ -1002,7 +1002,7 @@ var ' . $c_name . ' = {
         </div>
     </div>
 </div>
-	
+
 ';
         $fp = fopen('json/_' . $c_name . '/controls/history.php', 'w');
         fwrite($fp, $add);
@@ -1016,7 +1016,7 @@ var ' . $c_name . 'History = {
         if (typeof (uuid) == \'undefined\' || !uuid) {
             return;
         }
-        
+
         Post(\'/json/_' . $c_name . '/history.json\', {
             uuid : uuid
         }, function(data) {
@@ -1036,7 +1036,7 @@ var ' . $c_name . 'History = {
         fclose($fp);
     }
 
-    private function Manage($c_name, $table_name, $cols, $unique, $primary, $dlg_name)
+    private function Manage($c_name)
     {
         $page_dir = str_replace('Class', '', $c_name);
 
@@ -1086,8 +1086,8 @@ class ' . $page_dir . ' extends BasePage
     {
         $this->MasterPage = \'' . $this->MasterPage . '\';
     }
-    
-    public function Get() 
+
+    public function Get()
     {
         $items = ' . $c_name . '::GetAllPaginated(null, null, PAGE, PER_PAGE);
         $this->TableHeader = ' . $c_name . '::GetHeader(SORT_BY, SORT_DIR, true);

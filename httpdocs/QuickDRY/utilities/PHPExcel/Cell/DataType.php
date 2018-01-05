@@ -64,7 +64,6 @@ class PHPExcel_Cell_DataType
 	/**
 	 * DataType for value
 	 *
-	 * @deprecated Replaced by PHPExcel_Cell_IValueBinder infrastructure
 	 * @param	mixed 	$pValue
 	 * @return 	int
 	 */

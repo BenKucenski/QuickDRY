@@ -271,5 +271,6 @@ class PHPExcel_IOFactory
 			}
 		}
 
+		return null;
 	}	//	function createReaderForFile()
 }

@@ -144,29 +144,24 @@ class PHPExcel_Style_Border implements PHPExcel_IComparable
 			case '_outline':
 			case '_vertical':
 				throw new Exception('Cannot get shared component for a pseudo-border.');
-				break;
 
 			case '_bottom':
 				return $this->_parent->getSharedComponent()->getBottom();
-				break;
 
 			case '_diagonal':
 				return $this->_parent->getSharedComponent()->getDiagonal();
-				break;
 
 			case '_left':
 				return $this->_parent->getSharedComponent()->getLeft();
-				break;
 
 			case '_right':
 				return $this->_parent->getSharedComponent()->getRight();
-				break;
 
 			case '_top':
 				return $this->_parent->getSharedComponent()->getTop();
-				break;
 
 		}
+		return null;
 	}
 
 	/**

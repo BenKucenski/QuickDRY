@@ -132,16 +132,14 @@ class PHPExcel_Style_Color implements PHPExcel_IComparable
 		switch ($this->_parentPropertyName) {
 		case '_endColor':
 			return $this->_parent->getSharedComponent()->getEndColor();
-			break;
 
 		case '_color':
 			return $this->_parent->getSharedComponent()->getColor();
-			break;
 
 		case '_startColor':
 			return $this->_parent->getSharedComponent()->getStartColor();
-			break;
 		}
+		return null;
 	}
 
 	/**
@@ -316,6 +314,7 @@ class PHPExcel_Style_Color implements PHPExcel_IComparable
 		} elseif (strlen($RGB) == 6) {
 			return self::_getColourComponent($RGB,0,$hex);
 		}
+		return null;
 	}
 
     /**
@@ -329,6 +328,7 @@ class PHPExcel_Style_Color implements PHPExcel_IComparable
 		} elseif (strlen($RGB) == 6) {
 			return self::_getColourComponent($RGB,2,$hex);
 		}
+		return null;
 	}
 
     /**
@@ -342,6 +342,7 @@ class PHPExcel_Style_Color implements PHPExcel_IComparable
 		} elseif (strlen($RGB) == 6) {
 			return self::_getColourComponent($RGB,4,$hex);
 		}
+		return null;
 	}
 
 	/**

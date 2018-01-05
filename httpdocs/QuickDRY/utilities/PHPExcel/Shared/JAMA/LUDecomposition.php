@@ -197,7 +197,7 @@ class PHPExcel_Shared_JAMA_LUDecomposition {
 
     /**
      *    Count determinants
-     * @return array d matrix deterninat
+     * @return float d matrix deterninat
      * @throws Exception
      */
 	public function det() {
@@ -216,8 +216,8 @@ class PHPExcel_Shared_JAMA_LUDecomposition {
     /**
      *    Solve A*X = B
      *
-     * @param  $B  A Matrix with as many rows as A and any number of columns.
-     * @return X so that L*U*X = B(piv,:)
+     * @param  PHPExcel_Shared_JAMA_Matrix $B  A Matrix with as many rows as A and any number of columns.
+     * @return PHPExcel_Shared_JAMA_Matrix X so that L*U*X = B(piv,:)
      * @throws Exception
      * @exception  IllegalArgumentException Matrix row dimensions must agree.
      * @exception  RuntimeException  Matrix is singular.

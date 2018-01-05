@@ -143,6 +143,7 @@ class POP3 {
     $this->pop_conn  = 0;
     $this->connected = false;
     $this->error     = null;
+    return $this;
   }
 
   /**

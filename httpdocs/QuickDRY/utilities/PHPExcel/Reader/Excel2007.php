@@ -232,7 +232,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		} else {
 			return (bool)$c->v;
 		}
-		return $value;
+		// return $value;
 	}	//	function _castToBool()
 
     /**
@@ -241,7 +241,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
      */
     private static function _castToError($c) {
 //		echo 'Initial Cast to Error<br />';
-		return isset($c->v) ? (string) $c->v : null;;
+		return isset($c->v) ? (string) $c->v : null;
 	}	//	function _castToError()
 
     /**
@@ -250,7 +250,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
      */
     private static function _castToString($c) {
 //		echo 'Initial Cast to String<br />';
-		return isset($c->v) ? (string) $c->v : null;;
+		return isset($c->v) ? (string) $c->v : null;
 	}	//	function _castToString()
 
     /**

@@ -207,9 +207,14 @@ class Strings extends SafeClass
         return $val;
     }
 
-    public static function GetPlaceholders($count)
+    public static function GetPlaceholders($count, $str = '{{}}')
     {
-        return implode(',', array_fill(0, $count, '{{}}'));
+        return implode(',', array_fill(0, $count, $str));
+    }
+
+    public static function GetSQLServerPlaceholders($count)
+    {
+        return self::GetPlaceholders($count, '@');
     }
 
     public static function WordCount($val)

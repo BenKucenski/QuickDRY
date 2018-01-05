@@ -90,15 +90,21 @@ class MSSQL_Core extends SQL_Base
      * @param null $params
      *
      * @return array
-     * @throws Exception
      */
     public static function Execute(&$sql, $params = null, $large = false)
     {
         static::_connect();
 
-        if (isset(static::$database))
+        if (isset(static::$database)) {
             static::$connection->SetDatabase(static::$database);
-        return static::$connection->Execute($sql, $params, $large);
+        }
+
+        try {
+            return static::$connection->Execute($sql, $params, $large);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+        return null;
     }
 
     /**
@@ -227,45 +233,45 @@ class MSSQL_Core extends SQL_Base
         $col = str_replace('+', '', $col);
 
         if (substr($val, 0, strlen('NLIKE ')) === 'NLIKE ') {
-            $col = $col . ' NOT LIKE {{}}';
+            $col = $col . ' NOT LIKE @';
             $val = trim(str_replace('NLIKE', '', $val));
         } else
             if (substr($val, 0, strlen('NILIKE ')) === 'NILIKE ') {
-                $col = 'LOWER(' . $col . ')' . ' NOT LIKE LOWER({{}}) ';
+                $col = 'LOWER(' . $col . ')' . ' NOT LIKE LOWER(@) ';
                 $val = trim(str_replace('NILIKE', '', $val));
             } else
                 if (substr($val, 0, strlen('ILIKE ')) === 'ILIKE ') {
-                    $col = 'LOWER(' . $col . ')' . ' ILIKE LOWER({{}}) ';
+                    $col = 'LOWER(' . $col . ')' . ' ILIKE LOWER(@) ';
                     $val = trim(str_replace('ILIKE', '', $val));
                 } else
                     if (substr($val, 0, strlen('LIKE ')) === 'LIKE ') {
-                        $col = $col . ' LIKE {{}}';
+                        $col = $col . ' LIKE @';
                         $val = trim(str_replace('LIKE', '', $val));
                     } else
                         if (substr($val, 0, strlen('<= ')) === '<= ') {
-                            $col = $col . ' <= {{}} ';
+                            $col = $col . ' <= @ ';
                             $val = trim(str_replace('<=', '', $val));
                         } else
                             if (substr($val, 0, strlen('>= ')) === '>= ') {
-                                $col = $col . ' >= {{}} ';
+                                $col = $col . ' >= @ ';
                                 $val = trim(str_replace('>=', '', $val));
                             } else
                                 if (substr($val, 0, strlen('<> ')) === '<> ') {
                                     $val = trim(str_replace('<>', '', $val));
                                     if ($val !== 'null')
-                                        $col = $col . ' <> {{}} ';
+                                        $col = $col . ' <> @ ';
                                     else
                                         $col = $col . ' IS NOT NULL';
                                 } else
                                     if (substr($val, 0, strlen('< ')) === '< ') {
-                                        $col = $col . ' < {{}} ';
+                                        $col = $col . ' < @ ';
                                         $val = trim(str_replace('<', '', $val));
                                     } else
                                         if (substr($val, 0, strlen('> ')) === '> ') {
-                                            $col = $col . ' > {{}} ';
+                                            $col = $col . ' > @ ';
                                             $val = trim(str_replace('>', '', $val));
                                         } else {
-                                            $col = $col . ' = {{}} ';
+                                            $col = $col . ' = @ ';
                                         }
 
         return ['col' => $col, 'val' => $val];
@@ -305,7 +311,7 @@ class MSSQL_Core extends SQL_Base
                     $col = static::$_primary[0];
                 else
                     $col = 'id';
-            $where_sql = '' . $col . ' = {{}}';
+            $where_sql = '' . $col . ' = @';
             $params[] = $id;
         }
 
@@ -586,21 +592,21 @@ class MSSQL_Core extends SQL_Base
     /**
      * @param $name
      * @param $value
-     *
-     * @return bool|int|null|string|void
+     * @param bool $just_checking
+     * @return float|int|null
      * @throws Exception
      */
     protected static function StrongType($name, $value, $just_checking = false)
     {
         if (is_array($value)) {
-            return;
+            return null;
         }
 
         if(is_object($value)) {
             if ($value instanceof DateTime) {
-                $value = Timestamp($value);
+                $value = Date::Timestamp($value);
             } else {
-                return;
+                return null;
             }
         }
 
@@ -616,7 +622,7 @@ class MSSQL_Core extends SQL_Base
 
         switch (static::$prop_definitions[$name]['type']) {
             case 'date':
-                return $value ? Datestamp($value) : null;
+                return $value ? Date::Datestamp($value) : null;
 
             case 'tinyint(1)':
                 return $value ? 1 : 0;
@@ -627,7 +633,7 @@ class MSSQL_Core extends SQL_Base
 
             case 'timestamp':
             case 'datetime':
-                return $value ? Timestamp($value) : null;
+                return $value ? Date::Timestamp($value) : null;
         }
         return $value;
     }
@@ -636,7 +642,6 @@ class MSSQL_Core extends SQL_Base
      * @param bool $force_insert
      *
      * @return array
-     * @throws Exception
      */
     protected function _Save($force_insert = false)
     {
@@ -695,7 +700,7 @@ class MSSQL_Core extends SQL_Base
                 if (is_null($st_value) || strtolower(trim($st_value)) === 'null') {
                     $qs[] = 'NULL';
                 } else {
-                    $qs[] = '{{}}';
+                    $qs[] = '@';
                     $params[] = $st_value;
                 }
 
@@ -725,7 +730,7 @@ class MSSQL_Core extends SQL_Base
                 if (is_null($st_value) || strtolower(trim($st_value)) === 'null')
                     $props[] = '[' . $name . '] = NULL';
                 else {
-                    $props[] = '[' . $name . '] = {{}}';
+                    $props[] = '[' . $name . '] = @';
                     $params[] = $st_value;
                 }
             }

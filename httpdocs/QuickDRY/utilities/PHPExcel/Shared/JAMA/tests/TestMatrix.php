@@ -7,7 +7,7 @@ require_once "../Matrix.php";
  */
 class TestMatrix {
 
-  function TestMatrix() {
+  public function __construct() {
 
     // define test variables
 
@@ -64,14 +64,14 @@ class TestMatrix {
     */
     echo "<p>Testing constructors and constructor-like methods...</p>";
 
-    $A = new Matrix($columnwise, 3);
-    if($A instanceof Matrix) {
+    $A = new PHPExcel_Shared_JAMA_Matrix($columnwise, 3);
+    if($A instanceof PHPExcel_Shared_JAMA_Matrix) {
       $this->try_success("Column-packed constructor...");
     } else
       $errorCount = $this->try_failure($errorCount, "Column-packed constructor...", "Unable to construct Matrix");
 
-    $T = new Matrix($tvals);
-    if($T instanceof Matrix)
+    $T = new PHPExcel_Shared_JAMA_Matrix($tvals);
+    if($T instanceof PHPExcel_Shared_JAMA_Matrix)
       $this->try_success("2D array constructor...");
     else
       $errorCount = $this->try_failure($errorCount, "2D array constructor...", "Unable to construct Matrix");
@@ -354,12 +354,12 @@ class TestMatrix {
      * Check magnitude of difference of "scalars".
      * @param float $x
      * @param float $y
-     * @return bool|void
+     * @return bool
      */
   function checkScalars($x, $y) {
     $eps = pow(2.0,-52.0);
-    if ($x == 0 & abs($y) < 10*$eps) return;
-    if ($y == 0 & abs($x) < 10*$eps) return;
+    if ($x == 0 & abs($y) < 10*$eps) return null;
+    if ($y == 0 & abs($x) < 10*$eps) return null;
     if (abs($x-$y) > 10 * $eps * max(abs($x),abs($y)))
       return false;
     else
@@ -368,28 +368,30 @@ class TestMatrix {
 
   /**
   * Check norm of difference of "vectors".
-  * @param float $x[]
-  * @param float $y[]
+  * @param float[] $x
+  * @param float[] $y
   */
   function checkVectors($x, $y) {
     $nx = count($x);
     $ny = count($y);
-    if ($nx == $ny)
-      for($i=0; $i < $nx; ++$i)
-        $this->checkScalars($x[$i],$y[$i]);
-    else
-      die("Attempt to compare vectors of different lengths");
+    if ($nx == $ny) {
+        for ($i = 0; $i < $nx; ++$i) {
+            $this->checkScalars($x[$i], $y[$i]);
+        }
+    } else {
+        die("Attempt to compare vectors of different lengths");
+    }
   }
 
     /**
      * Check norm of difference of "arrays".
-     * @param float $x [][]
-     * @param float $y [][]
+     * @param float[][] $x
+     * @param float[][] $y
      * @return bool
      */
   function checkArrays($x, $y) {
-    $A = new Matrix($x);
-    $B = new Matrix($y);
+    $A = new PHPExcel_Shared_JAMA_Matrix($x);
+    $B = new PHPExcel_Shared_JAMA_Matrix($y);
     return $this->checkMatrices($A,$B);
   }
 

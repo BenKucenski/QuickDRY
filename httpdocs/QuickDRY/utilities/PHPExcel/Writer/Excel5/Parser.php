@@ -619,6 +619,7 @@ class PHPExcel_Writer_Excel5_Parser
 		} elseif ($this->_BIFF_version == 0x0600) {
 			return pack('C', $this->ptg['ptgStr']) . PHPExcel_Shared_String::UTF8toBIFF8UnicodeShort($string);
 		}
+		return null;
 	}
 
 	/**
@@ -643,6 +644,7 @@ class PHPExcel_Writer_Excel5_Parser
 		if ($args == -1) {
 			return pack("CCv", $this->ptg['ptgFuncVarV'], $num_args, $this->_functions[$token][0]);
 		}
+		return null;
 	}
 
     /**
@@ -1130,6 +1132,7 @@ class PHPExcel_Writer_Excel5_Parser
 			++$i;
 		}
 		//die("Lexical error ".$this->_current_char);
+        return null;
 	}
 
 	/**
@@ -1237,6 +1240,7 @@ class PHPExcel_Writer_Excel5_Parser
 				}
 				return '';
 		}
+		return false;
 	}
 
 	/**

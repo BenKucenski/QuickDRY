@@ -86,7 +86,7 @@ class UploadHandler
      *
      * @return mixed|string
      */
-    protected function trim_file_name($name, $type, $index)
+    protected function trim_file_name($name, $type)
     {
         // Remove path information and dots around the filename, to prevent uploading
         // into different directories or replacing hidden system files.
@@ -117,10 +117,8 @@ class UploadHandler
      *
      * @return array
      */
-    protected function handle_file_upload($uploaded_file, $name, $size, $type, $error, $index, $entity_id, $entity_type_id)
+    protected function handle_file_upload($uploaded_file, $name, $size, $type, $entity_id, $entity_type_id)
     {
-        global $Request;
-
         $fileArray = [
             'name' => $name,
             'type' => $type,

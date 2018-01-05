@@ -1722,7 +1722,6 @@ class PHPExcel_Calculation {
 	 *		but only if a PHPExcel_Calculation instance exists
 	 *
 	 *	@access	public
-	 *	@return null
 	 */
 	public static function flushInstance() {
 		if (isset(self::$_instance) && !is_null(self::$_instance)) {
@@ -2590,12 +2589,13 @@ class PHPExcel_Calculation {
 			}
 			return $typeString.' with a value of '.$this->_showValue($value);
 		}
+		return null;
 	}	//	function _showTypeDetails()
 
 
     /**
      * @param $formula
-     * @return mixed|string|void
+     * @return mixed|string
      * @throws Exception
      */
     private function _convertMatrixReferences($formula) {
@@ -2661,7 +2661,7 @@ class PHPExcel_Calculation {
     /**
      * @param $formula
      * @param PHPExcel_Cell $pCell
-     * @return array|bool|void
+     * @return array|bool
      * @throws Exception
      */
     private function _parseFormula($formula, PHPExcel_Cell $pCell = null) {
@@ -3038,7 +3038,7 @@ class PHPExcel_Calculation {
      * @param $tokens
      * @param null $cellID
      * @param PHPExcel_Cell $pCell
-     * @return bool|null|void
+     * @return bool|null
      * @throws Exception
      */
     private function _processTokenStack($tokens, $cellID = null, PHPExcel_Cell $pCell = null) {

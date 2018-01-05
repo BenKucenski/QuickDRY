@@ -133,7 +133,7 @@ class adLDAP
     /**
      * Get the list of domain controllers
      *
-     * @return void
+     * @return string[]
      */
     public function get_domain_controllers()
     {
@@ -394,13 +394,13 @@ class adLDAP
     {
         // Prevent null binding
         if ($username === NULL || $password === NULL) {
-            return (false);
+            return null;
         }
 
         // Bind as the user
         $this->_bind = @ldap_bind($this->_conn, $username . $this->_account_suffix, $password);
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         // Cnce we've checked their details, kick back into admin mode if we have it
@@ -431,14 +431,14 @@ class adLDAP
         // Find the parent group's dn
         $parent_group = $this->group_info($parent, ["cn"]);
         if ($parent_group[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $parent_dn = $parent_group[0]["dn"];
 
         // Find the child group's dn
         $child_group = $this->group_info($child, ["cn"]);
         if ($child_group[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $child_dn = $child_group[0]["dn"];
 
@@ -447,7 +447,7 @@ class adLDAP
 
         $result = @ldap_mod_add($this->_conn, $parent_dn, $add);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -467,13 +467,13 @@ class adLDAP
         // Find the user's dn
         $user_dn = $this->user_dn($user);
         if ($user_dn === false) {
-            return (false);
+            return null;
         }
 
         // Find the group's dn
         $group_info = $this->group_info($group, ["cn"]);
         if ($group_info[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $group_dn = $group_info[0]["dn"];
 
@@ -482,7 +482,7 @@ class adLDAP
 
         $result = @ldap_mod_add($this->_conn, $group_dn, $add);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -502,7 +502,7 @@ class adLDAP
         // Find the group's dn
         $group_info = $this->group_info($group, ["cn"]);
         if ($group_info[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $group_dn = $group_info[0]["dn"];
 
@@ -511,7 +511,7 @@ class adLDAP
 
         $result = @ldap_mod_add($this->_conn, $group_dn, $add);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -555,7 +555,7 @@ class adLDAP
         $container = "OU=" . implode(",OU=", $attributes["container"]);
         $result = ldap_add($this->_conn, "CN=" . $add["cn"] . ", " . $container . "," . $this->_base_dn, $add);
         if ($result != true) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -574,14 +574,14 @@ class adLDAP
         // Find the parent dn
         $parent_group = $this->group_info($parent, ["cn"]);
         if ($parent_group[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $parent_dn = $parent_group[0]["dn"];
 
         // Find the child dn
         $child_group = $this->group_info($child, ["cn"]);
         if ($child_group[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $child_dn = $child_group[0]["dn"];
 
@@ -590,7 +590,7 @@ class adLDAP
 
         $result = @ldap_mod_del($this->_conn, $parent_dn, $del);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -608,14 +608,14 @@ class adLDAP
         // Find the parent dn
         $group_info = $this->group_info($group, ["cn"]);
         if ($group_info[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $group_dn = $group_info[0]["dn"];
 
         // Find the users dn
         $user_dn = $this->user_dn($user);
         if ($user_dn === false) {
-            return (false);
+            return null;
         }
 
         $del = [];
@@ -623,7 +623,7 @@ class adLDAP
 
         $result = @ldap_mod_del($this->_conn, $group_dn, $del);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -641,7 +641,7 @@ class adLDAP
         // Find the parent dn
         $group_info = $this->group_info($group, ["cn"]);
         if ($group_info[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $group_dn = $group_info[0]["dn"];
 
@@ -650,7 +650,7 @@ class adLDAP
 
         $result = @ldap_mod_del($this->_conn, $group_dn, $del);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -665,7 +665,7 @@ class adLDAP
     public function groups_in_group($group, $recursive = NULL)
     {
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
@@ -675,7 +675,7 @@ class adLDAP
         $info = $this->group_info($group, ["member", "cn"]);
         $groups = $info[0]["member"];
         if (!is_array($groups)) {
-            return (false);
+            return null;
         }
 
         $group_array = [];
@@ -718,7 +718,7 @@ class adLDAP
     public function group_members($group, $recursive = NULL)
     {
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
@@ -727,7 +727,7 @@ class adLDAP
         $info = $this->group_info($group, ["member", "cn"]);
         $users = $info[0]["member"];
         if (!is_array($users)) {
-            return (false);
+            return null;
         }
 
         $user_array = [];
@@ -775,10 +775,10 @@ class adLDAP
     public function group_info($group_name, $fields = NULL)
     {
         if ($group_name === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         if (stristr($group_name, '+')) {
@@ -803,7 +803,7 @@ class adLDAP
     public function recursive_groups($group)
     {
         if ($group === NULL) {
-            return (false);
+            return null;
         }
 
         $ret_groups = [];
@@ -838,7 +838,7 @@ class adLDAP
     public function search_groups($samaccounttype = ADLDAP_SECURITY_GLOBAL_GROUP, $include_desc = false, $search = "*", $sorted = true)
     {
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         $filter = '(&(objectCategory=group)';
@@ -978,7 +978,7 @@ class adLDAP
         // Add the entry
         $result = @ldap_add($this->_conn, "CN=" . $add["cn"][0] . ", " . $container . "," . $this->_base_dn, $add);
         if ($result != true) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -996,7 +996,7 @@ class adLDAP
         $dn = $userinfo[0]['distinguishedname'][0];
         $result = $this->dn_delete($dn);
         if ($result != true) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -1011,13 +1011,13 @@ class adLDAP
     public function user_groups($username, $recursive = NULL)
     {
         if ($username === NULL) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
         } // Use the default option if they haven't set it
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         // Search the directory for their information
@@ -1044,10 +1044,10 @@ class adLDAP
     public function user_info($username, $fields = NULL)
     {
         if ($username === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         $filter = "samaccountname=$username";
@@ -1082,13 +1082,13 @@ class adLDAP
     public function user_ingroup($username, $group, $recursive = NULL)
     {
         if ($username === NULL) {
-            return (false);
+            return null;
         }
         if ($group === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
@@ -1102,7 +1102,7 @@ class adLDAP
             return (true);
         }
 
-        return (false);
+        return null;
     }
 
     /**
@@ -1115,13 +1115,13 @@ class adLDAP
     public function user_password_expiry($username)
     {
         if ($username === NULL) {
-            return ("Missing compulsory field [username]");
+            return ['error' => 'Missing compulsory field [username]'];
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if (!function_exists('bcmod')) {
-            return ("Missing function support [bcmod] http://www.php.net/manual/en/book.bc.php");
+            return ['error' => "Missing function support [bcmod] http://www.php.net/manual/en/book.bc.php"];
         };
 
         $userinfo = $this->user_info($username, ["pwdlastset", "useraccountcontrol"]);
@@ -1130,11 +1130,11 @@ class adLDAP
 
         if ($userinfo[0]['useraccountcontrol'][0] == '66048') {
             // Password does not expire
-            return "Does not expire";
+            return ['error' =>  "Does not expire"];
         }
         if ($pwdlastset === '0') {
             // Password has already expired
-            return "Password has expired";
+            return ['error' =>  "Password has expired"];
         }
 
         // Password expiry in AD can be calculated from TWO values:
@@ -1145,7 +1145,7 @@ class adLDAP
         // This function will convert them to Unix timestamps
         $sr = ldap_read($this->_conn, $this->_base_dn, 'objectclass=*', ['maxPwdAge']);
         if (!$sr) {
-            return false;
+            return null;
         }
         $info = ldap_get_entries($this->_conn, $sr);
         $maxpwdage = $info[0]['maxpwdage'][0];
@@ -1168,7 +1168,7 @@ class adLDAP
         // Unfortunately the maths involved are too big for PHP integers, so I've had to require
         // BCMath functions to work with arbitrary precision numbers.
         if (bcmod($maxpwdage, 4294967296) === '0') {
-            return "Domain does not expire passwords";
+            return ['error' =>  "Domain does not expire passwords"];
         }
 
         // Add maxpwdage and pwdlastset and we get password expiration time in Microsoft's
@@ -1193,7 +1193,7 @@ class adLDAP
     public function user_modify($username, $attributes)
     {
         if ($username === NULL) {
-            return ("Missing compulsory field [username]");
+            return null;
         }
         if (array_key_exists("password", $attributes) && !$this->_use_ssl) {
             throw new adLDAPException('SSL must be configured on your webserver and enabled in the class to set passwords.');
@@ -1206,7 +1206,7 @@ class adLDAP
         // Find the dn of the user
         $user_dn = $this->user_dn($username);
         if ($user_dn === false) {
-            return (false);
+            return null;
         }
 
         // Translate the update to the LDAP schema
@@ -1214,7 +1214,7 @@ class adLDAP
 
         // Check to see if this is an enabled status update
         if (!$mod && !array_key_exists("enabled", $attributes)) {
-            return (false);
+            return null;
         }
 
         // Set the account control attribute (only if specified)
@@ -1230,7 +1230,7 @@ class adLDAP
         // Do the update
         $result = @ldap_modify($this->_conn, $user_dn, $mod);
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1248,9 +1248,13 @@ class adLDAP
             return ("Missing compulsory field [username]");
         }
         $attributes = ["enabled" => 0];
-        $result = $this->user_modify($username, $attributes);
+        try {
+            $result = $this->user_modify($username, $attributes);
+        } catch(Exception $ex) {
+            exit($ex->getMessage());
+        }
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1270,7 +1274,7 @@ class adLDAP
         $attributes = ["enabled" => 1];
         $result = $this->user_modify($username, $attributes);
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1287,13 +1291,13 @@ class adLDAP
     public function user_password($username, $password)
     {
         if ($username === NULL) {
-            return (false);
+            return null;
         }
         if ($password === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if (!$this->_use_ssl && !$this->_use_tls) {
             throw new adLDAPException('SSL must be configured on your webserver and enabled in the class to set passwords.');
@@ -1301,7 +1305,7 @@ class adLDAP
 
         $user_dn = $this->user_dn($username);
         if ($user_dn === false) {
-            return (false);
+            return null;
         }
 
         $add = [];
@@ -1309,7 +1313,7 @@ class adLDAP
 
         $result = ldap_mod_replace($this->_conn, $user_dn, $add);
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1326,7 +1330,7 @@ class adLDAP
     public function all_users($include_desc = false, $search = "*", $sorted = true)
     {
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         // Perform the search and grab all their details
@@ -1397,7 +1401,7 @@ class adLDAP
         // Add the entry
         $result = @ldap_add($this->_conn, "CN=" . $add["cn"][0] . ", " . $container . "," . $this->_base_dn, $add);
         if ($result != true) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1413,13 +1417,13 @@ class adLDAP
     public function contact_groups($distinguishedname, $recursive = NULL)
     {
         if ($distinguishedname === NULL) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
         } //use the default option if they haven't set it
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         // Search the directory for their information
@@ -1446,10 +1450,10 @@ class adLDAP
     public function contact_info($distinguishedname, $fields = NULL)
     {
         if ($distinguishedname === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         $filter = "distinguishedName=" . $distinguishedname;
@@ -1484,27 +1488,27 @@ class adLDAP
     public function contact_ingroup($distinguisedname, $group, $recursive = NULL)
     {
         if ($distinguisedname === NULL) {
-            return (false);
+            return null;
         }
         if ($group === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
         } //use the default option if they haven't set it
 
         // Get a list of the groups
-        $groups = $this->contact_groups($distinguisedname, ["memberof"], $recursive);
+        $groups = $this->contact_groups($distinguisedname, $recursive);
 
         // Return true if the specified group is in the group list
         if (in_array($group, $groups)) {
             return (true);
         }
 
-        return (false);
+        return null;
     }
 
     /**
@@ -1525,13 +1529,13 @@ class adLDAP
 
         // Check to see if this is an enabled status update
         if (!$mod) {
-            return (false);
+            return null;
         }
 
         // Do the update
         $result = ldap_modify($this->_conn, $distinguishedname, $mod);
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -1547,7 +1551,7 @@ class adLDAP
     {
         $result = $this->dn_delete($distinguishedname);
         if ($result != true) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -1563,7 +1567,7 @@ class adLDAP
     public function all_contacts($include_desc = false, $search = "*", $sorted = true)
     {
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         // Perform the search and grab all their details
@@ -1609,7 +1613,7 @@ class adLDAP
             $recursive = $this->_recursive_groups;
         } //use the default option if they haven't set it
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         $filter = '(&';
@@ -1618,7 +1622,7 @@ class adLDAP
                 case 'contact':
                     $filter .= '(objectClass=contact)';
                     break;
-                case 'contact':
+                case 'computer':
                     $filter .= '(objectClass=computer)';
                     break;
                 case 'group':
@@ -1681,10 +1685,10 @@ class adLDAP
     public function computer_info($computer_name, $fields = NULL)
     {
         if ($computer_name === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         $filter = "(&(objectClass=computer)(cn=" . $computer_name . "))";
@@ -1703,32 +1707,32 @@ class adLDAP
      * @param string $computer_name The name of the computer
      * @param string $group The group to check
      * @param bool $recursive Whether to check recursively
-     * @return array
+     * @return bool
      */
     public function computer_ingroup($computer_name, $group, $recursive = NULL)
     {
         if ($computer_name === NULL) {
-            return (false);
+            return null;
         }
         if ($group === NULL) {
-            return (false);
+            return null;
         }
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
         } // use the default option if they haven't set it
 
         //get a list of the groups
-        $groups = $this->computer_groups($computer_name, ["memberof"], $recursive);
+        $groups = $this->computer_groups($computer_name, $recursive);
 
         //return true if the specified group is in the group list
         if (in_array($group, $groups)) {
-            return (true);
+            return true;
         }
 
-        return (false);
+        return null;
     }
 
     /**
@@ -1741,13 +1745,13 @@ class adLDAP
     public function computer_groups($computer_name, $recursive = NULL)
     {
         if ($computer_name === NULL) {
-            return (false);
+            return null;
         }
         if ($recursive === NULL) {
             $recursive = $this->_recursive_groups;
         } //use the default option if they haven't set it
         if (!$this->_bind) {
-            return (false);
+            return null;
         }
 
         //search the directory for their information
@@ -1813,7 +1817,7 @@ class adLDAP
         ];
         $result = $this->user_modify($username, $attributes);
         if ($result == false) {
-            return (false);
+            return null;
         }
         return (true);
     }
@@ -1843,7 +1847,7 @@ class adLDAP
         // Find the dn of the user
         $user = $this->user_info($username, ["cn", "proxyaddresses"]);
         if ($user[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $user_dn = $user[0]["dn"];
 
@@ -1862,7 +1866,7 @@ class adLDAP
 
             $result = @ldap_mod_replace($this->_conn, $user_dn, $modaddresses);
             if ($result == false) {
-                return (false);
+                return null;
             }
 
             return (true);
@@ -1874,7 +1878,7 @@ class adLDAP
             $add = $this->adldap_schema($attributes);
 
             if (!$add) {
-                return (false);
+                return null;
             }
 
             // Do the update
@@ -1882,7 +1886,7 @@ class adLDAP
             // exists in the list of proxyAddresses
             $result = @ldap_mod_add($this->_conn, $user_dn, $add);
             if ($result == false) {
-                return (false);
+                return null;
             }
 
             return (true);
@@ -1910,7 +1914,7 @@ class adLDAP
         // Find the dn of the user
         $user = $this->user_info($username, ["cn", "proxyaddresses"]);
         if ($user[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $user_dn = $user[0]["dn"];
 
@@ -1926,12 +1930,12 @@ class adLDAP
 
             $result = @ldap_mod_del($this->_conn, $user_dn, $mod);
             if ($result == false) {
-                return (false);
+                return null;
             }
 
             return (true);
         } else {
-            return (false);
+            return null;
         }
     }
 
@@ -1954,7 +1958,7 @@ class adLDAP
         // Find the dn of the user
         $user = $this->user_info($username, ["cn", "proxyaddresses"]);
         if ($user[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $user_dn = $user[0]["dn"];
 
@@ -1974,12 +1978,13 @@ class adLDAP
 
             $result = @ldap_mod_replace($this->_conn, $user_dn, $modaddresses);
             if ($result == false) {
-                return (false);
+                return null;
             }
 
-            return (true);
+            return true;
         }
 
+        return null;
     }
 
     /**
@@ -2004,7 +2009,7 @@ class adLDAP
             // Find the dn of the user
             $user = $this->contact_info($distinguishedname, ["cn", "displayname"]);
             if ($user[0]["displayname"] === NULL) {
-                return (false);
+                return null;
             }
             $mailnickname = $user[0]['displayname'][0];
         }
@@ -2016,13 +2021,13 @@ class adLDAP
 
         // Check to see if this is an enabled status update
         if (!$mod) {
-            return (false);
+            return null;
         }
 
         // Do the update
         $result = ldap_modify($this->_conn, $distinguishedname, $mod);
         if ($result == false) {
-            return (false);
+            return null;
         }
 
         return (true);
@@ -2201,7 +2206,7 @@ class adLDAP
         */
 
         if (count($mod) == 0) {
-            return (false);
+            return null;
         }
         return ($mod);
     }
@@ -2221,7 +2226,7 @@ class adLDAP
     protected function group_cn($gid)
     {
         if ($gid === NULL) {
-            return (false);
+            return null;
         }
         $r = false;
 
@@ -2254,7 +2259,7 @@ class adLDAP
     protected function get_primary_group($gid, $usersid)
     {
         if ($gid === NULL || $usersid === NULL) {
-            return (false);
+            return null;
         }
         $r = false;
 
@@ -2317,7 +2322,7 @@ class adLDAP
     {
         $user = $this->user_info($username, ["cn"]);
         if ($user[0]["dn"] === NULL) {
-            return (false);
+            return null;
         }
         $user_dn = $user[0]["dn"];
         return ($user_dn);
@@ -2485,7 +2490,7 @@ class adLDAP
     {
         $result = ldap_delete($this->_conn, $dn);
         if ($result != true) {
-            return (false);
+            return null;
         }
         return (true);
     }

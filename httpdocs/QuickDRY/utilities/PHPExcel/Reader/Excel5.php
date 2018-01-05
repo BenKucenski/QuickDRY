@@ -4124,7 +4124,7 @@ class PHPExcel_Reader_Excel5 implements PHPExcel_Reader_IReader
 		if (!$this->_readDataOnly) {
 			// offset: 0; size: 8; cell range address of all cells containing this hyperlink
 			try {
-				$cellRange = $this->_readBIFF8CellRangeAddressFixed($recordData, 0, 8);
+				$cellRange = $this->_readBIFF8CellRangeAddressFixed($recordData);
 			} catch (Exception $e) {
 				return;
 			}
@@ -6421,8 +6421,6 @@ class PHPExcel_Reader_Excel5 implements PHPExcel_Reader_IReader
 				return self::_mapColorBIFF5($color);
 			}
 		}
-
-		return $color;
 	}
 
 

@@ -153,7 +153,8 @@ class PHPExcel_Style_Font implements PHPExcel_IComparable
 	public function bindParent($parent)
 	{
 		$this->_parent = $parent;
-	}
+        return $this;
+    }
 
 	/**
 	 * Is this a supervisor or a real style component?

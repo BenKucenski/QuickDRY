@@ -133,6 +133,7 @@ class SMTP {
     $this->helo_rply = null;
 
     $this->do_debug = 0;
+    return $this;
   }
 
   /////////////////////////////////////////////////
@@ -936,7 +937,7 @@ class SMTP {
   /**
   * Get the current error
   * @access public
-  * @return array
+  * @return string
   */
   public function getError() {
     return $this->error;

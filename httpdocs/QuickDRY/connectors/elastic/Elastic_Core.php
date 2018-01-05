@@ -402,9 +402,10 @@ class Elastic_Core extends Elastic_Base
     }
 
     /**
+     * @param $index
+     * @param $type
      * @param $json
-     *
-     * @return mixed|null
+     * @return array|null
      */
     protected static function _InsertUpdate($index, $type, &$json)
     {

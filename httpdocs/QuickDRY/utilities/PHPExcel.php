@@ -32,24 +32,7 @@ if (!defined('PHPEXCEL_ROOT')) {
 	require(PHPEXCEL_ROOT . 'PHPExcel/Autoloader.php');
 }
 
-/**
- * @param $var
- */
 
-
-if (!function_exists('money_format')) {
-    // this seems to be a very deprecated issue but just in case, here it is.  This function is built into PHP so this should never be needed
-    /**
-     * @param $format
-     * @param $key
-     *
-     * @return mixed
-     */
-    function money_format($format, $key)
-    {
-        return $key;
-    }
-}
 
 /**
  * PHPExcel
@@ -314,7 +297,7 @@ class PHPExcel
 	 * Get index for sheet
 	 *
 	 * @param PHPExcel_Worksheet $pSheet
-	 * @return Sheet index
+	 * @return int index
 	 * @throws Exception
 	 */
 	public function getIndex(PHPExcel_Worksheet $pSheet)
@@ -324,6 +307,7 @@ class PHPExcel
 				return $key;
 			}
 		}
+		return null;
 	}
 
     /**
@@ -331,7 +315,7 @@ class PHPExcel
 	 *
 	 * @param string $sheetName Sheet name to modify index for
 	 * @param int $newIndex New index for the sheet
-	 * @return New sheet index
+	 * @return int New sheet index
 	 * @throws Exception
 	 */
     public function setIndexByName($sheetName, $newIndex)

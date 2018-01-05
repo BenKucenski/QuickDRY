@@ -62,14 +62,14 @@ class HTMLCalendar
                     $content = isset($days[$day]['content']) ? $days[$day]['content'] : null;
 
                     $calendar .= '
-					<td class="calendar_day ' . ($classes ? htmlspecialchars($classes) : '') . ' droppable" id="cal_' . Datestamp($month . '/' . $day . '/' . $year) . '">
-					<div id="month_date" rel="' . Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div>
+					<td class="calendar_day ' . ($classes ? htmlspecialchars($classes) : '') . ' droppable" id="cal_' . Date::Datestamp($month . '/' . $day . '/' . $year) . '">
+					<div id="month_date" rel="' . Date::Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div>
 					<div class="day_content">' . ($link ? '<a href="' . htmlspecialchars($link) . '">' . $content . '</a>' : $content) . '</div>
 					</td>';
                 } else {
                     $calendar .= '
-					<td class="calendar_day droppable" id="cal_' . Datestamp($month . '/' . $day . '/' . $year) . '">
-					<div id="month_date" rel="' . Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div>
+					<td class="calendar_day droppable" id="cal_' . Date::Datestamp($month . '/' . $day . '/' . $year) . '">
+					<div id="month_date" rel="' . Date::Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div>
 					<div class="day_content">
 				';
 
@@ -82,7 +82,7 @@ class HTMLCalendar
                     }
                     $calendar .= '</div></td>';
                 }
-            } else $calendar .= '<td class="calendar_day droppable" id="cal_' . Datestamp($month . '/' . $day . '/' . $year) . '"><div rel="' . Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div></td>';
+            } else $calendar .= '<td class="calendar_day droppable" id="cal_' . Date::Datestamp($month . '/' . $day . '/' . $year) . '"><div rel="' . Date::Datestamp($month . '/' . $day . '/' . $year) . '" class="day_num">' . $day . '</div></td>';
         }
         if ($weekday != 7) $calendar .= '<td colspan="' . (7 - $weekday) . '">&nbsp;</td>'; #remaining "empty" days
 

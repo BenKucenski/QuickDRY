@@ -285,16 +285,16 @@ class PHPExcel_Shared_Excel5
 		// Bitmap isn't allowed to start or finish in a hidden cell, i.e. a cell
 		// with zero height or width.
 		if (self::sizeCol($sheet, PHPExcel_Cell::stringFromColumnIndex($col_start)) == 0) {
-			return;
+			return null;
 		}
 		if (self::sizeCol($sheet, PHPExcel_Cell::stringFromColumnIndex($col_end))   == 0) {
-			return;
+			return null;
 		}
 		if (self::sizeRow($sheet, $row_start + 1) == 0) {
-			return;
+			return null;
 		}
 		if (self::sizeRow($sheet, $row_end + 1)   == 0) {
-			return;
+			return null;
 		}
 
 		// Convert the pixel values to the percentage value expected by Excel

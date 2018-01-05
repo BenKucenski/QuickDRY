@@ -7,11 +7,8 @@ class Curl
     public $Header;
 
     /**
-     * @param        $path
-     * @param        $params
-     * @param bool $get
-     * @param string $host
-     *
+     * @param $path
+     * @param $params
      * @return Curl
      */
     public static function Post($path, $params)
@@ -84,11 +81,10 @@ class Curl
     }
 
     /**
-     * @param        $path
-     * @param        $params
-     * @param bool $get
-     * @param string $host
-     *
+     * @param $path
+     * @param null $params
+     * @param null $username
+     * @param null $password
      * @return Curl
      */
     public static function Get($path, $params = null, $username = null, $password = null)

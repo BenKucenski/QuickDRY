@@ -129,7 +129,6 @@ class PHPExcel_Shared_OLE_ChainedBlockStream
 
 	/**
 	 * Implements support for fclose().
-	 * @return  string
 	 */
 	public function stream_close()
 	{

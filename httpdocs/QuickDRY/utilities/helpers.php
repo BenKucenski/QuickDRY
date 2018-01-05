@@ -119,6 +119,8 @@ function ColumnTypeToProperty($col_type)
     switch (strtolower($col_type)) {
         case 'varchar':
         case 'char':
+        case 'keyword':
+        case 'text':
             return 'string';
 
         case 'tinyint unsigned':
@@ -127,7 +129,12 @@ function ColumnTypeToProperty($col_type)
             return 'uint';
 
         case 'numeric':
+        case 'tinyint':
+        case 'smallint':
             return 'int';
+
+        case 'smalldatetime':
+            return 'datetime';
     }
     return $col_type;
 }

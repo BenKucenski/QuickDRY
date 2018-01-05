@@ -541,6 +541,7 @@ class PHPExcel_Writer_Excel5_Xf
 		if ($textRotation < 0) {
 			return 90 - $textRotation;
 		}
+		return null;
 	}
 
 	/**

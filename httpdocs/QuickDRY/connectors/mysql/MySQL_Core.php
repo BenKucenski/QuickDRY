@@ -77,15 +77,20 @@ class MySQL_Core extends SQL_Base
      * @param null $params
      *
      * @return array
-     * @throws Exception
      */
     public static function Execute($sql, $params = null, $large = false)
     {
         static::_connect();
 
-        if (isset(static::$database))
+        if (isset(static::$database)) {
             static::$connection->SetDatabase(static::$database);
-        return static::$connection->Execute($sql, $params, $large);
+        }
+        try {
+            return static::$connection->Execute($sql, $params, $large);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+        return null;
     }
 
     /**
@@ -539,24 +544,25 @@ class MySQL_Core extends SQL_Base
      * @param $name
      * @param $value
      *
-     * @return bool|int|null|string|void
+     * @return bool|int|null|string
      * @throws Exception
      */
     protected static function StrongType($name, $value)
     {
         if (is_object($value) || is_array($value))
-            return;
+            return null;
 
         if (strcasecmp($value, 'null') == 0) {
-            if (!static::$prop_definitions[$name]['nullable'])
+            if (!static::$prop_definitions[$name]['nullable']) {
                 throw new Exception($name . ' cannot be null');
+            }
             return null;
         }
 
 
         switch (static::$prop_definitions[$name]['type']) {
             case 'date':
-                return $value ? Datestamp($value) : null;
+                return $value ? Date::Datestamp($value) : null;
 
             case 'tinyint(1)':
                 return $value ? 1 : 0;

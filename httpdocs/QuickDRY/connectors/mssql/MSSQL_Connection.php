@@ -129,7 +129,6 @@ class MSSQL_Connection
             } catch(Exception $e) {
                 // Log exception
                 Halt($e);
-                return false;
             }
         }
 
@@ -607,7 +606,7 @@ class MSSQL_Connection
 			FROM
 				'  . $this->current_db. '.INFORMATION_SCHEMA.COLUMNS
 			WHERE
-				TABLE_NAME={{}}
+				TABLE_NAME=@
 		';
         $res = $this->Query($sql, [$table_name]);
         $list = [];
@@ -655,7 +654,7 @@ class MSSQL_Connection
 			WHERE
 				T.[is_ms_shipped] = 0
 				AND I.[type_desc] <> \'HEAP\'
-				AND T.[name] = {{}}
+				AND T.[name] = @
 			ORDER BY
 				T.[name],
 				I.[index_id],
@@ -859,7 +858,7 @@ ORDER BY
 				'  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 			WHERE
 				OBJECTPROPERTY(OBJECT_ID(constraint_name), \'IsPrimaryKey\') = 1
-				AND table_name = {{}}
+				AND table_name = @
 		';
         $res = $this->Query($sql, [$table_name]);
         if($res['error']) {

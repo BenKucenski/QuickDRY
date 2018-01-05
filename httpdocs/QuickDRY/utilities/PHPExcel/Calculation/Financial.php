@@ -436,7 +436,6 @@ class PHPExcel_Calculation_Financial {
 			default: // US (NASD) 30/360, Actual/360 or European 30/360
 					return 360 / $frequency;
 		}
-		return PHPExcel_Calculation_Functions::VALUE();
 	}	//	function COUPDAYS()
 
 

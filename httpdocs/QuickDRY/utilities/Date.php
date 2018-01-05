@@ -67,7 +67,7 @@ class Date extends SafeClass
 
         $d = new DateTime($year . '-01-01');
         date_modify($d, '+' . ($DayInYear - 1) . ' days');
-        return Datestamp($d->getTimestamp());
+        return Date::Datestamp($d->getTimestamp());
     }
 
     /**

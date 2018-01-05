@@ -16,9 +16,10 @@ class SQL_Base
     protected $_smart_location = null;
 
     /**
-     * @param $database
+     * @param $database_prefix
      * @param $table
-     *
+     * @param $lowercase_table
+     * @param $database_type_prefix
      * @return string
      */
     public static function TableToClass($database_prefix, $table, $lowercase_table, $database_type_prefix)
@@ -174,7 +175,7 @@ class SQL_Base
     /**
      * @param $name
      * @param $value
-     *
+     * @return mixed
      * @throws Exception
      */
     public function __set($name, $value)
@@ -188,13 +189,14 @@ class SQL_Base
     }
 
     /**
-     * @return null
+     * @return elastic_ChangeLogDataClass[]|null
      */
     private function _history()
     {
         if(class_exists('ChangeLogHandler')) {
             return ChangeLogHandler::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
         }
+        return null;
     }
 
     /**
@@ -306,17 +308,17 @@ class SQL_Base
     }
 
     /**
-     * @param null $name
-     *
-     * @return mixed
+     * @param string|null $name
+     * @return mixed|null
      */
-    protected function get_property( /*string*/ $name = null)
+    protected function get_property( $name = null)
     {
         if(array_key_exists($name, $this->props))
         {
             return $this->props[$name];
         }
         Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
+        return null;
     }
 
     public function ClearProps() {
@@ -404,7 +406,7 @@ class SQL_Base
      */
     public static function GetHeader($sort_by = '', $dir = '', $modify = false, $add = [], $ignore = [], $add_params = '', $sortable = true, $column_order = [])
     {
-        return static::_GetHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order, $column_order);
+        return static::_GetHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order);
     }
 
     /**
@@ -421,7 +423,7 @@ class SQL_Base
      */
     public static function GetBareHeader($sort_by = '', $dir = '', $modify = false, $add = [], $ignore = [], $add_params = '', $sortable = true, $column_order = [])
     {
-        return static::_GetBareHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order, $column_order);
+        return static::_GetBareHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order);
     }
 
     /**
@@ -494,11 +496,8 @@ class SQL_Base
      *
      * @return string
      */
-    protected static function _GetBareHeader(&$props, $sort_by, $dir, $modify = false, $add = [], $ignore = [], $add_params = '', $sortable = true, $column_order = [])
+    protected static function _GetBareHeader(&$props, $modify = false, $add = [], $ignore = [], $sortable = true, $column_order = [])
     {
-        $not_dir = $dir == 'asc' ? 'desc' : 'asc';
-        $arrow = $dir == 'asc' ? '&uarr;' : '&darr;';
-
         $columns = [];
 
         foreach($props as $name => $info)
@@ -612,7 +611,7 @@ class SQL_Base
    				[ <a class="action_link" href="' . CURRENT_PAGE_URL . '/edit?id=' . $this->props['id'] . '">edit</a> ]
    			';
             if($modify !== 'NO_DELETE')
-                $res .= '[ <a class="action_link" onclick="javascript:return confirm(\'Are you sure?\');" href="' . CURRENT_PAGE_URL . '/edit?a=delete&id=' . $this->props['id'] . '">delete</a> ]';
+                $res .= '[ <a class="action_link" onclick="return confirm(\'Are you sure?\');" href="' . CURRENT_PAGE_URL . '/edit?a=delete&id=' . $this->props['id'] . '">delete</a> ]';
             $res .= '</td>';
         }
         if(is_array($custom_link))
@@ -633,7 +632,7 @@ class SQL_Base
      *
      * @return string
      */
-    public function ToRow($modify = false, $swap = [], $add = [], $ignore = [], $custom_link = '', $row_style ='', $column_order = [])
+    public function ToRow($modify = false, $swap = [], $add = [], $ignore = [], $custom_link = '', $column_order = [])
     {
         $res = '<tr>';
         $columns = [];
@@ -909,7 +908,7 @@ class SQL_Base
      *
      * @return string
      */
-    protected static function _JQuerySelectItems($items, $selected, $id, $value, $order_by, $display = "")
+    protected static function _JQuerySelectItems($items, $selected, $id, $value, $display = "")
     {
         include_once 'controls/drag_select.js.php';
 

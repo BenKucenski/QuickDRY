@@ -82,10 +82,10 @@ class htmlfilter
      * This function skips any whitespace from the current position within
      * a string and to the next non-whitespace value.
      *
-     * @param  $body   the string
-     * @param  $offset the offset within the string where we should start
+     * @param  string $body   the string
+     * @param  int $offset the offset within the string where we should start
      *                   looking for the next non-whitespace character.
-     * @return           the location within the $body where the next
+     * @return int          the location within the $body where the next
      *                   non-whitespace char is located.
      */
     public static function tln_skipspace($body, $offset)
@@ -104,10 +104,10 @@ class htmlfilter
      * really just a glorified "strpos", except it catches the failures
      * nicely.
      *
-     * @param  $body   The string to look for needle in.
-     * @param  $offset Start looking from this position.
-     * @param  $needle The character/string to look for.
-     * @return           location of the next occurance of the needle, or
+     * @param  string $body   The string to look for needle in.
+     * @param  int $offset Start looking from this position.
+     * @param  string $needle The character/string to look for.
+     * @return int          location of the next occurance of the needle, or
      *                   strlen($body) if needle wasn't found.
      */
     public static function tln_findnxstr($body, $offset, $needle)
@@ -124,10 +124,10 @@ class htmlfilter
      * This function takes a PCRE-style regexp and tries to match it
      * within the string.
      *
-     * @param  $body   The string to look for needle in.
-     * @param  $offset Start looking from here.
-     * @param  $reg       A PCRE-style regex to match.
-     * @return           Returns a false if no matches found, or an array
+     * @param  string $body   The string to look for needle in.
+     * @param  int $offset Start looking from here.
+     * @param  string $reg       A PCRE-style regex to match.
+     * @return bool|array          Returns a false if no matches found, or an array
      *                   with the following members:
      *                   - integer with the location of the match within $body
      *                   - string with whatever content between offset and the match
@@ -153,9 +153,9 @@ class htmlfilter
     /**
      * This function looks for the next tag.
      *
-     * @param  $body   String where to look for the next tag.
-     * @param  $offset Start looking from here.
-     * @return           false if no more tags exist in the body, or
+     * @param  string $body   String where to look for the next tag.
+     * @param  int $offset Start looking from here.
+     * @return array|bool          false if no more tags exist in the body, or
      *                   an array with the following members:
      *                   - string with the name of the tag
      *                   - array with attributes and their values
@@ -170,7 +170,7 @@ class htmlfilter
         if ($offset > strlen($body)) {
             return false;
         }
-        $lt = tln_findnxstr($body, $offset, '<');
+        $lt = self::tln_findnxstr($body, $offset, '<');
         if ($lt == strlen($body)) {
             return false;
         }
@@ -179,7 +179,7 @@ class htmlfilter
          * blah blah <tag attribute="value">
          * \---------^
          */
-        $pos = tln_skipspace($body, $lt + 1);
+        $pos = self::tln_skipspace($body, $lt + 1);
         if ($pos >= strlen($body)) {
             return [false, false, false, $lt, strlen($body)];
         }
@@ -211,7 +211,7 @@ class htmlfilter
                     }
                     return [false, false, false, $lt, $gt];
                 } else {
-                    $gt = tln_findnxstr($body, $pos, '>');
+                    $gt = self::tln_findnxstr($body, $pos, '>');
                     return [false, false, false, $lt, $gt];
                 }
                 break;
@@ -229,7 +229,7 @@ class htmlfilter
         /**
          * Look for next [\W-_], which will indicate the end of the tag name.
          */
-        $regary = tln_findnxreg($body, $pos, '[^\w\-_]');
+        $regary = self::tln_findnxreg($body, $pos, '[^\w\-_]');
         if ($regary == false) {
             return [false, false, false, $lt, strlen($body)];
         }
@@ -254,14 +254,14 @@ class htmlfilter
                 if (substr($body, $pos, 2) == '/>') {
                     $pos++;
                     $tagtype = 3;
+                    return [$tagname, false, $tagtype, $lt, $pos];
                 } else {
-                    $gt = tln_findnxstr($body, $pos, '>');
+                    $gt = self::tln_findnxstr($body, $pos, '>');
                     $retary = [false, false, false, $lt, $gt];
                     return $retary;
                 }
             case '>':
                 return [$tagname, false, $tagtype, $lt, $pos];
-                break;
             default:
                 /**
                  * Check if it's whitespace
@@ -271,7 +271,7 @@ class htmlfilter
                     /**
                      * This is an invalid tag! Look for the next closing ">".
                      */
-                    $gt = tln_findnxstr($body, $lt, '>');
+                    $gt = self::tln_findnxstr($body, $lt, '>');
                     return [false, false, false, $lt, $gt];
                 }
         }
@@ -288,7 +288,7 @@ class htmlfilter
         $attary = [];
 
         while ($pos <= strlen($body)) {
-            $pos = tln_skipspace($body, $pos);
+            $pos = self::tln_skipspace($body, $pos);
             if ($pos == strlen($body)) {
                 /**
                  * Non-closed tag.
@@ -330,7 +330,7 @@ class htmlfilter
              * double quotes. Type 4 we convert into:
              * attrname="yes".
              */
-            $regary = tln_findnxreg($body, $pos, '[^\w\-_]');
+            $regary = self::tln_findnxreg($body, $pos, '[^\w\-_]');
             if ($regary == false) {
                 /**
                  * Looks like body ended before the end of tag.
@@ -357,20 +357,21 @@ class htmlfilter
                     if (substr($body, $pos, 2) == '/>') {
                         $pos++;
                         $tagtype = 3;
+                        $attary{$attname} = '"yes"';
+                        return [$tagname, $attary, $tagtype, $lt, $pos];
                     } else {
-                        $gt = tln_findnxstr($body, $pos, '>');
+                        $gt = self::tln_findnxstr($body, $pos, '>');
                         $retary = [false, false, false, $lt, $gt];
                         return $retary;
                     }
                 case '>':
                     $attary{$attname} = '"yes"';
                     return [$tagname, $attary, $tagtype, $lt, $pos];
-                    break;
                 default:
                     /**
                      * Skip whitespace and see what we arrive at.
                      */
-                    $pos = tln_skipspace($body, $pos);
+                    $pos = self::tln_skipspace($body, $pos);
                     $char = substr($body, $pos, 1);
                     /**
                      * Two things are valid here:
@@ -382,7 +383,7 @@ class htmlfilter
                      */
                     if ($char == '=') {
                         $pos++;
-                        $pos = tln_skipspace($body, $pos);
+                        $pos = self::tln_skipspace($body, $pos);
                         /**
                          * Here are 3 possibilities:
                          * "'"    attribute type 1
@@ -391,7 +392,7 @@ class htmlfilter
                          */
                         $quot = substr($body, $pos, 1);
                         if ($quot == '\'') {
-                            $regary = tln_findnxreg($body, $pos + 1, '\'');
+                            $regary = self::tln_findnxreg($body, $pos + 1, '\'');
                             if ($regary == false) {
                                 return [false, false, false, $lt, strlen($body)];
                             }
@@ -399,7 +400,7 @@ class htmlfilter
                             $pos++;
                             $attary{$attname} = '\'' . $attval . '\'';
                         } else if ($quot == '"') {
-                            $regary = tln_findnxreg($body, $pos + 1, '\"');
+                            $regary = self::tln_findnxreg($body, $pos + 1, '\"');
                             if ($regary == false) {
                                 return [false, false, false, $lt, strlen($body)];
                             }
@@ -410,7 +411,7 @@ class htmlfilter
                             /**
                              * These are hateful. Look for \s, or >.
                              */
-                            $regary = tln_findnxreg($body, $pos, '[\s>]');
+                            $regary = self::tln_findnxreg($body, $pos, '[\s>]');
                             if ($regary == false) {
                                 return [false, false, false, $lt, strlen($body)];
                             }
@@ -430,7 +431,7 @@ class htmlfilter
                         /**
                          * An illegal character. Find next '>' and return.
                          */
-                        $gt = tln_findnxstr($body, $pos, '>');
+                        $gt = self::tln_findnxstr($body, $pos, '>');
                         return [false, false, false, $lt, $gt];
                     }
             }
@@ -445,10 +446,10 @@ class htmlfilter
     /**
      * Translates entities into literal values so they can be checked.
      *
-     * @param $attvalue the by-ref value to check.
-     * @param $regex    the regular expression to check against.
-     * @param bool|whether $hex whether the entites are hexadecimal.
-     * @return True or False depending on whether there were matches.
+     * @param string $attvalue the by-ref value to check.
+     * @param string $regex    the regular expression to check against.
+     * @param bool  $hex whether the entites are hexadecimal.
+     * @return bool True or False depending on whether there were matches.
      */
     public static function tln_deent(&$attvalue, $regex, $hex = false)
     {
@@ -477,7 +478,6 @@ class htmlfilter
      * checks on them.
      *
      * @param  $attvalue A string to run entity check against.
-     * @return             Nothing, modifies a reference value.
      */
     public static function tln_defang(&$attvalue)
     {
@@ -490,12 +490,11 @@ class htmlfilter
         ) {
             return;
         }
-        $m = false;
         do {
             $m = false;
-            $m = $m || tln_deent($attvalue, '/\&#0*(\d+);*/s');
-            $m = $m || tln_deent($attvalue, '/\&#x0*((\d|[a-f])+);*/si', true);
-            $m = $m || tln_deent($attvalue, '/\\\\(\d+)/s', true);
+            $m = $m || self::tln_deent($attvalue, '/\&#0*(\d+);*/s');
+            $m = $m || self::tln_deent($attvalue, '/\&#x0*((\d|[a-f])+);*/si', true);
+            $m = $m || self::tln_deent($attvalue, '/\\\\(\d+)/s', true);
         } while ($m == true);
         $attvalue = stripslashes($attvalue);
     }
@@ -505,8 +504,7 @@ class htmlfilter
      * makers of the browser with 95% market value decided that it'd
      * be funny to make "java[tab]script" be just as good as "javascript".
      *
-     * @param The $attvalue
-     * @return attvalue Nothing, modifies a reference value.
+     * @param string $attvalue
      * @internal param The $attvalue attribute value before extraneous spaces removed.
      */
     public static function tln_unspace(&$attvalue)
@@ -521,12 +519,12 @@ class htmlfilter
     /**
      * This function runs various checks against the attributes.
      *
-     * @param  $tagname            String with the name of the tag.
-     * @param  $attary            Array with all tag attributes.
-     * @param  $rm_attnames        See description for tln_sanitize
-     * @param  $bad_attvals        See description for tln_sanitize
-     * @param  $add_attr_to_tag See description for tln_sanitize
-     * @return                    Array with modified attributes.
+     * @param  string $tagname            String with the name of the tag.
+     * @param  array $attary            Array with all tag attributes.
+     * @param  array $rm_attnames        See description for tln_sanitize
+     * @param  array $bad_attvals        See description for tln_sanitize
+     * @param  array $add_attr_to_tag See description for tln_sanitize
+     * @return array                   Array with modified attributes.
      */
     public static function tln_fixatts($tagname,
                          $attary,
@@ -553,8 +551,8 @@ class htmlfilter
             /**
              * Remove any backslashes, entities, or extraneous whitespace.
              */
-            tln_defang($attvalue);
-            tln_unspace($attvalue);
+            self::tln_defang($attvalue);
+            self::tln_unspace($attvalue);
 
             /**
              * Now let's run checks on the attvalues.
@@ -594,15 +592,15 @@ class htmlfilter
 
     /**
      *
-     * @param $body                    the string with HTML you wish to filter
-     * @param $tag_list                see description above
-     * @param $rm_tags_with_content see description above
-     * @param $self_closing_tags    see description above
-     * @param $force_tag_closing    see description above
-     * @param $rm_attnames            see description above
-     * @param $bad_attvals            see description above
-     * @param $add_attr_to_tag        see description above
-     * @return                        tln_sanitized html safe to show on your pages.
+     * @param string $body                    the string with HTML you wish to filter
+     * @param array $tag_list                see description above
+     * @param array $rm_tags_with_content see description above
+     * @param array $self_closing_tags    see description above
+     * @param bool $force_tag_closing    see description above
+     * @param array $rm_attnames            see description above
+     * @param array $bad_attvals            see description above
+     * @param array $add_attr_to_tag        see description above
+     * @return string                       tln_sanitized html safe to show on your pages.
      */
     public static function tln_sanitize($body,
                           $tag_list,
@@ -636,12 +634,11 @@ class htmlfilter
          * &{alert('boo')};
          */
         $body = preg_replace('/&(\{.*?\};)/si', '&amp;\\1', $body);
-        while (($curtag = tln_getnxtag($body, $curpos)) != FALSE) {
+        while (($curtag = self::tln_getnxtag($body, $curpos)) != FALSE) {
             list($tagname, $attary, $tagtype, $lt, $gt) = $curtag;
             $free_content = substr($body, $curpos, $lt - $curpos);
             if ($skip_content == false) {
                 $trusted .= $free_content;
-            } else {
             }
             if ($tagname != FALSE) {
                 if ($tagtype == 2) {
@@ -660,7 +657,6 @@ class htmlfilter
                             } else {
                                 $tagname = false;
                             }
-                        } else {
                         }
                     }
                 } else {
@@ -704,7 +700,7 @@ class htmlfilter
                                  * This is where we run other checks.
                                  */
                                 if (is_array($attary) && sizeof($attary) > 0) {
-                                    $attary = tln_fixatts($tagname,
+                                    $attary = self::tln_fixatts($tagname,
                                         $attary,
                                         $rm_attnames,
                                         $bad_attvals,
@@ -712,13 +708,11 @@ class htmlfilter
                                 }
                             }
                         }
-                    } else {
                     }
                 }
                 if ($tagname != false && $skip_content == false) {
-                    $trusted .= tln_tagprint($tagname, $attary, $tagtype);
+                    $trusted .= self::tln_tagprint($tagname, $attary, $tagtype);
                 }
-            } else {
             }
             $curpos = $gt + 1;
         }
@@ -742,12 +736,12 @@ class htmlfilter
 
 
     /**
-     * @param $body
-     * @param $trans_image_path
+     * @param string $body
+     * @param string $trans_image_path
      * @param bool $block_external_images
-     * @return tln_sanitized
+     * @return string tln_sanitized
      */
-    public static function HTMLFilter($body, $trans_image_path, $block_external_images = false)
+    public function __construct($body, $trans_image_path, $block_external_images = false)
     {
 
         $tag_list = [
@@ -872,7 +866,7 @@ class htmlfilter
                 ['target' => '"_blank"']
         ];
 
-        $trusted = tln_sanitize($body,
+        $trusted = self::tln_sanitize($body,
             $tag_list,
             $rm_tags_with_content,
             $self_closing_tags,

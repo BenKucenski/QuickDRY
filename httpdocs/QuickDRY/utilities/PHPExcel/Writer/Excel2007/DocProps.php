@@ -210,7 +210,7 @@ class PHPExcel_Writer_Excel2007_DocProps extends PHPExcel_Writer_Excel2007_Write
 	{
 		$customPropertyList = $pPHPExcel->getProperties()->getCustomProperties();
 		if (count($customPropertyList) == 0) {
-			return;
+			return null;
 		}
 
 		// Create XML writer

@@ -56,7 +56,7 @@ class PHPExcel_CachedObjectStorage_APC extends PHPExcel_CachedObjectStorage_Cach
      *
      *	@param	string			$pCoord		Coordinate address of the cell to update
      *	@param	PHPExcel_Cell	$cell		Cell to update
-	 *	@return	void
+	 *	@return	PHPExcel_Cell
      *	@throws	Exception
      */
 	public function addCacheData($pCoord, PHPExcel_Cell $cell) {

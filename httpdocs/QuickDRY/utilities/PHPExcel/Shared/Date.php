@@ -74,7 +74,7 @@ class PHPExcel_Shared_Date
     /**
      * Convert a date from Excel to PHP
      *
-     * @param int|long $dateValue Excel date/time value
+     * @param int $dateValue Excel date/time value
      * @return long PHP serialized date/time
      */
 	public static function ExcelToPHP($dateValue = 0) {
@@ -110,8 +110,8 @@ class PHPExcel_Shared_Date
     /**
      * Convert a date from Excel to a PHP Date/Time object
      *
-     * @param int|long $dateValue Excel date/time value
-     * @return long PHP date/time object
+     * @param int $dateValue Excel date/time value
+     * @return DateTime PHP date/time object
      */
 	public static function ExcelToPHPObject($dateValue = 0) {
 		$dateTime = self::ExcelToPHP($dateValue);
@@ -157,13 +157,13 @@ class PHPExcel_Shared_Date
     /**
      * FormattedPHPToExcel
      *
-     * @param    long $year
-     * @param    long $month
-     * @param    long $day
-     * @param int|long $hours
-     * @param int|long $minutes
-     * @param int|long $seconds
-     * @return long Excel date/time value
+     * @param    int $year
+     * @param    int $month
+     * @param    int $day
+     * @param int $hours
+     * @param int $minutes
+     * @param int $seconds
+     * @return int Excel date/time value
      */
 	public static function FormattedPHPToExcel($year, $month, $day, $hours=0, $minutes=0, $seconds=0) {
 		if (self::$ExcelBaseDate == self::CALENDAR_WINDOWS_1900) {

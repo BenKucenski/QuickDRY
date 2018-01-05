@@ -15,14 +15,14 @@ class Services_Twilio_AutoPagingIterator
         $this->size = $size;
         $this->filters = $filters;
 		$this->next_page_uri = null;
-        $this->items = array();
+        $this->items = [];
 
         // Save a backup for rewind()
-        $this->_args = array(
+        $this->_args = [
             'page' => $page,
             'size' => $size,
             'filters' => $filters,
-        );
+        ];
     }
 
     public function current()
@@ -39,6 +39,10 @@ class Services_Twilio_AutoPagingIterator
      * Return the next item in the list, making another HTTP call to the next
      * page of resources if necessary.
      */
+    /**
+     * @return []
+     * @throws Services_Twilio_RestException
+     */
     public function next()
     {
         try {
@@ -51,6 +55,7 @@ class Services_Twilio_AutoPagingIterator
                 throw $e;
             }
         }
+        return null;
     }
 
     /*

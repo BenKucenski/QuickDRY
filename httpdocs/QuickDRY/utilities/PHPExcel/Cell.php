@@ -101,7 +101,7 @@ class PHPExcel_Cell
 
 	/**
 	 * Send notification to the cache controller
-	 * @return void
+	 * @return PHPExcel_Cell
 	 **/
 	public function notifyCacheController() {
 		$this->_parent->getCellCacheController()->updateCacheData($this);
