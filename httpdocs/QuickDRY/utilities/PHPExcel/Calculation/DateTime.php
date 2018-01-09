@@ -1199,14 +1199,14 @@ class PHPExcel_Calculation_DateTime
         switch (PHPExcel_Calculation_Functions::getReturnDateType()) {
             case PHPExcel_Calculation_Functions::RETURNDATE_EXCEL :
                 return (float)PHPExcel_Shared_Date::PHPToExcel($PHPDateObject);
-                break;
+
             case PHPExcel_Calculation_Functions::RETURNDATE_PHP_NUMERIC :
                 return (integer)PHPExcel_Shared_Date::ExcelToPHP(PHPExcel_Shared_Date::PHPToExcel($PHPDateObject));
-                break;
+
             case PHPExcel_Calculation_Functions::RETURNDATE_PHP_OBJECT :
                 return $PHPDateObject;
-                break;
         }
+        return null;
     }    //	function EDATE()
 
 

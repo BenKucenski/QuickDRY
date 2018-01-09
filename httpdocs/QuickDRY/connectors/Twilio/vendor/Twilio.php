@@ -33,6 +33,15 @@ abstract class Base_Services_Twilio extends Services_Twilio_Resource
     protected $version;
     protected $versions = array('2010-04-01');
 
+    /**
+     * Base_Services_Twilio constructor.
+     * @param $sid
+     * @param $token
+     * @param null $version
+     * @param Services_Twilio_TinyHttp|null $_http
+     * @param int $retryAttempts
+     * @throws Services_Twilio_HttpException
+     */
     public function __construct(
         $sid,
         $token,
@@ -172,6 +181,13 @@ abstract class Base_Services_Twilio extends Services_Twilio_Resource
      * :return: The object representation of the resource
      * :rtype: object
      */
+    /**
+     * @param $path
+     * @param array $params
+     * @param bool $full_uri
+     * @return bool|mixed
+     * @throws Services_Twilio_RestException
+     */
     public function createData($path, $params = array(), $full_uri = false)
     {
 		if (!$full_uri) {
@@ -263,6 +279,13 @@ abstract class Base_Services_Twilio extends Services_Twilio_Resource
      * :return: The object representation of the resource
      * :rtype: object
      */
+    /**
+     * @param $callable
+     * @param $uri
+     * @param $retriesLeft
+     * @return bool|mixed
+     * @throws Services_Twilio_RestException
+     */
     protected function _makeIdempotentRequest($callable, $uri, $retriesLeft)
     {
         $response = call_user_func_array($callable, array($uri));
@@ -283,6 +306,11 @@ abstract class Base_Services_Twilio extends Services_Twilio_Resource
      * :rtype: object
      * :throws: A :php:class:`Services_Twilio_RestException` if the Response is
      *      in the 300-500 range of status codes.
+     */
+    /**
+     * @param $response
+     * @return bool|mixed
+     * @throws Services_Twilio_RestException
      */
     private function _processResponse($response)
     {

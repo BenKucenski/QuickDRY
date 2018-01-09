@@ -1963,6 +1963,7 @@ class PHPExcel_Calculation_Statistical {
 		$aArgs = PHPExcel_Calculation_Functions::flattenArray(func_get_args());
 
 		// Calculate
+        /* @var $entry int */
 		$entry = floor(array_pop($aArgs));
 
 		if ((is_numeric($entry)) && (!is_string($entry))) {
@@ -2680,6 +2681,7 @@ class PHPExcel_Calculation_Statistical {
 				sort($mArgs);
 				$count = self::COUNT($mArgs);
 				$index = $entry * ($count-1);
+				/* @var int $iBase */
 				$iBase = floor($index);
 				if ($index == $iBase) {
 					return $mArgs[$index];

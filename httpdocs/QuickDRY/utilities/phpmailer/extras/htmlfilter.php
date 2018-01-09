@@ -46,7 +46,6 @@ class htmlfilter
 {
     public static function tln_tagprint($tagname, $attary, $tagtype)
     {
-        $me = 'tln_tagprint';
         if ($tagtype == 2) {
             $fulltag = '</' . $tagname . '>';
         } else {
@@ -90,7 +89,6 @@ class htmlfilter
      */
     public static function tln_skipspace($body, $offset)
     {
-        $me = 'tln_skipspace';
         preg_match('/^(\s*)/s', substr($body, $offset), $matches);
         if (sizeof($matches[1])) {
             $count = strlen($matches[1]);
@@ -112,7 +110,6 @@ class htmlfilter
      */
     public static function tln_findnxstr($body, $offset, $needle)
     {
-        $me = 'tln_findnxstr';
         $pos = strpos($body, $needle, $offset);
         if ($pos === FALSE) {
             $pos = strlen($body);
@@ -135,7 +132,6 @@ class htmlfilter
      */
     public static function tln_findnxreg($body, $offset, $reg)
     {
-        $me = 'tln_findnxreg';
         $matches = [];
         $retarr = [];
         $preg_rule = '%^(.*?)(' . $reg . ')%s';
@@ -166,7 +162,6 @@ class htmlfilter
      */
     public static function tln_getnxtag($body, $offset)
     {
-        $me = 'tln_getnxtag';
         if ($offset > strlen($body)) {
             return false;
         }
@@ -192,7 +187,7 @@ class htmlfilter
          * 3. XHTML-style content-less tag, e.g.:
          *      <img src="blah"/>
          */
-        $tagtype = false;
+        //$tagtype = false;
         switch (substr($body, $pos, 1)) {
             case '/':
                 $tagtype = 2;
@@ -224,7 +219,7 @@ class htmlfilter
                 break;
         }
 
-        $tag_start = $pos;
+        //$tag_start = $pos;
         $tagname = '';
         /**
          * Look for next [\W-_], which will indicate the end of the tag name.
@@ -283,8 +278,8 @@ class htmlfilter
          *
          * At this point we loop in order to find all attributes.
          */
-        $attname = '';
-        $atttype = false;
+        //$attname = '';
+        //$atttype = false;
         $attary = [];
 
         while ($pos <= strlen($body)) {
@@ -453,8 +448,6 @@ class htmlfilter
      */
     public static function tln_deent(&$attvalue, $regex, $hex = false)
     {
-        $me = 'tln_deent';
-        $ret_match = false;
         preg_match_all($regex, $attvalue, $matches);
         if (is_array($matches) && sizeof($matches[0]) > 0) {
             $repl = [];
@@ -481,7 +474,6 @@ class htmlfilter
      */
     public static function tln_defang(&$attvalue)
     {
-        $me = 'tln_defang';
         /**
          * Skip this if there aren't ampersands or backslashes.
          */
@@ -509,7 +501,6 @@ class htmlfilter
      */
     public static function tln_unspace(&$attvalue)
     {
-        $me = 'tln_unspace';
         if (strcspn($attvalue, "\t\r\n\0 ") != strlen($attvalue)) {
             $attvalue = str_replace(["\t", "\r", "\n", "\0", " "],
                 ['', '', '', '', ''], $attvalue);
@@ -533,7 +524,6 @@ class htmlfilter
                          $add_attr_to_tag
     )
     {
-        $me = 'tln_fixatts';
         while (list($attname, $attvalue) = each($attary)) {
             /**
              * See if this attribute should be removed.
@@ -612,7 +602,6 @@ class htmlfilter
                           $add_attr_to_tag
     )
     {
-        $me = 'tln_sanitize';
         /**
          * Normalize rm_tags and rm_tags_with_content.
          */

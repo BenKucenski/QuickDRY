@@ -45,7 +45,6 @@ class MSAccess
 		$returnval['sql'] = $sql;
 		$returnval['params'] = $params;
 		
-		$list = [];
 		try {
 			if(!$this->conn)
 				exit('database failure');
@@ -56,7 +55,7 @@ class MSAccess
 			$stmt->execute($params);
 		}
 		catch (Exception $e) {
-			Debug($e);
+			Debug::Halt($e);
 		}
 		$returnval['data'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$returnval['numrows'] = count($returnval['data']);

@@ -2,6 +2,12 @@
 
 class Strings extends SafeClass
 {
+    public static function RemoveFromStart($remove, $string)
+    {
+        $remove_length = strlen($remove);
+
+        return substr($string, $remove_length, strlen($string) - $remove_length);
+    }
     /**
      * @param int $err_code
      * @return string

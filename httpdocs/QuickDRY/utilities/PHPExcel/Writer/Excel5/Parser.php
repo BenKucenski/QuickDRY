@@ -584,6 +584,7 @@ class PHPExcel_Writer_Excel5_Parser
      * @access private
      * @param mixed $num an integer or double for conversion to its ptg value
      * @return string
+     * @throws Exception
      */
 	function _convertNumber($num)
 	{

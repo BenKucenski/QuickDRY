@@ -191,7 +191,7 @@ class MySQL_Core extends SQL_Base
 
     /**
      * @param $col
-     * @param $val
+     * @param string $val
      *
      * @return array
      */
@@ -207,7 +207,7 @@ class MySQL_Core extends SQL_Base
         // adding a space to ensure that "in_" is not mistaken for an IN query
         // and the parameter must START with the special SQL command
         if (substr($val, 0, 3) === 'IN ') {
-            $val = explode(',', trim(str_replace('IN', '', $val)));
+            $val = explode(',', trim(Strings::RemoveFromStart('IN', $val)));
             if (($key = array_search('null', $val)) !== false) {
                 $col = '(' . $col . ' IS NULL OR ' . $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val) - 1) . '))';
                 unset($val[$key]);
@@ -217,30 +217,30 @@ class MySQL_Core extends SQL_Base
         } else
             if (substr($val, 0, 6) === 'NLIKE ') {
                 $col = $col . ' NOT LIKE {{}} ';
-                $val = trim(str_replace('NLIKE', '', $val));
+                $val = trim(Strings::RemoveFromStart('NLIKE', $val));
             } else
                 if (substr($val, 0, 7) === 'NILIKE ') {
                     $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
-                    $val = strtolower(trim(str_replace('NILIKE', '', $val)));
+                    $val = strtolower(trim(Strings::RemoveFromStart('NILIKE', $val)));
                 } else
                     if (substr($val, 0, 6) === 'ILIKE ') {
                         $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
-                        $val = strtotlower(trim(str_replace('ILIKE', '', $val)));
+                        $val = strtolower(trim(Strings::RemoveFromStart('ILIKE', $val)));
                     } else
                         if (substr($val, 0, 5) === 'LIKE ') {
                             $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
-                            $val = trim(str_replace('LIKE', '', $val));
+                            $val = trim(Strings::RemoveFromStart('LIKE', $val));
                         } else
                             if (stristr($val, '<=') !== false) {
                                 $col = $col . ' <= {{}} ';
-                                $val = trim(str_replace('<=', '', $val));
+                                $val = trim(Strings::RemoveFromStart('<=', $val));
                             } else
                                 if (stristr($val, '>=') !== false) {
                                     $col = $col . ' >= {{}} ';
-                                    $val = trim(str_replace('>=', '', $val));
+                                    $val = trim(Strings::RemoveFromStart('>=', $val));
                                 } else
                                     if (stristr($val, '<>') !== false) {
-                                        $val = trim(str_replace('<>', '', $val));
+                                        $val = trim(Strings::RemoveFromStart('<>', $val));
                                         if ($val !== 'null')
                                             $col = $col . ' <> {{}} ';
                                         else
@@ -248,11 +248,11 @@ class MySQL_Core extends SQL_Base
                                     } else
                                         if (stristr($val, '<') !== false) {
                                             $col = $col . ' < {{}} ';
-                                            $val = trim(str_replace('<', '', $val));
+                                            $val = trim(Strings::RemoveFromStart('<', $val));
                                         } else
                                             if (stristr($val, '>') !== false) {
                                                 $col = $col . ' > {{}} ';
-                                                $val = trim(str_replace('>', '', $val));
+                                                $val = trim(Strings::RemoveFromStart('>', $val));
                                             } else {
                                                 if (strtolower($val) !== 'null') {
                                                     $col = $col . ' = {{}} ';
@@ -320,12 +320,14 @@ class MySQL_Core extends SQL_Base
     {
         $params = [];
 
-        $sql_order = '';
+        $sql_order = [];
         if (is_array($order_by)) {
             foreach ($order_by as $col => $dir) {
                 $sql_order[] .= '`' . trim($col) . '` ' . $dir;
             }
             $sql_order = 'ORDER BY ' . implode(', ', $sql_order);
+        } else {
+            $sql_order = '';
         }
 
         $sql_where = '1=1';
@@ -463,8 +465,6 @@ class MySQL_Core extends SQL_Base
                     . "\r\n";
             }
         }
-
-        $primary = isset(static::$_primary) ? static::$_primary[0] : 'id';
 
         if (!$limit) {
             $sql = '
@@ -648,14 +648,16 @@ class MySQL_Core extends SQL_Base
                 continue;
             }
 
-            if (!is_null($CurrentUser))
+            /**
+            if (!is_null($CurrentUser)) {
                 if (static::$prop_definitions[$name]['type'] === 'datetime') {
                     if ($value) {
                         // this is where we can auto adjust time entries in the database
                         //$value = Timestamp(strtotime(Timestamp($value)) - $CurrentUser->hours_diff * 3600);
                     }
                 }
-
+            }
+            **/
             $st_value = static::StrongType($name, $value);
 
             if (strcmp($name, $primary) == 0 && $this->$primary && !$force_insert) continue;

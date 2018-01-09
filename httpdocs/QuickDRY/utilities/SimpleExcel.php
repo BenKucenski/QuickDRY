@@ -170,7 +170,12 @@ class SimpleExcel extends SafeClass
     {
         $objPHPExcel = new \PHPExcel();
 
-        $objPHPExcel->setActiveSheetIndex(0);
+        try {
+            $objPHPExcel->setActiveSheetIndex(0);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+
         $objPHPExcel->getActiveSheet()->setTitle($report->Title);
         $sheet_row = 1;
 

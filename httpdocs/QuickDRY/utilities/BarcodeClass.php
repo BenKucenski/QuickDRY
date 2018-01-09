@@ -38,7 +38,7 @@ class BarcodeClass
 		$img = imagecreate($width, $height);
 	
 		// First call to imagecolorallocate is the background color
-		$white = imagecolorallocate($img, 255, 255, 255);
+		//$white = imagecolorallocate($img, 255, 255, 255);
 		$black = imagecolorallocate($img, 0, 0, 0);
 	
 		// Reference for the imagettftext() function

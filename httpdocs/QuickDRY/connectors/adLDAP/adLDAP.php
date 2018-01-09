@@ -164,6 +164,9 @@ class adLDAP
      *
      * This will throw an exception for security reasons
      */
+    /**
+     * @throws adLDAPException
+     */
     public function get_ad_username()
     {
         throw new adLDAPException('For security reasons you cannot access the domain administrator account details');
@@ -184,6 +187,9 @@ class adLDAP
      * Get the password of the account with higher priviledges
      *
      * This will throw an exception for security reasons
+     */
+    /**
+     * @throws adLDAPException
      */
     public function get_ad_password()
     {
@@ -988,7 +994,7 @@ class adLDAP
      * Delete a user account
      *
      * @param string $username The username to delete (please be careful here!)
-     * @return array
+     * @return bool
      */
     public function user_delete($username)
     {
@@ -996,9 +1002,9 @@ class adLDAP
         $dn = $userinfo[0]['distinguishedname'][0];
         $result = $this->dn_delete($dn);
         if ($result != true) {
-            return null;
+            return false;
         }
-        return (true);
+        return true;
     }
 
     /**
@@ -1272,7 +1278,11 @@ class adLDAP
             return ("Missing compulsory field [username]");
         }
         $attributes = ["enabled" => 1];
-        $result = $this->user_modify($username, $attributes);
+        try {
+            $result = $this->user_modify($username, $attributes);
+        } catch(Exception $ex) {
+            Debug::Halt($ex);
+        }
         if ($result == false) {
             return null;
         }
@@ -1545,15 +1555,15 @@ class adLDAP
      * Delete a contact
      *
      * @param string $distinguishedname The contact dn to delete (please be careful here!)
-     * @return array
+     * @return bool
      */
     public function contact_delete($distinguishedname)
     {
         $result = $this->dn_delete($distinguishedname);
         if ($result != true) {
-            return null;
+            return false;
         }
-        return (true);
+        return true;
     }
 
     /**
@@ -1669,7 +1679,7 @@ class adLDAP
             }
         }
 
-        return false;
+        return null;
     }
 
     //*****************************************************************************************************************
@@ -1815,7 +1825,11 @@ class adLDAP
             'exchange_mailnickname' => $mailnickname,
             'exchange_usedefaults' => $mdbUseDefaults
         ];
-        $result = $this->user_modify($username, $attributes);
+        try {
+            $result = $this->user_modify($username, $attributes);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         if ($result == false) {
             return null;
         }
@@ -2261,7 +2275,6 @@ class adLDAP
         if ($gid === NULL || $usersid === NULL) {
             return null;
         }
-        $r = false;
 
         $gsid = substr_replace($usersid, pack('V', $gid), strlen($usersid) - 4, 4);
         $filter = '(objectsid=' . $this->getTextSID($gsid) . ')';

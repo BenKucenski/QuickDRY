@@ -805,9 +805,17 @@ class PHPExcel_Calculation_MathTrig {
 			$roman .= 'M';
 			$aValue -= 1000;
 		}
-		$m = self::_romanCut($aValue, 1000);	$aValue %= 1000;
-		$c = self::_romanCut($aValue, 100);		$aValue %= 100;
-		$t = self::_romanCut($aValue, 10);		$aValue %= 10;
+		/* @var $m int */
+		$m = self::_romanCut($aValue, 1000);
+		$aValue %= 1000;
+
+        /* @var $c int */
+		$c = self::_romanCut($aValue, 100);
+		$aValue %= 100;
+
+        /* @var $t int */
+		$t = self::_romanCut($aValue, 10);
+		$aValue %= 10;
 
 		return $roman.$mill[$m].$cent[$c].$tens[$t].$ones[$aValue];
 	}	//	function ROMAN()

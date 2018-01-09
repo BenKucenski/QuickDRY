@@ -170,6 +170,27 @@ class Date extends SafeClass
      *
      * @return bool|string
      */
+    public static function FancyDateB($date)
+    {
+        if(is_null($date))
+            return '<i>Not Set</i>';
+
+        if(!is_numeric($date)) {
+            $date = Date::Timestamp($date);
+            $date = strtotime($date);
+        }
+
+        if($date == 0)
+            return '<i>Not Set</i>';
+
+        return date('F j, Y', $date);
+    }
+
+    /**
+     * @param $date
+     *
+     * @return bool|string
+     */
     public static function ShortDate($date)
     {
         if($date instanceof DateTime){

@@ -196,7 +196,11 @@ class PHPExcel
     public function createSheet($iSheetIndex = null)
     {
         $newSheet = new PHPExcel_Worksheet($this);
-        $this->addSheet($newSheet, $iSheetIndex);
+        try {
+            $this->addSheet($newSheet, $iSheetIndex);
+        } catch(Exception $ex) {
+            Debug::Halt($ex);
+        }
         return $newSheet;
     }
 
@@ -398,9 +402,13 @@ class PHPExcel
 	{
 		$returnValue = [];
 		$worksheetCount = $this->getSheetCount();
-		for ($i = 0; $i < $worksheetCount; ++$i) {
-			array_push($returnValue, $this->getSheet($i)->getTitle());
-		}
+		try {
+            for ($i = 0; $i < $worksheetCount; ++$i) {
+                array_push($returnValue, $this->getSheet($i)->getTitle());
+            }
+        } catch(Exception $ex) {
+		    Debug::Halt($ex);
+        }
 
 		return $returnValue;
 	}
@@ -451,7 +459,7 @@ class PHPExcel
 	 * Add named range
 	 *
 	 * @param PHPExcel_NamedRange $namedRange
-	 * @return PHPExcel
+	 * @return bool
 	 */
 	public function addNamedRange(PHPExcel_NamedRange $namedRange) {
 		if ($namedRange->getScope() == null) {
@@ -719,82 +727,88 @@ class PHPExcel
 	 */
 	public function garbageCollect()
 	{
-    	// how many references are there to each cellXf ?
-		$countReferencesCellXf = [];
-		foreach ($this->_cellXfCollection as $index => $cellXf) {
-			$countReferencesCellXf[$index] = 0;
-		}
+	    try {
 
-		foreach ($this->getWorksheetIterator() as $sheet) {
 
-			// from cells
-			foreach ($sheet->getCellCollection(false) as $cellID) {
-				$cell = $sheet->getCell($cellID);
-				++$countReferencesCellXf[$cell->getXfIndex()];
-			}
+            // how many references are there to each cellXf ?
+            $countReferencesCellXf = [];
+            foreach ($this->_cellXfCollection as $index => $cellXf) {
+                $countReferencesCellXf[$index] = 0;
+            }
 
-			// from row dimensions
-			foreach ($sheet->getRowDimensions() as $rowDimension) {
-				if ($rowDimension->getXfIndex() !== null) {
-					++$countReferencesCellXf[$rowDimension->getXfIndex()];
-				}
-			}
+            foreach ($this->getWorksheetIterator() as $sheet) {
 
-			// from column dimensions
-			foreach ($sheet->getColumnDimensions() as $columnDimension) {
-				++$countReferencesCellXf[$columnDimension->getXfIndex()];
-			}
-		}
+                // from cells
+                foreach ($sheet->getCellCollection(false) as $cellID) {
+                    $cell = $sheet->getCell($cellID);
+                    ++$countReferencesCellXf[$cell->getXfIndex()];
+                }
 
-		// remove cellXfs without references and create mapping so we can update xfIndex
-		// for all cells and columns
-		$countNeededCellXfs = 0;
-		foreach ($this->_cellXfCollection as $index => $cellXf) {
-			if ($countReferencesCellXf[$index] > 0 || $index == 0) { // we must never remove the first cellXf
-				++$countNeededCellXfs;
-			} else {
-				unset($this->_cellXfCollection[$index]);
-			}
-			$map[$index] = $countNeededCellXfs - 1;
-		}
-		$this->_cellXfCollection = array_values($this->_cellXfCollection);
+                // from row dimensions
+                foreach ($sheet->getRowDimensions() as $rowDimension) {
+                    if ($rowDimension->getXfIndex() !== null) {
+                        ++$countReferencesCellXf[$rowDimension->getXfIndex()];
+                    }
+                }
 
-		// update the index for all cellXfs
-		foreach ($this->_cellXfCollection as $i => $cellXf) {
-			$cellXf->setIndex($i);
-		}
+                // from column dimensions
+                foreach ($sheet->getColumnDimensions() as $columnDimension) {
+                    ++$countReferencesCellXf[$columnDimension->getXfIndex()];
+                }
+            }
 
-		// make sure there is always at least one cellXf (there should be)
-		if (count($this->_cellXfCollection) == 0) {
-			$this->_cellXfCollection[] = new PHPExcel_Style();
-		}
+            // remove cellXfs without references and create mapping so we can update xfIndex
+            // for all cells and columns
+            $countNeededCellXfs = 0;
+            foreach ($this->_cellXfCollection as $index => $cellXf) {
+                if ($countReferencesCellXf[$index] > 0 || $index == 0) { // we must never remove the first cellXf
+                    ++$countNeededCellXfs;
+                } else {
+                    unset($this->_cellXfCollection[$index]);
+                }
+                $map[$index] = $countNeededCellXfs - 1;
+            }
+            $this->_cellXfCollection = array_values($this->_cellXfCollection);
 
-		// update the xfIndex for all cells, row dimensions, column dimensions
-		foreach ($this->getWorksheetIterator() as $sheet) {
+            // update the index for all cellXfs
+            foreach ($this->_cellXfCollection as $i => $cellXf) {
+                $cellXf->setIndex($i);
+            }
 
-			// for all cells
-			foreach ($sheet->getCellCollection(false) as $cellID) {
-				$cell = $sheet->getCell($cellID);
-				$cell->setXfIndex( $map[$cell->getXfIndex()] );
-			}
+            // make sure there is always at least one cellXf (there should be)
+            if (count($this->_cellXfCollection) == 0) {
+                $this->_cellXfCollection[] = new PHPExcel_Style();
+            }
 
-			// for all row dimensions
-			foreach ($sheet->getRowDimensions() as $rowDimension) {
-				if ($rowDimension->getXfIndex() !== null) {
-					$rowDimension->setXfIndex( $map[$rowDimension->getXfIndex()] );
-				}
-			}
+            // update the xfIndex for all cells, row dimensions, column dimensions
+            foreach ($this->getWorksheetIterator() as $sheet) {
 
-			// for all column dimensions
-			foreach ($sheet->getColumnDimensions() as $columnDimension) {
-				$columnDimension->setXfIndex( $map[$columnDimension->getXfIndex()] );
-			}
-		}
+                // for all cells
+                foreach ($sheet->getCellCollection(false) as $cellID) {
+                    $cell = $sheet->getCell($cellID);
+                    $cell->setXfIndex($map[$cell->getXfIndex()]);
+                }
 
-		// also do garbage collection for all the sheets
-		foreach ($this->getWorksheetIterator() as $sheet) {
-			$sheet->garbageCollect();
-		}
+                // for all row dimensions
+                foreach ($sheet->getRowDimensions() as $rowDimension) {
+                    if ($rowDimension->getXfIndex() !== null) {
+                        $rowDimension->setXfIndex($map[$rowDimension->getXfIndex()]);
+                    }
+                }
+
+                // for all column dimensions
+                foreach ($sheet->getColumnDimensions() as $columnDimension) {
+                    $columnDimension->setXfIndex($map[$columnDimension->getXfIndex()]);
+                }
+            }
+
+            // also do garbage collection for all the sheets
+            foreach ($this->getWorksheetIterator() as $sheet) {
+                $sheet->garbageCollect();
+            }
+        } catch(Exception $ex) {
+	        Debug::Halt($ex);
+        }
 	}
 
 }

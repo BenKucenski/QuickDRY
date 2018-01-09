@@ -75,7 +75,7 @@ class HTMLCalendar
 
                     foreach ($days[$day] as $day_info) {
                         $link = isset($day_info['link']) ? $day_info['link'] : null;
-                        $classes = isset($day_info['classes']) ? $day_info['classes'] : null;
+                        //$classes = isset($day_info['classes']) ? $day_info['classes'] : null;
                         $content = isset($day_info['content']) ? $day_info['content'] : null;
 
                         $calendar .= ($link ? '<a href="' . htmlspecialchars($link) . '">' . $content . '</a>' : $content);

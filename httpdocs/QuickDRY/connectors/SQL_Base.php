@@ -155,7 +155,6 @@ class SQL_Base
     /**
      * @param $name
      *
-     * @return int|null
      */
     public function __get($name)
     {
@@ -339,7 +338,7 @@ class SQL_Base
 
     /**
      * @param $name
-     * @param $value
+     * @param string $value
      *
      * @throws Exception
      */
@@ -423,7 +422,7 @@ class SQL_Base
      */
     public static function GetBareHeader($sort_by = '', $dir = '', $modify = false, $add = [], $ignore = [], $add_params = '', $sortable = true, $column_order = [])
     {
-        return static::_GetBareHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order);
+        return static::_GetBareHeader(static::$prop_definitions, $modify, $add, $ignore, $sortable, $column_order);
     }
 
     /**
@@ -653,7 +652,7 @@ class SQL_Base
                     $columns[$name] = '<td>' . $value . '</td>';
                 } else {
                     if($value instanceof DateTime) {
-                        $columns[$name] = '<td>' . Timestamp($value) . '</td>';
+                        $columns[$name] = '<td>' . Date::Timestamp($value) . '</td>';
                     } else {
                         $columns[$name] = '<td><i>Object: </i>' . get_class($value) . '</td>';
                     }
@@ -674,11 +673,9 @@ class SQL_Base
                     $name = $value;
                     $value = $this->$value;
                 }
-                if(is_array($value))
-                    $value = implode(',',$value);
-                $class = 'data_text';
-                if(is_numeric(str_replace('-','',$value)))
-                    $class = 'data_num';
+                if(is_array($value)) {
+                    $value = implode(',', $value);
+                }
 
                 $columns[$name] = '<td>' . $value . '</td>';
             }
@@ -749,7 +746,7 @@ class SQL_Base
                         $value = null;
                     } else {
                         if (strtotime($value)) {
-                            $value = Timestamp(strtotime(Timestamp($value)) + $User->hours_diff * 3600);
+                            $value = Date::Timestamp(strtotime(Date::Timestamp($value)) + $User->hours_diff * 3600);
                         }
                     }
                 }
@@ -894,7 +891,7 @@ class SQL_Base
 
         $items = $type::GetAll($where, $order_by);
 
-        return self::_JQuerySelectItems($items, $selected, $id, $value, $order_by, $display);
+        return self::_JQuerySelectItems($items, $selected, $id, $value, $display);
 
     }
 

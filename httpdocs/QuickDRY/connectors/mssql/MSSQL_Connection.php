@@ -145,10 +145,12 @@ class MSSQL_Connection
 
         $this->_LastConnection['current_db'] = $db_base;
 
+        /**
         if(!$this->_usesqlsrv) {
             //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
         }
 
+         * **/
         /*
             // this query should show "1" for arithabort when run from SSMS
             select
@@ -437,7 +439,6 @@ class MSSQL_Connection
             return $returnval;
         }
         try {
-            $fname = '';
             if ($large) {
                 if(!is_dir('sql')) {
                     mkdir('sql');

@@ -1,5 +1,6 @@
 <?php
 include_once 'JWT.php';
+
 /**
  * Twilio Capability Token generator
  *
@@ -19,8 +20,8 @@ class Services_Twilio_Capability
      * grant access to resources by configuring this token through the
      * functions allowXXXX.
      *
-     * @param $accountSid the account sid to which this token is granted access
-     * @param $authToken the secret key used to sign the token. Note, this auth
+     * @param string $accountSid the account sid to which this token is granted access
+     * @param string $authToken the secret key used to sign the token. Note, this auth
      *        token is not visible to the user of the token.
      */
     public function __construct($accountSid, $authToken)
@@ -28,7 +29,7 @@ class Services_Twilio_Capability
         $this->accountSid = $accountSid;
         $this->authToken = $authToken;
         $this->scopes = array();
-		$this->clientName = false;
+        $this->clientName = false;
     }
 
     /**
@@ -52,7 +53,7 @@ class Services_Twilio_Capability
                 'Client name must not be a zero length string.');
         }
 
-		$this->clientName = $clientName;
+        $this->clientName = $clientName;
         $this->allow('client', 'incoming',
             array('clientName' => $clientName));
     }
@@ -60,11 +61,11 @@ class Services_Twilio_Capability
     /**
      * Allow the user of this token to make outgoing connections.
      *
-     * @param $appSid the application to which this token grants access
-     * @param $appParams signed parameters that the user of this token cannot
+     * @param string $appSid the application to which this token grants access
+     * @param array $appParams signed parameters that the user of this token cannot
      *        overwrite.
      */
-    public function allowClientOutgoing($appSid, array $appParams=array())
+    public function allowClientOutgoing($appSid, array $appParams = array())
     {
         $this->allow('client', 'outgoing', array(
             'appSid' => $appSid,
@@ -76,7 +77,7 @@ class Services_Twilio_Capability
      *
      * @param $filters key/value filters to apply to the event stream
      */
-    public function allowEventStream(array $filters=array())
+    public function allowEventStream(array $filters = array())
     {
         $this->allow('stream', 'subscribe', array(
             'path' => '/2010-04-01/Events',
@@ -102,8 +103,8 @@ class Services_Twilio_Capability
         $scopeStrings = array();
 
         foreach ($this->scopes as $scope) {
-			if ($scope->privilege == "outgoing" && $this->clientName)
-				$scope->params["clientName"] = $this->clientName;
+            if ($scope->privilege == "outgoing" && $this->clientName)
+                $scope->params["clientName"] = $this->clientName;
             $scopeStrings[] = $scope->toString();
         }
 
@@ -111,7 +112,8 @@ class Services_Twilio_Capability
         return JWT::encode($payload, $this->authToken, 'HS256');
     }
 
-    protected function allow($service, $privilege, $params) {
+    protected function allow($service, $privilege, $params)
+    {
         $this->scopes[] = new ScopeURI($service, $privilege, $params);
     }
 }
@@ -146,7 +148,7 @@ class ScopeURI
     {
         $uri = "scope:{$this->service}:{$this->privilege}";
         if (count($this->params)) {
-            $uri .= "?".http_build_query($this->params, '', '&');
+            $uri .= "?" . http_build_query($this->params, '', '&');
         }
         return $uri;
     }
@@ -154,7 +156,7 @@ class ScopeURI
     /**
      * Parse a scope URI into a ScopeURI object
      *
-     * @param string    $uri  The scope URI
+     * @param string $uri The scope URI
      * @return ScopeURI The parsed scope uri
      */
     public static function parse($uri)

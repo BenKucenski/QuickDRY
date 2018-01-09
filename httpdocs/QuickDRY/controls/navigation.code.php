@@ -20,7 +20,7 @@ $_NAVIGATION->SetMenu($_MENU);
 /* // example permissions checking - should be done in your index.php file or wherever this file is included
 if(!$_NAVIGATION->CheckPermissions(CURRENT_PAGE, true)) {
     if(!$CurrentUser || !$CurrentUser->id) {
-        RedirectNotice('Please Sign In', '/signin');
+        HTTP::RedirectNotice('Please Sign In', '/signin');
     }
     CleanHalt([$CurrentUser->Roles, MenuAccess::GetPageRoles(CURRENT_PAGE)]);
 }

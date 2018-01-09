@@ -34,6 +34,12 @@ class Services_Twilio_HttpStream {
         }
     }
 
+    /**
+     * @param $name
+     * @param $args
+     * @return array
+     * @throws Services_Twilio_HttpStreamException
+     */
     public function __call($name, $args) {
         list($res, $req_headers, $req_body) = $args + array(0, array(), '');
 

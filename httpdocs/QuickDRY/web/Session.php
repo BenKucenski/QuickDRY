@@ -74,17 +74,19 @@ class Session
      */
     public function __unset($name)
 	{
-        return static::Clear($name);
+        static::Clear($name);
 	}
 
     /**
      * @param $name
      * @param $value
+     * @return mixed
      */
     public static function Set($name, $value)
     {
         $_SESSION[$name] = serialize($value);
         static::$_VALS[$name] = $_SESSION[$name];
+        return $value;
     }
 
     /**

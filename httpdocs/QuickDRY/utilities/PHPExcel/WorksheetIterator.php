@@ -79,6 +79,7 @@ class PHPExcel_WorksheetIterator extends CachingIterator
      * Current PHPExcel_Worksheet
      *
      * @return PHPExcel_Worksheet
+     * @throws Exception
      */
     public function current() {
     	return $this->_subject->getSheet($this->_position);

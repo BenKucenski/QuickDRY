@@ -195,7 +195,9 @@ class OAuthRequest {
     }
 
     /**
-     * builds the Authorization: header
+     * @param null $realm
+     * @return string
+     * @throws OAuthException
      */
     public function to_header($realm=null) {
         $first = true;
@@ -205,9 +207,10 @@ class OAuthRequest {
         } else
             $out = 'Authorization: OAuth';
 
-        $total = array();
         foreach ($this->parameters as $k => $v) {
-            if (substr($k, 0, 5) != "oauth") continue;
+            if (substr($k, 0, 5) != "oauth") {
+                continue;
+            }
             if (is_array($v)) {
                 throw new OAuthException('Arrays not supported in headers');
             }

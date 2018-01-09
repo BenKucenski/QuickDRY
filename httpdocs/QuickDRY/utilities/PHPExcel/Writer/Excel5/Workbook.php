@@ -255,8 +255,8 @@ class PHPExcel_Writer_Excel5_Workbook extends PHPExcel_Writer_Excel5_BIFFwriter
 	/**
 	 * Add a new XF writer
 	 *
-	 * @param PHPExcel_Style
-	 * @param boolean Is it a style XF?
+	 * @param PHPExcel_Style $style
+	 * @param boolean $isStyleXf Is it a style XF?
 	 * @return int Index to XF record
 	 */
 	public function addXfWriter($style, $isStyleXf = false)

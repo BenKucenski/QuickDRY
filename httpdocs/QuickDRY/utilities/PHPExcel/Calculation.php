@@ -3171,7 +3171,7 @@ class PHPExcel_Calculation {
 								$result = '#VALUE!';
 							}
 						} else {
-							$result = '"'.str_replace('""','"',self::_unwrapResult($operand1,'"').self::_unwrapResult($operand2,'"')).'"';
+							$result = '"'.str_replace('""','"',self::_unwrapResult($operand1).self::_unwrapResult($operand2)).'"';
 						}
 						$this->_writeDebug('Evaluation Result is '.$this->_showTypeDetails($result));
 						$stack->push('Value',$result);
@@ -3666,6 +3666,7 @@ class PHPExcel_Calculation {
      * @param    PHPExcel_Worksheet $pSheet Worksheet
      * @param bool $resetLog
      * @return mixed Array of values in range if range contains more than one element. Otherwise, a single value is returned.
+     * @throws Exception
      */
 	public function extractCellRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = null, $resetLog=true) {
 		// Return value
@@ -3722,6 +3723,7 @@ class PHPExcel_Calculation {
      * @param    PHPExcel_Worksheet $pSheet Worksheet
      * @param bool $resetLog
      * @return mixed Array of values in range if range contains more than one element. Otherwise, a single value is returned.
+     * @throws Exception
      */
 	public function extractNamedRange(&$pRange = 'A1', PHPExcel_Worksheet $pSheet = null, $resetLog=true) {
 		// Return value

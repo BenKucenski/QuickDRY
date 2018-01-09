@@ -39,6 +39,7 @@ function money2num(strMoney) {
 function num2money(n_value, prefix, elementId, dec, retval) {
     dec = (dec) ? dec : false;
     var oNval = n_value.toString();
+    var elem = null;
 
     if (typeof(n_value) === "string") {
         n_value = money2num(n_value);
@@ -47,7 +48,7 @@ function num2money(n_value, prefix, elementId, dec, retval) {
 
     if (n_value === "") {
         if (elementId != null) {
-            var elem = $("#" + elementId);
+            elem = $("#" + elementId);
             if (elem.type === "text") {
                 if (retval) {
                     elem.val("");
@@ -98,10 +99,12 @@ function num2money(n_value, prefix, elementId, dec, retval) {
         s_result = s_result.substring(0, s_result.indexOf("."));
     }
     if (elementId != null) {
-        if ($("#" + elementId).type == "text")
-            $("#" + elementId).val(b_negative ? '-' + pre + s_result + '' : pre + s_result);
-        else
-            $("#" + elementId).html(b_negative ? '-' + pre + s_result + '' : pre + s_result);
+        elem = $("#" + elementId);
+        if (elem.type == "text") {
+            elem.val(b_negative ? '-' + pre + s_result + '' : pre + s_result);
+        } else {
+            elem.html(b_negative ? '-' + pre + s_result + '' : pre + s_result);
+        }
     }
     return b_negative
         ? '-' + pre + s_result + ''
@@ -184,13 +187,6 @@ function _ToggleRecentMessages(data) {
         window.location = '/inbox';
 }
 
-function ToggleRecentMessages() {
-    if ($('#inbox_list').html() == '')
-        LoadHTML('/inbox/get_recent.json', {}, 'inbox_list', '_ToggleRecentMessages', true);
-    else
-        $('#inbox_list').html('');
-}
-
 function trim(stringToTrim) {
     return stringToTrim.replace(/^\s+|\s+$/g, "");
 }
@@ -212,7 +208,7 @@ var fixHelper = function (e, ui) {
 };
 
 function SetCookie(name, value, expires) {
-    if (expires * 1.0 == 0)
+    if (expires * 1.0 === 0.0)
         expires = 365;
 
     $.cookie(name, value, {
@@ -244,7 +240,7 @@ function ClearForm(form_id, clear_hidden) {
     });
 
     // reset doesn't clear out hidden fields, so this has to be done separately
-    if (typeof(clear_hidden) == "undefined" || clear_hidden)
+    if (typeof(clear_hidden) === "undefined" || clear_hidden)
         $('#' + form_id + ' input[type=hidden]').each(function () {
             $(this).val('');
         });
@@ -253,7 +249,7 @@ function ClearForm(form_id, clear_hidden) {
 var _last_tab = 0;
 
 function ShowSideTab(id) {
-    if (_last_tab != id) {
+    if (_last_tab !== id) {
         $('#side_tab_' + _last_tab).removeClass('active');
         $('#side_content_' + _last_tab).hide();
     }

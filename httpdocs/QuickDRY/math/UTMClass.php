@@ -228,7 +228,7 @@ class UTMClass
         /* Precalculate t */
         $t = tan($phi);
         $t2 = $t * $t;
-        $tmp = ($t2 * $t2 * $t2) - pow($t, 6.0);
+        //$tmp = ($t2 * $t2 * $t2) - pow($t, 6.0);
 
         /* Precalculate l */
         $l = $lambda - $lambda0;

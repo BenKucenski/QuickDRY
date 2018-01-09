@@ -201,6 +201,7 @@ class PHPExcel_Cell
 	 * Get cell value with formatting
 	 *
 	 * @return string
+     * @throws Exception
 	 */
 	public function getFormattedValue()
 	{
@@ -480,6 +481,7 @@ class PHPExcel_Cell
 	 *
 	 * @param	string	$pRange		Cell range (e.g. A1:A1)
 	 * @return	boolean
+     * @throws Exception
 	 */
 	public function isInRange($pRange = 'A1:A1')
 	{
@@ -603,6 +605,7 @@ class PHPExcel_Cell
 	 *
 	 * @param	string	$pRange		Cell range (e.g. A1:A1)
 	 * @return	array	Range coordinates (Start Cell, End Cell) where Start Cell and End Cell are arrays (Column Number, Row Number)
+     * @throws Exception
 	 */
 	public static function rangeBoundaries($pRange = 'A1:A1')
 	{
@@ -632,6 +635,7 @@ class PHPExcel_Cell
 	 *
 	 * @param	string	$pRange		Cell range (e.g. A1:A1)
 	 * @return	array	Range dimension (width, height)
+     * @throws Exception
 	 */
 	public static function rangeDimension($pRange = 'A1:A1')
 	{
@@ -646,6 +650,7 @@ class PHPExcel_Cell
 	 *
 	 * @param	string	$pRange		Cell range (e.g. A1:A1)
 	 * @return	array	Range boundaries (staring Column, starting Row, Final Column, Final Row)
+     * @throws Exception
 	 */
 	public static function getRangeBoundaries($pRange = 'A1:A1')
 	{

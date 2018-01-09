@@ -131,7 +131,12 @@ function ColumnTypeToProperty($col_type)
         case 'numeric':
         case 'tinyint':
         case 'smallint':
+        case 'bit':
             return 'int';
+
+        case 'money':
+        case 'decimal':
+            return 'float';
 
         case 'smalldatetime':
             return 'datetime';

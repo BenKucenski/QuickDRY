@@ -175,7 +175,7 @@ class FineDiff {
                 while ( $end < $from_len && (ord($from[$end]) & 0xC0) === 0x80 ) { $end++; }
                 if ( $opcode === 'c' ) { // copy n characters from source
                     call_user_func($callback, 'c', $from, $beg, $end - $beg, '');
-                    $last_to_chars = substr($from, $from, $beg, $end - $beg);
+                    $last_to_chars = substr($from, $beg, $end - $beg);
                 }
                 else /* if ( $opcode === 'd' ) */ { // delete n characters from source
                     call_user_func($callback, 'd', $from, $beg, $end - $beg, '');

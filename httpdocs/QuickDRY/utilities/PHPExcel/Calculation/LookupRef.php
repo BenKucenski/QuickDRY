@@ -179,7 +179,7 @@ class PHPExcel_Calculation_LookupRef {
      *        reference of the cell in which the ROW function appears; otherwise this function returns 0.
      *
      * @param string|null $cellAddress
-     * @return int or array of integer
+     * @return int|array or array of integer
      * @internal param A $cellAddress reference to a range of cells for which you want the row numbers
      */
 	public static function ROW($cellAddress=Null) {
@@ -209,6 +209,7 @@ class PHPExcel_Calculation_LookupRef {
 				return (integer) preg_replace('/[^0-9]/','',$cellAddress);
 			}
 		}
+		return null;
 	}	//	function ROW()
 
 
@@ -423,6 +424,7 @@ class PHPExcel_Calculation_LookupRef {
 		} else {
 			return PHPExcel_Calculation_Functions::VALUE();
 		}
+		/* @var int $chosenEntry */
 		$chosenEntry = floor($chosenEntry);
 		if (($chosenEntry <= 0) || ($chosenEntry > $entryCount)) {
 			return PHPExcel_Calculation_Functions::VALUE();

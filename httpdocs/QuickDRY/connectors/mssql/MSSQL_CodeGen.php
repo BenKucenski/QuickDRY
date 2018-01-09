@@ -514,7 +514,6 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
         $unique = $DatabaseClass::GetUniqueKeys($table_name);
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
-        $dlg_name = 'dlg_' . $c_name;
 
         if (!is_dir('json/_' . $c_name)) {
             mkdir('json/_' . $c_name);
@@ -958,6 +957,7 @@ var ' . $c_name . ' = {
         $("#" + this._class + "_' . $primary[0] . '").val(' . $primary[0] . ');
         if (' . $primary[0] . ') {
             Post("/json/_" + ' . $c_name . '._class + "/get.json", {uuid: ' . $primary[0] . '}, function (data) {
+                /** @namespace data.can_delete **/
                 LoadForm(data, ' . $c_name . '._class);
                 if (!data.can_delete) {
                     $("#btn_" + ' . $c_name . '._class + "_delete").hide();
@@ -1043,7 +1043,7 @@ var ' . $c_name . ' = {
 var ' . $c_name . 'History = {
     Load : function(uuid) {
         $(\'#' . $c_name . '_history_div\').html(\'\');
-        if (typeof (uuid) == \'undefined\' || !uuid) {
+        if (typeof (uuid) === \'undefined\' || !uuid) {
             return;
         }
 

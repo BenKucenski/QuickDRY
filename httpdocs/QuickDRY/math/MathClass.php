@@ -56,13 +56,12 @@ class MathClass
             return $principle / ($term * $periods);
 
         $L = $principle;
-        $I = $rate;
+        //$I = $rate;
         $i = $rate / 100.0 / $periods;
         $T = $term;
-        $Y = $I * $T;
-        $X = 0.5 * $Y;
+        //$Y = $I * $T;
+        //$X = 0.5 * $Y;
         $n = $periods * $T;
-        $P = 0.0;
         $P = ($L * $i) / (1 - pow(M_E, -$n * log(1 + $i)));
         return round($P, 2);
     }

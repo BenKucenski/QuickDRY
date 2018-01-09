@@ -47,7 +47,7 @@ class Services_Twilio_API_Capability
      * @param $ttl the expiration time of the token (in seconds). Default
      *        value is 3600 (1hr)
      * @param $extraAttributes extra attributes to be tied to the jwt.
-     * @return the newly generated token that is valid for $ttl seconds
+     * @return string the newly generated token that is valid for $ttl seconds
      */
     public function generateToken($ttl = 3600, $extraAttributes = null)
     {

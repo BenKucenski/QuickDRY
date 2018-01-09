@@ -234,30 +234,30 @@ class MSSQL_Core extends SQL_Base
 
         if (substr($val, 0, strlen('NLIKE ')) === 'NLIKE ') {
             $col = $col . ' NOT LIKE @';
-            $val = trim(str_replace('NLIKE', '', $val));
+            $val = trim(Strings::RemoveFromStart('NLIKE', $val));
         } else
             if (substr($val, 0, strlen('NILIKE ')) === 'NILIKE ') {
                 $col = 'LOWER(' . $col . ')' . ' NOT LIKE LOWER(@) ';
-                $val = trim(str_replace('NILIKE', '', $val));
+                $val = trim(Strings::RemoveFromStart('NILIKE', $val));
             } else
                 if (substr($val, 0, strlen('ILIKE ')) === 'ILIKE ') {
                     $col = 'LOWER(' . $col . ')' . ' ILIKE LOWER(@) ';
-                    $val = trim(str_replace('ILIKE', '', $val));
+                    $val = trim(Strings::RemoveFromStart('ILIKE', $val));
                 } else
                     if (substr($val, 0, strlen('LIKE ')) === 'LIKE ') {
                         $col = $col . ' LIKE @';
-                        $val = trim(str_replace('LIKE', '', $val));
+                        $val = trim(Strings::RemoveFromStart('LIKE', $val));
                     } else
                         if (substr($val, 0, strlen('<= ')) === '<= ') {
                             $col = $col . ' <= @ ';
-                            $val = trim(str_replace('<=', '', $val));
+                            $val = trim(Strings::RemoveFromStart('<=', $val));
                         } else
                             if (substr($val, 0, strlen('>= ')) === '>= ') {
                                 $col = $col . ' >= @ ';
-                                $val = trim(str_replace('>=', '', $val));
+                                $val = trim(Strings::RemoveFromStart('>=', $val));
                             } else
                                 if (substr($val, 0, strlen('<> ')) === '<> ') {
-                                    $val = trim(str_replace('<>', '', $val));
+                                    $val = trim(Strings::RemoveFromStart('<>', $val));
                                     if ($val !== 'null')
                                         $col = $col . ' <> @ ';
                                     else
@@ -265,11 +265,11 @@ class MSSQL_Core extends SQL_Base
                                 } else
                                     if (substr($val, 0, strlen('< ')) === '< ') {
                                         $col = $col . ' < @ ';
-                                        $val = trim(str_replace('<', '', $val));
+                                        $val = trim(Strings::RemoveFromStart('<', $val));
                                     } else
                                         if (substr($val, 0, strlen('> ')) === '> ') {
                                             $col = $col . ' > @ ';
-                                            $val = trim(str_replace('>', '', $val));
+                                            $val = trim(Strings::RemoveFromStart('>', $val));
                                         } else {
                                             $col = $col . ' = @ ';
                                         }
@@ -285,7 +285,6 @@ class MSSQL_Core extends SQL_Base
      */
     protected static function _Get($id, $col = null)
     {
-        $where_sql = '1=1';
         $params = [];
         if (is_array($id)) {
             $t = [];
@@ -306,11 +305,13 @@ class MSSQL_Core extends SQL_Base
             }
             $where_sql = implode(" AND ", $t);
         } else {
-            if (is_null($col))
-                if (isset(static::$_primary[0]))
+            if (is_null($col)) {
+                if (isset(static::$_primary[0])) {
                     $col = static::$_primary[0];
-                else
+                } else {
                     $col = 'id';
+                }
+            }
             $where_sql = '' . $col . ' = @';
             $params[] = $id;
         }
@@ -348,7 +349,6 @@ class MSSQL_Core extends SQL_Base
      */
     protected static function _GetAll($where = [], $order_by = null, $limit = null)
     {
-        $type = get_called_class();
         $params = [];
 
         $sql_order = '';
@@ -458,12 +458,14 @@ class MSSQL_Core extends SQL_Base
 
         $params = [];
 
-        $sql_order = '';
+        $sql_order = [];
         if (is_array($order_by) && sizeof($order_by)) {
             foreach ($order_by as $col => $dir) {
                 $sql_order[] .= '[' . trim($col) . '] ' . $dir;
             }
             $sql_order = 'ORDER BY ' . implode(', ', $sql_order);
+        } else {
+            $sql_order = '';
         }
 
         if (!$sql_order) {
@@ -594,7 +596,6 @@ class MSSQL_Core extends SQL_Base
      * @param $value
      * @param bool $just_checking
      * @return float|int|null
-     * @throws Exception
      */
     protected static function StrongType($name, $value, $just_checking = false)
     {
@@ -613,7 +614,7 @@ class MSSQL_Core extends SQL_Base
         if (strcasecmp($value, 'null') == 0) {
             if (!$just_checking) {
                 if (!static::$prop_definitions[$name]['nullable']) {
-                    throw new Exception($name . ' cannot be null');
+                    Debug::Halt($name . ' cannot be null');
                 }
             }
             return null;

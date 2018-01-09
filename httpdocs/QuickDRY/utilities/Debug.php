@@ -24,7 +24,7 @@ class Debug extends SafeClass
         static::_DebugCL($var, $message, true, true, true);
     }
 
-    private static function _Debug($var, $msg = null, $print = false, $exit = false, $backtrace = true)
+    public static function _Debug($var, $msg = null, $print = false, $exit = false, $backtrace = true)
     {
         $finalMsg = '';
         if ($msg) {

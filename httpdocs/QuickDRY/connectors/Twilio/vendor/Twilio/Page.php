@@ -36,7 +36,7 @@ class Services_Twilio_Page
     /**
      * The item list of the page.
      *
-     * @return array A list of instance resources
+     * @return Traversable A list of instance resources
      */
     public function getItems()
     {

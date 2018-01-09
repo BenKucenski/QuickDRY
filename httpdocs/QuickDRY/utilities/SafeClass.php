@@ -1,4 +1,5 @@
 <?php
+
 class SafeClass
 {
     private $_HaltOnError = true;
@@ -80,7 +81,11 @@ class SafeClass
         }
 
         $objPHPExcel = new PHPExcel();
-        $objPHPExcel->setActiveSheetIndex(0);
+        try {
+            $objPHPExcel->setActiveSheetIndex(0);
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         $rowCount = 1;
 
         $column = 'A';
@@ -102,8 +107,12 @@ class SafeClass
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
-        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
+        try {
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
         exit;
     }
 }
