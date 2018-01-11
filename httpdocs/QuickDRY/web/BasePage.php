@@ -3,6 +3,10 @@
 /**
  * Class BasePage
  *
+ * @property Request Request
+ * @property Session Session
+ * @property Cookie Cookie
+ * @property UserClass CurrentUser
  */
 class BasePage extends SafeClass
 {

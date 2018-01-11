@@ -1040,7 +1040,9 @@ var ' . $c_name . 'History = {
     {
         $page_dir = str_replace('Class', '', $c_name);
 
-        $page = '<div class="tab_nav">
+        $page = '
+<?php /* @var $PageModel ' . $page_dir . ' */ ?>
+<div class="tab_nav">
     <div class="tab_top tab_selected">' . CapsToSpaces(str_replace('Class', '', $c_name)) . '</div>
     <div class="tab tab_top"><a id="" onclick="' . $c_name . '.Load();">New</a></div>
 </div>
@@ -1097,7 +1099,7 @@ class ' . $page_dir . ' extends BasePage
     }
 }
 
-$PageModel = new ' . $page_dir . '($Request, $Session, $Cookie);
+define(\'PAGE_MODEL\', \'' . $page_dir . '\');
 ';
         $fp = fopen('manage/' . $page_dir . '/' . $page_dir . '.code.php', 'w');
         fwrite($fp, $code);

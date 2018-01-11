@@ -67,5 +67,3 @@ class Request
         return isset($_GET[$name]) || isset($_POST[$name]) || isset($this->_vars[$name]);
     }
 }
-
-$Request = new Request();

@@ -119,4 +119,4 @@ class Session
 	}
 }
 
-$Session = new Session();
+

@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * Class UserClass
+ *
+ * @property string id
+ * @property string Username
+ * @property array Roles
+ */
 class UserClass extends SafeClass
 {
     public $id;

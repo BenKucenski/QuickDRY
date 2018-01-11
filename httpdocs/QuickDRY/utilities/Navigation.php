@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class NavigationClass
+ * Class Navigation
  */
-class NavigationClass
+class Navigation
 {
     private $_PERMISSIONS = [];
     private $_MENU = [];

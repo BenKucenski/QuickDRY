@@ -79,5 +79,3 @@ class Server
         return isset($_SERVER[$name]) || isset($this->_VALS[$name]);
     }
 }
-
-$Server = new Server();

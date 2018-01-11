@@ -14,13 +14,14 @@ require_once 'utilities/PHPExcel.php';
 require_once 'utilities/phpmailer.php';
 require_once 'utilities/BarcodeClass.php';
 require_once 'utilities/HTMLCalendar.php';
-require_once 'utilities/NavigationClass.php';
+require_once 'utilities/Navigation.php';
 require_once 'utilities/UploadHandler.php';
 require_once 'utilities/Mailer.php';
 require_once 'utilities/FineDiff.php';
 require_once 'utilities/SimpleExcel_Column.php';
 require_once 'utilities/SimpleExcel.php';
 require_once 'utilities/SimpleExcel_Reader.php';
+require_once 'utilities/ExceptionHandler.php';
 
 require_once 'connectors/ChangeLog.php';
 require_once 'connectors/CoreClass.php';
@@ -44,6 +45,7 @@ require_once 'web/FileClass.php';
 require_once 'web/UserClass.php';
 require_once 'web/Meta.php';
 require_once 'web/HTTPStatus.php';
+require_once 'web/Web.php';
 
 require_once 'form/FormClass.php';
 require_once 'form/GenderClass.php';

@@ -67,5 +67,3 @@ class Cookie
 		unset($_COOKIE[$name]);
 	}
 }
-
-$Cookie = new Cookie();
