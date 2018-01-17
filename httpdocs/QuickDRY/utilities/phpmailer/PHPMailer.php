@@ -1833,6 +1833,7 @@ class PHPMailer
      * @param string $disposition_type
      * @param string $boundary
      * @return string
+     * @throws Exception
      */
     protected function AttachAll($disposition_type, $boundary)
     {

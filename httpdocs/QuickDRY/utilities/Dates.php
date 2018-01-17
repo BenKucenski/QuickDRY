@@ -1,5 +1,5 @@
 <?php
-class Date extends SafeClass
+class Dates extends SafeClass
 {
     /**
      * @param     $timeStamp
@@ -67,7 +67,7 @@ class Date extends SafeClass
 
         $d = new DateTime($year . '-01-01');
         date_modify($d, '+' . ($DayInYear - 1) . ' days');
-        return Date::Datestamp($d->getTimestamp());
+        return self::Datestamp($d->getTimestamp());
     }
 
     /**
@@ -155,7 +155,7 @@ class Date extends SafeClass
             return '<i>Not Set</i>';
 
         if(!is_numeric($date)) {
-            $date = Date::Timestamp($date);
+            $date = self::Timestamp($date);
             $date = strtotime($date);
         }
 
@@ -176,7 +176,7 @@ class Date extends SafeClass
             return '<i>Not Set</i>';
 
         if(!is_numeric($date)) {
-            $date = Date::Timestamp($date);
+            $date = self::Timestamp($date);
             $date = strtotime($date);
         }
 
@@ -301,18 +301,20 @@ class Date extends SafeClass
         }
 
         if(!is_numeric($time)) {
-            $time = Date::Timestamp($time);
+            $time = self::Timestamp($time);
         }
 
         if(!$time) {
             if (is_null($null)) {
-                $time = Date::AdjustedTime();
+                $time = self::AdjustedTime();
             } else {
                 return $null;
             }
         }
 
-        $time = strtotime($time);
+        if(!is_numeric($time)) {
+            $time = strtotime($time);
+        }
 
         if(!is_null($last_month) && !is_null($last_year)) {
             $m = date('m', $time);
@@ -338,7 +340,7 @@ class Date extends SafeClass
     public static function DayMonthDate($time = 0, $null = null)
     {
         if(!is_numeric($time)) $time = strtotime($time);
-        if($time == 0) if(is_null($null)) $time = Date::AdjustedTime(); else return $null;
+        if($time == 0) if(is_null($null)) $time = self::AdjustedTime(); else return $null;
         return date('n-j', $time);
     }
 
@@ -351,9 +353,9 @@ class Date extends SafeClass
     public static function StandardDateTime($time = 0, $null = null, $debug  = false)
     {
         if(!is_numeric($time)) {
-            $time = strtotime(Date::Timestamp($time, $null, $debug));
+            $time = strtotime(self::Timestamp($time, $null, $debug));
         }
-        if($time == 0) if(is_null($null)) $time = Date::AdjustedTime(); else return $null;
+        if($time == 0) if(is_null($null)) $time = self::AdjustedTime(); else return $null;
         return date('n/j/Y h:i A', $time);
     }
 
@@ -361,7 +363,7 @@ class Date extends SafeClass
     public static function StandardTime($time = 0, $null = null)
     {
         if(!is_numeric($time)) $time = strtotime($time);
-        if($time == 0) if(is_null($null)) $time = Date::AdjustedTime(); else return $null;
+        if($time == 0) if(is_null($null)) $time = self::AdjustedTime(); else return $null;
         return date('h:iA', $time);
     }
 
@@ -371,7 +373,7 @@ class Date extends SafeClass
             $time = strtotime($time);
         }
 
-        return Date::Timestamp($time - $User->hours_diff * 3600);
+        return self::Timestamp($time - $User->hours_diff * 3600);
     }
 
     /**
@@ -399,7 +401,7 @@ class Date extends SafeClass
             if(!is_null($null)) {
                 return $null;
             }
-            $time = Date::AdjustedTime();
+            $time = self::AdjustedTime();
         }
         return date('Y-m-d H:i:s', $time);
     }
@@ -413,14 +415,14 @@ class Date extends SafeClass
     public static function TimeOnlystamp($time = 0, $null = null)
     {
         if(!is_numeric($time)) $time = strtotime($time);
-        if($time == 0) if(is_null($null)) $time = Date::AdjustedTime(); else return $null;
+        if($time == 0) if(is_null($null)) $time = self::AdjustedTime(); else return $null;
         return date('H:i', $time);
     }
 
     function TimeElapsedString($ptime)
     {
         if(!is_numeric($ptime)) {
-            $ptime = strtotime(Date::Timestamp($ptime));
+            $ptime = strtotime(self::Timestamp($ptime));
         }
         $etime = time() - $ptime;
 
@@ -463,7 +465,7 @@ class Date extends SafeClass
 
     public static function TimeString($msg)
     {
-        return time() . ': ' . Date::Timestamp() . ': ' . $msg . PHP_EOL;
+        return time() . ': ' . self::Timestamp() . ': ' . $msg . PHP_EOL;
     }
 
     public static function GetStartAndEndDate($week, $year)

@@ -18,7 +18,7 @@ class Twilio extends SafeClass
         $tl->params = json_encode($params);
         $tl->response = serialize($response);
         $tl->twilio_mode_id = self::$mode;
-        $tl->created_at = Date::Timestamp();
+        $tl->created_at = Dates::Timestamp();
 
         switch(get_class($response)) {
             case 'Services_Twilio_Rest_SmsMessage':

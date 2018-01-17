@@ -289,7 +289,7 @@ class Strings extends SafeClass
             } else {
                 if (is_object($json[$i])) {
                     if ($json[$i] instanceof DateTime) {
-                        $json[$i] = Date::SolrTime($json[$i]);
+                        $json[$i] = Dates::SolrTime($json[$i]);
                     } else {
                         if ($json[$i] instanceof SafeClass) {
                             $json[$i] = $json[$i]->ToArray();

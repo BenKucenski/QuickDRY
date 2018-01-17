@@ -38,7 +38,8 @@ class Debug extends SafeClass
         $finalMsg .= '</pre>' . PHP_EOL;
 
         if (defined('IS_PRODUCTION') && IS_PRODUCTION) {
-            $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, 'HALT: ' . $_SERVER['REQUEST_URI'], $finalMsg);
+            $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_FILENAME'];
+            $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, 'HALT: ' . $uri, $finalMsg);
             try {
                 $t->Send();
             } catch(Exception $ex) {

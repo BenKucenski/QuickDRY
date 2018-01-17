@@ -572,7 +572,7 @@ class PHPExcel_Calculation_DateTime
                     $PHPEndDateObject->modify('-' . $endDays . ' days');
                     $adjustDays = $PHPEndDateObject->format('j');
                     if ($adjustDays > $startDays) {
-                        $retVal += ($adjustDays - $startDays);
+                        $retVal += ($adjustDays * 1 - $startDays * 1);
                     }
                 } else {
                     $retVal = $endDays - $startDays;

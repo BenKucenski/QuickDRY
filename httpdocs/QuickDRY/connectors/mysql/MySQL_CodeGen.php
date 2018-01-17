@@ -396,11 +396,11 @@ class db_' . $c_name . ' extends MySQL_A
     public function ValueToNiceValue($column_name, $value = null)
     {
         if($value instanceof DateTime) {
-            return Date::Timestamp($value, \'\');
+            return Dates::Timestamp($value, \'\');
         }
 
         if($this->$column_name instanceof DateTime) {
-            return Date::Timestamp($this->$column_name, \'\');
+            return Dates::Timestamp($this->$column_name, \'\');
         }
 
         return $value ? $value : $this->$column_name;
@@ -743,7 +743,7 @@ ob_start();
 	<td><?php echo $item->ValueToNiceValue($column); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->old); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->new); ?></td>
-	<td style="white-space: nowrap;"><?php echo Date::StandardDateTime($cl->created_at); ?></td>
+	<td style="white-space: nowrap;"><?php echo Dates::StandardDateTime($cl->created_at); ?></td>
 	<td style="white-space: nowrap;"><?php echo $cl->GetUser(); ?></td>
 </tr>
 <?php } ?>

@@ -76,6 +76,10 @@ class Services_Twilio_AutoPagingIterator
         throw new BadMethodCallException('Not allowed');
     }
 
+    /**
+     * @return bool
+     * @throws Services_Twilio_RestException
+     */
     public function valid()
     {
         try {

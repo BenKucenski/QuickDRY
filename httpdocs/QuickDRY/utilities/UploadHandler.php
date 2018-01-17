@@ -200,7 +200,7 @@ class UploadHandler
         $file->file_size = $fileArray['size'];
         $file->file_ext = explode('.', $file->file_name);
         $file->file_ext = $file->file_ext[sizeof($file->file_ext) - 1];
-        $file->created_at = Date::Timestamp();
+        $file->created_at = Dates::Timestamp();
         if ($fileArray['entity_id'] && $fileArray['entity_type_id']) {
             $file->entity_id = $fileArray['entity_id'];
             $file->entity_type = $fileArray['entity_type_id'];

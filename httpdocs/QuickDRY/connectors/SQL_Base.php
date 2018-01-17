@@ -652,7 +652,7 @@ class SQL_Base
                     $columns[$name] = '<td>' . $value . '</td>';
                 } else {
                     if($value instanceof DateTime) {
-                        $columns[$name] = '<td>' . Date::Timestamp($value) . '</td>';
+                        $columns[$name] = '<td>' . Dates::Timestamp($value) . '</td>';
                     } else {
                         $columns[$name] = '<td><i>Object: </i>' . get_class($value) . '</td>';
                     }
@@ -746,7 +746,7 @@ class SQL_Base
                         $value = null;
                     } else {
                         if (strtotime($value)) {
-                            $value = Date::Timestamp(strtotime(Date::Timestamp($value)) + $User->hours_diff * 3600);
+                            $value = Dates::Timestamp(strtotime(Dates::Timestamp($value)) + $User->hours_diff * 3600);
                         }
                     }
                 }
@@ -865,7 +865,7 @@ class SQL_Base
             else
             {
                 foreach($items as $item)
-                    if($selected !== $item->$value)
+                    if($selected != $item->$value) // needs to be a loose comparison otherwise it doesn't work with numbers
                         $select .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
                     else
                         $select .= '<option selected="selected" value="' . $item->$value . '">' . $item->$display . '</option>\r\n';

@@ -7,6 +7,7 @@
  * @property Session Session
  * @property Cookie Cookie
  * @property UserClass CurrentUser
+ * @property string MasterPage
  */
 class BasePage extends SafeClass
 {

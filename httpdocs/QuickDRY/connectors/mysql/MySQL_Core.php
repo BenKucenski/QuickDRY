@@ -149,7 +149,7 @@ class MySQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->GetUUID() : null;
-                $cl->created_at = Date::Timestamp();
+                $cl->created_at = Dates::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = true;
                 $cl->Save();
@@ -562,7 +562,7 @@ class MySQL_Core extends SQL_Base
 
         switch (static::$prop_definitions[$name]['type']) {
             case 'date':
-                return $value ? Date::Datestamp($value) : null;
+                return $value ? Dates::Datestamp($value) : null;
 
             case 'tinyint(1)':
                 return $value ? 1 : 0;
@@ -573,7 +573,7 @@ class MySQL_Core extends SQL_Base
 
             case 'timestamp':
             case 'datetime':
-                return $value ? Date::Timestamp($value) : null;
+                return $value ? Dates::Timestamp($value) : null;
         }
         return $value;
     }
@@ -695,7 +695,7 @@ class MySQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($CurrentUser) ? $CurrentUser->GetUUID() : null;
-                $cl->created_at = Date::Timestamp();
+                $cl->created_at = Dates::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = false;
                 $cl->Save();

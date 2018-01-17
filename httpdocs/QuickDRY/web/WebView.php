@@ -10,20 +10,19 @@ if (file_exists($Web->ControllerFile)) {
 
     if (defined('PAGE_MODEL_STATIC')) { // static class
         $PageModel = PAGE_MODEL_STATIC;
-        $PageModel::Construct($Request, $Session, $Cookie, $CurrentUser);
+        $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
         $PageModel::DoInit();
         $_MASTERPAGE = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
 
         if ($Web->IsSecureMasterPage($_MASTERPAGE)) {
             if ($Web->AccessDenied) {
-                if (!$CurrentUser || !$CurrentUser->id) {
+                if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
                 }
-                CleanHalt([$CurrentUser->Roles, MenuAccess::GetPageRoles(CURRENT_PAGE)]);
             }
         }
 
-        switch ($Server->REQUEST_METHOD) {
+        switch ($Web->Server->REQUEST_METHOD) {
             case 'GET':
                 $PageModel::DoGet();
                 break;
@@ -32,8 +31,8 @@ if (file_exists($Web->ControllerFile)) {
                 break;
         }
 
-        if ($Request->export) {
-            switch (strtolower($Request->export)) {
+        if ($Web->Request->export) {
+            switch (strtolower($Web->Request->export)) {
                 case 'xls':
                     if (method_exists($PageModel, 'DoExportToXLS')) {
                         $PageModel::DoExportToXLS();
@@ -54,20 +53,19 @@ if (file_exists($Web->ControllerFile)) {
         if (defined('PAGE_MODEL')) { // instance class
             $class = PAGE_MODEL;
             /* @var $PageModel BasePage */
-            $PageModel = new $class($Request, $Session, $Cookie, $CurrentUser);
+            $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
             $_MASTERPAGE = $PageModel->MasterPage ? $PageModel->MasterPage : null;
 
             if ($Web->IsSecureMasterPage($_MASTERPAGE)) {
                 if ($Web->AccessDenied) {
-                    if (!$CurrentUser || !$CurrentUser->id) {
+                    if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                         HTTP::RedirectNotice('Please Sign In', '/signin');
                     }
-                    CleanHalt([$CurrentUser->Roles, MenuAccess::GetPageRoles(CURRENT_PAGE)]);
                 }
             }
 
-            switch ($Server->REQUEST_METHOD) {
+            switch ($Web->Server->REQUEST_METHOD) {
                 case 'GET':
                     $PageModel->Get();
                     break;
@@ -76,7 +74,7 @@ if (file_exists($Web->ControllerFile)) {
                     break;
             }
 
-            if ($Request->export) {
+            if ($Web->Request->export) {
                 switch (strtolower($Request->export)) {
                     case 'xls':
                         if (method_exists($PageModel, 'ExportToXLS')) {
@@ -98,10 +96,9 @@ if (file_exists($Web->ControllerFile)) {
         } else { // no page model
 
             if ($Web->AccessDenied) {
-                if (!$CurrentUser || !$CurrentUser->id) {
+                if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
                 }
-                CleanHalt([$CurrentUser->Roles, MenuAccess::GetPageRoles(CURRENT_PAGE)]);
             }
         }
     }
@@ -118,9 +115,9 @@ Metrics::Stop('View');
 
 $_PAGE_HTML = ob_get_clean();
 
-if ($Session->pdf) {
+if ($Web->Session->pdf) {
     Metrics::Start('render pdf');
-    switch ($Session->pdf_lib) {
+    switch ($Web->Session->pdf_lib) {
         case 'webkit':
         default:
             require_once 'QuickDRY/pdf_output/webkit.php';

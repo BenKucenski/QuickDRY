@@ -1,4 +1,11 @@
 var GoogleCharts = {
+    Init : function (callback) {
+        google.load("visualization", "1.1", {
+            packages: ["corechart"],
+            callback: callback
+        });
+    },
+
     LineChart: function (title, data, element_id, width, height, legend) {
         if (!legend) {
             legend = 'none';

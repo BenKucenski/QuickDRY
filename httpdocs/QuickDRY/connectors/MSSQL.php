@@ -30,7 +30,7 @@ class MSSQL extends SafeClass
         if (is_numeric($data)) return "'" . $data . "'";
 
         if ($data instanceof DateTime) {
-            $data = Date::Timestamp($data);
+            $data = Dates::Timestamp($data);
         }
 
         $non_displayables = [

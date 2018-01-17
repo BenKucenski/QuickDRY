@@ -412,13 +412,14 @@ class PHPExcel_Reader_OOCalc implements PHPExcel_Reader_IReader
 //						echo '<b>'.$key.'</b><br />';
 						switch ($key) {
 							case 'table-header-rows':
-								foreach ($rowData as $key=>$cellData) {
+								foreach ($rowData as $keyb=>$cellData) {
 									$rowData = $cellData;
 									break;
 								}
+								break;
 							case 'table-row' :
 								$columnID = 'A';
-								foreach($rowData as $key => $cellData) {
+								foreach($rowData as $keyb => $cellData) {
 									if (!is_null($this->getReadFilter())) {
 										if (!$this->getReadFilter()->readCell($columnID, $rowID, $worksheetName)) {
 											continue;

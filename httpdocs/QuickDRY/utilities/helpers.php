@@ -4,7 +4,7 @@ function ToArray($arr)
 {
     foreach ($arr as $k => $v) {
         if (is_object($v) && get_class($v) === 'DateTime') {
-            $arr[$k] = Date::Timestamp($v);
+            $arr[$k] = Dates::Timestamp($v);
         }
     }
     return $arr;

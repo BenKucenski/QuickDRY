@@ -212,7 +212,7 @@ class SimpleExcel extends SafeClass
     {
         if (is_object($value)) {
             if ($value instanceof DateTime) {
-                $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Date::Datestamp($value, '') : Date::Timestamp($value, '');
+                $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Dates::Datestamp($value, '') : Dates::Timestamp($value, '');
             }
         }
 

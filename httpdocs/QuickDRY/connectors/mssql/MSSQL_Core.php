@@ -185,7 +185,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($User) ? $User->GetUUID() : null;
-                $cl->created_at = Date::Timestamp();
+                $cl->created_at = Dates::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = true;
                 $cl->Save();
@@ -514,11 +514,10 @@ class MSSQL_Core extends SQL_Base
 				';
         } else {
             $sql = '
-				SELECT COUNT(*) AS num FROM (SELECT * FROM ' . static::$database . '.dbo.[' . static::$table . ']
+				SELECT COUNT(*) AS num FROM (SELECT TOP ' . $limit . ' * FROM ' . static::$database . '.dbo.[' . static::$table . ']
 					' . $sql_left . '
 				WHERE
 					' . $sql_where . '
-				LIMIT ' . $limit . '
 				) AS c
 			';
         }
@@ -605,7 +604,7 @@ class MSSQL_Core extends SQL_Base
 
         if(is_object($value)) {
             if ($value instanceof DateTime) {
-                $value = Date::Timestamp($value);
+                $value = Dates::Timestamp($value);
             } else {
                 return null;
             }
@@ -623,7 +622,7 @@ class MSSQL_Core extends SQL_Base
 
         switch (static::$prop_definitions[$name]['type']) {
             case 'date':
-                return $value ? Date::Datestamp($value) : null;
+                return $value ? Dates::Datestamp($value) : null;
 
             case 'tinyint(1)':
                 return $value ? 1 : 0;
@@ -634,7 +633,7 @@ class MSSQL_Core extends SQL_Base
 
             case 'timestamp':
             case 'datetime':
-                return $value ? Date::Timestamp($value) : null;
+                return $value ? Dates::Timestamp($value) : null;
         }
         return $value;
     }
@@ -759,7 +758,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
                 $cl->user_id = is_object($CurrentUser) ? $CurrentUser->GetUUID() : null;
-                $cl->created_at = Date::Timestamp();
+                $cl->created_at = Dates::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = false;
                 $cl->Save();
