@@ -18,6 +18,8 @@ if (file_exists($Web->ControllerFile)) {
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
+                } else {
+                    HTTP::RedirectError('Invalid Page');
                 }
             }
         }
@@ -61,6 +63,8 @@ if (file_exists($Web->ControllerFile)) {
                 if ($Web->AccessDenied) {
                     if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                         HTTP::RedirectNotice('Please Sign In', '/signin');
+                    } else {
+                        HTTP::RedirectError('Invalid Page');
                     }
                 }
             }
@@ -98,6 +102,8 @@ if (file_exists($Web->ControllerFile)) {
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
+                } else {
+                    HTTP::RedirectError('Invalid Page');
                 }
             }
         }
