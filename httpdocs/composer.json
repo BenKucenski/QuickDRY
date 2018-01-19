@@ -1,7 +1,48 @@
 {
-    "require": {
-        "elasticsearch/elasticsearch": "~5.0",
-        "google/apiclient": "^2.0",
-        "facebook/graph-sdk": "^5.5"
+  "require": {
+    "elasticsearch/elasticsearch": "~5.0",
+    "google/apiclient": "^2.0",
+    "facebook/graph-sdk": "^5.5",
+    "php": "^5.6|^7.0",
+    "ext-ctype": "*",
+    "ext-dom": "*",
+    "ext-gd": "*",
+    "ext-iconv": "*",
+    "ext-libxml": "*",
+    "ext-mbstring": "*",
+    "ext-SimpleXML": "*",
+    "ext-xml": "*",
+    "ext-xmlreader": "*",
+    "ext-xmlwriter": "*",
+    "ext-zip": "*",
+    "ext-zlib": "*",
+    "psr/simple-cache": "^1.0"
+  },
+  "require-dev": {
+    "tecnickcom/tcpdf": "^6.2",
+    "squizlabs/php_codesniffer": "^2.7",
+    "phpunit/phpunit": "^5.7",
+    "dompdf/dompdf": "^0.8.0",
+    "mpdf/mpdf": "^7.0.0",
+    "friendsofphp/php-cs-fixer": "^2.7",
+    "jpgraph/jpgraph": "^4.0"
+  },
+  "suggest": {
+    "ext-gd": "Required for exact column width autocalculation",
+    "ext-dom": "Option to read and write HTML files",
+    "mpdf/mpdf": "Option for rendering PDF with PDF Writer",
+    "dompdf/dompdf": "Option for rendering PDF with PDF Writer",
+    "tecnick.com/tcpdf": "Option for rendering PDF with PDF Writer",
+    "jpgraph/jpgraph": "Option for rendering charts, or including charts with PDF or HTML Writers"
+  },
+  "autoload": {
+    "psr-4": {
+      "PhpOffice\\PhpSpreadsheet\\": "src/PhpSpreadsheet"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PhpOffice\\PhpSpreadsheetTests\\": "tests/PhpSpreadsheetTests"
+    }
+  }
 }

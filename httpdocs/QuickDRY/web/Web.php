@@ -142,6 +142,5 @@ class Web
         $this->Navigation->SetMenu(Menu::$Menu);
 
         $this->AccessDenied = !$this->Navigation->CheckPermissions(CURRENT_PAGE, true);
-
     }
 }

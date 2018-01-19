@@ -1,8 +1,9 @@
 <?php
+
 /**
- * PHPExcel
+ * PHPExcel_Shared_Escher_DgContainer
  *
- * Copyright (c) 2006 - 2011 PHPExcel
+ * Copyright (c) 2006 - 2015 PHPExcel
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,83 +21,55 @@
  *
  * @category   PHPExcel
  * @package    PHPExcel_Shared_Escher
- * @copyright  Copyright (c) 2006 - 2011 PHPExcel (http://www.codeplex.com/PHPExcel)
- * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt	LGPL
- * @version    1.7.6, 2011-02-27
- */
-
-/**
- * PHPExcel_Shared_Escher_DgContainer
- *
- * @category   PHPExcel
- * @package    PHPExcel_Shared_Escher
- * @copyright  Copyright (c) 2006 - 2011 PHPExcel (http://www.codeplex.com/PHPExcel)
+ * @copyright  Copyright (c) 2006 - 2015 PHPExcel (http://www.codeplex.com/PHPExcel)
+ * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt    LGPL
+ * @version    ##VERSION##, ##DATE##
  */
 class PHPExcel_Shared_Escher_DgContainer
 {
-	/**
-	 * Drawing index, 1-based.
-	 *
-	 * @var int
-	 */
-	private $_dgId;
-
-	/**
-	 * Last shape index in this drawing
-	 *
-	 * @var int
-	 */
-	private $_lastSpId;
-
-	private $_spgrContainer = null;
+    /**
+     * Drawing index, 1-based.
+     *
+     * @var int
+     */
+    private $dgId;
 
     /**
-     * @return int
+     * Last shape index in this drawing
+     *
+     * @var int
      */
+    private $lastSpId;
+
+    private $spgrContainer = null;
+
     public function getDgId()
-	{
-		return $this->_dgId;
-	}
+    {
+        return $this->dgId;
+    }
 
-    /**
-     * @param $value
-     */
     public function setDgId($value)
-	{
-		$this->_dgId = $value;
-	}
+    {
+        $this->dgId = $value;
+    }
 
-    /**
-     * @return int
-     */
     public function getLastSpId()
-	{
-		return $this->_lastSpId;
-	}
+    {
+        return $this->lastSpId;
+    }
 
-    /**
-     * @param $value
-     */
     public function setLastSpId($value)
-	{
-		$this->_lastSpId = $value;
-	}
+    {
+        $this->lastSpId = $value;
+    }
 
-    /**
-     * @return null
-     */
     public function getSpgrContainer()
-	{
-		return $this->_spgrContainer;
-	}
+    {
+        return $this->spgrContainer;
+    }
 
-    /**
-     * @param $spgrContainer
-     * @return mixed
-     */
     public function setSpgrContainer($spgrContainer)
-	{
-		return $this->_spgrContainer = $spgrContainer;
-	}
-
+    {
+        return $this->spgrContainer = $spgrContainer;
+    }
 }
