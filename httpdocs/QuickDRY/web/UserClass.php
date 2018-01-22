@@ -12,6 +12,7 @@ class UserClass extends SafeClass
     public $id;
     public $Username;
     public $Roles;
+    public $User;
 
     public function __get($name)
     {

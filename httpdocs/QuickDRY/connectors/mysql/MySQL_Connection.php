@@ -55,11 +55,11 @@ class MySQL_Connection
      */
     public function SetDatabase($db_base)
     {
-        if(!$db_base) {
+        if (!$db_base) {
             $db_base = $this->current_db;
         }
 
-        if($this->db && !mysqli_ping($this->db)) {
+        if ($this->db && !mysqli_ping($this->db)) {
             $this->db_conns[$this->current_db] = null;
             $this->current_db = null;
         }
@@ -77,12 +77,11 @@ class MySQL_Connection
                     $db_base,
                     $this->DB_PORT
                 );
-                if(!$this->db_conns[$db_base]) {
+                if (!$this->db_conns[$db_base]) {
                     Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
                 }
 
-            }
-            catch(\Exception $e) {
+            } catch (\Exception $e) {
                 die('Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error() . PHP_EOL . print_r([$e, $this->DB_HOST, $this->DB_USER, md5($this->DB_PASS), $db_base], true));
             }
         }
@@ -111,7 +110,7 @@ class MySQL_Connection
             return;
         }
 
-        static::$log[] = ['query' => $sql, 'time'=>$time];
+        static::$log[] = ['query' => $sql, 'time' => $time];
 
     }
 
@@ -124,7 +123,7 @@ class MySQL_Connection
     public function Execute($sql, $params = null, $large = false)
     {
         $query_hash = 'all';
-        if(self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
+        if (self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
             $query_hash = md5($sql);
             Log::Insert($query_hash);
             Log::Insert($sql);
@@ -136,9 +135,9 @@ class MySQL_Connection
         try {
             $this->_connect();
 
-			if(!$this->db) {
-				Halt([$sql, $params, 'mysql went away']);
-			}
+            if (!$this->db) {
+                Halt([$sql, $params, 'mysql went away']);
+            }
 
             $start = microtime(true);
 
@@ -150,20 +149,20 @@ class MySQL_Connection
             $last_id = 0;
             $aff = 0;
 
-            if($large || strlen($sql) > 128 * 1024) {
-                if(!is_dir('sql')) {
+            if ($large || strlen($sql) > 128 * 1024) {
+                if (!is_dir('sql')) {
                     mkdir('sql');
                 }
                 $fname = 'sql/' . time() . rand(0, 1000000) . '.mysql.txt';
                 $fp = fopen($fname, 'w');
                 $tries = 0;
-                while(!$fp && $tries < 3) {
+                while (!$fp && $tries < 3) {
                     sleep(1);
                     $fname = 'sql/' . time() . rand(0, 1000000) . '.mysql.txt';
                     $fp = fopen($fname, 'w');
                     $tries++;
                 }
-                if($fp) {
+                if ($fp) {
                     fwrite($fp, $sql);
                     fclose($fp);
                 } else {
@@ -190,7 +189,7 @@ host = ' . MYSQLA_HOST . '
                 $exec = $cmd . PHP_EOL . PHP_EOL . $res . PHP_EOL . PHP_EOL . implode(PHP_EOL, $output);
                 $error = '';
 
-                if(!static::$keep_files) {
+                if (!static::$keep_files) {
                     unlink($fname);
                 }
 
@@ -207,7 +206,7 @@ host = ' . MYSQLA_HOST . '
                         }
                         $aff += mysqli_affected_rows($this->db);
                     } while (mysqli_more_results($this->db)
-                        && mysqli_next_result($this->db));
+                    && mysqli_next_result($this->db));
                 }
                 $last_id = $this->LastID();
 
@@ -243,14 +242,10 @@ host = ' . MYSQLA_HOST . '
      *
      * @return array
      */
-    public function Query($sql, $params = null, $return_type = null, $map_function =  null)
+    public function Query($sql, $params = null, $return_type = null, $map_function = null)
     {
-        if($map_function) {
-            Halt($map_function);
-        }
-
         $query_hash = 'all';
-        if(self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
+        if (self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
             $query_hash = md5($sql);
 
             Log::Insert($query_hash);
@@ -274,12 +269,12 @@ host = ' . MYSQLA_HOST . '
         $start = microtime(true);
         $list = [];
         $res = false;
-        if(defined('QUERY_RETRY')) {
+        if (defined('QUERY_RETRY')) {
             $count = 0;
-            while(!$res && $count <= QUERY_RETRY) {
+            while (!$res && $count <= QUERY_RETRY) {
                 $res = @mysqli_query($this->db, $sql, MYSQLI_USE_RESULT);
-                if(!$res) {
-                    if(mysqli_error($this->db)) {
+                if (!$res) {
+                    if (mysqli_error($this->db)) {
                         break;
                     } else {
                         $this->db = null;
@@ -318,9 +313,9 @@ host = ' . MYSQLA_HOST . '
                     mysqli_free_result($result);
                 }
             } while (mysqli_more_results($this->db)
-                && mysqli_next_result(
-                    $this->db
-                ));
+            && mysqli_next_result(
+                $this->db
+            ));
         }
 
         $return['error'] = mysqli_error($this->db);
@@ -335,12 +330,15 @@ host = ' . MYSQLA_HOST . '
 
         $this->Log($sql, microtime(true) - $start, $return['error']);
 
-
-        if ($return_type && !$return['error']) {
+        if($return_type && !$return['error']) {
             return $return[$return_type];
         }
 
-        return $return;
+        if(!$map_function || $return['error']) {
+            return $return;
+        }
+
+        return $return['data'];
     }
 
     /**
@@ -407,12 +405,12 @@ host = ' . MYSQLA_HOST . '
 			    `{{nq}}`;
 		';
         $res = $this->Query($sql, [$table]);
-        if($res['error']) {
+        if ($res['error']) {
             Halt($res);
         }
 
         $list = [];
-        foreach($res['data'] as $row) {
+        foreach ($res['data'] as $row) {
             $l = new MySQL_TableColumn();
             $l->FromRow($row);
             $list[] = $l;
@@ -441,12 +439,15 @@ host = ' . MYSQLA_HOST . '
 
 		';
             $res = $this->Query($sql);
+            if($res['error']) {
+                Halt($res);
+            }
 
             /* @var $fk MSSQL_ForeignKey */
-            if (isset($res['data'])) {
+            if (sizeof($res['data'])) {
                 foreach ($res['data'] as $row) {
                     if (!isset($fks[$row['CONSTRAINT_NAME']])) {
-                        $fk = new MSSQL_ForeignKey();
+                        $fk = new MySQL_ForeignKey();
                         $fk->FromRow($row);
                     } else {
                         $fk = self::$_LinkedTables[$this->current_db][$row['table_name']][$row['CONSTRAINT_NAME']];
@@ -491,6 +492,11 @@ host = ' . MYSQLA_HOST . '
 
 		';
             $res = $this->Query($sql);
+
+            if ($res['error']) {
+                Debug::Halt($res);
+            }
+
             self::$_ForeignKeys[$this->current_db] = [];
             foreach ($res['data'] as $row) {
                 if (!isset(self::$_ForeignKeys[$this->current_db][$row['table_name']])) {
@@ -526,28 +532,28 @@ host = ' . MYSQLA_HOST . '
 
     public function GetPrimaryKey($table_name)
     {
-        if(is_null(self::$_PrimaryKey) || !isset(self::$_PrimaryKey[$table_name])) {
+        if (is_null(self::$_PrimaryKey) || !isset(self::$_PrimaryKey[$table_name])) {
 
             $sql = '
 SHOW INDEXES FROM
-`'  . $table_name . '`
+`' . $table_name . '`
 
         ';
 
             $res = MySQL_A::Query($sql);
-            if($res['error']) {
+            if ($res['error']) {
                 Halt($res);
             }
-            foreach($res['data'] as $row) {
-                if(!$row['Non_unique'] && $row['Key_name'] === 'PRIMARY') {
-                    if(!isset(self::$_PrimaryKey[$row['Table']][$row['Key_name']])) {
+            foreach ($res['data'] as $row) {
+                if (!$row['Non_unique'] && $row['Key_name'] === 'PRIMARY') {
+                    if (!isset(self::$_PrimaryKey[$row['Table']][$row['Key_name']])) {
                         self::$_PrimaryKey[$row['Table']] = [];
                     }
                     self::$_PrimaryKey[$row['Table']][] = $row['Column_name'];
                 }
             }
         }
-        if(!isset(self::$_PrimaryKey[$table_name])) {
+        if (!isset(self::$_PrimaryKey[$table_name])) {
             self::$_PrimaryKey[$table_name] = [];
         }
         return self::$_PrimaryKey[$table_name];
@@ -563,28 +569,28 @@ SHOW INDEXES FROM
 
     public function GetUniqueKeys($table_name)
     {
-        if(is_null(self::$_UniqueKeys) || !isset(self::$_UniqueKeys[$table_name])) {
+        if (is_null(self::$_UniqueKeys) || !isset(self::$_UniqueKeys[$table_name])) {
 
             $sql = '
 SHOW INDEXES FROM
-`'  . $table_name . '`
+`' . $table_name . '`
 
         ';
 
             $res = MySQL_A::Query($sql);
-            if($res['error']) {
+            if ($res['error']) {
                 Halt($res);
             }
-            foreach($res['data'] as $row) {
-                if(!$row['Non_unique'] && $row['Key_name'] !== 'PRIMARY') {
-                    if(!isset(self::$_UniqueKeys[$row['Table']][$row['Key_name']])) {
+            foreach ($res['data'] as $row) {
+                if (!$row['Non_unique'] && $row['Key_name'] !== 'PRIMARY') {
+                    if (!isset(self::$_UniqueKeys[$row['Table']][$row['Key_name']])) {
                         self::$_UniqueKeys[$row['Table']][$row['Key_name']] = [];
                     }
                     self::$_UniqueKeys[$row['Table']][$row['Key_name']][] = $row['Column_name'];
                 }
             }
         }
-        if(!isset(self::$_UniqueKeys[$table_name])) {
+        if (!isset(self::$_UniqueKeys[$table_name])) {
             self::$_UniqueKeys[$table_name] = [];
         }
         return self::$_UniqueKeys[$table_name];
@@ -596,7 +602,7 @@ SHOW INDEXES FROM
 			SHOW PROCEDURE STATUS;
 		';
         $res = $this->Query($sql);
-        if($res['error'] || !sizeof($res['data'])) {
+        if ($res['error']) {
             Halt($res);
         }
         return null;
@@ -605,16 +611,16 @@ SHOW INDEXES FROM
     public function CopyInfoSchema()
     {
         $this->SetDatabase('INFORMATION_SCHEMA');
-        $this->Execute("DROP DATABASE IF EXISTS `info_schema`;",null, true);
-        $this->Execute("CREATE DATABASE  `info_schema` ;       ",null, true);
-        $this->Execute("CREATE TABLE info_schema.key_column_usage LIKE INFORMATION_SCHEMA.key_column_usage;",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ENGINE = INNODB;",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_schema`);",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_name`);",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_column_name`);",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_schema`);",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_name`);",null, true);
-        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`column_name`);",null, true);
-        $this->Execute("INSERT INTO info_schema.key_column_usage SELECT * FROM INFORMATION_SCHEMA.key_column_usage;",null, true);
+        $this->Execute("DROP DATABASE IF EXISTS `info_schema`;", null, true);
+        $this->Execute("CREATE DATABASE  `info_schema` ;       ", null, true);
+        $this->Execute("CREATE TABLE info_schema.key_column_usage LIKE INFORMATION_SCHEMA.key_column_usage;", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ENGINE = INNODB;", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_schema`);", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_name`);", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_column_name`);", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_schema`);", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_name`);", null, true);
+        $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`column_name`);", null, true);
+        $this->Execute("INSERT INTO info_schema.key_column_usage SELECT * FROM INFORMATION_SCHEMA.key_column_usage;", null, true);
     }
 }

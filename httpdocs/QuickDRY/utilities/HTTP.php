@@ -1,6 +1,14 @@
 <?php
 class HTTP extends SafeClass
 {
+    public static function ArrayToHTTPQuery($array, $name)
+    {
+        $res = [];
+        foreach($array as $v) {
+            $res[] = $name .'[]=' . urlencode($v);
+        }
+        return implode('&', $res);
+    }
     /**
      * @param $err
      */

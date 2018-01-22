@@ -51,6 +51,10 @@ class MySQL_Core extends SQL_Base
         return static::$connection->GetForeignKeys($table);
     }
 
+    /**
+     * @param $table
+     * @return MySQL_ForeignKey[]
+     */
     public static function GetLinkedTables($table)
     {
         static::_connect();
@@ -582,7 +586,6 @@ class MySQL_Core extends SQL_Base
      * @param bool $force_insert
      *
      * @return array
-     * @throws Exception
      */
     protected function _Save($force_insert = false)
     {
@@ -597,32 +600,38 @@ class MySQL_Core extends SQL_Base
         $params = [];
 
         if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
-            $params = [];
-            $unique_set = 0;
 
-            foreach (static::$_unique as $col) {
-                if (is_null($this->$col))
-                    $params[$col] = 'null';
-                else {
-                    $params[$col] = $this->$col;
-                    $unique_set++;
+            foreach (static::$_unique as $unique) {
+                $params = [];
+                $unique_set = 0;
+                foreach ($unique as $col) {
+                    if (is_null($this->$col))
+                        $params[$col] = 'null';
+                    else {
+                        $params[$col] = $this->$col;
+                        $unique_set++;
+                    }
                 }
-            }
 
-            if ($unique_set && !$this->$primary) {
-                $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
-                $t = $type::Get($params);
+                if ($unique_set && !$this->$primary) {
+                    $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+                    $t = $type::Get($params);
 
-                if (!is_null($t)) {
-                    if ($t->$primary)
-                        $this->$primary = $t->$primary;
-                    $vars = $t->ToArray();
-                    foreach ($vars as $k => $v)
-                        if (isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
-                            $this->$k = $v;
+                    if (!is_null($t)) {
+                        if ($t->$primary)
+                            $this->$primary = $t->$primary;
+                        $vars = $t->ToArray();
+                        foreach ($vars as $k => $v) {
+                            if (isset($this->$k) && is_null($this->$k)) {
+                                // if the current object value is null, fill it in with the existing object's info
+                                $this->$k = $v;
+                            }
+                        }
+                    }
                 }
             }
         }
+
 
         $changed_only = false;
         if (!$primary || !$this->$primary || $force_insert) {
@@ -658,7 +667,12 @@ class MySQL_Core extends SQL_Base
                 }
             }
             **/
-            $st_value = static::StrongType($name, $value);
+
+            try {
+                $st_value = static::StrongType($name, $value);
+            } catch(Exception $ex) {
+                Halt($ex);
+            }
 
             if (strcmp($name, $primary) == 0 && $this->$primary && !$force_insert) continue;
 

@@ -12,9 +12,9 @@ if (file_exists($Web->ControllerFile)) {
         $PageModel = PAGE_MODEL_STATIC;
         $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
         $PageModel::DoInit();
-        $_MASTERPAGE = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
 
-        if ($Web->IsSecureMasterPage($_MASTERPAGE)) {
+        if ($Web->IsSecureMasterPage()) {
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
@@ -57,9 +57,9 @@ if (file_exists($Web->ControllerFile)) {
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
-            $_MASTERPAGE = $PageModel->MasterPage ? $PageModel->MasterPage : null;
+             $Web->MasterPage = $PageModel->MasterPage ? $PageModel->MasterPage : null;
 
-            if ($Web->IsSecureMasterPage($_MASTERPAGE)) {
+            if ($Web->IsSecureMasterPage()) {
                 if ($Web->AccessDenied) {
                     if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                         HTTP::RedirectNotice('Please Sign In', '/signin');
@@ -79,7 +79,7 @@ if (file_exists($Web->ControllerFile)) {
             }
 
             if ($Web->Request->export) {
-                switch (strtolower($Request->export)) {
+                switch (strtolower($Web->Request->export)) {
                     case 'xls':
                         if (method_exists($PageModel, 'ExportToXLS')) {
                             $PageModel->ExportToXLS();
@@ -132,4 +132,10 @@ if ($Web->Session->pdf) {
 
     Metrics::Stop('render pdf');
     exit;
+}
+
+if(file_exists('masterpages/' . $Web->MasterPage . '.php')) {
+    require_once 'masterpages/' . $Web->MasterPage . '.php';
+} else {
+    Debug::Halt($Web->MasterPage . ' does not exist');
 }

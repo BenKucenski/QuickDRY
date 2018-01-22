@@ -12,6 +12,8 @@
  * @property Navigation Navigation
  * @property bool AccessDenied
  * @property string[] SecureMasterPages
+ * @property string MasterPage
+ * @property string SettingsFile
  */
 class Web
 {
@@ -24,6 +26,8 @@ class Web
     public $CurrentUser;
     public $Navigation;
     public $AccessDenied;
+    public $MasterPage;
+    public $SettingsFile;
 
     private $SecureMasterPages;
 
@@ -35,13 +39,13 @@ class Web
         $this->SecureMasterPages = $MasterPages;
     }
 
-    public function IsSecureMasterPage($MasterPage)
+    public function IsSecureMasterPage()
     {
         if(!is_array($this->SecureMasterPages)) {
             return false;
         }
 
-        return in_array($MasterPage, $this->SecureMasterPages);
+        return in_array($this->MasterPage, $this->SecureMasterPages);
     }
 
     /**
@@ -61,8 +65,14 @@ class Web
         }
 
         if(isset( $this->Server->REQUEST_URI)) {
+            if(!defined('HTTP_HOST')) {
+                define('HTTP_HOST', strtolower($this->Server->HTTP_HOST));
+            }
             $fullUrl = (isSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI;
             define('FULL_URL', $fullUrl);
+        }
+        if(defined('HTTP_HOST')) {
+            $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
         }
 
         if(defined('MYSQL_LOG') && MYSQL_LOG) {
@@ -134,7 +144,8 @@ class Web
             }
             if (is_array($this->CurrentUser->Roles)) {
                 foreach ($this->CurrentUser->Roles as $role) {
-                    $this->Navigation->Combine(MenuAccess::GetForRole($role));
+                    $menu = MenuAccess::GetForRole($role);
+                    $this->Navigation->Combine($menu);
                 }
             }
         }

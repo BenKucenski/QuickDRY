@@ -94,8 +94,9 @@ class ' . $sp_class . ' extends SafeClass
     public function GenerateClasses()
     {
         $modules = [];
-        $modules[] = 'require_once \'common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
-        $this->GenerateDatabaseClass();
+        if($this->GenerateDatabaseClass()) {
+            $modules[] = 'require_once \'common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
+        }
 
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
@@ -111,13 +112,16 @@ class ' . $sp_class . ' extends SafeClass
         fclose($fp);
     }
 
+    /**
+     * @return bool
+     */
     function GenerateDatabaseClass()
     {
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
         $stored_procs = MySQL_A::GetStoredProcs();
 
         if(!$stored_procs) {
-            return;
+            return false;
         }
         $sp_require = [];
         $sp_code = [];
@@ -172,6 +176,8 @@ class sp_' . $class_name . ' extends MySQL_A
         $fp = fopen('_common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
+
+        return true;
     }
 
     function GenerateClass($table_name, $cols)
@@ -251,7 +257,6 @@ class sp_' . $class_name . ' extends MySQL_A
                 $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', $fk->column_name) : '';
                 $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
             }
-
 
             if (in_array($var, $seens_vars)) {
                 Log::Insert(['duplicate FK', $fk], true);

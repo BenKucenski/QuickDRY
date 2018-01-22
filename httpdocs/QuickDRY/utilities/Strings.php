@@ -2,6 +2,10 @@
 
 class Strings extends SafeClass
 {
+    public static function EndsWith($string, $ends_with) {
+        return substr($string, -strlen($ends_with), strlen($ends_with)) === $ends_with;
+    }
+
     public static function RemoveFromStart($remove, $string)
     {
         $remove_length = strlen($remove);
