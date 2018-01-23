@@ -75,16 +75,29 @@ class SimpleExcel extends SafeClass
     {
         $objPHPExcel = new \PHPExcel();
 
+        $total_sheets = sizeof($reports);
+
         foreach ($reports as $sheet => $report) {
+            if(!isset($_SERVER['HTTP_HOST'])) {
+                Log::Insert(($sheet + 1) . ' / ' . $total_sheets . ' : '. $report->Title, true);
+            }
             if ($sheet > 0) {
-                $objPHPExcel->createSheet($sheet);
+                try {
+                    $objPHPExcel->createSheet($sheet);
+                } catch(Exception $ex) {
+                    Halt($ex);
+                }
             }
             try {
                 $objPHPExcel->setActiveSheetIndex($sheet);
             } catch (Exception $ex) {
                 Debug::Halt($ex);
             }
-            $objPHPExcel->getActiveSheet()->setTitle($report->Title);
+            try {
+                $objPHPExcel->getActiveSheet()->setTitle($report->Title);
+            } catch(Exception $ex) {
+                Halt($ex);
+            }
             $sheet_row = 1;
 
 
@@ -108,10 +121,14 @@ class SimpleExcel extends SafeClass
 
         try {
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-            header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment;filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-            $objWriter->save('php://output');
+            if(isset($_SERVER['HTTP_HOST'])) {
+                header('Content-Type: application/vnd.ms-excel');
+                header('Content-Disposition: attachment;filename="' . $filename . '"');
+                header('Cache-Control: max-age=0');
+                $objWriter->save('php://output');
+            } else {
+                $objWriter->save($filename);
+            }
         } catch (Exception $ex) {
             Debug::Halt($ex);
         }
