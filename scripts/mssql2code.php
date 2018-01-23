@@ -25,8 +25,6 @@ if(!$_HOST || !$_DATABASE) {
     exit(basename(__FILE__) . ' usage: -h<host> -d<database> -c<database constant optional> -u<user class> -v<user variable> -i<user id column>' . PHP_EOL);
 }
 
-$_DATABASE_PREFIX = $_DATABASE_CONSTANT ? $_DATABASE_CONSTANT : $_DATABASE;
-
 include '../httpdocs/index.php';
 
 $CodeGen = new MSSQL_CodeGen();

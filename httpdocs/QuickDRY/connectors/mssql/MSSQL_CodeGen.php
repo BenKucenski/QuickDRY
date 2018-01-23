@@ -26,10 +26,10 @@ class MSSQL_CodeGen extends SafeClass
         $this->DatabaseClass = $DatabaseClass;
         $this->Database = $database;
         $this->DatabaseConstant = $database_constant;
-        $this->UserClass = $user_class;
-        $this->UserVar = $user_var;
-        $this->UserIdColumn = $user_id_column;
-        $this->MasterPage = $master_page;
+        $this->UserClass = $user_class ? $user_class : 'UserClass';
+        $this->UserVar = $user_var ? $user_var : 'CurrentUser';
+        $this->UserIdColumn = $user_id_column ? $user_id_column : 'id';
+        $this->MasterPage = $master_page ? $master_page : 'MASTERPAGE_DEFAULT';
         $this->DatabasePrefix = $this->DatabaseConstant ? $this->DatabaseConstant : $this->Database;
         $this->LowerCaseTables = $lowercase_tables;
         $this->UseFKColumnName = $use_fk_column_name;
@@ -255,6 +255,7 @@ class sp_' . $class_name . ' extends ' . $DatabaseClass . '
         }
 
         $refs = $DatabaseClass::GetLinkedTables($table_name);
+        $fk_counts = [];
         foreach ($refs as $fk) {
             if(is_array($fk->column_name)) {
                 $column_name = $this->UseFKColumnName ? '_' .  str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
@@ -285,6 +286,7 @@ class sp_' . $class_name . ' extends ' . $DatabaseClass . '
                     $isset[] = '$this->' . $col;
                     $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
                 }
+                $fk_counts []= $var . 'Count';
 
                 $gets[] = "
             case '$var':
@@ -301,6 +303,7 @@ class sp_' . $class_name . ' extends ' . $DatabaseClass . '
             ";
 
             } else {
+                $fk_counts []= $var . 'Count';
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && \$this->" . $fk->column_name . ") {
@@ -380,7 +383,7 @@ $code .= '
 
     public function IsReferenced()
     {
-        return 0;
+        return ' . (sizeof($fk_counts) == 0 ? '0' : '$this->' . implode(' + $this->', $fk_counts)) . ';
     }
 
     public function VisibleTo(' . $this->UserClass . ' &$user)
@@ -697,6 +700,10 @@ if($Request->uuid)
 	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
 	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
 		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    }
+    
+    if($c->IsReferenced()) {
+		HTTP::ExitJSON([\'error\'=>\'The record is depended on by other related records\'], HTTP_STATUS_BAD_REQUEST);
     }
 
 	$res = $c->Remove($' . $this->UserVar . ');

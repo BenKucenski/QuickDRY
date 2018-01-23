@@ -17,10 +17,10 @@ class MySQL_CodeGen extends SafeClass
     {
         $this->Database = $database;
         $this->DatabaseConstant = $database_constant;
-        $this->UserClass = $user_class;
-        $this->UserVar = $user_var;
-        $this->UserIdColumn = $user_id_column;
-        $this->MasterPage = $master_page;
+        $this->UserClass = $user_class ? $user_class : 'UserClass';
+        $this->UserVar = $user_var ? $user_var : 'CurrentUser';
+        $this->UserIdColumn = $user_id_column ? $user_id_column : 'id';
+        $this->MasterPage = $master_page ? $master_page : 'MASTERPAGE_DEFAULT';
         $this->DatabasePrefix = $this->DatabaseConstant ? $this->DatabaseConstant : $this->Database;
         $this->LowerCaseTables = $lowercase_tables;
         $this->UseFKColumnName = $use_fk_column_name;
@@ -79,8 +79,11 @@ class ' . $sp_class . ' extends SafeClass
     public function __construct($row = null)
     {
         if($row) {
-            CleanHalt($row);
+            $this->HaltOnError(false);
             $this->FromRow($row);
+            if($this->HasMissingProperties()) {
+                Halt($this->GetMissingPropeties());
+            }
         }
     }
 }
