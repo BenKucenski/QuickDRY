@@ -73,11 +73,14 @@ class SimpleExcel_Reader extends SafeClass
                     if($row_limit && $row > $row_limit) {
                         break;
                     }
-                    $report[$sheetNames[$sheet]] += $activeSheet->rangeToArray('A' . $row . ':' . $cols . ($end),
+                    $data = $activeSheet->rangeToArray('A' . $row . ':' . $cols . ($end),
                         NULL,
                         $process_cells,
                         $process_cells);
 
+                    foreach($data as $record ) {
+                        $report[$sheetNames[$sheet]] [] = $record;
+                    }
                 }
 
                 if ($debug) {

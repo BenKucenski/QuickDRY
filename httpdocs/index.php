@@ -9,7 +9,11 @@ require_once 'QuickDRYInstance/Defines.php';
 
 require_once 'QuickDRY/QuickDRY.php';
 
-require_once 'init.php';
+define('IS_MOBILE',BrowserOS::IsMobile());
+define('GUID', GUID());
+
+require_once 'QuickDRYInstance/ChangeLogHandler.php';
+require_once 'QuickDRYInstance/UserManager.php';
 
 ExceptionHandler::Init();
 

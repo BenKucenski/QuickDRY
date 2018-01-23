@@ -27,9 +27,7 @@ if(!$_HOST || !$_DATABASE) {
 
 $_DATABASE_PREFIX = $_DATABASE_CONSTANT ? $_DATABASE_CONSTANT : $_DATABASE;
 
-include '../httpdocs/localsettings.php';
-include '../httpdocs/init.php';
-
+include '../httpdocs/index.php';
 
 $CodeGen = new MSSQL_CodeGen();
 $CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE, $_LOWERCASE_TABLE, $_USE_FK_COLUMN_NAME);

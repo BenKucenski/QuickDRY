@@ -15,8 +15,7 @@ if(!$_HOST || !$_CONNECTION || !$_PREFIX) {
     exit('-h<host> required -c<connection class name> required -p<prefix> required');
 }
 
-require_once '../httpdocs/localsettings.php';
-require_once '../httpdocs/init.php';
+include '../httpdocs/index.php';
 
 Log::Insert($options, true);
 

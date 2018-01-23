@@ -104,28 +104,6 @@ class MSSQL extends SafeClass
     }
 }
 
-/**
- * @param $data
- *
- * @return string
- */
-function ms_escape_string($data)
-{
-    return MSSQL::EscapeString($data);
-}
-
-/**
- * @param $sql
- * @param $params
- *
- * @return mixed
- */
-function ms_escape_query($sql, $params)
-{
-    return MSSQL::EscapeQuery($sql, $params);
-}
-
-
 require_once 'mssql/MSSQL_Core.php';
 require_once 'mssql/MSSQL_TableColumn.php';
 require_once 'mssql/MSSQL_ForeignKey.php';

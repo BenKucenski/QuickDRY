@@ -237,7 +237,7 @@ class MSSQL_Connection
             'params' => $params
         ];
 
-        $query = ms_escape_query($sql, $params);
+        $query = MSSQL::EscapeQuery($sql, $params);
         $returnval['query'] = $query;
 
         $this->_connect();
@@ -457,11 +457,15 @@ class MSSQL_Connection
                 // -x turns off variable interpretation - must be set
                 // https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
                 // adding -l 0 to avoid login timeout errors
-                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . MSSQL_USER . ' -P"' . MSSQL_PASS . '" -S' . MSSQL_HOST . ' -i' . $fname;
+                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . MSSQL_USER . ' -P"' . MSSQL_PASS . '" -S' . MSSQL_HOST . ' -i"' . $fname . '"';
+
                 if(self::$keep_files) {
                     Log::Insert($cmd, true);
                 }
                 $res = exec($cmd, $output);
+                if(self::$keep_files) {
+                    Log::Insert($output, true);
+                }
 
                 $returnval['exec'] = $res . PHP_EOL . PHP_EOL . implode(
                         PHP_EOL, $output
