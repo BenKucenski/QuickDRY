@@ -252,6 +252,8 @@ class sp_' . $class_name . ' extends MySQL_A
         }
 
         $refs = MySQL_A::GetLinkedTables($table_name);
+        $fk_counts = [];
+
         foreach ($refs as $fk) {
             if (is_array($fk->column_name)) {
                 $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
@@ -282,6 +284,7 @@ class sp_' . $class_name . ' extends MySQL_A
                     $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
                 }
 
+                $fk_counts []= $var . 'Count';
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && " . implode(' && ', $isset) . ") {
@@ -297,6 +300,7 @@ class sp_' . $class_name . ' extends MySQL_A
             ";
 
             } else {
+                $fk_counts []= $var . 'Count';
                 $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && \$this->" . $fk->column_name . ") {
@@ -375,7 +379,7 @@ class db_' . $c_name . ' extends MySQL_A
 
     public function IsReferenced()
     {
-        return 0;
+        return ' . (sizeof($fk_counts) == 0 ? '0' : '$this->' . implode(' + $this->', $fk_counts)) . ';
     }
 
     public function VisibleTo(' . $this->UserClass . ' &$user)
@@ -677,6 +681,10 @@ if($Request->uuid)
 	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
 	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
 		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+    }
+
+    if($c->IsReferenced()) {
+		HTTP::ExitJSON([\'error\'=>\'The record is depended on by other related records\'], HTTP_STATUS_BAD_REQUEST);
     }
 
 	$res = $c->Remove($' . $this->UserVar . ');
