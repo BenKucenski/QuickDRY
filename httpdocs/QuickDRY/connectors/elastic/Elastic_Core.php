@@ -228,7 +228,7 @@ class Elastic_Core extends Elastic_Base
     {
         global $Request;
         if (!static::_connect()) {
-            if ($Request->query_log) {
+            if ($Web->Request->query_log) {
                 exit('could not connect');
             }
             return null;
@@ -254,7 +254,7 @@ class Elastic_Core extends Elastic_Base
         global $Request;
 
         if (!static::_connect()) {
-            if ($Request->query_log) {
+            if ($Web->Request->query_log) {
                 exit('could not connect');
             }
             return null;

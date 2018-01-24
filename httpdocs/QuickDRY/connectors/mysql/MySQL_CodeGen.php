@@ -591,10 +591,10 @@ if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserI
 
 $returnvals = [];
 
-if(isset($Request->uuid))
+if(isset($Web->Request->uuid))
 {
 	/* @var $c ' . $c_name . ' */
-	$c = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
+	$c = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Web->Request->uuid]);
 	if(!$c || !$c->VisibleTo($' . $this->UserVar . ')) {
 		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
@@ -622,7 +622,7 @@ if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserI
 
 $returnvals = [];
 
-$search = strtoupper($Request->term);
+$search = strtoupper($Web->Request->term);
 if(strlen($search) < 1) {
 	$returnvals[] = [\'id\' => 0, \'value\' => \'No Results Found\'];
 	HTTP::ExitJSON($returnvals);
@@ -650,9 +650,9 @@ HTTP::ExitJSON($returnvals);
         if (sizeof($unique)) {
             foreach ($unique as $key => $cols) {
                 foreach ($cols as $u) {
-                    $u_req[] = '$Request->' . $u;
-                    $u_seq[] = "'$u'=>\$Request->$u";
-                    $u_ret[] = "\$returnvals['$u'] = \$Request->$u;";
+                    $u_req[] = '$Web->Request->' . $u;
+                    $u_seq[] = "'$u'=>\$Web->Request->$u";
+                    $u_ret[] = "\$returnvals['$u'] = \$Web->Request->$u;";
                 }
             }
 
@@ -660,7 +660,7 @@ HTTP::ExitJSON($returnvals);
 if(' . implode(' && ', $u_req) . ')
 {
 	$t = ' . $c_name . '::Get([' . implode(', ', $u_seq) . ']);
-	$Request->uuid = $t->' . ($primary[0] ? $primary[0] : $unique[0]) . ';
+	$Web->Request->uuid = $t->' . ($primary[0] ? $primary[0] : $unique[0]) . ';
 }
 ';
         }
@@ -675,10 +675,10 @@ $returnvals = [];
 
 ' . $unique_php . '
 
-if($Request->uuid)
+if($Web->Request->uuid)
 {
 	/* @var $c ' . $c_name . ' */
-	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Request->uuid]);
+	$c = ' . $c_name . '::Get(["' . $primary[0] . '"=>$Web->Request->uuid]);
 	if(is_null($c) || !$c->VisibleTo($CurrentUser) || !$c->CanDelete($' . $this->UserVar . ')) {
 		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
@@ -691,7 +691,7 @@ if($Request->uuid)
 	if(!isset($res[\'error\']) || !$res[\'error\'])
 	{
 		$returnvals[\'success\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' Removed\';
-		$returnvals[\'uuid\'] = $Request->uuid;
+		$returnvals[\'uuid\'] = $Web->Request->uuid;
 		' . implode("\r\n\t\t", $u_ret) . '
 	} else {
 		$returnvals[\'error\'] = $res[\'error\'];
@@ -718,10 +718,10 @@ if(!isset($' . $this->UserVar . ') || !$' . $this->UserVar . '->' . $this->UserI
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
 
-if(isset($Request->uuid))
+if(isset($Web->Request->uuid))
 {
 	/* @var $item ' . $c_name . ' */
-	$item = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Request->uuid]);
+	$item = ' . $c_name . '::Get([\'' . $primary[0] . '\'=>$Web->Request->uuid]);
 	if(!$item || !$item->VisibleTo($' . $this->UserVar . ')) {
 		HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
     }
