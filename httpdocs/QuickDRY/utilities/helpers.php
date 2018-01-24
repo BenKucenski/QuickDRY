@@ -197,16 +197,7 @@ function getTinyUrl($url)
     return $data;
 }
 
-function isSecure()
-{
-    if (!isset($_SERVER['HTTPS'])) {
-        return false;
-    }
 
-    return
-        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || $_SERVER['SERVER_PORT'] == 443;
-}
 
 /**
  * @param $count

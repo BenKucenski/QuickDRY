@@ -1,5 +1,6 @@
 <?php
 /** DO NOT USE THIS CLASS DIRECTLY **/
+define('GUID_MSSQL','UPPER(SUBSTRING(master.dbo.fn_varbintohexstr(HASHBYTES(\'MD5\',cast(NEWID() as varchar(36)))), 3, 32)) ');
 
 if (!function_exists('sqlsrv_connect')) {
     function sqlsrv_connect()

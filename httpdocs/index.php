@@ -9,17 +9,23 @@ require_once 'QuickDRYInstance/Defines.php';
 
 require_once 'QuickDRY/QuickDRY.php';
 
-define('IS_MOBILE',BrowserOS::IsMobile());
-define('GUID', GUID());
 
 require_once 'QuickDRYInstance/ChangeLogHandler.php';
 require_once 'QuickDRYInstance/UserManager.php';
 
+require_once 'common_modules.php';
+
+define('IS_MOBILE',BrowserOS::IsMobile());
+define('GUID', GUID());
+
 ExceptionHandler::Init();
 
+
 $Web = new Web();
-$Web->Init('signin', 'admin');
+$Web->Init('signin', 'admin', dirname(__FILE__));
 $Web->SetSecureMasterPages([MASTERPAGE_DEFAULT]);
+
+
 
 if (file_exists($Web->SettingsFile)) {
     require_once $Web->SettingsFile;
@@ -37,10 +43,16 @@ if (file_exists($Web->SettingsFile)) {
     }
 }
 
+if (defined('ROUTE_REQUESTS') && ROUTE_REQUESTS) {
+    require_once ROUTE_REQUESTS;
+    exit;
+}
+
+
 if ($Web->Server->REQUEST_URI) {
 
-    require_once 'common/Menu.php';
-    require_once 'common/MenuAccess.php';
+    require_once 'QuickDRYInstance/Menu.php';
+    require_once 'QuickDRYInstance/MenuAccess.php';
 
     $Web->InitMenu();
 

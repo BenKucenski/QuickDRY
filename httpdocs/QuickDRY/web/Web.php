@@ -52,7 +52,7 @@ class Web
      * @param string $default_page
      * @param string $default_user_page
      */
-    public function Init($default_page, $default_user_page)
+    public function Init($default_page, $default_user_page, $script_dir)
     {
         $this->Request = new Request();
         $this->Session = new Session();
@@ -65,12 +65,26 @@ class Web
         }
 
         if(isset( $this->Server->REQUEST_URI)) {
-            if(!defined('HTTP_HOST')) {
-                define('HTTP_HOST', strtolower($this->Server->HTTP_HOST));
+            if (!defined('HTTP_HOST')) {
+                if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+                    $host = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
+                    $host = trim($host[sizeof($host) - 1]);
+                } else {
+                    $host = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : (isset($_HOST) ? $_HOST : '');
+                }
+
+                define('HTTP_HOST', strtolower($host)); // the domain that the site needs to behave as (for proxies)
             }
-            $fullUrl = (isSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI;
-            define('FULL_URL', $fullUrl);
         }
+
+        $fullUrl = (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI;
+        define('FULL_URL', $fullUrl);
+
+        if(isset($_SERVER['SERVER_PROTOCOL'])) {
+            $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
+            define('BASE_URL', $protocol . HTTP_HOST);
+        }
+
         if(defined('HTTP_HOST')) {
             $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
         }
@@ -83,6 +97,11 @@ class Web
             MSSQL_Connection::$use_log = true;
         }
 
+        $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
+        if($t[strlen($t) - 1] == '/') {
+            $t = substr($t,0,strlen($t) - 1);
+        }
+        define('DOC_ROOT_PATH', $t);
 
         define('SORT_BY', isset($this->Request->sort_by) ? $this->Request->sort_by : null);
         define('SORT_DIR', isset($this->Request->sort_dir) ? $this->Request->sort_dir : 'asc');
@@ -117,6 +136,17 @@ class Web
             $cur_page = $this->CurrentUser ? $default_user_page : $default_page;
             $full_path = '/' . $cur_page;
         }
+
+        $host = explode('.', HTTP_HOST);
+        $m = sizeof($host);
+
+        if(sizeof($host) >= 2) {
+            define('URL_DOMAIN',$host[$m-2] . '.' . $host[$m-1]);
+        } else {
+            define('URL_DOMAIN',$host[0]);
+        }
+
+        define('COOKIE_DOMAIN','.'.URL_DOMAIN);
 
         define('CURRENT_PAGE', $full_path);
         define('CURRENT_PAGE_NAME', $cur_page);

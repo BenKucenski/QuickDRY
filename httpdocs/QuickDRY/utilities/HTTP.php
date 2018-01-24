@@ -1,6 +1,17 @@
 <?php
 class HTTP extends SafeClass
 {
+    public static function IsSecure()
+    {
+        if (!isset($_SERVER['HTTPS'])) {
+            return false;
+        }
+
+        return
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || $_SERVER['SERVER_PORT'] == 443;
+    }
+
     public static function ArrayToHTTPQuery($array, $name)
     {
         $res = [];
