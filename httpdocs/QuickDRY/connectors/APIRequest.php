@@ -17,6 +17,7 @@ class APIRequest
     private $_headers = null;
 
     public static $UseLog = false;
+    public static $CacheTimeoutSeconds;
 
     public function __get($name)
     {
@@ -70,6 +71,23 @@ class APIRequest
 
     private function _Request($path, $data = null, $headers = null, $post = true)
     {
+        if(self::$CacheTimeoutSeconds > -1) {
+            $hash = md5(serialize([$path, $data, $headers, $post]));
+            $dir = 'logs/cache';
+            if(!is_dir($dir)) {
+                mkdir($dir);
+            }
+            $file = $dir .'/' .$hash .'.txt';
+            if(file_exists($file)) {
+                if(time() - filectime($file) < self::$CacheTimeoutSeconds) {
+                    $fp = fopen($file, 'r');
+                    $retr = fread($fp, filesize($file));
+                    fclose($fp);
+                    return $retr;
+                }
+            }
+        }
+
         $ch = curl_init();
 
         $host = parse_url($path);
@@ -112,6 +130,12 @@ class APIRequest
         $retr = curl_exec($ch);
 
         $this->_error = curl_error($ch);
+
+        if(self::$CacheTimeoutSeconds > -1) {
+            $fp = fopen($file, 'w');
+            fwrite($fp, $retr);
+            fclose($fp);
+        }
 
         return $retr;
     }

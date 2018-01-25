@@ -6,6 +6,23 @@ var GoogleCharts = {
         });
     },
 
+    ComboChart: function (title, data, element_id, options) {
+        if (data.length < 2) {
+            return;
+        }
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.ComboChart(document.getElementById(element_id));
+
+        $('#' + element_id).after('<div style="text-align: center;" id="' + element_id + '_png"></div>');
+
+        google.visualization.events.addListener(chart, 'ready', function () {
+            document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+        });
+
+        chart.draw(google.visualization.arrayToDataTable(data), options);
+    },
+
     LineChart: function (title, data, element_id, width, height, legend) {
         if (!legend) {
             legend = 'none';
