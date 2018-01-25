@@ -8,19 +8,6 @@ if (strcasecmp($Web->Session->page_orientation, 'letter') == 0) {
     $Web->Session->page_orientation = 'portrait';
 }
 
-
-if (!$Web->Session->pdf_style) {
-    $Web->Session->pdf_style = 'default';
-}
-
-ob_start();
-require_once 'style/' . $Web->Session->pdf_style . '.php';
-$_CSS_HTML = ob_get_clean();
-
-$_PAGE_HTML = $_CSS_HTML . $_PAGE_HTML;
-
-$_PAGE_HTML = preg_replace('/\.\.\//si', '/', $_PAGE_HTML);
-$_PAGE_HTML = preg_replace('/\/+/si', '/', $_PAGE_HTML);
 $_PAGE_HTML = str_replace('src="/', 'src="' . BASE_URL . '/', $_PAGE_HTML);
 $_PAGE_HTML = str_replace('href="/', 'href="' . BASE_URL . '/', $_PAGE_HTML);
 $_PAGE_HTML = str_replace('src=\'/', 'src=\'' . BASE_URL . '/', $_PAGE_HTML);
@@ -28,11 +15,11 @@ $_PAGE_HTML = str_replace('href=\'/', 'href=\'' . BASE_URL . '/', $_PAGE_HTML);
 
 $hash = md5($_PAGE_HTML);
 
-if (!is_dir(BASEDIR . 'temp/')) {
-    mkdir(BASEDIR . 'temp/');
+if (!is_dir(DOC_ROOT_PATH . '/temp/')) {
+    mkdir(DOC_ROOT_PATH . '/temp/');
 }
 
-$html_file = BASEDIR . 'temp/' . $hash . '.html';
+$html_file = DOC_ROOT_PATH . '/temp/' . $hash . '.html';
 
 $fp = fopen($html_file, 'w');
 fwrite($fp, $_PAGE_HTML);
@@ -43,7 +30,7 @@ $Description = $Web->Session->name;
 $FileName = $html_file . '.pdf';
 
 
-$cmd = BASEDIR . 'QuickDRY\\bin\\wkhtmltopdf.exe --javascript-delay 5000 --enable-javascript --disable-smart-shrinking -O ' . $Web->Session->page_orientation . ' ' . $html_file . ' ' . $FileName;
+$cmd = DOC_ROOT_PATH . '\\QuickDRY\\bin\\wkhtmltopdf.exe --javascript-delay 5000 --enable-javascript --disable-smart-shrinking -O ' . $Web->Session->page_orientation . ' ' . $html_file . ' ' . $FileName;
 
 $output = [];
 exec($cmd, $output);
@@ -52,7 +39,7 @@ $output = implode(PHP_EOL, $output);
 
 $e = error_get_last();
 if (!is_null($e) && !stristr($e['message'], 'statically')) {
-    exit('<p><b>There has been an error processing this page.</b></p>' . Debug($e, false, true));
+    Debug::Halt($e);
 }
 
 $pdf_name = $Web->Session->name;

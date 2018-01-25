@@ -1,4 +1,5 @@
 var GoogleCharts = {
+    NoPrintLink : false,
     Init : function (callback) {
         google.load("visualization", "1.1", {
             packages: ["corechart"],
@@ -17,7 +18,9 @@ var GoogleCharts = {
         $('#' + element_id).after('<div style="text-align: center;" id="' + element_id + '_png"></div>');
 
         google.visualization.events.addListener(chart, 'ready', function () {
-            document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            if(!GoogleCharts.NoPrintLink) {
+                document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            }
         });
 
         chart.draw(google.visualization.arrayToDataTable(data), options);
@@ -45,7 +48,9 @@ var GoogleCharts = {
         $('#' + element_id).after('<div style="text-align: center;" id="' + element_id + '_png"></div>');
 
         google.visualization.events.addListener(chart, 'ready', function () {
-            document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            if(!GoogleCharts.NoPrintLink) {
+                document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            }
         });
 
         chart.draw(google.visualization.arrayToDataTable(data), options);
@@ -75,7 +80,9 @@ var GoogleCharts = {
 
 
             google.visualization.events.addListener(chart, 'ready', function () {
-                document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+                if(!GoogleCharts.NoPrintLink) {
+                    document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+                }
             });
         }
 
@@ -100,7 +107,9 @@ var GoogleCharts = {
         $('#' + element_id).after('<div style="text-align: center;" id="' + element_id + '_png"></div>');
 
         google.visualization.events.addListener(chart, 'ready', function () {
-            document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            if(!GoogleCharts.NoPrintLink) {
+                document.getElementById(element_id + '_png').innerHTML = '<a target="_blank" href="' + chart.getImageURI() + '">Printable version</a>';
+            }
         });
 
         chart.draw(google.visualization.arrayToDataTable(data), options);

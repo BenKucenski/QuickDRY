@@ -122,6 +122,15 @@ Metrics::Stop('View');
 $_PAGE_HTML = ob_get_clean();
 
 if ($Web->Session->pdf) {
+
+    ob_start();
+    if(file_exists('masterpages/' . $Web->MasterPage . '.php')) {
+        require_once 'masterpages/' . $Web->MasterPage . '.php';
+    } else {
+        Debug::Halt($Web->MasterPage . ' does not exist');
+    }
+    $_PAGE_HTML = ob_get_clean();
+
     Metrics::Start('render pdf');
     switch ($Web->Session->pdf_lib) {
         case 'webkit':
