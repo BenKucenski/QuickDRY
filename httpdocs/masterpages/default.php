@@ -56,13 +56,13 @@
 		<div id="custom-bootstrap-menu" class="navbar navbar-default " role="navigation">
             <div class="collapse navbar-collapse navbar-menubuilder">
 		<ul class="nav navbar-nav navbar-left">
-			<?php echo $_NAVIGATION->RenderBootstrap(); ?>
+			<?php echo $Web->Navigation->RenderBootstrap(); ?>
 		</ul>
-                <?php if(isset($CurrentUser) && is_object($CurrentUser) && $CurrentUser->login) { ?>
+                <?php if(isset($Web->CurrentUser) && is_object($Web->CurrentUser) && $Web->CurrentUser->login) { ?>
 
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?php echo $CurrentUser->login; ?><span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?php echo $Web->CurrentUser->login; ?><span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="/logout">Logout</a></li>
                             </ul>
@@ -76,7 +76,7 @@
 	</div>
 
 	<div class="row">
-		<?php echo $_PAGE_HTML; ?>
+		<?php echo $Web->HTML; ?>
 	</div>
 
 	<div class="row" style="margin: 15px;">
@@ -88,7 +88,7 @@
 
 </div>
 
-<input type="hidden" id="current_tab" value="<?php echo $Cookie->current_tab * 1.0; ?>" />
+<input type="hidden" id="current_tab" value="<?php echo $Web->Cookie->current_tab * 1.0; ?>" />
 <?php require_once 'QuickDry/controls/ctl_notice.php'; ?>
 <?php require_once 'QuickDry/controls/ctl_wait.php'; ?>
 <?php require_once 'QuickDry/controls/ctl_confirm.php'; ?>
@@ -97,12 +97,12 @@
 <script>
 	DOMAIN = "<?php echo COOKIE_DOMAIN; ?>";
 	$(document).ready(function(){
-		<?php if($Session->notice) { ?>
-		NoticeDialog('Notice', "<?php echo $Session->notice; ?>");
-		<?php $Session->notice = ''; } ?>
-		<?php if($Session->error) { ?>
-		NoticeDialog('Error', "<?php echo $Session->error; ?>");
-		<?php $Session->error = ''; } ?>
+		<?php if($Web->Session->notice) { ?>
+		NoticeDialog('Notice', "<?php echo $Web->Session->notice; ?>");
+		<?php $Web->Session->notice = ''; } ?>
+		<?php if($Web->Session->error) { ?>
+		NoticeDialog('Error', "<?php echo $Web->Session->error; ?>");
+		<?php $Web->Session->error = ''; } ?>
 
 		ShowTab($('#current_tab').val());
 	});

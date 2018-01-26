@@ -14,6 +14,12 @@
  * @property string[] SecureMasterPages
  * @property string MasterPage
  * @property string SettingsFile
+ * @property bool RenderPDF;
+ * @property string HTML;
+
+ * @property string PDFPageOrientation
+ * @property string PDFFileName
+ * @property string PDFPostRedirect
  */
 class Web
 {
@@ -30,6 +36,11 @@ class Web
     public $SettingsFile;
 
     private $SecureMasterPages;
+
+    public $RenderPDF;
+    public $PDFPageOrientation;
+    public $PDFFileName;
+    public $PDFPostRedirect;
 
     /**
      * @param string[] $MasterPages
@@ -54,6 +65,8 @@ class Web
      */
     public function Init($default_page, $default_user_page, $script_dir)
     {
+        $this->RenderPDF = false;
+
         $this->Request = new Request();
         $this->Session = new Session();
         $this->Cookie = new Cookie();

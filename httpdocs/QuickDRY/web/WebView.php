@@ -39,16 +39,28 @@ if (file_exists($Web->ControllerFile)) {
                     if (method_exists($PageModel, 'DoExportToXLS')) {
                         $PageModel::DoExportToXLS();
                     } else {
-                        exit('ExportToXLS Not Implemented: ' . $PageModel);
+                        exit('DoExportToXLS Not Implemented: ' . $PageModel);
                     }
                     exit;
                 case 'json':
                     if (method_exists($PageModel, 'DoExportToJSON')) {
                         $PageModel::DoExportToJSON();
                     } else {
-                        exit('ToJSON Not Implemented: ' . $PageModel);
+                        exit('DoExportToJSON Not Implemented: ' . $PageModel);
                     }
                     exit;
+                case 'pdf':
+                    if (method_exists($PageModel, 'DoExportToPDF')) {
+                        $PageModel::DoExportToPDF();
+                        $Web->RenderPDF = true;
+                        $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
+                        $Web->PDFFileName = $PageModel::$PDFFileName;
+                        $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
+                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+                    } else {
+                        exit('DoExportToPDF Not Implemented');
+                    }
+                    break;
             }
         }
     } else {
@@ -57,7 +69,7 @@ if (file_exists($Web->ControllerFile)) {
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
-             $Web->MasterPage = $PageModel->MasterPage ? $PageModel->MasterPage : null;
+            $Web->MasterPage = $PageModel->MasterPage ? $PageModel->MasterPage : null;
 
             if ($Web->IsSecureMasterPage()) {
                 if ($Web->AccessDenied) {
@@ -91,9 +103,21 @@ if (file_exists($Web->ControllerFile)) {
                         if (method_exists($PageModel, 'ExportToJSON')) {
                             $PageModel->ExportToJSON();
                         } else {
-                            exit('ToJSON Not Implemented');
+                            exit('ExportToJSON Not Implemented');
                         }
                         exit;
+                    case 'pdf':
+                        if (method_exists($PageModel, 'ExportToPDF')) {
+                            $PageModel->ExportToPDF();
+                            $Web->RenderPDF = true;
+                            $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;
+                            $Web->PDFFileName = $PageModel->PDFFileName;
+                            $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
+                            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+                        } else {
+                            exit('ExportToPDF Not Implemented');
+                        }
+                        break;
                 }
             }
 
@@ -110,7 +134,6 @@ if (file_exists($Web->ControllerFile)) {
     }
 }
 
-
 Metrics::Stop('Controller');
 
 Metrics::Start('View');
@@ -119,32 +142,29 @@ if (file_exists($Web->ViewFile)) {
 }
 Metrics::Stop('View');
 
-$_PAGE_HTML = ob_get_clean();
+$Web->HTML = ob_get_clean();
 
-if ($Web->Session->pdf) {
+
+if ($Web->RenderPDF) {
 
     ob_start();
-    if(file_exists('masterpages/' . $Web->MasterPage . '.php')) {
+    if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
         require_once 'masterpages/' . $Web->MasterPage . '.php';
     } else {
         Debug::Halt($Web->MasterPage . ' does not exist');
     }
-    $_PAGE_HTML = ob_get_clean();
+    $Web->HTML = ob_get_clean();
+
 
     Metrics::Start('render pdf');
-    switch ($Web->Session->pdf_lib) {
-        case 'webkit':
-        default:
-            require_once 'QuickDRY/pdf_output/webkit.php';
-            break;
-    }
+    require_once 'QuickDRY/pdf_output/webkit.php';
 
     Metrics::Stop('render pdf');
     exit;
 }
 
-if(file_exists('masterpages/' . $Web->MasterPage . '.php')) {
+if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
     require_once 'masterpages/' . $Web->MasterPage . '.php';
 } else {
-    Debug::Halt($Web->MasterPage . ' does not exist');
+    Debug::Halt($Web->MasterPage . ' masterpage does not exist');
 }
