@@ -25,8 +25,8 @@ class HTTP extends SafeClass
      */
     public static function RedirectError($err, $url = '/')
     {
-        global $Session;
-        $Session->error = $err;
+        $_SESSION['error'] = serialize($err); // make it compatible with the Session object
+
         if(isset($_SERVER['HTTP_REFERER']))
             header('location: ' . $_SERVER['HTTP_REFERER']);
         else {
@@ -37,8 +37,8 @@ class HTTP extends SafeClass
 
     public static function RedirectNotice($notice, $url = '/')
     {
-        global $Session;
-        $Session->notice = $notice;
+        $_SESSION['notice'] = serialize($notice); // make it compatible with the Session object
+
         if(isset($_SERVER['HTTP_REFERER']))
             header('location: ' . $_SERVER['HTTP_REFERER']);
         else {
