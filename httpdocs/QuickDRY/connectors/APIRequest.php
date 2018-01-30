@@ -73,7 +73,7 @@ class APIRequest
     {
         if(self::$CacheTimeoutSeconds > -1) {
             $hash = md5(serialize([$path, $data, $headers, $post]));
-            $dir = 'logs/cache';
+            $dir = DOC_ROOT_PATH . '/logs/cache';
             if(!is_dir($dir)) {
                 mkdir($dir);
             }

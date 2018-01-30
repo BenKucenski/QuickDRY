@@ -1,29 +1,81 @@
 <?php
 
+/**
+ * Class Debug
+ */
 class Debug extends SafeClass
 {
+    /**
+     * @param $class_name
+     */
+    public static function HaltStatic($class_name)
+    {
+        try {
+            $reflection = new ReflectionClass($class_name);
+            self::Halt($reflection->getStaticProperties());
+        } catch(Exception $ex) {
+            self::Halt($ex);
+        }
+    }
+
+    /**
+     * @param $class_name
+     */
+    public static function CleanHaltStatic($class_name)
+    {
+        try {
+            $reflection = new ReflectionClass($class_name);
+            self::CleanHalt($reflection->getStaticProperties());
+        } catch(Exception $ex) {
+            self::Halt($ex);
+        }
+    }
+
+    /**
+     * @param $var
+     * @param null $message
+     */
     public static function CleanHalt($var, $message = null)
     {
         static::_Debug($var, $message, true, true, false);
 
     }
 
+    /**
+     * @param $var
+     * @param null $message
+     */
     public static function Halt($var, $message = null)
     {
         static::_Debug($var, $message, true, true, true);
     }
 
+    /**
+     * @param $var
+     * @param null $message
+     */
     public static function CleanHaltCL($var, $message = null)
     {
         static::_DebugCL($var, $message, true, true, false);
 
     }
 
+    /**
+     * @param $var
+     * @param null $message
+     */
     public static function HaltCL($var, $message = null)
     {
         static::_DebugCL($var, $message, true, true, true);
     }
 
+    /**
+     * @param $var
+     * @param null $msg
+     * @param bool $print
+     * @param bool $exit
+     * @param bool $backtrace
+     */
     public static function _Debug($var, $msg = null, $print = false, $exit = false, $backtrace = true)
     {
         $finalMsg = '';

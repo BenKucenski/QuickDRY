@@ -27,7 +27,6 @@ fwrite($fp, $Web->HTML);
 fclose($fp);
 
 
-$Description = $Web->PDFFileName;
 $FileName = $html_file . '.pdf';
 
 
@@ -54,11 +53,13 @@ if ($Web->PDFPostRedirect) {
     exit();
 }
 
-
-header('Content-type: application/pdf');
-header('Content-Disposition: inline; filename="' . $Web->PDFFileName . '"');
-header('Expires: 0');
-header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-header('Pragma: public');
-readfile($FileName);
-
+if(isset($_SERVER['HTTP_HOST'])) {
+    header('Content-type: application/pdf');
+    header('Content-Disposition: inline; filename="' . $Web->PDFFileName . '"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    readfile($FileName);
+} else {
+    rename($FileName, $Web->PDFFileName);
+}

@@ -226,9 +226,10 @@ class Elastic_Core extends Elastic_Base
 
     protected static function _Aggregation($index, $type, $query)
     {
-        global $Request;
+        /* @var $Web Web */
+        global $Web;
         if (!static::_connect()) {
-            if ($Web->Request->query_log) {
+            if ($Web && $Web->Request->query_log) {
                 exit('could not connect');
             }
             return null;
