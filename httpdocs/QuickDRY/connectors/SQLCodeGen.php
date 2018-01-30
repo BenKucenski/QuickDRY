@@ -81,8 +81,9 @@ class ' . $sp_class . ' extends SafeClass
     public function GenerateClasses()
     {
         $modules = [];
-        $modules[] = 'require_once \'common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
-        $this->GenerateDatabaseClass();
+        if($this->GenerateDatabaseClass()) {
+            $modules[] = 'require_once \'common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
+        }
 
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
