@@ -51,6 +51,44 @@ class SQLCodeGen extends SafeClass
             mkdir('_common');
     }
 
+    /**
+     * @param $col_type
+     *
+     * @return string
+     */
+    public static function ColumnTypeToProperty($col_type)
+    {
+        switch (strtolower($col_type)) {
+            case 'varchar':
+            case 'char':
+            case 'keyword':
+            case 'text':
+                return 'string';
+
+            case 'tinyint unsigned':
+            case 'bigint unsigned':
+            case 'int unsigned':
+                return 'uint';
+
+            case 'numeric':
+            case 'tinyint':
+            case 'smallint':
+            case 'bit':
+                return 'int';
+
+            case 'money':
+            case 'decimal':
+                return 'float';
+
+            case 'smalldatetime':
+                return 'datetime';
+        }
+        return $col_type;
+    }
+
+    /**
+     * @param $sp_class
+     */
     public function GenerateSPClassFile($sp_class)
     {
         $code = '<?php
@@ -114,7 +152,7 @@ class ' . $sp_class . ' extends SafeClass
 
 
         foreach ($cols as $col) {
-            $class_props[] = ' * @property ' . ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field;
+            $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field;
             $props .= "'" . $col->field . "'=>['display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . (strcasecmp($col->null, 'no') == 0 ? 'false' : 'true') . "],\r\n\t\t";
         }
 
@@ -1050,7 +1088,7 @@ class ' . $page_dir . ' extends BasePage
     }
 }
 
-define(\'PAGE_MODEL\', \'' . $page_dir . '\');
+$Web->InstanceModel = \'' . $page_dir . '\';
 ';
         $fp = fopen('manage/' . $page_dir . '/' . $page_dir . '.code.php', 'w');
         fwrite($fp, $code);

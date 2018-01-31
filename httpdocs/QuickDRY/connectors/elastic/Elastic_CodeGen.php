@@ -110,7 +110,7 @@ class Elastic_CodeGen extends SafeClass
                 $alias_list = [];
                 foreach ($properties as $name => $prop_type) {
                     $alias = preg_replace('/[^a-z0-9]/si','_', $name);
-                    $prop_comments[] = ' * @property ' . (isset($prop_type['properties']) ? 'object' : $prop_type['type']) . ' ' . $name;
+                    $prop_comments[] = ' * @property ' . (isset($prop_type['properties']) ? 'object' : SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $prop_type['type']))) . ' ' . $name;
                     $prop_code[] = '    public $' . $alias . ';';
 
                     if($alias !== $name) {

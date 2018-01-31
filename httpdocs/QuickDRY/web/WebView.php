@@ -8,8 +8,8 @@ Metrics::Start('Controller');
 if (file_exists($Web->ControllerFile)) {
     require_once $Web->ControllerFile;
 
-    if (defined('PAGE_MODEL_STATIC')) { // static class
-        $PageModel = PAGE_MODEL_STATIC;
+    if ($Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
+        $PageModel = $Web->StaticModel ? $Web->StaticModel : PAGE_MODEL_STATIC;
         $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
         $PageModel::DoInit();
         $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
@@ -36,36 +36,24 @@ if (file_exists($Web->ControllerFile)) {
         if ($Web->Request->export) {
             switch (strtolower($Web->Request->export)) {
                 case 'xls':
-                    if (method_exists($PageModel, 'DoExportToXLS')) {
-                        $PageModel::DoExportToXLS();
-                    } else {
-                        exit('DoExportToXLS Not Implemented: ' . $PageModel);
-                    }
+                    $PageModel::DoExportToXLS();
                     exit;
                 case 'json':
-                    if (method_exists($PageModel, 'DoExportToJSON')) {
-                        $PageModel::DoExportToJSON();
-                    } else {
-                        exit('DoExportToJSON Not Implemented: ' . $PageModel);
-                    }
+                    $PageModel::DoExportToJSON();
                     exit;
                 case 'pdf':
-                    if (method_exists($PageModel, 'DoExportToPDF')) {
-                        $PageModel::DoExportToPDF();
-                        $Web->RenderPDF = true;
-                        $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
-                        $Web->PDFFileName = $PageModel::$PDFFileName;
-                        $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
-                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
-                    } else {
-                        exit('DoExportToPDF Not Implemented');
-                    }
+                    $PageModel::DoExportToPDF();
+                    $Web->RenderPDF = true;
+                    $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
+                    $Web->PDFFileName = $PageModel::$PDFFileName;
+                    $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
+                    $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
                     break;
             }
         }
     } else {
-        if (defined('PAGE_MODEL')) { // instance class
-            $class = PAGE_MODEL;
+        if ($Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
+            $class = $Web->InstanceModel ? $Web->InstanceModel : PAGE_MODEL;
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
@@ -93,30 +81,18 @@ if (file_exists($Web->ControllerFile)) {
             if ($Web->Request->export) {
                 switch (strtolower($Web->Request->export)) {
                     case 'xls':
-                        if (method_exists($PageModel, 'ExportToXLS')) {
-                            $PageModel->ExportToXLS();
-                        } else {
-                            exit('ExportToXLS Not Implemented: ' . get_class($PageModel));
-                        }
+                        $PageModel->ExportToXLS();
                         exit;
                     case 'json':
-                        if (method_exists($PageModel, 'ExportToJSON')) {
-                            $PageModel->ExportToJSON();
-                        } else {
-                            exit('ExportToJSON Not Implemented');
-                        }
+                        $PageModel->ExportToJSON();
                         exit;
                     case 'pdf':
-                        if (method_exists($PageModel, 'ExportToPDF')) {
-                            $PageModel->ExportToPDF();
-                            $Web->RenderPDF = true;
-                            $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;
-                            $Web->PDFFileName = $PageModel->PDFFileName;
-                            $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
-                            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
-                        } else {
-                            exit('ExportToPDF Not Implemented');
-                        }
+                        $PageModel->ExportToPDF();
+                        $Web->RenderPDF = true;
+                        $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;
+                        $Web->PDFFileName = $PageModel->PDFFileName;
+                        $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
+                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
                         break;
                 }
             }

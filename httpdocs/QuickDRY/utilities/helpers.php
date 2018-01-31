@@ -109,40 +109,7 @@ function run_in_background($cmd)
 }
 
 
-/**
- * @param $col_type
- *
- * @return string
- */
-function ColumnTypeToProperty($col_type)
-{
-    switch (strtolower($col_type)) {
-        case 'varchar':
-        case 'char':
-        case 'keyword':
-        case 'text':
-            return 'string';
 
-        case 'tinyint unsigned':
-        case 'bigint unsigned':
-        case 'int unsigned':
-            return 'uint';
-
-        case 'numeric':
-        case 'tinyint':
-        case 'smallint':
-        case 'bit':
-            return 'int';
-
-        case 'money':
-        case 'decimal':
-            return 'float';
-
-        case 'smalldatetime':
-            return 'datetime';
-    }
-    return $col_type;
-}
 
 /**
  * @param $field

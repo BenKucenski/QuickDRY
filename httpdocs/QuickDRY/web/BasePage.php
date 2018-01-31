@@ -220,4 +220,44 @@ class BasePage extends SafeClass
         $res .= '</ul></div>';
         return $res;
     }
+
+    public function ExportToXLS()
+    {
+        Halt('ExportToXLS is not implemented');
+    }
+
+    public function ExportToPDF()
+    {
+        Halt('ExportToPDF is not implemented');
+    }
+
+    public function ExportToCSV()
+    {
+        Halt('ExportToCSV is not implemented');
+    }
+
+    public function ExportToJSON()
+    {
+        Halt('ExportToJSON is not implemented');
+    }
+
+    public static function DoExportToXLS()
+    {
+        Halt('DoExportToXLS is not implemented');
+    }
+
+    public static function DoExportToPDF()
+    {
+        Halt('DoExportToPDF is not implemented');
+    }
+
+    public static function DoExportToCSV()
+    {
+        Halt('DoExportToCSV is not implemented');
+    }
+
+    public static function DoExportToJSON()
+    {
+        Halt('DoExportToJSON is not implemented');
+    }
 }

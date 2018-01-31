@@ -42,6 +42,9 @@ class Web
     public $PDFFileName;
     public $PDFPostRedirect;
 
+    public $StaticModel;
+    public $InstanceModel;
+
     /**
      * @param string[] $MasterPages
      */
@@ -50,6 +53,9 @@ class Web
         $this->SecureMasterPages = $MasterPages;
     }
 
+    /**
+     * @return bool
+     */
     public function IsSecureMasterPage()
     {
         if(!is_array($this->SecureMasterPages)) {
@@ -90,8 +96,7 @@ class Web
             }
         }
 
-        $fullUrl = (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI;
-        define('FULL_URL', $fullUrl);
+        define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
 
         if(isset($_SERVER['SERVER_PROTOCOL'])) {
             $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
