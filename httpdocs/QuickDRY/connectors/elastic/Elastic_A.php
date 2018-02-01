@@ -17,7 +17,12 @@ class Elastic_A extends Elastic_Core
     protected static $ACTIVE_ELASTIC_URL = Elastic_A_URL;
     protected static $ACTIVE_ELASTIC_HOST = Elastic_A_HOST;
 
-    public static function GetAll($where)
+    /**
+     * @param $where
+     * @param int $limit
+     * @return array
+     */
+    public static function GetAll($where, $limit = 10000)
     {
         $return_type = get_called_class();
 
@@ -30,7 +35,9 @@ class Elastic_A extends Elastic_Core
         $page = 0;
         $per_page = 10000; // arbitrary limit
         $max_page = ceil($count / $per_page);
-        while ($page < $max_page) {
+
+        while ($page < $max_page && $page * $per_page < $limit) {
+            Log::Insert([$page, $max_page], true);
             $res = $return_type::Search($where, $page, $per_page);
             foreach ($res['data'] as $row) {
                 $list[] = new $return_type($row);
@@ -40,6 +47,22 @@ class Elastic_A extends Elastic_Core
         return $list;
     }
 
+    /**
+     * @param $where
+     * @return int
+     */
+    public static function GetCount($where)
+    {
+        $return_type = get_called_class();
+
+        $res = $return_type::Search($where, 0, 0);
+        return $res['count'];
+    }
+
+    /**
+     * @param $where
+     * @return null
+     */
     public static function Get($where)
     {
         $res = self::Search($where, 0 ,1);

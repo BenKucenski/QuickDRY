@@ -32,8 +32,9 @@ class SQL_Base
         $t = explode('_', $database_prefix . '_' . $table);
 
         $type = '';
-        foreach($t as $w)
-            $type .= preg_replace('/[^a-z0-9]/si','',ucfirst($w));
+        foreach($t as $w) {
+            $type .= preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
+        }
         $type .= 'Class';
         if(is_numeric($type[0]))
             $type = 'i' . $type;

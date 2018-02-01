@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class SQLCodeGen
+ */
 class SQLCodeGen extends SafeClass
 {
     protected $Database;
@@ -38,6 +42,13 @@ class SQLCodeGen extends SafeClass
         if (!is_dir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp'))
             mkdir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp');
 
+        if (!is_dir('sp_db'))
+            mkdir('sp_db');
+        if (!is_dir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
+            mkdir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
+        if (!is_dir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db'))
+            mkdir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db');
+
         if (!is_dir('phpunit'))
             mkdir('phpunit');
 
@@ -46,9 +57,6 @@ class SQLCodeGen extends SafeClass
 
         if (!is_dir('manage'))
             mkdir('manage');
-
-        if (!is_dir('_common'))
-            mkdir('_common');
     }
 
     /**
@@ -96,7 +104,7 @@ class SQLCodeGen extends SafeClass
 /**
  * Class ' . $sp_class . '
  */
-class ' . $sp_class . ' extends SafeClass
+class ' . $sp_class . ' extends db_' . $sp_class . '
 {
     public function __construct($row = null)
     {
@@ -118,10 +126,7 @@ class ' . $sp_class . ' extends SafeClass
 
     public function GenerateClasses()
     {
-        $modules = [];
-        if($this->GenerateDatabaseClass()) {
-            $modules[] = 'require_once \'common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php\';';
-        }
+        $modules = $this->GenerateDatabaseClass();
 
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
@@ -129,12 +134,37 @@ class ' . $sp_class . ' extends SafeClass
             $DatabaseClass = $this->DatabaseClass;
             $columns = $DatabaseClass::GetTableColumns($table_name);
             $mod = $this->GenerateClass($table_name, $columns);
-            $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php\';';
-            $modules[] = 'require_once \'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php\';';
+            $modules['db_' . $mod] = 'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php';
+            $modules[$mod] = 'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php';
         }
 
         $fp = fopen('includes/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
-        fwrite($fp, "<?php\r\n\r\n" . implode("\r\n", $modules));
+
+        $mod_map = [];
+        foreach($modules as $mod => $file) {
+            $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
+        }
+        $include_php = '<?php
+/**
+ * @param $class
+ */
+function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader($class) {
+    $class_map = [
+        ' . implode("\r\n\t\t", $mod_map) . '
+    ];
+    
+    if(!isset($class_map[$class])) {
+        return;
+    }
+
+    require_once $class_map[$class];
+}
+
+
+spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader\');        
+        ';
+
+        fwrite($fp, $include_php);
         fclose($fp);
     }
 

@@ -250,15 +250,18 @@ class Elastic_Core extends Elastic_Base
         return isset($array['aggregations']) ? $array['aggregations'] : [];
     }
 
+    /**
+     * @param $index
+     * @param $type
+     * @param $query
+     * @param int $page
+     * @param int $per_page
+     * @return array
+     */
     protected static function _SearchQuery($index, $type, $query, $page = 0, $per_page = 20)
     {
-        global $Request;
-
         if (!static::_connect()) {
-            if ($Web->Request->query_log) {
-                exit('could not connect');
-            }
-            return null;
+            Halt('could not connect');
         }
 
         $start_time = microtime(true);
@@ -371,6 +374,14 @@ class Elastic_Core extends Elastic_Base
         return $list;
     }
 
+    /**
+     * @param $index
+     * @param $type
+     * @param $query
+     * @param null $fields
+     * @param bool $is_numeric
+     * @return null
+     */
     protected static function _Stats($index, $type, $query, $fields = null, $is_numeric = true)
     {
         if (!static::_connect()) {
@@ -445,6 +456,12 @@ class Elastic_Core extends Elastic_Base
         return $res;
     }
 
+    /**
+     * @param $index
+     * @param $type
+     * @param $json
+     * @return array|null
+     */
     protected static function _Insert($index, $type, &$json)
     { // single inserts only, use insertupdate for bulk inserts
         if (!static::_connect()) {
@@ -493,6 +510,11 @@ class Elastic_Core extends Elastic_Base
         return $res;
     }
 
+    /**
+     * @param $index
+     * @param $type
+     * @return array|null
+     */
     protected static function _Truncate($index, $type)
     {
         if (!static::_connect()) {
@@ -515,6 +537,12 @@ class Elastic_Core extends Elastic_Base
         return $res;
     }
 
+    /**
+     * @param $path
+     * @param $command
+     * @param $json
+     * @return array|null
+     */
     public static function Execute($path, $command, $json)
     {
         if (!static::_connect()) {

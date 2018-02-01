@@ -42,8 +42,9 @@ class ExceptionHandler
     public static function Fatal()
     {
         $error = error_get_last();
-        if ($error['type'] == E_ERROR)
+        if ($error['type'] == E_ERROR) {
             self::Error($error['type'], $error['message'], $error['file'], $error['line']);
+        }
     }
 
     public static function Init()

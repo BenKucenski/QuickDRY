@@ -54,11 +54,35 @@ class Elastic_CodeGen extends SafeClass
         $modules = $this->GenerateCode();
 
         $fp = fopen('includes/es_' . $this->ClassPrefix . '.php','w');
-        fwrite($fp, '<?php' . PHP_EOL);
-        foreach($modules as $module) {
-            fwrite($fp, 'require_once \'common/' . $module . '\';' . PHP_EOL);
+
+
+        $mod_map = [];
+        foreach($modules as $mod => $file) {
+            $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
         }
+        $include_php = '<?php
+/**
+ * @param $class
+ */
+function es_' . strtolower($this->ClassPrefix) . '_autoloader($class) {
+    $class_map = [
+        ' . implode("\r\n\t\t", $mod_map) . '
+    ];
+    
+    if(!isset($class_map[$class])) {
+        return;
+    }
+
+    require_once $class_map[$class];
+}
+
+
+spl_autoload_register(\'es_' . strtolower($this->ClassPrefix) . '_autoloader\');        
+        ';
+
+        fwrite($fp, $include_php);
         fclose($fp);
+
     }
 
     private function GetIndexes()
@@ -224,8 +248,8 @@ class ' . $classname . ' extends ' . $schemaname . '
                 fwrite($fp, $code);
                 fclose($fp);
 
-                $modules[] = $this->ConnectionClassName . '/schema/' . $schemaname . '.php';
-                $modules[] = $this->ConnectionClassName . '/' .  $classname . '.php';
+                $modules[$schemaname] = 'common/' . $this->ConnectionClassName . '/schema/' . $schemaname . '.php';
+                $modules[$classname] = 'common/' . $this->ConnectionClassName . '/' .  $classname . '.php';
             }
         }
 
