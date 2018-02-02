@@ -49,6 +49,28 @@ class Elastic_A extends Elastic_Core
 
     /**
      * @param $where
+     * @param int $limit
+     * @return array
+     */
+    public static function GetAllPaginated($where, $page, $per_page)
+    {
+        $return_type = get_called_class();
+
+        $res = $return_type::Search($where, $page, $per_page);
+        $count = $res['count'];
+        if (!$count) {
+            return [];
+        }
+        $list = [];
+        foreach ($res['data'] as $row) {
+            $list[] = new $return_type($row);
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param $where
      * @return int
      */
     public static function GetCount($where)
