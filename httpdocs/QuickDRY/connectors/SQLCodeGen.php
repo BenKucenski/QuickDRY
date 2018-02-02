@@ -106,6 +106,10 @@ class SQLCodeGen extends SafeClass
  */
 class ' . $sp_class . ' extends db_' . $sp_class . '
 {
+    /**
+     * ' . $sp_class . ' constructor.
+     * @param null $row
+     */
     public function __construct($row = null)
     {
         if($row) {
