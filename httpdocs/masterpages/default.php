@@ -3,9 +3,6 @@
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=10" />
 	<title><?php echo isset($_META_TITLE) ? $_META_TITLE : META_TITLE; ?></title>
-	<link rel="stylesheet" type="text/css" href="/css/le-frog/jquery-ui-1.10.3.custom.css" />
-	<link rel="stylesheet" type="text/css" href="/css/jquery.notifications.css" />
-	<link rel="stylesheet" type="text/css" href="/css/jquery.fileupload-ui.css">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -25,28 +22,28 @@
     <script src="https://www.google.com/jsapi"></script>
     <script type="text/javascript" src="/QuickDRY/js/GoogleCharts.js"></script>
 
-	<script type='text/javascript' src='/js/jquery.cookie.js'></script>
-	<script type='text/javascript' src='/js/jquery.stickyheader.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery.cookie.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery.stickyheader.js'></script>
 	<script type='text/javascript' src='/QuickDRY/js/helpers.js'></script>
-	<script type='text/javascript' src='/js/jquery.mousewheel.min.js'></script>
-	<script type='text/javascript' src='/js/jquery.scrollbar-min.js'></script>
-	<script type='text/javascript' src='/js/jquery-tooltip.min.js'></script>
-	<script type='text/javascript' src='/js/jquery.notifications-1.1.min.js'></script>
-	<script type='text/javascript' src='/js/dropit.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery.mousewheel.min.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery.scrollbar-min.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery-tooltip.min.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/jquery.notifications-1.1.min.js'></script>
+	<script type='text/javascript' src='/QuickDRY/js/dropit.js'></script>
 
 	<?php if(file_exists('pages'.CURRENT_PAGE. '/' . CURRENT_PAGE_NAME . '.js')) { ?>
 		<script type="text/javascript" src="/pages<?php echo CURRENT_PAGE. '/' . CURRENT_PAGE_NAME . '.js'; ?>"></script>
 	<?php } ?>
 
-	<script src="/js/tmpl.min.js"></script>
-	<script src="/js/load-image.min.js"></script>
-	<script src="/js/canvas-to-blob.min.js"></script>
-	<script src="/js/jquery.iframe-transport.js"></script>
-	<script src="/js/jquery.fileupload.js"></script>
-	<script src="/js/jquery.fileupload-fp.js"></script>
-	<script src="/js/jquery.fileupload-ui.js"></script>
-	<script src="/js/locale.js"></script>
-	<script src="/js/jscolor.js"></script>
+	<script src="/QuickDRY/js/tmpl.min.js"></script>
+	<script src="/QuickDRY/js/load-image.min.js"></script>
+	<script src="/QuickDRY/js/canvas-to-blob.min.js"></script>
+	<script src="/QuickDRY/js/jquery.iframe-transport.js"></script>
+	<script src="/QuickDRY/js/jquery.fileupload.js"></script>
+	<script src="/QuickDRY/js/jquery.fileupload-fp.js"></script>
+	<script src="/QuickDRY/js/jquery.fileupload-ui.js"></script>
+	<script src="/QuickDRY/js/locale.js"></script>
+	<script src="/QuickDRY/js/jscolor.js"></script>
 </head>
 <body onload="if (typeof InitGoogleCharts === 'function') { InitGoogleCharts(); }">
 
