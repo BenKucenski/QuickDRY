@@ -18,6 +18,7 @@ require_once 'utilities/Navigation.php';
 require_once 'utilities/UploadHandler.php';
 require_once 'utilities/Mailer.php';
 require_once 'utilities/FineDiff.php';
+require_once 'utilities/SimpleReport.php';
 require_once 'utilities/SimpleExcel_Column.php';
 require_once 'utilities/SimpleExcel.php';
 require_once 'utilities/SimpleExcel_Reader.php';
