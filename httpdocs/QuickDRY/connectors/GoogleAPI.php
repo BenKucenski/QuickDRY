@@ -45,7 +45,7 @@ class GoogleAPI {
 	{
 		if (strlen($this->gKey) > 1) {
 			$q = str_replace(' ', '_', str_replace(' ','+',urlencode($this->address)) . ',+'.str_replace(' ','+',$this->city).',+'.str_replace(' ','+',$this->country).',+'.$this->zip);
-			if ($d = fopen("http://maps.googleapis.com/maps/api/geocode/xml?address=$q&sensor=false", "r")) {
+			if ($d = fopen("http://maps.googleapis.com/maps/api/geocode/xml?address=$q&sensor=false&key=" . $this->gKey, "r")) {
 				$gcsv = '';
 				while($r = fread($d, 2048)) {
                     $gcsv .= $r;

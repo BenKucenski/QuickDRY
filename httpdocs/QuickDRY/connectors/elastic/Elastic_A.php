@@ -37,7 +37,7 @@ class Elastic_A extends Elastic_Core
         $max_page = ceil($count / $per_page);
 
         while ($page < $max_page && $page * $per_page < $limit) {
-            Log::Insert([$page, $max_page], true);
+            // Log::Insert([$page, $max_page], true);
             $res = $return_type::Search($where, $page, $per_page);
             foreach ($res['data'] as $row) {
                 $list[] = new $return_type($row);

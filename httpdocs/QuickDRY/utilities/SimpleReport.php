@@ -17,6 +17,7 @@ class SimpleReport extends SafeClass
             if($this->HasMissingProperties()) {
                 Halt($this->GetMissingPropeties());
             }
+            $this->HaltOnError(true);
         }
     }
 }

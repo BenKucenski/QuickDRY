@@ -118,6 +118,7 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
             if($this->HasMissingProperties()) {
                 Halt($this->GetMissingPropeties());
             }
+            $this->HaltOnError(true);
         }
     }
 }

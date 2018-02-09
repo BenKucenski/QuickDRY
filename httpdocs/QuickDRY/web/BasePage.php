@@ -177,6 +177,14 @@ class BasePage extends SafeClass
         static::$PostData = json_decode(file_get_contents('php://input'), false); // return a standard object
     }
 
+    /**
+     * @return string
+     */
+    public static function GetClassName()
+    {
+        return get_called_class();
+    }
+
     public function Get()
     {
         static::DoGet();
