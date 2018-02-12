@@ -48,34 +48,46 @@ class MySQL_CodeGen extends SQLCodeGen
         $sp_require = [];
         $sp_code = [];
         foreach ($stored_procs as $sp) {
-            $sp_class = $class_name . '_' . $sp->SPECIFIC_NAME . 'Class';
+            $sp_class = SQL_Base::TableToClass($this->DatabasePrefix, $sp->SPECIFIC_NAME, true, $this->DatabaseTypePrefix . '_sp');
+
+            Log::Insert($sp_class, true);
 
             $this->GenerateSPClassFile($sp_class);
 
-            $sp_require[] = 'require_once \'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp/' . $sp_class . '.php\';';
+            $sp_require['db_' . $sp_class] = 'common/' . $class_name . '/sp_db/db_' . $sp_class . '.php';
+            $sp_require[$sp_class] = 'common/' . $class_name . '/sp/' . $sp_class . '.php';
 
             $sp_params = $DatabaseClass::GetStoredProcParams($sp->SPECIFIC_NAME);
             $params = [];
             $sql_params = [];
+            $func_params = [];
             foreach ($sp_params as $param) {
-                $params[] = str_replace('@', '$', $param->Parameter_name);
-                $sql_params[] = $param->Parameter_name . ' = {{}}';
+                $clean_param = str_replace('#', '_', str_replace('@', '$', $param->Parameter_name));
+                $sql_param = '{{' . str_replace('$', '', $clean_param) . '}}';
+                $func_params[] = $clean_param;
+                $sql_params[] = $sql_param;
+                $params[] = '\'' . str_replace('$', '', $clean_param) . '\' => ' . $clean_param;
             }
 
-            $sp_code[] = '
-
+            $code = '<?php
+            
+/**
+ * Class db_' . $sp_class . '
+ */    
+ class db_' . $sp_class . ' extends SafeClass
+{
     /**
      * @return ' . $sp_class . '[]
      */
-    public static function ' . $sp->SPECIFIC_NAME . '(' . implode(', ', $params) . ')
+    public static function GetReport(' . implode(', ', $func_params) . ')
     {
         $sql = \'
         EXEC	\' . ' . $this->DatabaseConstant . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
-        ' . implode(",\r\n\t\t", $sql_params) . '
+        ' . implode(", ", $sql_params) . '
 
         \';
         /* @var $rows ' . $sp_class . '[] */
-        $rows =  ' . $DatabaseClass . '::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
+        $rows = ' . $DatabaseClass . '::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
             return new ' . $sp_class . '($row);
         });
 
@@ -84,21 +96,15 @@ class MySQL_CodeGen extends SQLCodeGen
         }
         return $rows;
     }
-            ';
-        }
-        $code = '<?php
-' . implode("\r\n", $sp_require) . '
-
-class sp_' . $class_name . ' extends ' . $DatabaseClass . '
-{
-' . implode("\r\n", $sp_code) . '
 }
         ';
 
-        $fp = fopen('_common/sp_' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+            $file = 'sp_db/' . $class_name . '/sp_db/db_' . $sp_class . '.php';
+            $fp = fopen($file, 'w');
+            fwrite($fp, $code);
+            fclose($fp);
+        }
 
-        return true;
+        return $sp_require;
     }
 }

@@ -1066,13 +1066,14 @@ var ' . $c_name . 'History = {
 
         $page = '
 <?php /* @var $PageModel ' . $page_dir . ' */ ?>
-<div class="tab_nav">
-    <div class="tab_top tab_selected">' . CapsToSpaces(str_replace('Class', '', $c_name)) . '</div>
-    <div class="tab tab_top"><a id="" onclick="' . $c_name . '.Load();">New</a></div>
-</div>
-
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="pull-right"><a id="" onclick="' . $c_name . '.Load();"><i class="fa fa-plus"></i></a></div>
+        <div class="panel-title">' . CapsToSpaces(str_replace('Class', '', $c_name)) . '</div>
+    </div>
+    <div class="panel-body">
 <?php echo BootstrapPaginationLinks($PageModel->Count); ?>
-<table class="table table-striped">
+<table class="table table-striped" style="font-size: 0.9em;">
     <thead>
     <?php echo $PageModel->TableHeader; ?>
     </thead>
@@ -1081,6 +1082,10 @@ var ' . $c_name . 'History = {
     <?php } ?>
 </table>
 <?php echo BootstrapPaginationLinks($PageModel->Count); ?>
+    
+    </div>
+</div>
+
 
 <?php require_once \'pages/json/_' . $c_name . '/controls/add.php\'; ?>
 ';
