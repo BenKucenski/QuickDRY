@@ -67,52 +67,28 @@ class SafeClass
     }
 
     /**
-     * @param $array
+     * @param StdClass[] $array
      * @param $filename
      *
      * pass in an array of SafeClass objects and the file name
-     * note that public static $headers must be defined in the format
-     * ['Nice Name' => 'Property Name']
      */
-    public static function ToXLS($array, $filename)
+    public static function ToCSV($array, $filename, $headers = null)
     {
-        if (!isset(static::$headers)) {
-            Halt('You must define public static $headers in your class');
+        if (!is_array($array) || !sizeof($array)) {
+            Halt('Not an array or empty');
         }
 
-        $objPHPExcel = new PHPExcel();
-        try {
-            $objPHPExcel->setActiveSheetIndex(0);
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
-        $rowCount = 1;
+        $header = $headers ? $headers : array_keys(get_object_vars($array[0]));
 
-        $column = 'A';
-
-        foreach (static::$headers as $title => $property) {
-            $objPHPExcel->getActiveSheet()->setCellValue($column . $rowCount, $title);
-            $column++;
+        $output = fopen("php://output", 'w') or die("Can't open php://output");
+        header("Content-Type:application/csv");
+        header("Content-Disposition:attachment;filename=\"" . $filename . "\"");
+        fputcsv($output, $header);
+        foreach ($array as $item) { /* @var $item SafeClass */
+            $ar = array_values(get_object_vars($item));
+            fputcsv($output, $ar);
         }
-        $rowCount++;
-        foreach ($array as $item) {
-            $column = 'A';
-            foreach (static::$headers as $title => $property) {
-                $objPHPExcel->getActiveSheet()->setCellValue($column . $rowCount, $item->$property);
-                $column++;
-            }
-            $rowCount++;
-        }
-
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        try {
-            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-            $objWriter->save('php://output');
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
+        fclose($output) or die("Can't close php://output");
         exit;
     }
 }

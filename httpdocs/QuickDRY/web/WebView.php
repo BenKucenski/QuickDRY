@@ -35,6 +35,9 @@ if (file_exists($Web->ControllerFile)) {
 
         if ($Web->Request->export) {
             switch (strtolower($Web->Request->export)) {
+                case 'csv':
+                    $PageModel::DoExportToCSV();
+                    exit;
                 case 'xls':
                     $PageModel::DoExportToXLS();
                     exit;
@@ -80,6 +83,9 @@ if (file_exists($Web->ControllerFile)) {
 
             if ($Web->Request->export) {
                 switch (strtolower($Web->Request->export)) {
+                    case 'csv':
+                        $PageModel->ExportToCSV();
+                        exit;
                     case 'xls':
                         $PageModel->ExportToXLS();
                         exit;
