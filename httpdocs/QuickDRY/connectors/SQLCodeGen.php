@@ -71,6 +71,7 @@ class SQLCodeGen extends SafeClass
             case 'char':
             case 'keyword':
             case 'text':
+            case 'nvarchar':
                 return 'string';
 
             case 'tinyint unsigned':
@@ -186,17 +187,37 @@ spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
 
 
-        foreach ($cols as $col) {
-            $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field;
+        $aliases = [];
+
+        foreach ($cols as $col) { /* @var $col MSSQL_TableColumn */ // these are the same for MySQL and MSSQL, only claim it's one to help with code completion
+            if($col->field !== $col->field_alias) {
+                $aliases[] = $col;
+            }
+            $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
             $props .= "'" . $col->field . "'=>['display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . (strcasecmp($col->null, 'no') == 0 ? 'false' : 'true') . "],\r\n\t\t";
         }
 
 
         $refs = $DatabaseClass::GetForeignKeys($table_name);
         $gets = [];
+        $sets = [];
+
         $foreign_key_props = [];
 
         $seens_vars = [];
+
+        foreach($aliases as $alias) { /* @var $alias MSSQL_TableColumn */
+            $gets[] = "
+            case '" . $alias->field_alias . "':
+                return \$this->get_property('" . $alias->field . "'); 
+            ";
+
+            $sets[] = "
+            case '" . $alias->field_alias . "':
+                return \$this->set_property('" . $alias->field . "', \$value); 
+            ";
+
+        }
 
         foreach ($refs as $fk) {
             if (is_array($fk->column_name)) {
@@ -355,6 +376,16 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
             ' . implode("\r\n\t\t", $gets) . '
             default:
                 return parent::__get($name);
+        }
+    }
+
+    public function __set($name, $value)
+    {
+        switch($name)
+        {
+            ' . implode("\r\n\t\t", $sets) . '
+            default:
+                return parent::__set($name, $value);
         }
     }
 

@@ -198,6 +198,15 @@ class Strings extends SafeClass
         return $res;
     }
 
+    public static function NumbersOnly($val)
+    {
+        $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);
+        if (!$res) {
+            return $val * 1.0;
+        }
+        return $res;
+    }
+
     public static function NumericPhone($val)
     {
         $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);
