@@ -23,19 +23,43 @@ class UserClass extends SafeClass
         return parent::__get($name); 
     }
 
+    /**
+     * @param $username
+     * @param $password
+     * @param null $default_host
+     * @return null|UserClass
+     */
     public static function LogInLDAP($username, $password, $default_host = null)
     {
+        if(!defined('LDAP_ADMIN_USER')) {
+            Halt('LDAP_ADMIN_USER must be defined in settings');
+            return null;
+        }
+
+        if(!defined('LDAP_ADMIN_PASS')) {
+            Halt('LDAP_ADMIN_PASS must be defined in settings');
+            return null;
+        }
+
         if($default_host && strstr($username, '@') === false) {
             $username .= '@' . $default_host;
         }
 
         // https://stackoverflow.com/questions/6222641/how-to-php-ldap-search-to-get-user-ou-if-i-dont-know-the-ou-for-base-dn
-        $ldap = new adLDAP();
+        try {
+            $ldap = new adLDAP();
+        } catch (Exception $ex) {
+            Halt($ex);
+        }
+
+        $ldap->set_use_tls(defined('LDAP_USE_TLS') ? LDAP_USE_TLS : false);
+
         try {
             if ($ldap->authenticate($username, $password)) {
 
                 // May not be necessary to use an administrative account to get role information
                 $ldadmin = new adLDAP();
+                $ldadmin->set_use_tls(defined('LDAP_USE_TLS') ? LDAP_USE_TLS : false);
                 $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
 
                 $user = new self();
