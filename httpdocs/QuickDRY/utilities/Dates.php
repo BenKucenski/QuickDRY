@@ -1,6 +1,18 @@
 <?php
 class Dates extends SafeClass
 {
+    public static function MonthsBetweenDates($min_date, $max_date)
+    {
+        $min_date = strtotime(Dates::Datestamp($min_date));
+        $max_date = strtotime(Dates::Datestamp($max_date));
+
+        $i = 0;
+        while (($min_date = strtotime("+1 MONTH", $min_date)) <= $max_date) {
+            $i++;
+        }
+        return $i;
+    }
+
     /**
      * @param     $timeStamp
      * @param int $totalMonths

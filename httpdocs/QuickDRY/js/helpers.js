@@ -3,6 +3,53 @@ $(document).on('hidden.bs.modal', '.modal', function () {
     $('.modal:visible').length && $(document.body).addClass('modal-open');
 });
 
+var current_tab = window.location.hash.replace('#','');
+
+function ShowTab(tab) {
+    var tab = typeof tab !== "undefined" ? tab : current_tab;
+
+    console.log(current_tab);
+
+    if(typeof tab === "undefined" || !tab) {
+        tab = '0';
+    }
+
+    if (typeof current_tab !== "undefined" && current_tab > -1 && current_tab !== tab) {
+        $('#tab_' + current_tab).addClass('tab');
+        $('#tab_' + current_tab).removeClass('tab_selected');
+        $('#tab_' + current_tab).removeClass('active');
+        $('#tab_s_' + current_tab).hide();
+    }
+    $('#tab_' + tab).addClass('tab_selected');
+    $('#tab_' + tab).addClass('active');
+    $('#tab_' + tab).removeClass('tab');
+    $('#tab_s_' + tab).show();
+
+    current_tab = tab;
+
+    SetBack();
+}
+
+function SetBack() {
+    var url = QueryString.base_url;
+    var params = [];
+    for (var param in QueryString) {
+        if (param == 'base_url') {
+            continue;
+        }
+
+        if (param == 'current_tab') {
+        } else if (param == 'current_side_tab') {
+        } else {
+            params.push(param + '=' + QueryString[param]);
+        }
+    }
+    params.push('current_tab=' + GetCookie('current_tab'));
+    params.push('current_side_tab=' + GetCookie('current_side_tab'));
+
+    SetCookie('back', url + '?' + params.join('&'));
+}
+
 
 function chkOnlyEmailIsValid(sEmail) {
     var filter = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
