@@ -66,24 +66,6 @@ class Mailer extends SafeClass
             exit('SMTP_FROM_EMAIL or SMTP_FROM_NAME not defined');
         }
 
-        $mail = new PHPMailer();
-
-        $mail->Host = SMTP_HOST;
-        $mail->From = SMTP_FROM_EMAIL;
-        $mail->FromName = SMTP_FROM_NAME;
-        $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
-
-        if (defined('SMTP_USER') && defined('SMTP_PASS')) {
-            if(SMTP_USER && SMTP_PASS) {
-                $mail->Password = SMTP_PASS;
-                $mail->Username = SMTP_USER;
-                $mail->AuthType = SMTP_AUTH;
-                $mail->SMTPAuth = true;
-                $mail->SMTPSecure = 'tls';
-            }
-        }
-        $mail->Mailer = 'smtp';
-
         if (defined('SMTP_DEBUG') && SMTP_DEBUG) {
             if (defined('SMTP_DEBUG_EMAIL')) {
                 $this->to_email = SMTP_DEBUG_EMAIL;
@@ -92,30 +74,53 @@ class Mailer extends SafeClass
             }
         }
 
-        $mail->AddAddress($this->to_email, $this->to_name);
-        $mail->Subject = $this->subject;
-        $mail->MsgHTML($this->message);
+        $to_emails = explode(',', str_replace(';',',', $this->to_email));
+        foreach($to_emails as $to) {
 
-        $attachments = unserialize($this->headers);
-        if (!is_null($attachments) && is_array($attachments)) {
-            foreach ($attachments as $name => $path) {
-                if (!file_exists($path)) {
-                    $path = '../' . $path;
-                }
-                if (!file_exists($path)) {
-                    Halt(['error'=>'invalid attachment', $name => $path]);
-                    continue;
-                }
-                $mail->AddAttachment($path, $name);
-            }
-        }
+            $mail = new PHPMailer();
 
-        if (!$mail->Send()) {
-            if ($debug) {
-                Halt([$mail->ErrorInfo, $mail]);
+            $mail->Host = SMTP_HOST;
+            $mail->From = SMTP_FROM_EMAIL;
+            $mail->FromName = SMTP_FROM_NAME;
+            $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
+
+            if (defined('SMTP_USER') && defined('SMTP_PASS')) {
+                if (SMTP_USER && SMTP_PASS) {
+                    $mail->Password = SMTP_PASS;
+                    $mail->Username = SMTP_USER;
+                    $mail->AuthType = SMTP_AUTH;
+                    $mail->SMTPAuth = true;
+                    $mail->SMTPSecure = 'tls';
+                }
             }
-            $this->log = $mail->ErrorInfo;
-            return 0;
+            $mail->Mailer = 'smtp';
+
+
+            $mail->AddAddress($to, $this->to_name);
+            $mail->Subject = $this->subject;
+            $mail->MsgHTML($this->message);
+
+            $attachments = unserialize($this->headers);
+            if (!is_null($attachments) && is_array($attachments)) {
+                foreach ($attachments as $name => $path) {
+                    if (!file_exists($path)) {
+                        $path = '../' . $path;
+                    }
+                    if (!file_exists($path)) {
+                        Halt(['error' => 'invalid attachment', $name => $path]);
+                        continue;
+                    }
+                    $mail->AddAttachment($path, $name);
+                }
+            }
+
+            if (!$mail->Send()) {
+                if ($debug) {
+                    Halt([$mail->ErrorInfo, $mail]);
+                }
+                $this->log = $mail->ErrorInfo;
+                return 0;
+            }
         }
         $this->is_sent = true;
         $this->sent_at = Dates::Timestamp(time());
