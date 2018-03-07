@@ -2,6 +2,16 @@
 
 class Strings extends SafeClass
 {
+    /**
+     * @param $str
+     * @return null|string|string[]
+     */
+    public static function KeyboardOnly($str)
+    {
+        $str = preg_replace('/[^a-z0-9\!\@\#\$\%\^\&\*\(\)\-\=\_\+\[\]\\\{\}\|\;\'\:\"\,\.\/\<\>\\\?\ ]/si','', $str);
+        return preg_replace('/\s+/si',' ', $str);
+    }
+
     public static function SimpleXMLToArray($xml)
     {
         $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
@@ -91,6 +101,11 @@ class Strings extends SafeClass
         return substr($string, -strlen($ends_with), strlen($ends_with)) === $ends_with;
     }
 
+    /**
+     * @param $remove
+     * @param $string
+     * @return bool|string
+     */
     public static function RemoveFromStart($remove, $string)
     {
         $remove_length = strlen($remove);
