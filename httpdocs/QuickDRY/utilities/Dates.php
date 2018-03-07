@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class Dates
+ */
 class Dates extends SafeClass
 {
     public static function MonthsBetweenDates($min_date, $max_date)

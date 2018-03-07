@@ -1,4 +1,6 @@
 <?php
+define('QUICKDRY_MODE_STATIC', 1);
+define('QUICKDRY_MODE_INSTANCE', 2);
 
 /**
  * Class Web
@@ -34,6 +36,9 @@ class Web
     public $AccessDenied;
     public $MasterPage;
     public $SettingsFile;
+    public $PageMode;
+    public $CurrentPage;
+    public $CurrentPageName;
 
     private $SecureMasterPages;
 
@@ -169,11 +174,14 @@ class Web
         define('CURRENT_PAGE', $full_path);
         define('CURRENT_PAGE_NAME', $cur_page);
 
-        $page_alt = 'pages' . CURRENT_PAGE . '/' . CURRENT_PAGE_NAME . '.php';
-        $code_alt = 'pages' . CURRENT_PAGE . '/' . CURRENT_PAGE_NAME . '.code.php';
+        $this->CurrentPage = $full_path;
+        $this->CurrentPageName = $cur_page;
 
-        $page = 'pages' . CURRENT_PAGE . '.php';
-        $code = 'pages' . CURRENT_PAGE . '.code.php';
+        $page_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.php';
+        $code_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.code.php';
+
+        $page = 'pages' . $this->CurrentPage . '.php';
+        $code = 'pages' . $this->CurrentPage . '.code.php';
 
         $this->ControllerFile = file_exists($code) ? $code : $code_alt;
         $this->ViewFile = file_exists($page) ? $page : $page_alt;

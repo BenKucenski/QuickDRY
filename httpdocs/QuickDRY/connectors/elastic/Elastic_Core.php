@@ -240,7 +240,7 @@ class Elastic_Core extends Elastic_Base
         }
         $query['size'] = 0;
 
-        $query = json_encode(fix_json($query));
+        $query = json_encode(Strings::FixJSON($query));
         $params['index'] = $index;
         $params['type'] = $type;
         $params['body'] = $query;
@@ -274,7 +274,7 @@ class Elastic_Core extends Elastic_Base
         $query['from'] = $page * $per_page;
         $query['size'] = $per_page;
 
-        $query = json_encode(fix_json($query));
+        $query = json_encode(Strings::FixJSON($query));
         $params['index'] = $index;
         $params['type'] = $type;
         $params['body'] = $query;
@@ -427,7 +427,7 @@ class Elastic_Core extends Elastic_Base
         Metrics::Start('ELASTIC');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
-        $json = fix_json($json);
+        $json = Strings::FixJSON($json);
 
         $params = [];
         $params['index'] = $index;
@@ -470,7 +470,7 @@ class Elastic_Core extends Elastic_Base
         Metrics::Start('ELASTIC');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
-        $json = fix_json($json);
+        $json = Strings::FixJSON($json);
 
         $params = [];
         $params['body'][]['index'] = ['_index' => $index, '_type' => $type];
@@ -551,7 +551,7 @@ class Elastic_Core extends Elastic_Base
         Metrics::Start('ELASTIC');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
-        $json = fix_json($json);
+        $json = Strings::FixJSON($json);
         $res = null;
         switch ($path) {
             case '_cluster':

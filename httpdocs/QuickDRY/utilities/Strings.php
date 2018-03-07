@@ -384,7 +384,7 @@ class Strings extends SafeClass
 
         foreach ($json as $i => $row) {
             if (is_array($row)) {
-                $json[$i] = fix_json($row);
+                $json[$i] = Strings::FixJSON($row);
             } else {
                 if (is_object($json[$i])) {
                     if ($json[$i] instanceof DateTime) {
@@ -432,7 +432,7 @@ class Strings extends SafeClass
         if (strlen($string) <= $length) {
             return $string;
         }
-        $string = substr($string, 0, strpos(substr($string, 0, $length), ' ')) . '...';
+            $string = substr($string, 0, strpos(substr($string, 0, $length), ' ')) . '...';
 
         return $string;
     }

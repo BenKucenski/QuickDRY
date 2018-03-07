@@ -1159,7 +1159,7 @@ class ' . $page_dir . ' extends BasePage
     }
 }
 
-$Web->InstanceModel = \'' . $page_dir . '\';
+$Web->PageMode = QUICKDRY_MODE_INSTANCE;
 ';
         $fp = fopen('manage/' . $page_dir . '/' . $page_dir . '.code.php', 'w');
         fwrite($fp, $code);

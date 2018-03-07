@@ -40,7 +40,7 @@ class Elastic_Base extends SafeClass
             switch (static::$_strong_type[$name]) {
                 case 'string':
                     if (is_array($value)) {
-                        $value = json_encode(fix_json($value));
+                        $value = json_encode(Strings::FixJSON($value));
                     } else {
                         $value = preg_replace('/\s+/si', ' ', $value);
                     }

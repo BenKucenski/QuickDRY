@@ -8,8 +8,8 @@ Metrics::Start('Controller');
 if (file_exists($Web->ControllerFile)) {
     require_once $Web->ControllerFile;
 
-    if ($Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
-        $PageModel = $Web->StaticModel ? $Web->StaticModel : PAGE_MODEL_STATIC;
+    if ($Web->PageMode === QUICKDRY_MODE_STATIC || $Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
+        $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL_STATIC);
         $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
         $PageModel::DoInit();
         $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
@@ -55,8 +55,8 @@ if (file_exists($Web->ControllerFile)) {
             }
         }
     } else {
-        if ($Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
-            $class = $Web->InstanceModel ? $Web->InstanceModel : PAGE_MODEL;
+        if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
+            $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL);
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
