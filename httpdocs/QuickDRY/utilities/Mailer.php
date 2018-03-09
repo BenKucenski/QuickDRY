@@ -90,7 +90,9 @@ class Mailer extends SafeClass
                     $mail->Username = SMTP_USER;
                     $mail->AuthType = SMTP_AUTH;
                     $mail->SMTPAuth = true;
-                    $mail->SMTPSecure = 'tls';
+                    if(SMTP_AUTH !== 'PLAIN') {
+                        $mail->SMTPSecure = 'tls';
+                    }
                 }
             }
             $mail->Mailer = 'smtp';
