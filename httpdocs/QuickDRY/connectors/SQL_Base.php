@@ -168,7 +168,7 @@ class SQL_Base
                 return $this->_history;
 
             default:
-                return $this->get_property($name);
+                return $this->GetProperty($name);
         }
     }
 
@@ -176,14 +176,13 @@ class SQL_Base
      * @param $name
      * @param $value
      * @return mixed
-     * @throws Exception
      */
     public function __set($name, $value)
     {
         switch($name)
         {
             default:
-                $this->set_property($name,$value);
+                $this->SetProperty($name,$value);
         }
         return $value;
     }
@@ -311,7 +310,7 @@ class SQL_Base
      * @param string|null $name
      * @return mixed|null
      */
-    protected function get_property( $name = null)
+    protected function GetProperty( $name = null)
     {
         if(array_key_exists($name, $this->props))
         {
@@ -341,12 +340,11 @@ class SQL_Base
      * @param $name
      * @param string $value
      *
-     * @throws Exception
      */
-    protected function set_property($name, $value)
+    protected function SetProperty($name, $value)
     {
         if (!array_key_exists($name, $this->props)) {
-            throw new Exception($name . ' is not a property of ' . get_class($this) . '<pre>Object<br/>' . debug_backtrace() . '</pre>');
+            Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
         }
 
         if (is_array($value)) {
@@ -361,8 +359,8 @@ class SQL_Base
             $value = null;
         }
 
-        $old_val = $this->StrongType($name, $this->props[$name]);
-        $new_val = $this->StrongType($name, $value);
+        $old_val = self::StrongType($name, $this->props[$name]);
+        $new_val = self::StrongType($name, $value);
 
         $changed = false;
         if (is_null($old_val) && !is_null($new_val)) {

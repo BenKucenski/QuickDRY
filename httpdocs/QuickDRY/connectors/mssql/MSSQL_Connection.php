@@ -677,16 +677,32 @@ class MSSQL_Connection
     }
 
     private static $_UniqueKeys = null;
-
+    private static $_Indexes = null;
     /**
      * @param $table_name
      *
-     * @return null
+     * @return []
      */
+    public function GetIndexes($table_name)
+    {
+        if(is_null(self::$_Indexes)) {
+            $this->GetUniqueKeys($table_name);
+        }
+        if(!isset(self::$_Indexes[$table_name])) {
+            self::$_Indexes[$table_name] = [];
+        }
+        return self::$_Indexes[$table_name];
+    }
 
+    /**
+     * @param $table_name
+     * @return mixed
+     */
     public function GetUniqueKeys($table_name)
     {
         if(is_null(self::$_UniqueKeys)) {
+            self::$_UniqueKeys = [];
+            self::$_Indexes = [];
             // https://stackoverflow.com/questions/765867/list-of-all-index-index-columns-in-sql-server-db
             $sql = '
 SELECT 
@@ -717,11 +733,19 @@ ORDER BY
                 Halt($res);
             }
             foreach($res['data'] as $row) {
-                if($row['is_unique'] && !$row['is_primary_key']) {
+                if($row['is_primary_key']) {
+                    continue;
+                }
+                if($row['is_unique']) {
                     if(!isset(self::$_UniqueKeys[$row['TableName']][$row['IndexName']])) {
                         self::$_UniqueKeys[$row['TableName']][$row['IndexName']] = [];
                     }
                     self::$_UniqueKeys[$row['TableName']][$row['IndexName']][] = $row['ColumnName'];
+                } else {
+                    if(!isset(self::$_Indexes[$row['TableName']][$row['IndexName']])) {
+                        self::$_Indexes[$row['TableName']][$row['IndexName']] = [];
+                    }
+                    self::$_Indexes[$row['TableName']][$row['IndexName']][] = $row['ColumnName'];
                 }
             }
         }

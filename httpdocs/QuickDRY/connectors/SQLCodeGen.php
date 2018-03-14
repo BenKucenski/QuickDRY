@@ -158,7 +158,7 @@ function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)
     $class_map = [
         ' . implode("\r\n\t\t", $mod_map) . '
     ];
-    
+
     if(!isset($class_map[$class])) {
         return;
     }
@@ -167,7 +167,7 @@ function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)
 }
 
 
-spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader\');        
+spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader\');
         ';
 
         fwrite($fp, $include_php);
@@ -185,7 +185,7 @@ spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->
         $props = '';
         $unique = $DatabaseClass::GetUniqueKeys($table_name);
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
-
+        $indexes = $DatabaseClass::GetIndexes($table_name);
 
         $aliases = [];
 
@@ -209,12 +209,12 @@ spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->
         foreach($aliases as $alias) { /* @var $alias MSSQL_TableColumn */
             $gets[] = "
             case '" . $alias->field_alias . "':
-                return \$this->get_property('" . $alias->field . "'); 
+                return \$this->GetProperty('" . $alias->field . "');
             ";
 
             $sets[] = "
             case '" . $alias->field_alias . "':
-                return \$this->set_property('" . $alias->field . "', \$value); 
+                return \$this->SetProperty('" . $alias->field . "', \$value);
             ";
 
         }
@@ -357,6 +357,18 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
 
         $code .= '
         ];
+
+    public static $_indexes = [
+    ';
+
+        foreach ($indexes as $key => $columns) {
+            $code .= '        [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+        }
+
+
+        $code .= '
+        ];
+
     protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $table = \'' . $table_name . '\';
     protected static $DatabasePrefix = \'' . (!$this->DatabaseConstant ? $this->Database : $this->DatabaseConstant) . '\';
@@ -369,41 +381,67 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
 
     ' . implode("\r\n\t", $foreign_key_props) . '
 
+    /**
+     * @param $name
+     * @return mixed
+     */
     public function __get($name)
     {
         switch($name)
         {
-            ' . implode("\r\n\t\t", $gets) . '
+            ' . implode("\r\n        ", $gets) . '
             default:
                 return parent::__get($name);
         }
     }
 
+    /**
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
     public function __set($name, $value)
     {
         switch($name)
         {
-            ' . implode("\r\n\t\t", $sets) . '
+            ' . implode("\r\n        ", $sets) . '
             default:
                 return parent::__set($name, $value);
         }
     }
 
+    /**
+     * @param $req
+     * @param bool $save
+     * @param bool $overwrite
+     * @return bool
+     */
     public function FromRequest(&$req, $save = true, $overwrite = false)
     {
         return parent::FromRequest($req, $save, $overwrite);
     }
 
+    /**
+     * @param $search
+     * @param UserClass $user
+     */
     public static function Suggest($search, ' . $this->UserClass . ' &$user)
     {
         HTTP::ExitJSON([\'error\' => \'Suggest not implemented\', \'search\' => $search, \'user\' => $user]);
     }
 
+    /**
+     * @return int
+     */
     public function IsReferenced()
     {
         return ' . (sizeof($fk_counts) == 0 ? '0' : '$this->' . implode(' + $this->', $fk_counts)) . ';
     }
 
+    /**
+     * @param UserClass $user
+     * @return bool
+     */
     public function VisibleTo(' . $this->UserClass . ' &$user)
     {
         if($user->Is([ROLE_ID_ADMIN])) {
@@ -413,6 +451,10 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         return false;
     }
 
+    /**
+     * @param UserClass $user
+     * @return bool
+     */
     public function CanDelete(' . $this->UserClass . ' &$user)
     {
         if($user->Is([ROLE_ID_ADMIN])) {
@@ -422,11 +464,20 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         return false;
     }
 
+    /**
+     * @param $column_name
+     * @return string
+     */
     public static function ColumnNameToNiceName($column_name)
     {
         return isset(static::$prop_definitions[$column_name]) ? static::$prop_definitions[$column_name][\'display\'] : \'<i>unknown</i>\';
     }
 
+    /**
+     * @param $column_name
+     * @param null $value
+     * @return mixed
+     */
     public function ValueToNiceValue($column_name, $value = null)
     {
         if($value instanceof DateTime) {
@@ -440,6 +491,10 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         return $value ? $value : $this->$column_name;
     }
 
+    /**
+     * @param $column_name
+     * @return bool
+     */
     public static function IgnoreColumn($column_name)
     {
         return in_array($column_name, [\'id\', \'created_at\', \'created_by_id\', \'edited_at\', \'edited_by_id\']);
@@ -1113,7 +1168,7 @@ var ' . $c_name . 'History = {
     <?php } ?>
 </table>
 <?php echo BootstrapPaginationLinks($PageModel->Count); ?>
-    
+
     </div>
 </div>
 
@@ -1166,5 +1221,5 @@ $Web->PageMode = QUICKDRY_MODE_INSTANCE;
         fclose($fp);
 
     }
-    
+
 }

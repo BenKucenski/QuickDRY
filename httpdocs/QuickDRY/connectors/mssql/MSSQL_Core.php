@@ -42,6 +42,13 @@ class MSSQL_Core extends SQL_Base
         return static::$connection->GetUniqueKeys($table_name);
     }
 
+    public static function GetIndexes($table_name)
+    {
+        static::_connect();
+
+        return static::$connection->GetIndexes($table_name);
+    }
+
     public static function GetForeignKeys($table_name)
     {
         static::_connect();
