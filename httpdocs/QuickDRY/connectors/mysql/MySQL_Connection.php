@@ -169,7 +169,7 @@ class MySQL_Connection
                     Halt('error writing mysql file');
                 }
 
-                $file = GUID . '.mysql_config.cnf';
+                $file =  'mysql_config.' . GUID . '.cnf';
                 $fp = fopen($file, 'w');
                 fwrite(
                     $fp, '
@@ -560,6 +560,22 @@ SHOW INDEXES FROM
     }
 
     private static $_UniqueKeys = null;
+    private static $_Indexes = null;
+    /**
+     * @param $table_name
+     *
+     * @return []
+     */
+    public function GetIndexes($table_name)
+    {
+        if(is_null(self::$_Indexes)) {
+            $this->GetUniqueKeys($table_name);
+        }
+        if(!isset(self::$_Indexes[$table_name])) {
+            self::$_Indexes[$table_name] = [];
+        }
+        return self::$_Indexes[$table_name];
+    }
 
     /**
      * @param $table_name
@@ -582,11 +598,20 @@ SHOW INDEXES FROM
                 Halt($res);
             }
             foreach ($res['data'] as $row) {
-                if (!$row['Non_unique'] && $row['Key_name'] !== 'PRIMARY') {
+                if($row['Key_name'] === 'PRIMARY') {
+                    continue;
+                }
+
+                if (!$row['Non_unique']) {
                     if (!isset(self::$_UniqueKeys[$row['Table']][$row['Key_name']])) {
                         self::$_UniqueKeys[$row['Table']][$row['Key_name']] = [];
                     }
                     self::$_UniqueKeys[$row['Table']][$row['Key_name']][] = $row['Column_name'];
+                } else {
+                    if (!isset(self::$_Indexes[$row['Table']][$row['Key_name']])) {
+                        self::$_Indexes[$row['Table']][$row['Key_name']] = [];
+                    }
+                    self::$_Indexes[$row['Table']][$row['Key_name']][] = $row['Column_name'];
                 }
             }
         }

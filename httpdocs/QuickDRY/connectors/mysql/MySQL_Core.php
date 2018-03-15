@@ -37,6 +37,13 @@ class MySQL_Core extends SQL_Base
         return static::$connection->GetTableColumns($table);
     }
 
+    public static function GetIndexes($table_name)
+    {
+        static::_connect();
+
+        return static::$connection->GetIndexes($table_name);
+    }
+
     public static function GetUniqueKeys($table)
     {
         static::_connect();
