@@ -841,13 +841,13 @@ ob_start();
 <?php $m = sizeof($item->history); foreach($item->history as $i => $cl) {
     /* @var $cl ChangeLogClass */
     foreach($cl->changes_list as $column => $change) {
-    if($item->IgnoreColumn($column)) {
+    if(' . $c_name . '::IgnoreColumn($column)) {
         continue;
     }
 ?>
 <tr>
 	<td><?php echo $m - $i; ?></td>
-	<td style="white-space: nowrap;"><?php echo $item->ColumnNameToNiceName($column); ?></td>
+	<td style="white-space: nowrap;"><?php echo ' . $c_name . '::ColumnNameToNiceName($column); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->old); ?></td>
 	<td><?php echo $item->ValueToNiceValue($column, $change->new); ?></td>

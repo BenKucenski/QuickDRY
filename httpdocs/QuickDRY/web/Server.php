@@ -7,11 +7,19 @@ class Server
 {
     private $_VALS = [];
 
+    /**
+     * Server constructor.
+     * @param null $vals
+     */
     public function __construct($vals = null)
     {
         $this->_VALS = $vals;
     }
 
+    /**
+     * @param string $prefix
+     * @return array
+     */
     public function GetVals($prefix = '')
     {
         $res = [];

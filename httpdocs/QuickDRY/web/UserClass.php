@@ -14,6 +14,10 @@ class UserClass extends SafeClass
     public $Roles;
     public $User;
 
+    /**
+     * @param $name
+     * @return null|string
+     */
     public function __get($name)
     {
         switch($name) {
@@ -82,6 +86,10 @@ class UserClass extends SafeClass
         return null;
     }
 
+    /**
+     * @param $roles
+     * @return bool
+     */
     public function Is($roles)
     {
         if(!is_array($roles)) {
@@ -95,6 +103,9 @@ class UserClass extends SafeClass
         return false;
     }
 
+    /**
+     * @return string
+     */
     public function GetUUID()
     {
         // used by change log to identify who made the change

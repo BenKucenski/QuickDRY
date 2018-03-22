@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class PrincipleInterest
+ */
 class PrincipleInterest extends SafeClass
 {
     public $month;

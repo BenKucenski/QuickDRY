@@ -15,8 +15,15 @@ define('HTTP_STATUS_BAD_GATEWAY', 502);
 define('HTTP_STATUS_SERVICE_UNAVAILABLE', 503);
 define('HTTP_STATUS_GATEWAY_TIMEOUT', 504);
 
+/**
+ * Class HTTPStatus
+ */
 class HTTPStatus
 {
+    /**
+     * @param $http_status_code
+     * @return null|string
+     */
     public static function GetDescription($http_status_code)
     {
         if(!is_numeric($http_status_code)) {

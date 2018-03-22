@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class Curl
+ */
 class Curl
 {
     public $Body;

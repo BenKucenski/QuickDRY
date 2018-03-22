@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class ChangeLog
+ */
 class ChangeLog extends SafeClass
 {
     public $host;

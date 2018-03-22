@@ -1,10 +1,18 @@
 <?php
 
-function ToArray($arr)
+/**
+ * @param $arr
+ * @param bool $null_blank
+ * @return mixed
+ */
+function ToArray($arr, $null_string = false)
 {
     foreach ($arr as $k => $v) {
         if (is_object($v) && get_class($v) === 'DateTime') {
             $arr[$k] = Dates::Timestamp($v);
+        }
+        if($null_string && is_null($v)) {
+            $arr[$k] = 'null';
         }
     }
     return $arr;

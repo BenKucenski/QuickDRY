@@ -27,6 +27,10 @@ class Request
         return $vals;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         $value = !is_array($value) ? trim($value) : $value;

@@ -19,6 +19,10 @@ class APIRequest
     public static $UseLog = false;
     public static $CacheTimeoutSeconds;
 
+    /**
+     * @param $name
+     * @return null
+     */
     public function __get($name)
     {
         switch ($name) {
@@ -45,6 +49,10 @@ class APIRequest
         }
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         switch ($name) {
@@ -69,6 +77,13 @@ class APIRequest
         }
     }
 
+    /**
+     * @param $path
+     * @param null $data
+     * @param null $headers
+     * @param bool $post
+     * @return bool|mixed|string
+     */
     private function _Request($path, $data = null, $headers = null, $post = true)
     {
         if(self::$CacheTimeoutSeconds > -1) {
@@ -140,32 +155,51 @@ class APIRequest
         return $retr;
     }
 
+    /**
+     * @param $path
+     * @param null $data
+     * @param null $headers
+     * @return bool|mixed|string
+     */
     protected function _Post($path, $data = null, $headers = null)
     {
         return $this->_Request($path, $data, $headers, true);
     }
 
+    /**
+     * @param $path
+     * @param null $data
+     * @param null $headers
+     * @return bool|mixed|string
+     */
     protected function _Get($path, $data = null, $headers = null)
     {
         return $this->_Request($path, $data, $headers, false);
     }
 
+    /**
+     * @param string $Method
+     */
     protected function _Log($Method = 'Get')
     {
+        global $Web;
+
         $this->_method = $Method;
 
         if(!self::$UseLog) {
             return;
         }
-        global $Session;
-        if(!$Session) {
+        if(!$Web->Session) {
             return;
         }
-        $a = $Session->api_log;
+        $a = $Web->Session->api_log;
         $a[] = $this;
-        $Session->api_log = $a;
+        $Web->Session->api_log = $a;
     }
 
+    /**
+     * @return array|stdClass
+     */
     public function GetProps()
     {
         if (!is_null($this->res)) {
@@ -175,12 +209,15 @@ class APIRequest
                 $props = $this->res;
             }
         } else {
-            $props = array();
+            $props = [];
         }
 
         return $props;
     }
 
+    /**
+     * @param null $headers
+     */
     public function Post($headers = null)
     {
         $res = $this->_Post($this->path, $this->data, $headers);
@@ -193,6 +230,9 @@ class APIRequest
         $this->_Log('Post');
     }
 
+    /**
+     * @param null $headers
+     */
     public function Get($headers = null)
     {
         $res = $this->_Get($this->path, $this->data, $headers);

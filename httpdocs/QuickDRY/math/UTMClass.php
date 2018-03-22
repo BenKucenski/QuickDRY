@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class UTMClass
+ */
 class UTMClass
 {
 // http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
@@ -12,18 +16,23 @@ class UTMClass
     public static $UTMScaleFactor = 0.9996;
 
 
-    /*
-    * DegToRad
-    *
-    * Converts degrees to radians.
-    *
-    */
+    /**
+     * @param $deg
+     * @return float
+     */
     public static function DegToRad($deg)
     {
         return ($deg * self::$pi / 180.0);
     }
 
 
+    /**
+     * @param $lat_a
+     * @param $lon_a
+     * @param $lat_b
+     * @param $lon_b
+     * @return float
+     */
     public static function GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
     {
         $lat_a_r = self::DegToRad($lat_a);
@@ -39,17 +48,22 @@ class UTMClass
         return self::$sm_a * $c / 1000.0;
     }
 
+    /**
+     * @param $lat_a
+     * @param $lon_a
+     * @param $lat_b
+     * @param $lon_b
+     * @return float
+     */
     public static function GetMilesFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
     {
         return self::GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b) / 1.6093;
     }
 
-    /*
-    * RadToDeg
-    *
-    * Converts radians to degrees.
-    *
-    */
+    /**
+     * @param $rad
+     * @return float|int
+     */
     public static function RadToDeg($rad)
     {
         return ($rad * 180.0 / self::$pi);
@@ -76,6 +90,10 @@ class UTMClass
     *     The ellipsoidal distance of the point from the equator, in meters.
     *
     */
+    /**
+     * @param $phi
+     * @return float|int
+     */
     public static function ArcLengthOfMeridian($phi)
     {
         //var alpha, beta, gamma, delta, epsilon, n;
@@ -124,6 +142,10 @@ class UTMClass
     *   Range of the central meridian is the radian equivalent of [-177,+177].
     *
     */
+    /**
+     * @param $zone
+     * @return float
+     */
     public static function UTMCentralMeridian($zone)
     {
         //var cmeridian;
@@ -150,6 +172,10 @@ class UTMClass
     *   The footpoint latitude, in radians.
     *
     */
+    /**
+     * @param $y
+     * @return float|int
+     */
     public static function FootpointLatitude($y)
     {
 //        var y_, alpha_, beta_, gamma_, delta_, epsilon_, n;
@@ -210,6 +236,12 @@ class UTMClass
     *    The function does not return a value.
     *
     */
+    /**
+     * @param $phi
+     * @param $lambda
+     * @param $lambda0
+     * @return array
+     */
     public static function MapLatLonToXY($phi, $lambda, $lambda0)
     {
         //var N, nu2, ep2, t, t2, l;
@@ -284,6 +316,12 @@ class UTMClass
     *   The UTM zone used for calculating the values of x and y.
     *
     */
+    /**
+     * @param $lat
+     * @param $lon
+     * @param $zone
+     * @return array
+     */
     public static function LatLonToUTMXY($lat, $lon, $zone)
     {
         $zone = self::UTMCentralMeridian($zone);
@@ -314,6 +352,11 @@ class UTMClass
         return $xy;
     }
 
+    /**
+     * @param $xy_a
+     * @param $xy_b
+     * @return float|int
+     */
     public static function GetDistance($xy_a, $xy_b)
     {
         $a = $xy_a[0] - $xy_b[0];
@@ -322,11 +365,23 @@ class UTMClass
         return sqrt($a * $a + $b * $b) / 1000;
     }
 
+    /**
+     * @param $xy_a
+     * @param $xy_b
+     * @return float
+     */
     public static function GetMiles($xy_a, $xy_b)
     {
         return self::GetDistance($xy_a, $xy_b) / 1.6093;
     }
 
+    /**
+     * @param $lat
+     * @param $lon
+     * @param $distance
+     * @param $bearing
+     * @return array
+     */
     public static function AddKmToLatLon($lat, $lon, $distance, $bearing)
     {
         $earthRadius = 6371;
@@ -341,6 +396,12 @@ class UTMClass
         return ['lat' => rad2deg($lat2), 'lon' => rad2deg($lon2)];
     }
 
+    /**
+     * @param $lat
+     * @param $lon
+     * @param $distance
+     * @return array
+     */
     public static function GetBoundary($lat, $lon, $distance)
     {
         $res = [];

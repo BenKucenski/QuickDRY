@@ -1,17 +1,37 @@
 <?php
 
+/**
+ * Class MathClass
+ */
 class MathClass
 {
+    /**
+     * @param $raw
+     * @param int $decimals
+     * @return string
+     */
     public static function ReportPercent($raw, $decimals = 1)
     {
         return number_format($raw * 100, $decimals);
     }
 
+    /**
+     * @param $rate
+     * @param $principal
+     * @param $periods
+     * @return float|int
+     */
     public static function AccruedInterest($rate, $principal, $periods)
     {
         return $principal * pow(1 + $rate, $periods) - $principal;
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $payment
+     * @return null|PrincipleInterest
+     */
     public static function MonthsToRepay($rate, $principle, $payment)
     {
         $res = new PrincipleInterest();
@@ -30,11 +50,23 @@ class MathClass
         return $res;
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @return float|int
+     */
     public static function MonthlyPayment($rate, $principle, $term)
     {
         return self::MonthlyPaymentForPeriod($rate, $principle, $term, 12);
     }
 
+    /**
+     * @param $principle
+     * @param $payment
+     * @param $periods
+     * @return float
+     */
     public static function FindInterest($principle, $payment, $periods)
     {
         $low = 0.0;
@@ -50,6 +82,13 @@ class MathClass
         return $cur;
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @param $periods
+     * @return float|int
+     */
     public static function MonthlyPaymentForPeriod($rate, $principle, $term, $periods)
     {
         if ($rate == 0)
@@ -66,11 +105,24 @@ class MathClass
         return round($P, 2);
     }
 
-    public static function total_interest($rate, $principle, $term)
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @return int
+     */
+    public static function TotalInterest($rate, $principle, $term)
     {
         return self::TotalInterestForPeriod($rate, $principle, $term, 12);
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @param $periods
+     * @return int
+     */
     public static function TotalInterestForPeriod($rate, $principle, $term, $periods)
     {
         $payment = self::MonthlyPaymentForPeriod($rate, $principle, $term, $periods);
@@ -81,11 +133,24 @@ class MathClass
         return 0;
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @return array
+     */
     public static function Amortization($rate, $principle, $term)
     {
         return self::AmortizationForPeriod($rate, $principle, $term, 12);
     }
 
+    /**
+     * @param $rate
+     * @param $principle
+     * @param $term
+     * @param $periods
+     * @return array
+     */
     public static function AmortizationForPeriod($rate, $principle, $term, $periods)
     {
         $points = [];
@@ -118,7 +183,11 @@ class MathClass
         return $points;
     }
 
-    public static function PayOff($debt)
+    /**
+     * @param Debt $debt
+     * @return array
+     */
+    public static function PayOff(Debt $debt)
     {
         $history = [];
         $month = 0;
@@ -151,7 +220,12 @@ class MathClass
         return $history;
     }
 
-    public static function future_value($account, $months)
+    /**
+     * @param $account
+     * @param $months
+     * @return array
+     */
+    public static function FutureValue($account, $months)
     {
         $history = [];
         $month = 0;
@@ -182,7 +256,7 @@ class MathClass
      * @param Debt[] $debts
      * @return array
      */
-    public static function snowball($debts)
+    public static function Snowball($debts)
     {
         $points = [];
         $point = new PrincipleInterest();

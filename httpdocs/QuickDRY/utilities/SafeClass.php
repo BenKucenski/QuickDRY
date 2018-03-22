@@ -1,25 +1,41 @@
 <?php
 
+/**
+ * Class SafeClass
+ */
 class SafeClass
 {
     private $_HaltOnError = true;
     private $_MissingProperties = [];
 
+    /**
+     * @return bool
+     */
     public function HasMissingProperties()
     {
         return sizeof($this->_MissingProperties) > 0;
     }
 
+    /**
+     * @return string
+     */
     public function GetMissingPropeties()
     {
         return implode("\n", $this->_MissingProperties);
     }
 
+    /**
+     * @param $true_or_false
+     */
     public function HaltOnError($true_or_false)
     {
         $this->_HaltOnError = $true_or_false ? true : false;
     }
 
+    /**
+     * @param $name
+     * @return null
+     */
     public function __get($name)
     {
         if ($this->_HaltOnError) {
@@ -30,6 +46,11 @@ class SafeClass
         return null;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
     public function __set($name, $value)
     {
         if ($this->_HaltOnError) {
@@ -40,6 +61,10 @@ class SafeClass
         return $value;
     }
 
+    /**
+     * @param bool $ignore_empty
+     * @return array
+     */
     public function ToArray($ignore_empty = false)
     {
         $res = get_object_vars($this);
@@ -53,9 +78,17 @@ class SafeClass
                 }
             }
         }
+        foreach($res as $key => $val) {
+            if($val instanceof DateTime) {
+                $res[$key] = Dates::Timestamp($val);
+            }
+        }
         return $res;
     }
 
+    /**
+     * @param $row
+     */
     public function FromRow($row)
     {
         if (!is_array($row)) {

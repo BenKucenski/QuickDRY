@@ -7,6 +7,9 @@ class Session
 {
 	static $_VALS = [];
 
+    /**
+     * @return array
+     */
     public function GetVals()
     {
         $vals = [];
@@ -20,6 +23,9 @@ class Session
         return $vals;
     }
 
+    /**
+     *
+     */
 	public static function ClearAll()
 	{
 		foreach($_SESSION as $n => $v)

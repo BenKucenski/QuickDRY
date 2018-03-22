@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Class YesNoClass
+ * Class RoleClass
  */
 class RoleClass extends FormClass
 {

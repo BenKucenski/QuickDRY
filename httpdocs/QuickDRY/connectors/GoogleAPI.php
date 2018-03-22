@@ -43,9 +43,17 @@ class GoogleAPI {
      */
     function GetRequest()
 	{
+        $contextOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ];
+        $context = stream_context_create($contextOptions);
+
 		if (strlen($this->gKey) > 1) {
-			$q = str_replace(' ', '_', str_replace(' ','+',urlencode($this->address)) . ',+'.str_replace(' ','+',$this->city).',+'.str_replace(' ','+',$this->country).',+'.$this->zip);
-			if ($d = fopen("http://maps.googleapis.com/maps/api/geocode/xml?address=$q&sensor=false&key=" . $this->gKey, "r")) {
+			$q = str_replace(' ', '_', str_replace(' ','+',urlencode(Strings::KeyboardOnly($this->address))) . ',+'.str_replace(' ','+',$this->city).',+'.str_replace(' ','+',$this->country).',+'.$this->zip);
+			if ($d = fopen("https://maps.googleapis.com/maps/api/geocode/xml?address=$q&sensor=false&key=" . $this->gKey, "r",null, $context)) {
 				$gcsv = '';
 				while($r = fread($d, 2048)) {
                     $gcsv .= $r;

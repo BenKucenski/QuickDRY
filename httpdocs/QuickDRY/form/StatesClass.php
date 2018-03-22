@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class StatesClass
+ */
 class StatesClass
 {
     private static $states = [
@@ -54,11 +58,19 @@ class StatesClass
         'Wyoming' => 'WY'
     ];
 
+    /**
+     * @return array|null
+     */
     public static function GetStates()
     {
         return array_flip(self::$states);
     }
 
+    /**
+     * @param $name
+     * @param string $get
+     * @return null
+     */
     public static function StateABBR($name, $get = 'abbr')
     {
         $name = preg_replace('/[^a-z]/si', '', trim($name));

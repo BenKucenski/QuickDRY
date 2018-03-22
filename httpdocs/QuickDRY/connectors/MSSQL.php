@@ -16,6 +16,9 @@ if (!function_exists('sqlsrv_query')) {
     }
 }
 
+/**
+ * Class MSSQL
+ */
 class MSSQL extends SafeClass
 {
     /**

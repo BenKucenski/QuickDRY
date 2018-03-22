@@ -1,10 +1,15 @@
 <?php
+
+/**
+ * Class FormClass
+ */
 class FormClass
 {
     public static function Options()
     {
         return static::$_options;
     }
+
     /**
      * @param $id
      *
@@ -15,6 +20,14 @@ class FormClass
         return isset(static::$_options[$id]) ? static::$_options[$id] : null;
     }
 
+    /**
+     * @param $options
+     * @param $selected
+     * @param $id
+     * @param string $class
+     * @param string $onchange
+     * @return string
+     */
     public static function SelectItems($options, $selected, $id, $class = '', $onchange='')
     {
         if (!is_array($id)) {
@@ -38,6 +51,13 @@ class FormClass
 
     }
 
+    /**
+     * @param $val
+     * @param $id
+     * @param null $outer_style
+     * @param null $inner_style
+     * @return string
+     */
     public static function Textarea($val, $id, $outer_style = null, $inner_style = null)
     {
         if (is_array($id)) {
@@ -52,6 +72,13 @@ class FormClass
             . '">' . $val . '</textarea></div>';
     }
 
+    /**
+     * @param $val
+     * @param $id
+     * @param null $outer_style
+     * @param null $inner_style
+     * @return string
+     */
     public static function Text($val, $id, $outer_style = null, $inner_style = null)
     {
         if (is_array($id)) {
@@ -65,6 +92,16 @@ class FormClass
         . '" id="' . $id . '" value="' . $val . '" /></div>';
     }
 
+    /**
+     * @param $selected
+     * @param $options
+     * @param $id
+     * @param null $outer_class
+     * @param null $inner_style
+     * @param bool $new_line
+     * @param string $onchange
+     * @return string
+     */
     public static function Checkbox($selected, $options, $id, $outer_class = null, $inner_style = null, $new_line = false, $onchange = '')
     {
         if (!is_array($selected)) {
@@ -99,6 +136,15 @@ class FormClass
         return $res . '</div>';
     }
 
+    /**
+     * @param $selected
+     * @param $options
+     * @param $id
+     * @param null $outer_style
+     * @param null $inner_style
+     * @param bool $new_line
+     * @return string
+     */
     public static function Radio($selected, $options, $id, $outer_style = null, $inner_style = null, $new_line = false)
     {
         if (!is_array($selected)) {

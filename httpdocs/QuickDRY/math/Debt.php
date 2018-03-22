@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class Debt
+ */
 class Debt extends SafeClass
 {
     public $interest_rate;

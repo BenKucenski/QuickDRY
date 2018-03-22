@@ -333,7 +333,7 @@ class SQL_Base
      */
     public function ToArray()
     {
-        return ToArray($this->props);
+        return ToArray($this->props, true);
     }
 
     /**
@@ -359,8 +359,8 @@ class SQL_Base
             $value = null;
         }
 
-        $old_val = self::StrongType($name, $this->props[$name]);
-        $new_val = self::StrongType($name, $value);
+        $old_val = static::StrongType($name, $this->props[$name]);
+        $new_val = static::StrongType($name, $value);
 
         $changed = false;
         if (is_null($old_val) && !is_null($new_val)) {

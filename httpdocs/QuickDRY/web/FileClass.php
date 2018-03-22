@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class FileClass
+ */
 class FileClass extends SafeClass
 {
     public $user_id;
@@ -12,6 +16,10 @@ class FileClass extends SafeClass
     public $entity_id;
     public $entity_type;
 
+    /**
+     * @param $name
+     * @return null|string
+     */
     public function __get($name)
     {
         switch ($name) {
@@ -21,10 +29,16 @@ class FileClass extends SafeClass
         return parent::__get($name);
     }
 
+    /**
+     * @param $hash
+     * @param string $ext
+     * @return string
+     */
     public static function UploadFolder($hash, $ext = 'tmp')
     {
         if(!defined('UPLOAD_DIR')) {
             Halt('UPLOAD_DIR is undefined');
+            exit;
         }
         $dir = UPLOAD_DIR;
         for ($j = 0; $j < 2; $j++) {

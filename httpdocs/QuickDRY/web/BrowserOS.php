@@ -1,15 +1,25 @@
 <?php
+
+/**
+ * Class BrowserOS
+ */
 class BrowserOS
 {
 	public static $os = '';
 	public static $browser = '';
 	private static $is_mobile = '';
 
+    /**
+     * @return string
+     */
     public static function IsMobile()
     {
         return static::$is_mobile;
     }
 
+    /**
+     *
+     */
 	public static function Configure()
 	{
 		$ua = isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : '';

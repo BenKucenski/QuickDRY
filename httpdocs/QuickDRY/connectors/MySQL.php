@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class MySQL
+ */
 class MySQL extends SafeClass
 {
     /**
