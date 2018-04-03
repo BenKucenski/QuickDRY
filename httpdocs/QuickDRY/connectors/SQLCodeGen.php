@@ -17,6 +17,7 @@ class SQLCodeGen extends SafeClass
     protected $UseFKColumnName;
     protected $DatabaseTypePrefix;
     protected $DatabaseClass;
+    protected $GenerateJSON;
 
     protected function CreateDirectories()
     {
@@ -567,6 +568,10 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
     public function GenerateJSON()
     {
+        if(!$this->GenerateJSON) {
+            return;
+        }
+
         $DatabaseClass = $this->DatabaseClass;
 
         foreach ($this->Tables as $table_name) {

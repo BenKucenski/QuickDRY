@@ -1,8 +1,11 @@
 <?php
 
+/**
+ * Class MySQL_CodeGen
+ */
 class MySQL_CodeGen extends SQLCodeGen
 {
-    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MySQL_A')
+    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MySQL_A', $GenerateJSON = true)
     {
         $this->DatabaseTypePrefix = 'my';
 
@@ -22,6 +25,7 @@ class MySQL_CodeGen extends SQLCodeGen
         $this->DatabasePrefix = $this->DatabaseConstant ? $this->DatabaseConstant : $this->Database;
         $this->LowerCaseTables = $lowercase_tables;
         $this->UseFKColumnName = $use_fk_column_name;
+        $this->GenerateJSON = $GenerateJSON;
 
         $DatabaseClass::CopyInfoSchema();
 
