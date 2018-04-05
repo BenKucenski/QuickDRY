@@ -10,7 +10,6 @@ require_once 'utilities/Dates.php';
 require_once 'utilities/HTTP.php';
 require_once 'utilities/Strings.php';
 require_once 'utilities/helpers.php';
-require_once 'utilities/PHPExcel.php';
 require_once 'utilities/phpmailer.php';
 require_once 'utilities/BarcodeClass.php';
 require_once 'utilities/HTMLCalendar.php';

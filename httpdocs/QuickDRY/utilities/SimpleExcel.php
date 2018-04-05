@@ -189,13 +189,13 @@ class SimpleExcel extends SafeClass
                     ->getStyle($sheet_column . $sheet_row)
                     ->getNumberFormat()
                     ->setFormatCode(
-                        PHPExcel_Style_NumberFormat::FORMAT_TEXT
+                        \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
                     );
             } catch (Exception $ex) {
                 Debug::Halt($ex);
             }
 
-            $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         } else {
             if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
                 try {
@@ -203,7 +203,7 @@ class SimpleExcel extends SafeClass
                         ->getStyle($sheet_column . $sheet_row)
                         ->getNumberFormat()
                         ->setFormatCode(
-                            PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2
+                            \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
                         );
                 } catch (Exception $ex) {
                     Debug::Halt($ex);
