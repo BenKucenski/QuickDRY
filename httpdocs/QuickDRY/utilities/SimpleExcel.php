@@ -1,4 +1,6 @@
 <?php
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * Class SimpleExcel
@@ -21,53 +23,7 @@ class SimpleExcel extends SafeClass
      */
     public static function MultiSheet($filename, $reports)
     {
-        $objPHPExcel = new \PHPExcel();
-
-        foreach ($reports as $sheet => $report) {
-            if ($sheet > 0) {
-                $objPHPExcel->createSheet($sheet);
-            }
-            try {
-                $objPHPExcel->setActiveSheetIndex($sheet);
-            } catch (Exception $ex) {
-                Debug::Halt($ex);
-            }
-            $objPHPExcel->getActiveSheet()->setTitle($report->Title);
-            $sheet_row = 1;
-
-
-            $sheet_column = 'A';
-            foreach ($report->Columns as $column) {
-                self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
-                $sheet_column++;
-            }
-            $sheet_row++;
-            if ($report->Report && is_array($report->Report)) {
-                foreach ($report->Report as $item) {
-                    $sheet_column = 'A';
-                    foreach ($report->Columns as $column) {
-                        self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
-                        $sheet_column++;
-                    }
-                    $sheet_row++;
-                }
-            }
-        }
-
-        try {
-            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-            if(isset($_SERVER['HTTP_HOST'])) {
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename="' . $filename . '"');
-                header('Cache-Control: max-age=0');
-                $objWriter->save('php://output');
-                exit;
-            } else {
-                $objWriter->save($filename);
-            }
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
+        Halt('Deprecated: Use ExportSpreadsheets');
     }
 
     /**
@@ -76,66 +32,7 @@ class SimpleExcel extends SafeClass
      */
     public static function MultiSheet2007($filename, $reports)
     {
-        $objPHPExcel = new \PHPExcel();
-
-        $total_sheets = sizeof($reports);
-
-        foreach ($reports as $sheet => $report) {
-            if(!isset($_SERVER['HTTP_HOST'])) {
-                Log::Insert(($sheet + 1) . ' / ' . $total_sheets . ' : '. $report->Title, true);
-            }
-            if ($sheet > 0) {
-                try {
-                    $objPHPExcel->createSheet($sheet);
-                } catch(Exception $ex) {
-                    Halt($ex);
-                }
-            }
-            try {
-                $objPHPExcel->setActiveSheetIndex($sheet);
-            } catch (Exception $ex) {
-                Debug::Halt($ex);
-            }
-            try {
-                $objPHPExcel->getActiveSheet()->setTitle($report->Title);
-            } catch(Exception $ex) {
-                Halt($ex);
-            }
-            $sheet_row = 1;
-
-
-            $sheet_column = 'A';
-            foreach ($report->Columns as $column) {
-                self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
-                $sheet_column++;
-            }
-            $sheet_row++;
-            if ($report->Report && is_array($report->Report)) {
-                foreach ($report->Report as $item) {
-                    $sheet_column = 'A';
-                    foreach ($report->Columns as $column) {
-                        self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
-                        $sheet_column++;
-                    }
-                    $sheet_row++;
-                }
-            }
-        }
-
-        try {
-            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-            if(isset($_SERVER['HTTP_HOST'])) {
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename="' . $filename . '"');
-                header('Cache-Control: max-age=0');
-                $objWriter->save('php://output');
-                exit;
-            } else {
-                $objWriter->save($filename);
-            }
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
+        Halt('Deprecated: Use ExportSpreadsheets');
     }
 
     /**
@@ -143,47 +40,7 @@ class SimpleExcel extends SafeClass
      */
     public static function SingleSheet(SimpleExcel $report)
     {
-        $objPHPExcel = new \PHPExcel();
-
-        try {
-            $objPHPExcel->setActiveSheetIndex(0);
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
-        $objPHPExcel->getActiveSheet()->setTitle($report->Title);
-        $sheet_row = 1;
-
-
-        $sheet_column = 'A';
-        foreach ($report->Columns as $column) {
-            self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
-            $sheet_column++;
-        }
-        $sheet_row++;
-        foreach ($report->Report as $item) {
-            $sheet_column = 'A';
-            foreach ($report->Columns as $column) {
-                self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
-                $sheet_column++;
-            }
-            $sheet_row++;
-        }
-
-
-        try {
-            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-            if(isset($_SERVER['HTTP_HOST'])) {
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
-                header('Cache-Control: max-age=0');
-                $objWriter->save('php://output');
-                exit;
-            } else {
-                $objWriter->save($report->Filename);
-            }
-        } catch (Exception $ex) {
-            Debug::Halt($ex);
-        }
+        Halt('Deprecated: use ExportSpreadsheet');
     }
 
     /**
@@ -191,28 +48,32 @@ class SimpleExcel extends SafeClass
      */
     public static function SingleSheet2007(SimpleExcel $report)
     {
-        $objPHPExcel = new \PHPExcel();
+        Halt('Deprecated: use ExportSpreadsheet');
+    }
 
+    /**
+     * @param SimpleExcel $se
+     */
+    public static function ExportSpreadsheet(SimpleExcel &$se)
+    {
+        $spreadsheet = new Spreadsheet();
         try {
-            $objPHPExcel->setActiveSheetIndex(0);
+            $sheet = $spreadsheet->getActiveSheet();
         } catch (Exception $ex) {
             Debug::Halt($ex);
         }
-
-        $objPHPExcel->getActiveSheet()->setTitle($report->Title);
+        $sheet->setTitle($se->Title);
         $sheet_row = 1;
-
-
         $sheet_column = 'A';
-        foreach ($report->Columns as $column) {
-            self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
+        foreach ($se->Columns as $column) {
+            self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
             $sheet_column++;
         }
         $sheet_row++;
-        foreach ($report->Report as $item) {
+        foreach ($se->Report as $item) {
             $sheet_column = 'A';
-            foreach ($report->Columns as $column) {
-                self::_SetCellValue($objPHPExcel, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+            foreach ($se->Columns as $column) {
+                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
                 $sheet_column++;
             }
             $sheet_row++;
@@ -220,22 +81,101 @@ class SimpleExcel extends SafeClass
 
 
         try {
-            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-            if(isset($_SERVER['HTTP_HOST'])) {
+            $writer = new Xlsx($spreadsheet);
+            if (isset($_SERVER['HTTP_HOST'])) {
                 header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename="' . $report->Filename . '"');
+                header('Content-Disposition: attachment;filename="' . $se->Filename . '"');
                 header('Cache-Control: max-age=0');
-                $objWriter->save('php://output');
+                $writer->save('php://output');
                 exit;
             } else {
-                $objWriter->save($report->Filename);
+                $writer->save($se->Filename);
             }
         } catch (Exception $ex) {
             Debug::Halt($ex);
         }
+
     }
 
-    private static function _SetCellValue(\PHPExcel &$objPHPExcel, $sheet_column, $sheet_row, $value, $property_type = '')
+    /**
+     * @param $filename
+     * @param SimpleExcel[] $se
+     */
+    public static function ExportSpreadsheets($filename, &$ses)
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $total_sheets = sizeof($ses);
+
+        foreach ($ses as $sheet => $report) {
+            if (!isset($_SERVER['HTTP_HOST'])) {
+                Log::Insert(($sheet + 1) . ' / ' . $total_sheets . ' : ' . $report->Title, true);
+            }
+            if ($sheet > 0) {
+                try {
+                    $spreadsheet->createSheet($sheet);
+                } catch (Exception $ex) {
+                    Halt($ex);
+                }
+            }
+            try {
+                $spreadsheet->setActiveSheetIndex($sheet);
+            } catch (Exception $ex) {
+                Debug::Halt($ex);
+            }
+            try {
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setTitle($report->Title);
+            } catch (Exception $ex) {
+                Halt($ex);
+            }
+            $sheet_row = 1;
+
+
+            $sheet_column = 'A';
+            foreach ($report->Columns as $column) {
+                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
+                $sheet_column++;
+            }
+            $sheet_row++;
+            if ($report->Report && is_array($report->Report)) {
+                foreach ($report->Report as $item) {
+                    $sheet_column = 'A';
+                    foreach ($report->Columns as $column) {
+                        self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+                        $sheet_column++;
+                    }
+                    $sheet_row++;
+                }
+            }
+        }
+
+
+        try {
+            $writer = new Xlsx($spreadsheet);
+            if (isset($_SERVER['HTTP_HOST'])) {
+                header('Content-Type: application/vnd.ms-excel');
+                header('Content-Disposition: attachment;filename="' . $filename . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');
+                exit;
+            } else {
+                $writer->save($filename);
+            }
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+
+    }
+
+    /**
+     * @param PHPExcel $phpexcel
+     * @param $sheet_column
+     * @param $sheet_row
+     * @param $value
+     * @param string $property_type
+     */
+    private static function _SetSpreadsheetCellValue(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet &$sheet, $sheet_column, $sheet_row, $value, $property_type = '')
     {
         if (is_object($value)) {
             if ($value instanceof DateTime) {
@@ -243,21 +183,19 @@ class SimpleExcel extends SafeClass
             }
         }
 
-        $sheet = $objPHPExcel->getActiveSheet();
-
         if ($property_type === SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {
             try {
                 $sheet
                     ->getStyle($sheet_column . $sheet_row)
                     ->getNumberFormat()
                     ->setFormatCode(
-                        \PHPExcel_Style_NumberFormat::FORMAT_TEXT
+                        PHPExcel_Style_NumberFormat::FORMAT_TEXT
                     );
             } catch (Exception $ex) {
                 Debug::Halt($ex);
             }
 
-            $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, PHPExcel_Cell_DataType::TYPE_STRING);
         } else {
             if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
                 try {
@@ -265,7 +203,7 @@ class SimpleExcel extends SafeClass
                         ->getStyle($sheet_column . $sheet_row)
                         ->getNumberFormat()
                         ->setFormatCode(
-                            \PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2
+                            PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2
                         );
                 } catch (Exception $ex) {
                     Debug::Halt($ex);
@@ -275,7 +213,11 @@ class SimpleExcel extends SafeClass
             if (is_array($value)) {
                 Debug::Halt(['value cannot be an array', $value]);
             }
-            $sheet->setCellValue($sheet_column . $sheet_row, $value);
+            try {
+                $sheet->setCellValue($sheet_column . $sheet_row, $value);
+            } catch (Exception $ex) {
+                Halt($ex);
+            }
         }
     }
 }

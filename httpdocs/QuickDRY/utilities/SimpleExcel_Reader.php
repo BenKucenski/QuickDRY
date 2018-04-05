@@ -1,7 +1,18 @@
 <?php
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
+/**
+ * Class SimpleExcel_Reader
+ */
 class SimpleExcel_Reader extends SafeClass
 {
+    /**
+     * @param $file
+     * @param bool $process_cells
+     * @param bool $debug
+     * @param null $row_limit
+     * @return array
+     */
     public static function FromFilename($file, $process_cells = true, $debug = false, $row_limit = null)
     {
         if ($debug) {
@@ -11,34 +22,30 @@ class SimpleExcel_Reader extends SafeClass
             if ($debug) {
                 Log::Insert('Getting file type', true);
             }
-            $inputFileType = PHPExcel_IOFactory::identify($file);
-            if ($debug) {
-                Log::Insert('File type: ' . $inputFileType, true);
-            }
-            if ($debug) {
-                Log::Insert('Creating reader', true);
-            }
-            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
-            //$objReader->setReadDataOnly(true); // this isn't a function for CSV files
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
 
-            if ($debug) {
-                Log::Insert('Loading File', true);
-            }
-            $objPHPExcel = $objReader->load($file);
-            return self::ToReport($objPHPExcel, $process_cells, $debug, $row_limit);
+
+            return self::ToReport($spreadsheet, $process_cells, $debug, $row_limit);
         } catch (Exception $e) {
             die('Error loading file "' . $file . '": ' . $e->getMessage());
         }
     }
 
-    public static function ToReport(PHPExcel &$objPHPExcel, $process_cells = true, $debug = false, $row_limit = null)
+    /**
+     * @param Spreadsheet $spreadsheet
+     * @param bool $process_cells
+     * @param bool $debug
+     * @param null $row_limit
+     * @return array
+     */
+    public static function ToReport(Spreadsheet &$spreadsheet, $process_cells = true, $debug = false, $row_limit = null)
     {
         if ($debug) {
             Log::Insert('SimpleExcel_Reader::ToReport', true);
         }
         $report = [];
-        $sheetCount = $objPHPExcel->getSheetCount();
-        $sheetNames = $objPHPExcel->getSheetNames();
+        $sheetCount = $spreadsheet->getSheetCount();
+        $sheetNames = $spreadsheet->getSheetNames();
 
         if ($debug) {
             Log::Insert('Sheet Count: ' . $sheetCount, true);
@@ -50,7 +57,7 @@ class SimpleExcel_Reader extends SafeClass
                     Log::Insert('Sheet: ' . $sheetNames[$sheet], true);
                 }
 
-                $activeSheet = $objPHPExcel->setActiveSheetIndex($sheet);
+                $activeSheet = $spreadsheet->setActiveSheetIndex($sheet);
 
                 $report[$sheetNames[$sheet]] = [];
 
