@@ -1,7 +1,36 @@
 <?php
 
+/**
+ * Class Strings
+ */
 class Strings extends SafeClass
 {
+    /**
+     * @param $tsv
+     * @return array
+     */
+    public static function TSVToArray($tsv)
+    {
+        // https://stackoverflow.com/questions/4801895/csv-to-associative-array
+        // https://stackoverflow.com/questions/28690855/str-getcsv-on-a-tab-separated-file
+        /* Map Rows and Loop Through Them */
+        $rows = array_map(function($v){return str_getcsv($v, "\t");}, explode("\n", $tsv));
+        $header = array_shift($rows);
+        $n = sizeof($header);
+        $csv = [];
+        foreach ($rows as $row) {
+            $m = sizeof($row);
+            for ($j = $m; $j < $n; $j++) {
+                $row[] = ''; // fill in missing fields with emptry strings
+            }
+            if(sizeof($row) != $n) {
+                Halt([$header, $row]);
+            }
+            $csv[] = array_combine($header, $row);
+        }
+        return $csv;
+    }
+
     /**
      * @param $str
      * @return null|string|string[]
@@ -12,6 +41,10 @@ class Strings extends SafeClass
         return preg_replace('/\s+/si',' ', $str);
     }
 
+    /**
+     * @param $xml
+     * @return mixed
+     */
     public static function SimpleXMLToArray($xml)
     {
         $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
@@ -96,6 +129,11 @@ class Strings extends SafeClass
     }
 
 
+    /**
+     * @param $string
+     * @param $ends_with
+     * @return bool
+     */
     public static function EndsWith($string, $ends_with)
     {
         return substr($string, -strlen($ends_with), strlen($ends_with)) === $ends_with;
@@ -147,16 +185,28 @@ class Strings extends SafeClass
         }
     }
 
+    /**
+     * @param $value
+     * @return mixed
+     */
     public static function FormFilter($value)
     {
         return str_replace('"', '\\"', $value);
     }
 
+    /**
+     * @param $js
+     * @return string
+     */
     public static function EchoJS($js)
     {
         return addcslashes(str_replace('"', "'", $js), "'");
     }
 
+    /**
+     * @param $data
+     * @return string
+     */
     public static function ArrayToXML($data)
     {
         $xml = '';
@@ -167,6 +217,14 @@ class Strings extends SafeClass
         return $xml;
     }
 
+    /**
+     * @param $value
+     * @param int $brightness
+     * @param int $max
+     * @param int $min
+     * @param string $thirdColorHex
+     * @return string
+     */
     public static function PercentToColor($value, $brightness = 255, $max = 100, $min = 0, $thirdColorHex = '00')
     {
         if ($value > $max) {
@@ -197,6 +255,10 @@ class Strings extends SafeClass
 
     }
 
+    /**
+     * @param $string
+     * @return string
+     */
     public static function XMLEntities($string)
     {
         return strtr(
@@ -211,6 +273,10 @@ class Strings extends SafeClass
         );
     }
 
+    /**
+     * @param $num
+     * @return string
+     */
     public static function BigInt($num)
     {
         return sprintf('%.0f', $num);
@@ -290,6 +356,10 @@ class Strings extends SafeClass
         return $arg;
     }
 
+    /**
+     * @param $val
+     * @return float|string
+     */
     public static function Numeric($val)
     {
         $res = trim(preg_replace('/[^0-9\.-]/si', '', $val) * 1.0);
@@ -299,6 +369,10 @@ class Strings extends SafeClass
         return $res;
     }
 
+    /**
+     * @param $val
+     * @return float|string
+     */
     public static function NumbersOnly($val)
     {
         $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);

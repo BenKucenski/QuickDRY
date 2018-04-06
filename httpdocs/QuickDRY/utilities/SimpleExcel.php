@@ -142,6 +142,12 @@ class SimpleExcel extends SafeClass
                 foreach ($report->Report as $item) {
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
+                        if(!is_object($item)) {
+                            Halt($item);
+                        }
+                        if(!property_exists(get_class($item), $column->Property) && !isset($item->{$column->Property})) {
+                            Halt([get_class($item), $column->Property, $item]);
+                        }
                         self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
                         $sheet_column++;
                     }

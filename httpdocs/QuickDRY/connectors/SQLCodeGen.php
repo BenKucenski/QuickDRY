@@ -175,6 +175,11 @@ spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->
         fclose($fp);
     }
 
+    /**
+     * @param $table_name
+     * @param $cols
+     * @return string
+     */
     function GenerateClass($table_name, $cols)
     {
         $DatabaseClass = $this->DatabaseClass;
@@ -529,7 +534,9 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         fclose($fp);
 
         $code = '<?php
-
+/**
+ * Class ' . $c_name . '
+ */
 class ' . $c_name . ' extends db_' . $c_name . '
 {
     public function __construct()
@@ -537,6 +544,10 @@ class ' . $c_name . ' extends db_' . $c_name . '
         parent::__construct();
     }
 
+    /**
+     * @param $name
+     * @return mixed
+     */
     public function __get($name)
     {
         switch($name)
@@ -546,11 +557,20 @@ class ' . $c_name . ' extends db_' . $c_name . '
         }
     }
 
+    /**
+     * @return array
+     */
     public function Save()
     {
         return $this->_Save();
     }
 
+    /**
+     * @param $req
+     * @param bool $save
+     * @param bool $overwrite
+     * @return bool
+     */
     public function FromRequest(&$req, $save = true, $overwrite = false)
     {
         return parent::FromRequest($req, $save, $overwrite);
