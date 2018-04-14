@@ -1,3 +1,7 @@
-php composer.phar self-update
-php composer.phar update
-php composer.phar install
+composer self-update
+
+composer update
+
+composer install
+
+
