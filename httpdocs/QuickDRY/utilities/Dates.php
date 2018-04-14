@@ -435,7 +435,7 @@ class Dates extends SafeClass
         return date('H:i', $time);
     }
 
-    function TimeElapsedString($ptime)
+    public static function TimeElapsedString($ptime)
     {
         if(!is_numeric($ptime)) {
             $ptime = strtotime(self::Timestamp($ptime));
