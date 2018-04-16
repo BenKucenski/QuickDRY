@@ -73,7 +73,15 @@ class SimpleExcel extends SafeClass
         foreach ($se->Report as $item) {
             $sheet_column = 'A';
             foreach ($se->Columns as $column) {
-                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+                if(!is_object($item)) {
+                    Halt($item);
+                }
+                if(!property_exists(get_class($item), $column->Property) && !isset($item->{$column->Property})) {
+                    $value = '';
+                } else {
+                    $value = $item->{$column->Property};
+                }
+                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                 $sheet_column++;
             }
             $sheet_row++;
@@ -146,9 +154,11 @@ class SimpleExcel extends SafeClass
                             Halt($item);
                         }
                         if(!property_exists(get_class($item), $column->Property) && !isset($item->{$column->Property})) {
-                            Halt([get_class($item), $column->Property, $item]);
+                            $value = '';
+                        } else {
+                            $value = $item->{$column->Property};
                         }
-                        self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+                        self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                         $sheet_column++;
                     }
                     $sheet_row++;
