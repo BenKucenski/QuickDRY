@@ -6,6 +6,21 @@
 class Strings extends SafeClass
 {
     /**
+     * @param $filename
+     * @return array
+     */
+    public static function CSVToAssociativeArray($filename)
+    {
+        $rows = array_map('str_getcsv', file($filename));
+        $header = array_shift($rows);
+        $csv = [];
+        foreach ($rows as $row) {
+            $csv[] = array_combine($header, $row);
+        }
+        return $csv;
+    }
+
+    /**
      * @param $tsv
      * @return array
      */
