@@ -30,25 +30,10 @@ class UserClass extends SafeClass
     /**
      * @param $username
      * @param $password
-     * @param null $default_host
      * @return null|UserClass
      */
-    public static function LogInLDAP($username, $password, $default_host = null)
+    public static function DoLogin($username, $password)
     {
-        if(!defined('LDAP_ADMIN_USER')) {
-            Halt('LDAP_ADMIN_USER must be defined in settings');
-            return null;
-        }
-
-        if(!defined('LDAP_ADMIN_PASS')) {
-            Halt('LDAP_ADMIN_PASS must be defined in settings');
-            return null;
-        }
-
-        if($default_host && strstr($username, '@') === false) {
-            $username .= '@' . $default_host;
-        }
-
         // https://stackoverflow.com/questions/6222641/how-to-php-ldap-search-to-get-user-ou-if-i-dont-know-the-ou-for-base-dn
         try {
             $ldap = new adLDAP();
@@ -84,6 +69,41 @@ class UserClass extends SafeClass
             return null;
         }
         return null;
+
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @param null $default_host
+     * @return null|UserClass
+     */
+    public static function LogInLDAP($username, $password, $default_host = null)
+    {
+        if (!defined('LDAP_ADMIN_USER')) {
+            Halt('LDAP_ADMIN_USER must be defined in settings');
+            return null;
+        }
+
+        if (!defined('LDAP_ADMIN_PASS')) {
+            Halt('LDAP_ADMIN_PASS must be defined in settings');
+            return null;
+        }
+
+        if ($default_host && strstr($username, '@') === false) {
+            if (!is_array($default_host)) {
+                $username .= '@' . $default_host;
+                return self::DoLogin($username, $password);
+            }
+            foreach ($default_host as $item) {
+                $test = self::DoLogin($username . '@' . $item, $password);
+                if ($test) {
+                    return $test;
+                }
+            }
+        }
+
+        return self::DoLogin($username, $password);
     }
 
     /**

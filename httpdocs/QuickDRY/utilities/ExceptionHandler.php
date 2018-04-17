@@ -22,14 +22,14 @@ class ExceptionHandler
      * @param $errstr
      * @param $errfile
      * @param $errline
-     *
      * @return bool
+     * @throws Exception
      */
     public static function Error($errno, $errstr, $errfile, $errline)
     {
         if (defined('SHOW_ERRORS') && SHOW_ERRORS) {
             if ($errno != 8 || (defined('SHOW_NOTICES') && SHOW_NOTICES)) { // don't show notice errors on the page unless explicitly told to
-                Debug::Halt([$errno, $errstr, $errfile, $errline]);
+                throw new Exception(json_encode([$errno, $errstr, $errfile, $errline]));
             }
         }
         //LogError($errno, $errstr, $errfile, $errline);
