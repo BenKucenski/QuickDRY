@@ -185,7 +185,7 @@ class SimpleExcel extends SafeClass
     }
 
     /**
-     * @param PHPExcel $phpexcel
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
      * @param $sheet_column
      * @param $sheet_row
      * @param $value
