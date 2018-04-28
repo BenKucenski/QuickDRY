@@ -14,9 +14,9 @@ class BarcodeClass
      */
     public static function Generate($width, $height, $code)
 	{
-		global $Request;
+		global $Web;
 
-		$root = BASEDIR;
+		$root = DOC_ROOT_PATH;
 		if(substr($root,-8) !== 'barcode/')
 			$root .= 'barcode/';
 

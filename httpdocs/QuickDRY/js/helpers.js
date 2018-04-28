@@ -580,7 +580,7 @@ function SaveObject(type, vars, callback, dialog) {
         WaitDialog('Please Wait', 'Saving...');
     }
 
-    var url = endsWith(type, '.json') ? type : '/json/_' + type + '/save.json';
+    var url = endsWith(type, '.json') ? type : '/json/' + type + '/save.json';
     $.post(url, vars, function (data) {
         CloseDialogIfOpen('wait_dialog');
         if (data.error) {
@@ -600,7 +600,7 @@ function SaveObject(type, vars, callback, dialog) {
 }
 
 function GetObject(type, vars, callback) {
-    var url = endsWith(type, '.json') ? type : '/json/_' + type + '/get.json';
+    var url = endsWith(type, '.json') ? type : '/json/' + type + '/get.json';
     $.post(url, vars, function (data) {
         CloseDialogIfOpen('wait_dialog');
         if (data.error)
@@ -613,7 +613,7 @@ function GetObject(type, vars, callback) {
 }
 
 function SelectObject(type, vars, elem_id, callback) {
-    var url = endsWith(type, '.json') ? type : '/json/_' + type + '/select.json';
+    var url = endsWith(type, '.json') ? type : '/json/' + type + '/select.json';
     $.post(url, vars, function (data) {
         CloseDialogIfOpen('wait_dialog');
         if (data.error)
@@ -664,7 +664,7 @@ function DeleteObject(type, vars, callback, confirmed, dialog) {
 
     WaitDialog('Please Wait', 'Deleting...');
 
-    var url = endsWith(type, '.json') ? type : '/json/_' + type + '/delete.json';
+    var url = endsWith(type, '.json') ? type : '/json/' + type + '/delete.json';
     Post(url, vars, callback, null, dialog);
 }
 

@@ -27,7 +27,7 @@ class LogFile
         $msg []= Dates::Timestamp();
         $msg [] = getcwd() . '/' . $filename;
         $msg [] = Network::Interfaces();
-		$msg [] = is_array($message) ? json_encode($message) : $message;
+        $msg [] = is_array($message) || is_object($message) ? json_encode($message) : $message;
         $msg = implode("\t", $msg);
         fwrite($fp, $msg . PHP_EOL);
         fclose($fp);
@@ -37,7 +37,7 @@ class LogFile
             $msg []= GUID;
             $msg [] = getcwd() . '/' . $filename;
             $msg [] = Network::Interfaces();
-            $msg [] = is_array($message) ? json_encode($message) : $message;
+            $msg [] = is_array($message) || is_object($message) ? json_encode($message) : $message;
             $msg = implode("\t", $msg);
             echo Dates::TimeString($msg);
         }

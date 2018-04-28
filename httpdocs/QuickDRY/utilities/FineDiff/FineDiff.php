@@ -562,11 +562,11 @@ class FineDiff {
 
     public static function String($from_text, $to_text)
     {
-        $opcodes = FineDiff::getDiffOpcodes($from_text, $to_text, FINE_DIFF_GRANULARITY_WORD);
+        $opcodes = FineDiff::getDiffOpcodes($from_text, $to_text, json_decode(FINE_DIFF_GRANULARITY_WORD));
         $to_text = FineDiff::renderDiffToHTMLFromOpcodes($from_text, $opcodes);
         return $to_text;
     }
 }
 
-define('FINE_DIFF_GRANULARITY_WORD', FineDiff::$wordGranularity);
+define('FINE_DIFF_GRANULARITY_WORD', json_encode(FineDiff::$wordGranularity));
 define('FINE_DIFF_GRANULARITY_PARAGRAPH', 0);

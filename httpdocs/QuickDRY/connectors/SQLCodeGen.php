@@ -45,9 +45,6 @@ class SQLCodeGen extends SafeClass
         $this->CommonClassSPFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp';
         $this->CommonClassSPDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db';
 
-        $this->PagesJSONFolder = $this->DestinationFolder . '/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-        $this->PagesManageFolder = $this->DestinationFolder . '/pages/manage/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-
         $this->PagesPHPUnitFolder = $this->DestinationFolder . '/phpunit';
 
         $this->PagesBaseJSONFolder = $this->DestinationFolder . '/pages/json';
@@ -83,14 +80,6 @@ class SQLCodeGen extends SafeClass
 
         if (!is_dir($this->CommonClassSPDBFolder)) {
             mkdir($this->CommonClassSPDBFolder);
-        }
-
-        if (!is_dir($this->PagesJSONFolder)) {
-            mkdir($this->PagesJSONFolder);
-        }
-
-        if (!is_dir($this->PagesManageFolder)) {
-            mkdir($this->PagesManageFolder);
         }
 
         if (!is_dir($this->PagesPHPUnitFolder)) {
@@ -1265,7 +1254,7 @@ var ' . $c_name . 'History = {
 </div>
 
 
-<?php require_once \'pages/json/_' . $c_name . '/controls/add.php\'; ?>
+<?php require_once \'pages/json/' . $c_name . '/controls/add.php\'; ?>
 ';
 
         $fp = fopen($this->PagesManageFolder . '/' . $page_dir . '.php', 'w');
