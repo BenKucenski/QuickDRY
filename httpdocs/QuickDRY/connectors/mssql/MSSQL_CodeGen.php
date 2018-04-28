@@ -5,7 +5,7 @@
  */
 class MSSQL_CodeGen extends SQLCodeGen
 {
-    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MSSQL_A', $GenerateJSON = true)
+    public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MSSQL_A', $GenerateJSON = true, $DestinationFolder = '../httpdocs')
     {
         $this->DatabaseTypePrefix = 'ms';
 
@@ -16,6 +16,7 @@ class MSSQL_CodeGen extends SQLCodeGen
             exit($DatabaseClass . ' is invalid');
         }
 
+        $this->DestinationFolder = $DestinationFolder;
         $this->DatabaseClass = $DatabaseClass;
         $this->Database = $database;
         $this->DatabaseConstant = $database_constant;
@@ -101,7 +102,7 @@ class MSSQL_CodeGen extends SQLCodeGen
 }
         ';
 
-            $file = 'sp_db/' . $class_name . '/sp_db/db_' . $sp_class . '.php';
+            $file = $this->CommonClassSPDBFolder . '/db_' . $sp_class . '.php';
             $fp = fopen($file, 'w');
             fwrite($fp, $code);
             fclose($fp);

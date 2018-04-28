@@ -5,6 +5,7 @@
  */
 class SQLCodeGen extends SafeClass
 {
+    protected $DestinationFolder;
     protected $Database;
     protected $DatabaseConstant;
     protected $DatabasePrefix;
@@ -19,45 +20,82 @@ class SQLCodeGen extends SafeClass
     protected $DatabaseClass;
     protected $GenerateJSON;
 
+    protected $IncludeFolder;
+    protected $CommonFolder;
+    protected $CommonClassFolder;
+    protected $CommonClassDBFolder;
+    protected $CommonClassSPFolder;
+    protected $CommonClassSPDBFolder;
+    protected $PagesBaseJSONFolder;
+    protected $PagesJSONFolder;
+    protected $PagesJSONControlsFolder;
+
+    protected $PagesBaseManageFolder;
+    protected $PagesManageFolder;
+    protected $PagesPHPUnitFolder;
+    
     protected function CreateDirectories()
     {
-        if (!is_dir('includes'))
-            mkdir('includes');
+        $this->IncludeFolder = $this->DestinationFolder . '/includes';
 
-        if (!is_dir('class'))
-            mkdir('class');
-        if (!is_dir('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
-            mkdir('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
+        $this->CommonFolder = $this->DestinationFolder . '/common';
+        $this->CommonClassFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+        $this->CommonClassDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db';
 
-        if (!is_dir('db'))
-            mkdir('db');
-        if (!is_dir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
-            mkdir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
-        if (!is_dir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db'))
-            mkdir('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db');
+        $this->CommonClassSPFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp';
+        $this->CommonClassSPDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db';
 
-        if (!is_dir('sp'))
-            mkdir('sp');
-        if (!is_dir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
-            mkdir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
-        if (!is_dir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp'))
-            mkdir('sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp');
+        $this->PagesJSONFolder = $this->DestinationFolder . '/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+        $this->PagesManageFolder = $this->DestinationFolder . '/pages/manage/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
 
-        if (!is_dir('sp_db'))
-            mkdir('sp_db');
-        if (!is_dir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)))
-            mkdir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix));
-        if (!is_dir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db'))
-            mkdir('sp_db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db');
+        $this->PagesPHPUnitFolder = $this->DestinationFolder . '/phpunit';
 
-        if (!is_dir('phpunit'))
-            mkdir('phpunit');
+        $this->PagesBaseJSONFolder = $this->DestinationFolder . '/pages/json';
+        $this->PagesBaseManageFolder = $this->DestinationFolder . '/pages/manage';
 
-        if (!is_dir('json'))
-            mkdir('json');
+        if(!is_dir($this->PagesBaseJSONFolder)) {
+            mkdir($this->PagesBaseJSONFolder);
+        }
 
-        if (!is_dir('manage'))
-            mkdir('manage');
+        if(!is_dir($this->PagesBaseManageFolder)) {
+            mkdir($this->PagesBaseManageFolder);
+        }
+
+        if (!is_dir($this->IncludeFolder)) {
+            mkdir($this->IncludeFolder);
+        }
+
+        if (!is_dir($this->CommonFolder)) {
+            mkdir($this->CommonFolder);
+        }
+
+        if (!is_dir($this->CommonClassFolder)) {
+            mkdir($this->CommonClassFolder);
+        }
+
+        if (!is_dir($this->CommonClassDBFolder)) {
+            mkdir($this->CommonClassDBFolder);
+        }
+
+        if (!is_dir($this->CommonClassSPFolder)) {
+            mkdir($this->CommonClassSPFolder);
+        }
+
+        if (!is_dir($this->CommonClassSPDBFolder)) {
+            mkdir($this->CommonClassSPDBFolder);
+        }
+
+        if (!is_dir($this->PagesJSONFolder)) {
+            mkdir($this->PagesJSONFolder);
+        }
+
+        if (!is_dir($this->PagesManageFolder)) {
+            mkdir($this->PagesManageFolder);
+        }
+
+        if (!is_dir($this->PagesPHPUnitFolder)) {
+            mkdir($this->PagesPHPUnitFolder);
+        }
     }
 
     /**
@@ -125,10 +163,12 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
     }
 }
 ';
-        $file = 'sp/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp/' . $sp_class . '.php';
-        $fp = fopen($file, 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+        $file = $this->CommonClassSPFolder . '/' . $sp_class . '.php';
+        if(!file_exists($file)) { // do not overwrite existing files, user edited
+            $fp = fopen($file, 'w');
+            fwrite($fp, $code);
+            fclose($fp);
+        }
     }
 
     public function GenerateClasses()
@@ -138,17 +178,19 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
 
+
             $DatabaseClass = $this->DatabaseClass;
             $columns = $DatabaseClass::GetTableColumns($table_name);
             $mod = $this->GenerateClass($table_name, $columns);
-            $modules['db_' . $mod] = 'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $mod . '.php';
-            $modules[$mod] = 'common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $mod . '.php';
+
+            $modules['db_' . $mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassDBFolder . '/db_' . $mod . '.php');
+            $modules[$mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassFolder . '/' . $mod . '.php');
         }
 
-        $fp = fopen('includes/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
+        $fp = fopen($this->IncludeFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
 
         $mod_map = [];
-        foreach($modules as $mod => $file) {
+        foreach ($modules as $mod => $file) {
             $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
         }
         $include_php = '<?php
@@ -164,7 +206,15 @@ function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)
         return;
     }
 
-    require_once $class_map[$class];
+    if (file_exists($class_map[$class])) { // web
+        require_once $class_map[$class];
+    } else {
+        if (file_exists(\'../\' . $class_map[$class])) { // cron folder
+            require_once \'../\' . $class_map[$class];
+        } else { // scripts folder
+           require_once \''  . $this->DestinationFolder . '/\' . $class_map[$class];
+        }
+    }
 }
 
 
@@ -529,7 +579,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     }
 }
 ';
-        $fp = fopen('db/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db/db_' . $c_name . '.php', 'w');
+        $fp = fopen($this->CommonClassDBFolder . '/db_' . $c_name . '.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
 
@@ -578,10 +628,13 @@ class ' . $c_name . ' extends db_' . $c_name . '
 }
 
 ';
-
-        $fp = fopen('class/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $c_name . '.php', 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+        
+        $file = $this->CommonClassFolder . '/' . $c_name . '.php';
+        if(!file_exists($file)) {
+            $fp = fopen($file, 'w');
+            fwrite($fp, $code);
+            fclose($fp);
+        }
 
         return $c_name;
     }
@@ -592,10 +645,28 @@ class ' . $c_name . ' extends db_' . $c_name . '
             return;
         }
 
+
         $DatabaseClass = $this->DatabaseClass;
 
         foreach ($this->Tables as $table_name) {
             Log::Insert($table_name, true);
+            $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+
+            $this->PagesJSONFolder = $this->PagesBaseJSONFolder . '/' . $c_name;
+            if(!is_dir($this->PagesJSONFolder)) {
+                mkdir($this->PagesJSONFolder);
+            }
+
+            $this->PagesJSONControlsFolder = $this->PagesJSONFolder . '/controls';
+            if(!is_dir($this->PagesJSONControlsFolder)) {
+                mkdir($this->PagesJSONControlsFolder);
+            }
+
+            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . $c_name;
+            if(!is_dir($this->PagesManageFolder)) {
+                mkdir($this->PagesManageFolder);
+            }
+
 
             $columns = $DatabaseClass::GetTableColumns($table_name);
             $this->_GenerateJSON($table_name, $columns);
@@ -616,10 +687,6 @@ class ' . $c_name . ' extends db_' . $c_name . '
         $unique = $DatabaseClass::GetUniqueKeys($table_name);
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
 
-        if (!is_dir('json/_' . $c_name)) {
-            mkdir('json/_' . $c_name);
-            mkdir('json/_' . $c_name . '/controls');
-        }
 
         $this->SaveJSON($c_name, $primary);
         $this->GetJSON($c_name, $primary);
@@ -679,7 +746,7 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 
 HTTP::ExitJSON($returnvals);
 	';
-        $fp = fopen('json/_' . $c_name . '/save.json.php', 'w');
+        $fp = fopen($this->PagesJSONFolder . '/save.json.php', 'w');
         fwrite($fp, $save);
         fclose($fp);
     }
@@ -714,7 +781,7 @@ if(isset($Web->Request->uuid))
 HTTP::ExitJSON($returnvals);
 	';
 
-        $fp = fopen('json/_' . $c_name . '/get.json.php', 'w');
+        $fp = fopen($this->PagesJSONFolder . '/get.json.php', 'w');
         fwrite($fp, $get);
         fclose($fp);
     }
@@ -738,7 +805,7 @@ $returnvals = ' . $c_name . '::Suggest($search, $Web->' . $this->UserVar . ');
 HTTP::ExitJSON($returnvals);
 	';
 
-        $fp = fopen('json/_' . $c_name . '/lookup.json.php', 'w');
+        $fp = fopen($this->PagesJSONFolder . '/lookup.json.php', 'w');
         fwrite($fp, $lookup);
         fclose($fp);
     }
@@ -820,7 +887,7 @@ if($Web->Request->uuid)
 HTTP::ExitJSON($returnvals);
 ';
 
-        $fp = fopen('json/_' . $c_name . '/delete.json.php', 'w');
+        $fp = fopen($this->PagesJSONFolder . '/delete.json.php', 'w');
         fwrite($fp, $delete);
         fclose($fp);
     }
@@ -890,7 +957,7 @@ $returnvals[\'html\'] = $html;
 HTTP::ExitJSON($returnvals);
 ';
 
-        $fp = fopen('json/_' . $c_name . '/history.json.php', 'w');
+        $fp = fopen($this->PagesJSONFolder . '/history.json.php', 'w');
         fwrite($fp, $history);
         fclose($fp);
     }
@@ -1024,7 +1091,7 @@ HTTP::ExitJSON($returnvals);
 </div>
 ';
 
-        $fp = fopen('json/_' . $c_name . '/controls/add.php', 'w');
+        $fp = fopen($this->PagesJSONControlsFolder . '/add.php', 'w');
         fwrite($fp, $add);
         fclose($fp);
 
@@ -1108,7 +1175,7 @@ var ' . $c_name . ' = {
 };
 ';
 
-        $fp = fopen('json/_' . $c_name . '/controls/add.js', 'w');
+        $fp = fopen($this->PagesJSONControlsFolder . '/add.js', 'w');
         fwrite($fp, $js);
         fclose($fp);
 
@@ -1139,7 +1206,7 @@ var ' . $c_name . ' = {
 </div>
 
 ';
-        $fp = fopen('json/_' . $c_name . '/controls/history.php', 'w');
+        $fp = fopen($this->PagesJSONControlsFolder . '/history.php', 'w');
         fwrite($fp, $add);
         fclose($fp);
 
@@ -1166,7 +1233,7 @@ var ' . $c_name . 'History = {
     }
 };
 ';
-        $fp = fopen('json/_' . $c_name . '/controls/history.js', 'w');
+        $fp = fopen($this->PagesJSONControlsFolder . '/history.js', 'w');
         fwrite($fp, $add);
         fclose($fp);
     }
@@ -1201,11 +1268,7 @@ var ' . $c_name . 'History = {
 <?php require_once \'pages/json/_' . $c_name . '/controls/add.php\'; ?>
 ';
 
-        if (!is_dir('manage/' . $page_dir)) {
-            mkdir('manage/' . $page_dir);
-        }
-
-        $fp = fopen('manage/' . $page_dir . '/' . $page_dir . '.php', 'w');
+        $fp = fopen($this->PagesManageFolder . '/' . $page_dir . '.php', 'w');
         fwrite($fp, $page);
         fclose($fp);
 
@@ -1241,7 +1304,7 @@ class ' . $page_dir . ' extends BasePage
 
 $Web->PageMode = QUICKDRY_MODE_INSTANCE;
 ';
-        $fp = fopen('manage/' . $page_dir . '/' . $page_dir . '.code.php', 'w');
+        $fp = fopen($this->PagesManageFolder . '/' . $page_dir . '.code.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
 

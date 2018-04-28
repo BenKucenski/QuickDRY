@@ -41,8 +41,9 @@ class Session
      * @return mixed|string
      */
     public static function Get($name) {
-        if(isset($_SESSION[$name]))
+        if(isset($_SESSION[$name])) {
             return unserialize($_SESSION[$name]);
+        }
 
         if(isset(static::$_VALS[$name]))
             return unserialize(static::$_VALS[$name]);

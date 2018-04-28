@@ -22,6 +22,7 @@ define('QUICKDRY_MODE_INSTANCE', 2);
  * @property string PDFPageOrientation
  * @property string PDFFileName
  * @property string PDFPostRedirect
+ * @property UserClass CurrentUser
  */
 class Web
 {

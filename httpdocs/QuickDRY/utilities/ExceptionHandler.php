@@ -43,7 +43,11 @@ class ExceptionHandler
     {
         $error = error_get_last();
         if ($error['type'] == E_ERROR) {
-            self::Error($error['type'], $error['message'], $error['file'], $error['line']);
+            try {
+                self::Error($error['type'], $error['message'], $error['file'], $error['line']);
+            } catch(Exception $e) {
+                Halt($e);
+            }
         }
     }
 

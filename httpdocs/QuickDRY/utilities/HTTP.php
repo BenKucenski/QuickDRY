@@ -39,7 +39,7 @@ class HTTP extends SafeClass
     {
         $_SESSION['notice'] = serialize($notice); // make it compatible with the Session object
 
-        if(isset($_SERVER['HTTP_REFERER']))
+        if($url === '/' && isset($_SERVER['HTTP_REFERER']))
             header('location: ' . $_SERVER['HTTP_REFERER']);
         else {
             header('location: ' . $url);
