@@ -1050,7 +1050,7 @@ HTTP::ExitJSON($returnvals);
 
         $form .= '</table>';
 
-        $add = '<script src="/pages/json/_' . $c_name . '/controls/add.js"></script>
+        $add = '<script src="/pages/json/' . $c_name . '/controls/add.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_dialog" style="display: none;" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel">
     <div class="modal-dialog modal-lg" role="document">
@@ -1117,7 +1117,7 @@ var ' . $c_name . ' = {
 
         $("#" + this._class + "_' . $primary[0] . '").val(' . $primary[0] . ');
         if (' . $primary[0] . ') {
-            Post("/json/_" + ' . $c_name . '._class + "/get.json", {uuid: ' . $primary[0] . '}, function (data) {
+            Post("/json/" + ' . $c_name . '._class + "/get.json", {uuid: ' . $primary[0] . '}, function (data) {
                 /** @namespace data.can_delete **/
                 LoadForm(data, ' . $c_name . '._class);
                 if (!data.can_delete) {
@@ -1173,7 +1173,7 @@ var ' . $c_name . ' = {
 
     protected function History($c_name)
     {
-        $add = '<script src="/pages/json/_' . $c_name . '/controls/history.js"></script>
+        $add = '<script src="/pages/json/' . $c_name . '/controls/history.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog"
      aria-labelledby="joinModalLabel">
@@ -1208,7 +1208,7 @@ var ' . $c_name . 'History = {
             return;
         }
 
-        Post(\'/json/_' . $c_name . '/history.json\', {
+        Post(\'/json/' . $c_name . '/history.json\', {
             uuid : uuid
         }, function(data) {
             if (data.error) {
