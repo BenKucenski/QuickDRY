@@ -1,14 +1,16 @@
 <?php
 class Elastic_CodeGen extends SafeClass
 {
+    public $DestinationFolder;
     public $ConnectionClassName;
     public $ClassPrefix;
     public $Indexes;
-    public $SchemaPath;
-    public $ClassPath;
     public $ExcludeStartsWith;
 
-    public function __construct($ConnectionClassName, $ClassPrefix, $ExcludeStartsWith = [])
+    public $ClassFolder;
+    public $ClassSchemaFolder;
+
+    public function __construct($ConnectionClassName, $ClassPrefix, $ExcludeStartsWith = [], $DestinationFolder = '../httpdocs')
     {
         if(!class_exists($ConnectionClassName)) {
             CleanHalt(['$ConnectionClassName ' . $ConnectionClassName . ' does not exist']);
@@ -18,42 +20,27 @@ class Elastic_CodeGen extends SafeClass
             CleanHalt(['$ConnectionClassName ' . $ConnectionClassName . ' does not implement GetIndexes']);
         }
 
-        if (!is_dir('includes')) {
-            mkdir('includes');
-        }
-
-        if(!is_dir('elastic')) {
-            mkdir('elastic');
-        }
-
-        if(!is_dir('elastic_schema')) {
-            mkdir('elastic_schema');
-        }
-
-        $this->ClassPath = 'elastic/' . $ConnectionClassName;
-        if(!is_dir($this->ClassPath)) {
-            mkdir($this->ClassPath);
-        }
-
-        $this->SchemaPath = 'elastic_schema/' . $ConnectionClassName;
-        if(!is_dir($this->SchemaPath)) {
-            mkdir($this->SchemaPath);
-        }
-
-        $this->SchemaPath = 'elastic_schema/' . $ConnectionClassName . '/schema';
-        if(!is_dir($this->SchemaPath)) {
-            mkdir($this->SchemaPath);
-        }
-
+        $this->DestinationFolder = $DestinationFolder;
         $this->ConnectionClassName = $ConnectionClassName;
         $this->ClassPrefix = $ClassPrefix;
-
         $this->ExcludeStartsWith = $ExcludeStartsWith;
+
+        $this->ClassFolder = $this->DestinationFolder .'/common/' . $ConnectionClassName;
+        $this->ClassSchemaFolder = $this->ClassFolder . '/schema';
+
+        if(!is_dir($this->ClassFolder)) {
+            mkdir($this->ClassFolder);
+        }
+
+        if(!is_dir($this->ClassSchemaFolder)) {
+            mkdir($this->ClassSchemaFolder);
+        }
+
 
         $this->GetIndexes();
         $modules = $this->GenerateCode();
 
-        $fp = fopen('includes/es_' . $this->ClassPrefix . '.php','w');
+        $fp = fopen($this->DestinationFolder .'/includes/es_' . $this->ClassPrefix . '.php','w');
 
 
         $mod_map = [];
@@ -73,7 +60,15 @@ function es_' . strtolower($this->ClassPrefix) . '_autoloader($class) {
         return;
     }
 
-    require_once $class_map[$class];
+    if (file_exists($class_map[$class])) { // web
+        require_once $class_map[$class];
+    } else {
+        if (file_exists(\'../\' . $class_map[$class])) { // cron folder
+            require_once \'../\' . $class_map[$class];
+        } else { // scripts folder
+           require_once \''  . $this->DestinationFolder . '/\' . $class_map[$class];
+        }
+    }
 }
 
 
@@ -208,7 +203,7 @@ class ' . $schemaname . ' extends ' . $this->ConnectionClassName . '
     ' . $to_array_code . '
 }
 ';
-                $fp = fopen($this->SchemaPath . '/' . $schemaname . '.php', 'w');
+                $fp = fopen($this->ClassSchemaFolder . '/' . $schemaname . '.php', 'w');
                 fwrite($fp, $code);
                 fclose($fp);
 
@@ -244,9 +239,11 @@ class ' . $classname . ' extends ' . $schemaname . '
     }
 }
 ';
-                $fp = fopen($this->ClassPath . '/' .  $classname . '.php', 'w');
-                fwrite($fp, $code);
-                fclose($fp);
+                if(!file_exists($this->ClassFolder . '/' .  $classname . '.php')) { // don't overwrite this file
+                    $fp = fopen($this->ClassFolder . '/' . $classname . '.php', 'w');
+                    fwrite($fp, $code);
+                    fclose($fp);
+                }
 
                 $modules[$schemaname] = 'common/' . $this->ConnectionClassName . '/schema/' . $schemaname . '.php';
                 $modules[$classname] = 'common/' . $this->ConnectionClassName . '/' .  $classname . '.php';
