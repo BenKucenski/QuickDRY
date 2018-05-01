@@ -11,7 +11,7 @@ class ExceptionHandler
     public static function Exception($err)
     {
         if (defined('SHOW_ERRORS') && SHOW_ERRORS) {
-            Log::Insert($err, true);
+            Halt($err);
         }
         LogError(-1, $err, '', '');
     }

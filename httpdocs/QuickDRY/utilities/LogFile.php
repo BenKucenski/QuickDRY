@@ -21,6 +21,12 @@ class LogFile
             return;
         }
 
+        if(is_object($message)) {
+            if(method_exists($message,'GetMessage')) {
+                $message = $message->GetMessage();
+            }
+        }
+
         $msg = [];
         $msg []= GUID;
         $msg []= time();

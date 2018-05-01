@@ -56,6 +56,15 @@ class SimpleExcel extends SafeClass
      */
     public static function ExportSpreadsheet(SimpleExcel &$se)
     {
+        if(!$se->Filename) {
+            Halt('Filename required');
+        }
+        $se->Title = substr($se->Title, 0, 31); // max 31 characters
+        $parts = pathinfo($se->Filename);
+        if(!isset($parts['extension']) || strcasecmp($parts['extension'], 'xlsx') !== 0) {
+            $se->Filename .= '.xlsx';
+        }
+
         $spreadsheet = new Spreadsheet();
         try {
             $sheet = $spreadsheet->getActiveSheet();
