@@ -651,7 +651,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
                 mkdir($this->PagesJSONControlsFolder);
             }
 
-            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . $c_name;
+            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . str_replace('Class', '', $c_name);
             if(!is_dir($this->PagesManageFolder)) {
                 mkdir($this->PagesManageFolder);
             }
