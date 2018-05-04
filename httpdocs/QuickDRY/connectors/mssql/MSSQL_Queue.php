@@ -3,6 +3,12 @@ class MSSQL_Queue
 {
     private $_sql = [];
     private $strlen = 0;
+    private $MSSQL_CLASS;
+
+    public function __construct($MSSQL_CLASS = 'MSSQL_A')
+    {
+        $this->MSSQL_CLASS = $MSSQL_CLASS;
+    }
 
     /**
      * @return int
@@ -27,7 +33,8 @@ class MSSQL_Queue
         		;
         		' . $sql;
 
-        $res = MSSQL_A::Execute($sql, null, true);
+        $class = $this->MSSQL_CLASS;
+        $res = $class::Execute($sql, null, true);
         if ($res['error']) {
             Log::Insert($res, true);
             echo $res['query'];

@@ -457,7 +457,7 @@ class MSSQL_Connection
                 // -x turns off variable interpretation - must be set
                 // https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
                 // adding -l 0 to avoid login timeout errors
-                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . MSSQL_USER . ' -P"' . MSSQL_PASS . '" -S' . MSSQL_HOST . ' -i"' . $fname . '"';
+                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . $this->DB_USER . ' -P"' . $this->DB_PASS . '" -S' . $this->DB_HOST . ' -i"' . $fname . '"';
 
                 if(self::$keep_files) {
                     Log::Insert($cmd, true);
