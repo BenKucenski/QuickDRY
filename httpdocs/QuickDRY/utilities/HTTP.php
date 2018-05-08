@@ -20,6 +20,17 @@ class HTTP extends SafeClass
         }
         return implode('&', $res);
     }
+
+
+    /**
+     * @param $err
+     */
+    public static function Redirect($url)
+    {
+        header('location: ' . $url);
+        exit();
+    }
+
     /**
      * @param $err
      */
