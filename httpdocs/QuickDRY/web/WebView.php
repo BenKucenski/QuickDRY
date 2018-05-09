@@ -152,5 +152,5 @@ if ($Web->RenderPDF) {
 if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
     require_once 'masterpages/' . $Web->MasterPage . '.php';
 } else {
-    Debug::Halt($Web->MasterPage . ' masterpage does not exist');
+    Debug::Halt($Web->MasterPage . ' masterpage does not exist for ' . $Web->ControllerFile);
 }
