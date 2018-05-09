@@ -167,6 +167,18 @@ class Strings extends SafeClass
     }
 
     /**
+     * @param $remove
+     * @param $string
+     * @return bool|string
+     */
+    public static function RemoveFromEnd($remove, $string)
+    {
+        $remove_length = strlen($remove);
+
+        return substr($string, 0, strlen($string) - $remove_length);
+    }
+
+    /**
      * @param int $err_code
      * @return string
      */
