@@ -189,6 +189,14 @@ class APIRequest
         if(!self::$UseLog) {
             return;
         }
+
+        if(!$Web) {
+            $a = unserialize($_SESSION['api_log']);
+            $a[] = $this;
+            $_SESSION['api_log'] = serialize($a);
+            return;
+        }
+
         if(!$Web->Session) {
             return;
         }
