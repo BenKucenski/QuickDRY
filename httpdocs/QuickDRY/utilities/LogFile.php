@@ -1,6 +1,8 @@
 <?php
 class LogFile
 {
+    private static $StartTime;
+
     public function __construct()
     {
         if(!is_dir(DOC_ROOT_PATH . '/logs')) {
@@ -26,10 +28,13 @@ class LogFile
                 $message = $message->GetMessage();
             }
         }
+        if(!isset(self::$StartTime[GUID])) {
+            self::$StartTime[GUID] = time();
+        }
 
         $msg = [];
         $msg []= GUID;
-        $msg []= time();
+        $msg []= sprintf('%08.2f', (time() - self::$StartTime[GUID]) / 60);
         $msg []= Dates::Timestamp();
         $msg [] = getcwd() . '/' . $filename;
         $msg [] = Network::Interfaces();
@@ -39,13 +44,7 @@ class LogFile
         fclose($fp);
 
         if($echo) {
-            $msg = [];
-            $msg []= GUID;
-            $msg [] = getcwd() . '/' . $filename;
-            $msg [] = Network::Interfaces();
-            $msg [] = is_array($message) || is_object($message) ? json_encode($message) : $message;
-            $msg = implode("\t", $msg);
-            echo Dates::TimeString($msg);
+            echo $msg . PHP_EOL;
         }
     }
 }
