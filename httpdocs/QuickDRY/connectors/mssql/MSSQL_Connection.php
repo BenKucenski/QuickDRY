@@ -584,7 +584,7 @@ class MSSQL_Connection
      */
     public function GetTables()
     {
-        $sql = 'SELECT * FROM '  . $this->current_db. '.information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
+        $sql = 'SELECT * FROM ['  . $this->current_db. '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
         $res = $this->Query($sql);
         $list = [];
         foreach($res['data'] as $row)
@@ -609,7 +609,7 @@ class MSSQL_Connection
 			SELECT
 				*
 			FROM
-				'  . $this->current_db. '.INFORMATION_SCHEMA.COLUMNS
+				['  . $this->current_db. '].INFORMATION_SCHEMA.COLUMNS
 			WHERE
 				TABLE_NAME=@
 		';
@@ -652,10 +652,10 @@ class MSSQL_Connection
 				IC.[is_descending_key],
 				IC.[is_included_column]
 			FROM
-				'  . $this->current_db. '.sys.[tables] AS T
-  			INNER JOIN '  . $this->current_db. '.sys.[indexes] I ON T.[object_id] = I.[object_id]
-  			INNER JOIN '  . $this->current_db. '.sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
-  			INNER JOIN '  . $this->current_db. '.sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
+				['  . $this->current_db. '].sys.[tables] AS T
+  			INNER JOIN ['  . $this->current_db. '].sys.[indexes] I ON T.[object_id] = I.[object_id]
+  			INNER JOIN ['  . $this->current_db. '].sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
+  			INNER JOIN ['  . $this->current_db. '].sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
 			WHERE
 				T.[is_ms_shipped] = 0
 				AND I.[type_desc] <> \'HEAP\'
@@ -715,13 +715,13 @@ SELECT
      ic.*,
      col.* 
 FROM 
-     '  . $this->current_db. '.sys.indexes ind 
+     ['  . $this->current_db. '].sys.indexes ind 
 INNER JOIN 
-     '  . $this->current_db. '.sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+     ['  . $this->current_db. '].sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
 INNER JOIN 
-     '  . $this->current_db. '.sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
+     ['  . $this->current_db. '].sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
 INNER JOIN 
-     '  . $this->current_db. '.sys.tables t ON ind.object_id = t.object_id 
+     ['  . $this->current_db. '].sys.tables t ON ind.object_id = t.object_id 
 
 ORDER BY 
      t.name, ind.name, ind.index_id, ic.index_column_id        
@@ -778,14 +778,14 @@ ORDER BY
 			    ,KCU2.TABLE_NAME AS REFERENCED_TABLE_NAME
 			    ,KCU2.COLUMN_NAME AS REFERENCED_COLUMN_NAME
 			    ,KCU2.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM '  . $this->current_db. '.INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+			FROM ['  . $this->current_db. '].INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
-			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
 			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
 			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
 			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
 
-			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
 			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
 			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
 			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
@@ -833,14 +833,14 @@ ORDER BY
 			    ,KCU1.TABLE_NAME AS REFERENCED_TABLE_NAME
 			    ,KCU1.COLUMN_NAME AS REFERENCED_COLUMN_NAME
 			    ,KCU1.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM '  . $this->current_db. '.INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+			FROM ['  . $this->current_db. '].INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
-			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
 			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
 			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
 			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
 
-			LEFT JOIN '  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
 			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
 			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
 			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
@@ -884,7 +884,7 @@ ORDER BY
 			SELECT
 				column_name
 			FROM
-				'  . $this->current_db. '.INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+				['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 			WHERE
 				OBJECTPROPERTY(OBJECT_ID(constraint_name), \'IsPrimaryKey\') = 1
 				AND table_name = @
@@ -907,7 +907,7 @@ ORDER BY
     {
         $sql = '
 select * 
-  from '  . $this->current_db. '.information_schema.routines 
+  from ['  . $this->current_db. '].information_schema.routines 
  where routine_type = \'PROCEDURE\'
  ORDER BY SPECIFIC_NAME        
         ';
@@ -948,7 +948,7 @@ select
                    case when system_type_id in (35, 99, 167, 175, 231, 239)  
                    then ServerProperty(\'collation\') end)  
 
-  from '  . $this->current_db. '.sys.parameters   
+  from ['  . $this->current_db. '].sys.parameters   
   ORDER BY parameter_id
         ';
 
