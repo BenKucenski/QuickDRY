@@ -28,7 +28,7 @@ class FormClass
      * @param string $onchange
      * @return string
      */
-    public static function SelectItems($options, $selected, $id, $class = '', $onchange='')
+    public static function SelectItems($options, $selected, $id, $class = '', $onchange='', $add_none = false)
     {
         if (!is_array($id)) {
             $name = $id;
@@ -38,6 +38,9 @@ class FormClass
         }
 
         $res = '<select onchange="' . $onchange . '" class="' . $class . '" name="' . $name . '" id="' . $id . '">';
+        if($add_none) {
+            $res .= '<option value="">Select One...</input>';
+        }
         foreach ($options as $id => $disp) {
             if ($id == $selected) {
                 $res .= '<option selected value="' . $id . '">' . $disp . '</input>';
