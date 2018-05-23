@@ -182,11 +182,13 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
         foreach ($modules as $mod => $file) {
             $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
         }
+        $autoloader_class = 'autoloader_' . md5($this->DatabaseTypePrefix . '_' . $this->DatabasePrefix);
+
         $include_php = '<?php
 /**
  * @param $class
  */
-function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader($class) {
+function ' . $autoloader_class . '($class) {
     $class_map = [
         ' . implode("\r\n\t\t", $mod_map) . '
     ];
@@ -207,7 +209,7 @@ function ' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix)
 }
 
 
-spl_autoload_register(\'' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '_autoloader\');
+spl_autoload_register(\'' . $autoloader_class . '\');
         ';
 
         fwrite($fp, $include_php);
