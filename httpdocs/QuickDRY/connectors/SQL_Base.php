@@ -42,6 +42,32 @@ class SQL_Base
     }
 
     /**
+     * @param $database_prefix
+     * @param $table
+     * @param $lowercase_table
+     * @param $database_type_prefix
+     * @return string
+     */
+    public static function TableToNiceName($table, $lowercase_table)
+    {
+        if($lowercase_table) {
+            $table = strtolower($table);
+        }
+
+        $t = explode('_', $table);
+
+        $type = '';
+        foreach($t as $w) {
+            $type .= preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
+        }
+
+        if(is_numeric($type[0])) {
+            $type = 'i' . $type;
+        }
+        return $type;
+    }
+
+    /**
      *
      */
     public function __construct()

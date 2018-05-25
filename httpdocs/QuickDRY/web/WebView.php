@@ -24,27 +24,39 @@ if (file_exists($Web->ControllerFile)) {
             }
         }
 
-        switch ($Web->Server->REQUEST_METHOD) {
-            case 'GET':
+        switch ($Web->Verb) {
+            case REQUEST_VERB_GET:
                 $PageModel::DoGet();
                 break;
-            case 'POST':
+            case REQUEST_VERB_POST:
                 $PageModel::DoPost();
+                break;
+            case REQUEST_VERB_PUT:
+                $PageModel::DoPut();
+                break;
+            case REQUEST_VERB_DELETE:
+                $PageModel::DoDelete();
+                break;
+            case REQUEST_VERB_FIND:
+                $PageModel::DoFind();
+                break;
+            case REQUEST_VERB_HISTORY:
+                $PageModel::DoHistory();
                 break;
         }
 
         if ($Web->Request->export) {
-            switch (strtolower($Web->Request->export)) {
-                case 'csv':
+            switch (strtoupper($Web->Request->export)) {
+                case REQUEST_EXPORT_CSV:
                     $PageModel::DoExportToCSV();
                     exit;
-                case 'xls':
+                case REQUEST_EXPORT_XLS:
                     $PageModel::DoExportToXLS();
                     exit;
-                case 'json':
+                case REQUEST_EXPORT_JSON:
                     $PageModel::DoExportToJSON();
                     exit;
-                case 'pdf':
+                case REQUEST_EXPORT_PDF:
                     $PageModel::DoExportToPDF();
                     $Web->RenderPDF = true;
                     $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
@@ -76,27 +88,39 @@ if (file_exists($Web->ControllerFile)) {
                 }
             }
 
-            switch ($Web->Server->REQUEST_METHOD) {
-                case 'GET':
+            switch ($Web->Verb) {
+                case REQUEST_VERB_GET:
                     $PageModel->Get();
                     break;
-                case 'POST':
+                case REQUEST_VERB_POST:
                     $PageModel->Post();
+                    break;
+                case REQUEST_VERB_PUT:
+                    $PageModel->Put();
+                    break;
+                case REQUEST_VERB_DELETE:
+                    $PageModel->Delete();
+                    break;
+                case REQUEST_VERB_FIND:
+                    $PageModel->Find();
+                    break;
+                case REQUEST_VERB_HISTORY:
+                    $PageModel->History();
                     break;
             }
 
             if ($Web->Request->export) {
-                switch (strtolower($Web->Request->export)) {
-                    case 'csv':
+                switch (strtoupper($Web->Request->export)) {
+                    case REQUEST_EXPORT_CSV:
                         $PageModel->ExportToCSV();
                         exit;
-                    case 'xls':
+                    case REQUEST_EXPORT_XLS:
                         $PageModel->ExportToXLS();
                         exit;
-                    case 'json':
+                    case REQUEST_EXPORT_JSON:
                         $PageModel->ExportToJSON();
                         exit;
-                    case 'pdf':
+                    case REQUEST_EXPORT_PDF:
                         $PageModel->ExportToPDF();
                         $Web->RenderPDF = true;
                         $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;

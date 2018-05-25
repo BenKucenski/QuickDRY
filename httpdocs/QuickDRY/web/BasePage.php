@@ -162,6 +162,26 @@ class BasePage extends SafeClass
 
     }
 
+    public static function DoPut()
+    {
+
+    }
+
+    public static function DoDelete()
+    {
+
+    }
+
+    public static function DoFind()
+    {
+
+    }
+
+    public static function DoHistory()
+    {
+
+    }
+
     /**
      * @param Request $Request
      * @param Session $Session
@@ -195,10 +215,31 @@ class BasePage extends SafeClass
         static::DoPost();
     }
 
+    public function Put()
+    {
+        static::DoPut();
+    }
+
+    public function Delete()
+    {
+        static::DoDelete();
+    }
+
+    public function Find()
+    {
+        static::DoFind();
+    }
+
     public function Init()
     {
         static::DoInit();
     }
+
+    public function History()
+    {
+        static::DoHistory();
+    }
+
 
     /**
      * @param $error

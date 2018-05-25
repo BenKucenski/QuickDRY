@@ -173,13 +173,15 @@ class MSSQL_Core extends SQL_Base
      */
     public function Remove(UserClass &$User)
     {
-        if (!$this->CanDelete($User))
-            return null;
+        if (!$this->CanDelete($User)) {
+            return ['error' => 'No Permission'];
+        }
 
         // if this instance wasn't loaded from the database
         // don't try to remove it
-        if (!$this->_from_db)
-            return null;
+        if (!$this->_from_db) {
+            return ['error' => 'Invalid Request'];
+        }
 
         if ($this->HasChangeLog()) {
             $uuid = $this->GetUUID();
@@ -205,12 +207,14 @@ class MSSQL_Core extends SQL_Base
         if (sizeof(static::$_primary) > 0) {
             foreach (static::$_primary as $column)
                 $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
-        } else
+        } else {
             if (sizeof(static::$_unique) > 0) {
                 foreach (static::$_unique as $column)
                     $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
-            } else
-                exit('unique or primary key required');
+            } else {
+                return ['error' => 'unique or primary key required'];
+            }
+        }
 
 
         $sql = '

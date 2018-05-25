@@ -20,7 +20,7 @@ class Server
      * @param string $prefix
      * @return array
      */
-    public function GetVals($prefix = '')
+    public function ToArray($prefix = '')
     {
         $res = [];
         foreach ($this->_VALS as $k => $v) {

@@ -643,9 +643,21 @@ class ' . $c_name . ' extends db_' . $c_name . '
             Log::Insert($table_name, true);
             $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
 
-            $this->PagesJSONFolder = $this->PagesBaseJSONFolder . '/' . $c_name;
+            $this->PagesJSONFolder = $this->PagesBaseJSONFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
             if(!is_dir($this->PagesJSONFolder)) {
                 mkdir($this->PagesJSONFolder);
+            }
+
+            $table_nice_name = $DatabaseClass::TableToNiceName($table_name, $this->LowerCaseTables);
+
+            $this->PagesJSONFolder .= '/' . $table_nice_name;
+            if(!is_dir($this->PagesJSONFolder)) {
+                mkdir($this->PagesJSONFolder);
+            }
+
+            if(!is_dir($this->PagesJSONFolder . '/base')) {
+                mkdir($this->PagesJSONFolder . '/base');
             }
 
             $this->PagesJSONControlsFolder = $this->PagesJSONFolder . '/controls';
@@ -653,18 +665,25 @@ class ' . $c_name . ' extends db_' . $c_name . '
                 mkdir($this->PagesJSONControlsFolder);
             }
 
-            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . str_replace('Class', '', $c_name);
+
+            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
+            if(!is_dir($this->PagesManageFolder)) {
+                mkdir($this->PagesManageFolder);
+            }
+
+            $this->PagesManageFolder .= '/' . $table_nice_name;
             if(!is_dir($this->PagesManageFolder)) {
                 mkdir($this->PagesManageFolder);
             }
 
 
             $columns = $DatabaseClass::GetTableColumns($table_name);
-            $this->_GenerateJSON($table_name, $columns);
+            $this->_GenerateJSON($table_name, $table_nice_name, $columns);
         }
     }
 
-    protected function _GenerateJSON($table_name, $cols)
+    protected function _GenerateJSON($table_name, $table_nice_name, $cols)
     {
         $DatabaseClass = $this->DatabaseClass;
 
@@ -678,15 +697,252 @@ class ' . $c_name . ' extends db_' . $c_name . '
         $unique = $DatabaseClass::GetUniqueKeys($table_name);
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
 
+        $this->Add($c_name, $table_name, $cols, $primary, $table_nice_name);
+        $this->History($c_name, $table_nice_name);
+        $this->Manage($c_name, $table_nice_name);
 
+        $this->CRUDClass($c_name, $table_name, $table_nice_name, $primary);
+
+        /**
         $this->SaveJSON($c_name, $primary);
         $this->GetJSON($c_name, $primary);
         $this->LookupJSON($c_name);
         $this->DeleteJSON($c_name, $unique, $primary);
         $this->HistoryJSON($c_name, $primary);
-        $this->Add($c_name, $table_name, $cols, $primary);
-        $this->History($c_name);
-        $this->Manage($c_name);
+        **/
+
+
+    }
+
+    protected function CRUDClass($c_name, $table_name, $table_nice_name, $primary)
+    {
+        if(!sizeof($primary)) {
+            return;
+        }
+
+        $get_params = [];
+        $missing_params = [];
+        foreach($primary as $param) {
+            $get_params []= '\'' . $param . '\' => self::$Request->' . $param;
+            $missing_params []= '!self::$Request->' . $param;
+
+        }
+        $get_params = implode(', ', $get_params);
+        $missing_params = implode(' || ', $missing_params);
+
+        $code = '<?php
+if(!' . $table_nice_name . '::$Item) {
+    HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_BAD_REQUEST);
+}
+        ';
+        $file = $this->PagesJSONFolder . '/' . $table_nice_name . '.php';
+        if (!file_exists($file)) {
+            $fp = fopen($file, 'w');
+            fwrite($fp, $code);
+            fclose($fp);
+        }
+
+        $code = '<?php
+require_once \'base/' . $table_nice_name . 'Base.php\';
+
+class ' . $table_nice_name . ' extends ' . $table_nice_name . 'Base
+{
+
+}
+        ';
+        $file = $this->PagesJSONFolder . '/' . $table_nice_name . '.code.php';
+        if (!file_exists($file)) {
+            $fp = fopen($file, 'w');
+            fwrite($fp, $code);
+            fclose($fp);
+        }
+
+        $code = '<?php
+
+/**
+ * Class ' . $table_nice_name . 'Base
+ */
+class ' . $table_nice_name . 'Base extends BasePage
+{
+    public static $History;
+
+    /* @var $Item ' . $c_name . ' */
+    public static $Item;
+
+    public static function DoGet()
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        if (' . $missing_params . ') {
+            HTTP::ExitJSON([\'error\' => \'Missing ID\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        self::$Item = ' . $c_name . '::Get([' . $get_params . ']);
+
+        if (!self::$Item) {
+            HTTP::ExitJSON([\'error\' => \'Invalid ID\',\'parameters\' => [' . $get_params . ']], HTTP_STATUS_NOT_FOUND);
+        }
+
+        if (!self::$Item->VisibleTo(self::$CurrentUser)) {
+            HTTP::ExitJSON([\'error\' => \'No Permission\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        $res = self::$Item->ToArray();
+        $res[\'can_delete\'] = self::$Item->CanDelete(self::$CurrentUser);
+        HTTP::ExitJSON([\'data\' => $res], HTTP_STATUS_OK);
+    }
+
+    public static function DoPost()
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        if (' . $missing_params . ') {
+            HTTP::ExitJSON([\'error\' => \'Missing ID\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        self::$Item = ' . $c_name . '::Get([' . $get_params . ']);
+        if (!self::$Item) {
+            HTTP::ExitJSON([\'error\' => \'Invalid ID\'], HTTP_STATUS_NOT_FOUND);
+        }
+
+        if (!self::$Item->VisibleTo(self::$CurrentUser)) {
+            HTTP::ExitJSON([\'error\' => \'No Permission\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        $req = self::$Request->ToArray();
+        $res = self::$Item->FromRequest($req);
+        if ($res[\'error\']) {
+            HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        HTTP::ExitJSON([\'data\' => self::$Item->ToArray()], HTTP_STATUS_OK);
+    }
+
+    public static function DoPut()
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        self::$Item = new ' . $c_name . '();
+        $req = self::$Request->ToArray();
+        $res = self::$Item->FromRequest($req, false);
+
+        if ($res[\'error\']) {
+            HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        if (!self::$Item->VisibleTo(self::$CurrentUser)) {
+            HTTP::ExitJSON([\'error\' => \'No Permission\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        $res = self::$Item->Save();
+        if ($res[\'error\']) {
+            HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        HTTP::ExitJSON([\'data\' => self::$Item->ToArray()], HTTP_STATUS_OK);
+    }
+
+    public static function DoDelete($success_message = \'Item Removed\')
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        if (' . $missing_params . ') {
+            HTTP::ExitJSON([\'error\' => \'Missing ID\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        self::$Item = ' . $c_name . '::Get([' . $get_params . ']);
+        if (!self::$Item) {
+            HTTP::ExitJSON([\'error\' => \'Invalid ID\'], HTTP_STATUS_NOT_FOUND);
+        }
+
+        $res = self::$Item->Remove(self::$CurrentUser);
+        if ($res[\'error\']) {
+            HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
+        }
+        HTTP::ExitJSON([\'success\' => $success_message], HTTP_STATUS_OK);
+    }
+
+    public static function DoFind()
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        HTTP::ExitJSON([\'error\' => \'Find Not Implemented\'], HTTP_STATUS_BAD_REQUEST);
+    }
+
+    public static function DoHistory()
+    {
+        self::$Request->FromSerialized(self::$Request->serialized);
+
+        if (!self::$CurrentUser || !self::$CurrentUser->id) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        if (' . $missing_params . ') {
+            HTTP::ExitJSON([\'error\' => \'Missing ID\'], HTTP_STATUS_BAD_REQUEST);
+        }
+
+        /* @var self::$Item ' . $c_name . ' */
+        self::$Item = ' . $c_name . '::Get([' . $get_params . ']);
+        if (!self::$Item || !self::$Item->VisibleTo(self::$CurrentUser)) {
+            HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
+        }
+
+        self::$History = self::$Item->history;
+
+        if (!self::$History || !sizeof(self::$History)) {
+            HTTP::ExitJSON([\'error\' => \'No History Available\'], HTTP_STATUS_NOT_FOUND);
+        }
+
+        $report = [];
+
+        $m = sizeof(self::$History);
+        foreach (self::$History as $i => $cl) {
+            /* @var $cl ChangeLogClass */
+            foreach ($cl->changes_list as $column => $change) {
+                if (' . $c_name . '::IgnoreColumn($column)) {
+                    continue;
+                }
+                $r = [
+                    \'Rev\' => $m - $i,
+                    \'Column\' => ' . $c_name . '::ColumnNameToNiceName($column),
+                    \'Value\' => self::$Item->ValueToNiceValue($column),
+                    \'Was\' => self::$Item->ValueToNiceValue($column, $change->old),
+                    \'Now\' => self::$Item->ValueToNiceValue($column, $change->new),
+                    \'When\' => Dates::StandardDateTime($cl->created_at),
+                    \'By\' => $cl->GetUser(),
+
+                ];
+                $report [] = $r;
+            }
+        }
+        HTTP::ExitJSON([\'history\' => $report], HTTP_STATUS_OK);
+    }
+}        
+        ';
+        $file = $this->PagesJSONFolder . '/base/' . $table_nice_name . 'Base.php';
+        $fp = fopen($file, 'w');
+        fwrite($fp, $code);
+        fclose($fp);
     }
 
     protected function SaveJSON($c_name, $primary)
@@ -953,7 +1209,7 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
-    protected function Add($c_name, $table_name, $cols, $primary)
+    protected function Add($c_name, $table_name, $cols, $primary, $table_nice_name)
     {
         if (!sizeof($cols)) {
             return;
@@ -1052,7 +1308,7 @@ HTTP::ExitJSON($returnvals);
 
         $form .= '</table>';
 
-        $add = '<script src="/pages/json/' . $c_name . '/controls/add.js"></script>
+        $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/add.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_dialog" style="display: none;" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel">
     <div class="modal-dialog modal-lg" role="document">
@@ -1097,32 +1353,33 @@ HTTP::ExitJSON($returnvals);
 
 
 var ' . $c_name . ' = {
-    title: "' . $c_name . '",
-    save_action: "Saving ' . $c_name . '",
-    delete_action: "Deleting ' . $c_name . '",
+    title: "' . $table_nice_name . '",
+    save_action: "Saving ' . $table_nice_name . '",
+    delete_action: "Deleting ' . $table_nice_name . '",
     _form: "' . $c_name . '_form",
+    _path: "' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) .  '/' . $table_nice_name . '",
     _class: "' . $c_name . '",
     _dialog: "' . $c_name . '_dialog",
     _active: false,
     _save_callback: function (data) {
-        ReloadPage();
+        HTTP.ReloadPage();
     },
     _delete_callback: function (data) {
-        ReloadPage();
+        HTTP.ReloadPage();
     },
     _Load: function (data) {
-        ShowModal(this._dialog, this.title);
+        QuickDRY.ShowModal(this._dialog, this.title);
 
     },
     Load: function (' . $primary[0] . ', save_callback, delete_callback) {
-        ClearForm(this._form);
+        QuickDRY.ClearForm(this._form);
 
         $("#" + this._class + "_' . $primary[0] . '").val(' . $primary[0] . ');
         if (' . $primary[0] . ') {
-            Post("/json/" + ' . $c_name . '._class + "/get.json", {uuid: ' . $primary[0] . '}, function (data) {
+            QuickDRY.Read(' . $c_name . '._path, {' . $primary[0] . ': ' . $primary[0] . '}, function (data) {
                 /** @namespace data.can_delete **/
-                LoadForm(data, ' . $c_name . '._class);
-                if (!data.can_delete) {
+                QuickDRY.LoadForm(data, ' . $c_name . '._class);
+                if (!data.data.can_delete) {
                     $("#btn_" + ' . $c_name . '._class + "_delete").hide();
                 } else {
                     $("#btn_" + ' . $c_name . '._class + "_delete").show();
@@ -1148,11 +1405,15 @@ var ' . $c_name . ' = {
         }
         WaitDialog("Please Wait...", this.save_action);
         this._active = false;
-        SaveObject(this._class, {serialized: $("#" + this._form).serialize()}, this._save_callback, this._dialog);
+        if($("#" + this._class + "_' . $primary[0] . '").val()) {
+            QuickDRY.Update(this._path, {serialized: $("#" + this._form).serialize()}, this._save_callback, this._dialog);
+        } else {
+            QuickDRY.Create(this._path, {serialized: $("#" + this._form).serialize()}, this._save_callback, this._dialog);
+        }
     },
-    Delete: function (id) {
-        if(id) {
-            ConfirmDeleteObject(this._class, this.title, {uuid: id}, "", this._delete_callback, this._dialog);
+    Delete: function (' . $primary[0] . ') {
+        if(' . $primary[0] . ') {
+            QuickDRY.ConfirmDelete(this._path, this.title, {' . $primary[0] . ': ' . $primary[0] . '}, "", this._delete_callback, this._dialog);
             return;
         }
 
@@ -1161,7 +1422,7 @@ var ' . $c_name . ' = {
         }
         this._active = false;
 
-        ConfirmDeleteObject(this._class, this.title, {uuid: $("#" + this._class + "_' . $primary[0] . '").val()}, "", this._delete_callback, this._dialog);
+        QuickDRY.ConfirmDelete(this._path, this.title, {' . $primary[0] . ': $("#" + this._class + "_' . $primary[0] . '").val()}, "", this._delete_callback, this._dialog);
     }
 };
 ';
@@ -1173,9 +1434,9 @@ var ' . $c_name . ' = {
 
     }
 
-    protected function History($c_name)
+    protected function History($c_name, $table_nice_name)
     {
-        $add = '<script src="/pages/json/' . $c_name . '/controls/history.js"></script>
+        $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/history.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog"
      aria-labelledby="joinModalLabel">
@@ -1210,7 +1471,7 @@ var ' . $c_name . 'History = {
             return;
         }
 
-        Post(\'/json/' . $c_name . '/history.json\', {
+        HTTP.Post(\'/json/' . $c_name . '/history.json\', {
             uuid : uuid
         }, function(data) {
             if (data.error) {
@@ -1218,7 +1479,7 @@ var ' . $c_name . 'History = {
             } else {
                 $(\'#' . $c_name . '_history_dialog_title\').html("' . $c_name . '");
                 $(\'#' . $c_name . '_history_div\').html(data.html);
-                ShowModal(\'' . $c_name . '_history_dialog\', \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
+                QuickDRY.ShowModal(\'' . $c_name . '_history_dialog\', \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
             }
         });
     }
@@ -1229,73 +1490,71 @@ var ' . $c_name . 'History = {
         fclose($fp);
     }
 
-    protected function Manage($c_name)
+    protected function Manage($c_name, $table_nice_name)
     {
         $page_dir = str_replace('Class', '', $c_name);
 
-        $page = '
-<?php /* @var $PageModel ' . $page_dir . ' */ ?>
-<div class="panel panel-default">
+        $page = '<div class="panel panel-default">
     <div class="panel-heading">
         <div class="pull-right"><a id="" onclick="' . $c_name . '.Load();"><i class="fa fa-plus"></i></a></div>
-        <div class="panel-title">' . CapsToSpaces(str_replace('Class', '', $c_name)) . '</div>
+        <div class="panel-title">' . $table_nice_name . '</div>
     </div>
     <div class="panel-body">
-<?php echo BootstrapPaginationLinks($PageModel->Count); ?>
+<?php echo BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
 <table class="table table-striped" style="font-size: 0.9em;">
     <thead>
-    <?php echo $PageModel->TableHeader; ?>
+    <?php echo ' . $table_nice_name . '::$TableHeader; ?>
     </thead>
-    <?php foreach ($PageModel->' . $page_dir . ' as $item) { ?>
+    <?php foreach (' . $table_nice_name . '::$Items as $item) { ?>
         <?php echo $item->ToRow(true); ?>
     <?php } ?>
 </table>
-<?php echo BootstrapPaginationLinks($PageModel->Count); ?>
+<?php echo BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
 
     </div>
 </div>
 
 
-<?php require_once \'pages/json/' . $c_name . '/controls/add.php\'; ?>
+<?php require_once \'' . str_replace($this->DestinationFolder . '/', '', $this->PagesJSONFolder) . '/controls/add.php\'; ?>
 ';
 
-        $fp = fopen($this->PagesManageFolder . '/' . $page_dir . '.php', 'w');
+        $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.php', 'w');
         fwrite($fp, $page);
         fclose($fp);
 
         $code = '<?php
 
 /**
- * Class ' . $page_dir . '
+ * Class ' . $table_nice_name . '
  *
- * @property ' . $c_name . '[] ' . $page_dir . '
- * @property string Count
- * @property string TableHeader
  */
-class ' . $page_dir . ' extends BasePage
+class ' . $table_nice_name . ' extends BasePage
 {
-    public $' . $page_dir . ';
-    public $Count;
-    public $TableHeader;
+    /* @var $Items ' . $c_name . '[]  */
+    public static $Items;
 
-    public function Init()
+    /* @var $Count int */
+    public static $Count;
+F
+    /* @var $TableHeader string */
+    public static $TableHeader;
+
+    public static function DoInit()
     {
-        $this->MasterPage = ' . $this->MasterPage . ';
+        self::$MasterPage = ' . $this->MasterPage . ';
     }
 
-    public function Get()
+    public static function DoGet()
     {
         $items = ' . $c_name . '::GetAllPaginated(null, null, PAGE, PER_PAGE);
-        $this->TableHeader = ' . $c_name . '::GetHeader(SORT_BY, SORT_DIR, true);
-        $this->' . $page_dir . ' = $items[\'items\'];
-        $this->Count = $items[\'count\'];
+        self::$TableHeader = ' . $c_name . '::GetHeader(SORT_BY, SORT_DIR, true);
+        self::$Items = $items[\'items\'];
+        self::$Count = $items[\'count\'];
 
     }
 }
-
-$Web->PageMode = QUICKDRY_MODE_INSTANCE;
 ';
-        $fp = fopen($this->PagesManageFolder . '/' . $page_dir . '.code.php', 'w');
+        $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.code.php', 'w');
         fwrite($fp, $code);
         fclose($fp);
 

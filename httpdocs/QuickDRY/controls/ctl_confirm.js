@@ -2,7 +2,7 @@ var ConfirmDialogControl = {
     _cc_vars: null,
     _cc_callback: null,
     Load: function (title, text, action, action_callback, vars) {
-        ShowModal('cc_dialog', title);
+        QuickDRY.ShowModal('cc_dialog', title);
 
 	    this._cc_callback = action_callback;
 	    this._cc_vars = vars;
@@ -14,7 +14,7 @@ var ConfirmDialogControl = {
 
     },
     Confirm : function () {
-        CloseDialogIfOpen('cc_dialog');
+        QuickDRY.CloseDialogIfOpen('cc_dialog');
         if (typeof(this._cc_callback) == "function") {
             this._cc_callback(this._cc_vars);
         }

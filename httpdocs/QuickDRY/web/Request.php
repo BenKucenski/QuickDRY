@@ -14,7 +14,7 @@ class Request
      * @return array
      */
 
-    public function GetVals()
+    public function ToArray()
     {
         $vals = [];
         foreach ($_POST as $k => $v) {
@@ -69,5 +69,20 @@ class Request
     public function __isset($name)
     {
         return isset($_GET[$name]) || isset($_POST[$name]) || isset($this->_vars[$name]);
+    }
+
+    /**
+     * @param $serialized
+     */
+    public function FromSerialized($serialized)
+    {
+        if(!$serialized) {
+            return;
+        }
+
+        $post = HTTP::PostFromSerialized($serialized);
+        foreach($post as $k => $v) {
+            $this->$k = $v;
+        }
     }
 }

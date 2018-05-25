@@ -10,7 +10,7 @@ class Session
     /**
      * @return array
      */
-    public function GetVals()
+    public function ToArray()
     {
         $vals = [];
         foreach ($_SESSION as $k => $v) {

@@ -2,6 +2,19 @@
 define('QUICKDRY_MODE_STATIC', 1);
 define('QUICKDRY_MODE_INSTANCE', 2);
 
+define('REQUEST_VERB_GET','GET');
+define('REQUEST_VERB_POST','POST');
+define('REQUEST_VERB_PUT','PUT');
+define('REQUEST_VERB_DELETE','DELETE');
+define('REQUEST_VERB_HISTORY','HISTORY');
+
+define('REQUEST_VERB_FIND','FIND');
+define('REQUEST_EXPORT_CSV','CSV');
+define('REQUEST_EXPORT_PDF','PDF');
+define('REQUEST_EXPORT_JSON','JSON');
+define('REQUEST_EXPORT_XLS','XLS');
+
+
 /**
  * Class Web
  *
@@ -18,7 +31,7 @@ define('QUICKDRY_MODE_INSTANCE', 2);
  * @property string SettingsFile
  * @property bool RenderPDF;
  * @property string HTML;
-
+ * @property string Verb
  * @property string PDFPageOrientation
  * @property string PDFFileName
  * @property string PDFPostRedirect
@@ -50,6 +63,8 @@ class Web
 
     public $StaticModel;
     public $InstanceModel;
+
+    public $Verb;
 
     /**
      * @param string[] $MasterPages
@@ -83,6 +98,8 @@ class Web
         $this->Session = new Session();
         $this->Cookie = new Cookie();
         $this->Server = new Server();
+
+        $this->PageMode = QUICKDRY_MODE_STATIC; // default to static classes for pages
 
         $this->CurrentUser = null;
         if ($this->Session->user) {
@@ -186,6 +203,8 @@ class Web
 
         $this->ControllerFile = file_exists($code) ? $code : $code_alt;
         $this->ViewFile = file_exists($page) ? $page : $page_alt;
+
+        $this->Verb = $this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD;
     }
 
     public function InitMenu()
