@@ -1535,7 +1535,7 @@ class ' . $table_nice_name . ' extends BasePage
 
     /* @var $Count int */
     public static $Count;
-F
+
     /* @var $TableHeader string */
     public static $TableHeader;
 
