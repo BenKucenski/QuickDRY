@@ -10,6 +10,11 @@ if (file_exists($Web->ControllerFile)) {
 
     if ($Web->PageMode === QUICKDRY_MODE_STATIC || $Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
         $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL_STATIC);
+
+        if(is_numeric($PageModel[0])) {
+            $PageModel = 'i' . $PageModel;
+        }
+
         $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
         $PageModel::DoInit();
         $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
@@ -69,6 +74,11 @@ if (file_exists($Web->ControllerFile)) {
     } else {
         if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
             $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL);
+
+            if(is_numeric($class[0])) {
+                $class = 'i' . $class;
+            }
+
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
