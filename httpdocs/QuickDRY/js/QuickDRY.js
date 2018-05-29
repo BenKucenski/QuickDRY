@@ -166,6 +166,8 @@ var QuickDRY = {
     },
 
     InitDatePickers: function () {
+        $('.date-picker').prop('autocomplete','off');
+
         $('.date-picker').datepicker({
             format: 'mm/dd/yyyy',
             startDate: '01/01/1900',
