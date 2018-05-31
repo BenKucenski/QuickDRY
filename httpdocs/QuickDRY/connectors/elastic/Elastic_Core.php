@@ -115,6 +115,13 @@ class Elastic_Core extends Elastic_Base
         return static::_Aggregation(static::$_index, static::$_type, $query);
     }
 
+    public static function SearchInIndexType(
+        $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
+    )
+    {
+        return static::_Search($index, $type, $where, $page, $per_page, $order_by, $fields);
+    }
+
     public static function Search(
         $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
     )
@@ -130,6 +137,29 @@ class Elastic_Core extends Elastic_Base
     public static function Insert($index, $type, &$json)
     {
         return static::_Insert($index, $type, $json);
+    }
+
+    public static function GetAllForIndexType($index, $type, $where, $limit = 10000)
+    {
+        $res = self::SearchInIndexType($index, $type, $where, 0, 0);
+        $count = $res['count'];
+        if (!$count) {
+            return [];
+        }
+        $list = [];
+        $page = 0;
+        $per_page = 10000; // arbitrary limit
+        $max_page = ceil($count / $per_page);
+
+        while ($page < $max_page && (!$limit || $page * $per_page < $limit)) {
+            // Log::Insert([$page, $max_page], true);
+            $res = self::SearchInIndexType($index, $type, $where, $page, $per_page);
+            foreach ($res['data'] as $row) {
+                $list[] = $row;
+            }
+            $page++;
+        }
+        return $list;
     }
 
     protected static function _DeleteIndexType($index, $type)
