@@ -29,8 +29,22 @@ fclose($fp);
 
 $FileName = $html_file . '.pdf';
 
+$params = [];
+$params[] = '--javascript-delay 5000';
+$params[] = '--enable-javascript';
+$params[] = '--disable-smart-shrinking';
+// $params[] = '--debug-javascript';
+$params[] = '-O ' . $Web->PDFPageOrientation;
+if($Web->PDFHeader) {
+    $params[] = '--header-html "' . $Web->PDFHeader . '"';
+}
+if($Web->PDFFooter) {
+    $params[] ='--footer-html "' . $Web->PDFFooter . '"';
+}
 
-$cmd = DOC_ROOT_PATH . '\\QuickDRY\\bin\\wkhtmltopdf.exe --javascript-delay 5000 --enable-javascript --disable-smart-shrinking -O ' . $Web->PDFPageOrientation . ' ' . $html_file . ' ' . $FileName;
+
+$cmd = DOC_ROOT_PATH . '\\QuickDRY\\bin\\wkhtmltopdf.exe ' . implode(' ', $params) . ' ' . $html_file . ' ' . $FileName;
+Log::Insert($cmd);
 
 $output = [];
 exec($cmd, $output);

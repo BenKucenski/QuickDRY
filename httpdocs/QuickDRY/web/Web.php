@@ -34,6 +34,8 @@ define('REQUEST_EXPORT_XLS','XLS');
  * @property string Verb
  * @property string PDFPageOrientation
  * @property string PDFFileName
+ * @property string PDFHeader
+ * @property string PDFFooter
  * @property string PDFPostRedirect
  * @property UserClass CurrentUser
  */
@@ -60,6 +62,8 @@ class Web
     public $PDFPageOrientation;
     public $PDFFileName;
     public $PDFPostRedirect;
+    public $PDFHeader;
+    public $PDFFooter;
 
     public $StaticModel;
     public $InstanceModel;
