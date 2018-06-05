@@ -492,6 +492,10 @@ class Strings extends SafeClass
         return $str;
     }
 
+    /**
+     * @param $json
+     * @return array|string
+     */
     public static function FixJSON($json)
     {
         if (!is_array($json)) {

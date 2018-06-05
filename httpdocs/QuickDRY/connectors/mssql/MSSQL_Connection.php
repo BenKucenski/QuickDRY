@@ -723,9 +723,9 @@ INNER JOIN
 INNER JOIN 
      ['  . $this->current_db. '].sys.tables t ON ind.object_id = t.object_id 
 
-ORDER BY 
-     t.name, ind.name, ind.index_id, ic.index_column_id        
-        
+ORDER BY
+     t.name, ind.name, ind.index_id, ic.index_column_id
+
         ';
 
             $res = $this->Query($sql);
@@ -912,7 +912,7 @@ select
   from ['  . $this->current_db. '].information_schema.routines 
   INNER JOIN ['  . $this->current_db. '].sys.objects ON objects.name = ROUTINE_NAME
  where routine_type = \'PROCEDURE\'
- ORDER BY SPECIFIC_NAME        
+ ORDER BY SPECIFIC_NAME
         ';
         /* @var $res MSSQL_StoredProc[] */
         $res = $this->Query($sql, null, function($row) {
@@ -937,21 +937,21 @@ select
         }
 
         $sql = '
-select  
+select
   \'StoredProc\' = object_name(object_id),
-   \'Parameter_name\' = name,  
-   \'Type\'   = type_name(user_type_id),  
-   \'Length\'   = max_length,  
-   \'Prec\'   = case when type_name(system_type_id) = \'uniqueidentifier\' 
-              then precision  
-              else OdbcPrec(system_type_id, max_length, precision) end,  
-   \'Scale\'   = OdbcScale(system_type_id, scale),  
-   \'Param_order\'  = parameter_id,  
-   \'Collation\'   = convert(sysname, 
-                   case when system_type_id in (35, 99, 167, 175, 231, 239)  
-                   then ServerProperty(\'collation\') end)  
+   \'Parameter_name\' = name,
+   \'Type\'   = type_name(user_type_id),
+   \'Length\'   = max_length,
+   \'Prec\'   = case when type_name(system_type_id) = \'uniqueidentifier\'
+              then precision
+              else OdbcPrec(system_type_id, max_length, precision) end,
+   \'Scale\'   = OdbcScale(system_type_id, scale),
+   \'Param_order\'  = parameter_id,
+   \'Collation\'   = convert(sysname,
+                   case when system_type_id in (35, 99, 167, 175, 231, 239)
+                   then ServerProperty(\'collation\') end)
 
-  from ['  . $this->current_db. '].sys.parameters   
+  from ['  . $this->current_db. '].sys.parameters
   ORDER BY parameter_id
         ';
 

@@ -75,10 +75,10 @@ class MySQL_CodeGen extends SQLCodeGen
             }
 
             $code = '<?php
-            
+
 /**
  * Class db_' . $sp_class . '
- */    
+ */
  class db_' . $sp_class . ' extends SafeClass
 {
     /**

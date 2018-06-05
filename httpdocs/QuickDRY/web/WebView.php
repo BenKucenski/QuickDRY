@@ -171,7 +171,7 @@ if ($Web->RenderPDF) {
     if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
         require_once 'masterpages/' . $Web->MasterPage . '.php';
     } else {
-        Debug::Halt($Web->MasterPage . ' does not exist');
+        Debug::Halt($Web->MasterPage . ' does not exist: ' . $Web->ViewFile);
     }
     $Web->HTML = ob_get_clean();
 
@@ -186,5 +186,5 @@ if ($Web->RenderPDF) {
 if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
     require_once 'masterpages/' . $Web->MasterPage . '.php';
 } else {
-    Debug::Halt($Web->MasterPage . ' masterpage does not exist');
+    Debug::Halt($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile);
 }

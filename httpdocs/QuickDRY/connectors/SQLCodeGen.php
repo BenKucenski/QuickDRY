@@ -33,7 +33,7 @@ class SQLCodeGen extends SafeClass
     protected $PagesBaseManageFolder;
     protected $PagesManageFolder;
     protected $PagesPHPUnitFolder;
-    
+
     protected function CreateDirectories()
     {
         $this->IncludeFolder = $this->DestinationFolder . '/includes';
@@ -619,7 +619,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 }
 
 ';
-        
+
         $file = $this->CommonClassFolder . '/' . $c_name . '.php';
         if(!file_exists($file)) {
             $fp = fopen($file, 'w');
@@ -937,7 +937,7 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
         HTTP::ExitJSON([\'history\' => $report], HTTP_STATUS_OK);
     }
-}        
+}
         ';
         $file = $this->PagesJSONFolder . '/base/' . $table_nice_name . 'Base.php';
         $fp = fopen($file, 'w');

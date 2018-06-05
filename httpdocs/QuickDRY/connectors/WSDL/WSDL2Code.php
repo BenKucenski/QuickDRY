@@ -54,7 +54,7 @@ class WSDL2Code extends SafeClass
             $code = '
     /**
 ' . implode("\r\n", $param_comment) . '
-     */            
+     */
     protected static function _' . $function->Name . '(' . implode(', ', $parameters) . ')
     {
         $res = new self();

@@ -77,10 +77,10 @@ class MSSQL_CodeGen extends SQLCodeGen
                 $sp_code[$i] = "//        " . trim($line);
             }
             $code = '<?php
-            
+
 /**
  * Class db_' . $sp_class . '
- */    
+ */
  class db_' . $sp_class . ' extends SafeClass
 {
     /**
