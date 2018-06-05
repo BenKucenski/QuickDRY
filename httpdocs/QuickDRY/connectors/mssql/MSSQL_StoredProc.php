@@ -53,6 +53,7 @@ class MSSQL_StoredProc extends SafeClass
     public $IS_IMPLICITLY_INVOCABLE;
     public $CREATED;
     public $LAST_ALTERED;
+    public $SOURCE_CODE;
 
     public function __construct($row = null)
     {

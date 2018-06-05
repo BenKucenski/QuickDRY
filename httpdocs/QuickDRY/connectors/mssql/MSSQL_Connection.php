@@ -906,8 +906,11 @@ ORDER BY
     public function GetStoredProcs()
     {
         $sql = '
-select * 
+select 
+  routines.*
+  ,object_definition(object_id) AS SOURCE_CODE
   from ['  . $this->current_db. '].information_schema.routines 
+  INNER JOIN ['  . $this->current_db. '].sys.objects ON objects.name = ROUTINE_NAME
  where routine_type = \'PROCEDURE\'
  ORDER BY SPECIFIC_NAME        
         ';

@@ -52,7 +52,7 @@ class MySQL_CodeGen extends SQLCodeGen
         }
         $sp_require = [];
         $sp_code = [];
-        foreach ($stored_procs as $sp) {
+        foreach ($stored_procs as $sp) { /* @var $sp MySQL_StoredProc */
             $sp_class = SQL_Base::TableToClass($this->DatabasePrefix, $sp->SPECIFIC_NAME, true, $this->DatabaseTypePrefix . '_sp');
 
             Log::Insert($sp_class, true);

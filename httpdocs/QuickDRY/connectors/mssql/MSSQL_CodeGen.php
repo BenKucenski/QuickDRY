@@ -50,7 +50,7 @@ class MSSQL_CodeGen extends SQLCodeGen
             return [];
         }
         $sp_require = [];
-        foreach ($stored_procs as $sp) {
+        foreach ($stored_procs as $sp) { /* @var $sp MSSQL_StoredProc */
             $sp_class = SQL_Base::TableToClass($this->DatabasePrefix, $sp->SPECIFIC_NAME, true, $this->DatabaseTypePrefix . '_sp');
 
             Log::Insert($sp_class, true);
@@ -72,6 +72,10 @@ class MSSQL_CodeGen extends SQLCodeGen
                 $params[] = '\'' . str_replace('@', '', $sql_param) . '\' => ' . $clean_param;
             }
 
+            $sp_code = explode("\n", $sp->SOURCE_CODE);
+            foreach($sp_code as $i => $line) {
+                $sp_code[$i] = "//        " . trim($line);
+            }
             $code = '<?php
             
 /**
@@ -100,6 +104,8 @@ class MSSQL_CodeGen extends SQLCodeGen
         return $rows;
     }
 }
+
+' . implode("\n", $sp_code) . '
         ';
 
             $file = $this->CommonClassSPDBFolder . '/db_' . $sp_class . '.php';
