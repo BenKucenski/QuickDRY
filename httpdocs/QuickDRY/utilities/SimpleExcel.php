@@ -194,6 +194,53 @@ class SimpleExcel extends SafeClass
     }
 
     /**
+     * @param SimpleExcel $se
+     */
+    public static function ExportCSV(SimpleExcel &$se)
+    {
+        $spreadsheet = new Spreadsheet();
+        try {
+            $sheet = $spreadsheet->getActiveSheet();
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+        $sheet->setTitle($se->Title);
+        $sheet_row = 1;
+        $sheet_column = 'A';
+        foreach ($se->Columns as $column) {
+            self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
+            $sheet_column++;
+        }
+        $sheet_row++;
+        foreach ($se->Report as $item) {
+            $sheet_column = 'A';
+            foreach ($se->Columns as $column) {
+                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $item->{$column->Property}, $column->PropertyType);
+                $sheet_column++;
+            }
+            $sheet_row++;
+        }
+
+
+        try {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
+            if (isset($_SERVER['HTTP_HOST'])) {
+                header('Content-Type: text/csv');
+                header('Content-Disposition: attachment;filename="' . $se->Filename . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');
+                exit;
+            } else {
+                $writer->save($se->Filename);
+            }
+        } catch (Exception $ex) {
+            Debug::Halt($ex);
+        }
+
+    }
+
+
+    /**
      * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
      * @param $sheet_column
      * @param $sheet_row
