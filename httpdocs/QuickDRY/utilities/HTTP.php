@@ -36,6 +36,11 @@ class HTTP extends SafeClass
      */
     public static function RedirectError($err, $url = '/')
     {
+        if(!isset($_SERVER['HTTP_HOST'])) {
+            Log::Insert($err, true);
+            return;
+        }
+
         $_SESSION['error'] = serialize($err); // make it compatible with the Session object
 
         if(isset($_SERVER['HTTP_REFERER']))
