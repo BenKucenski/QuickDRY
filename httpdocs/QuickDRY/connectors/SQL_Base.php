@@ -827,6 +827,7 @@ class SQL_Base
 
         $type = get_called_class();
 
+
         $hash = md5(serialize([$type, $order_by, $where]));
         if(!isset(static::$_select_cache[$hash]))
         {

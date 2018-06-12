@@ -4,6 +4,7 @@
  */
 class MSSQL_ForeignKey
 {
+    public $database_name;
     public $table_name;
     public $column_name;
     public $foreign_table_name;
@@ -21,6 +22,7 @@ class MSSQL_ForeignKey
             switch($key)
             {
                 case 'FK_TABLE_NAME': $this->table_name = $value; break;
+                case 'FK_DATABASE_NAME': $this->database_name = $value; break;
                 case 'FK_COLUMN_NAME': $this->column_name = $value; break;
                 case 'REFERENCED_TABLE_NAME': $this->foreign_table_name = $value; break;
                 case 'REFERENCED_COLUMN_NAME': $this->foreign_column_name = $value; break;

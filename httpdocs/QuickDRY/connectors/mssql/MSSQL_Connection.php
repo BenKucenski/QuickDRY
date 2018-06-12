@@ -763,35 +763,31 @@ ORDER BY
 
     private static $_ForeignKeys = null;
 
+    // https://stackoverflow.com/questions/483193/how-can-i-list-all-foreign-keys-referencing-a-given-table-in-sql-server
+    // Note: SYS Tables are far more reliable for this.  Using the information schema table, you will not accurately get
+    // foreign keys that link to UNIQUE indexes, only ones that link to PRIMARY Keys
     public function GetForeignKeys($table_name)
     {
         if (!isset(self::$_ForeignKeys[$this->current_db])) {
 
-
             $sql = '
-			SELECT
-			     KCU1.CONSTRAINT_NAME AS FK_CONSTRAINT_NAME
-			    ,KCU1.TABLE_NAME AS FK_TABLE_NAME
-			    ,KCU1.COLUMN_NAME AS FK_COLUMN_NAME
-			    ,KCU1.ORDINAL_POSITION AS FK_ORDINAL_POSITION
-			    ,KCU2.CONSTRAINT_NAME AS REFERENCED_CONSTRAINT_NAME
-			    ,KCU2.TABLE_NAME AS REFERENCED_TABLE_NAME
-			    ,KCU2.COLUMN_NAME AS REFERENCED_COLUMN_NAME
-			    ,KCU2.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM ['  . $this->current_db. '].INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+SELECT  
+    obj.name AS FK_CONSTRAINT_NAME
+    , sch.name AS FK_DATABASE_NAME
+    , tab1.name AS FK_TABLE_NAME
+    , col1.name AS FK_COLUMN_NAME
+    , tab2.name AS REFERENCED_TABLE_NAME
+    , col2.name AS REFERENCED_COLUMN_NAME
+FROM ['  . $this->current_db. '].sys.foreign_key_columns fkc
+INNER JOIN ['  . $this->current_db. '].sys.objects obj ON obj.object_id = fkc.constraint_object_id
+INNER JOIN ['  . $this->current_db. '].sys.tables tab1 ON tab1.object_id = fkc.parent_object_id
+INNER JOIN ['  . $this->current_db. '].sys.schemas sch ON tab1.schema_id = sch.schema_id
+INNER JOIN ['  . $this->current_db. '].sys.columns col1 ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id
+INNER JOIN ['  . $this->current_db. '].sys.tables tab2 ON tab2.object_id = fkc.referenced_object_id
+INNER JOIN ['  . $this->current_db. '].sys.columns col2 ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id            
+ORDER BY obj.name
+            ';
 
-			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
-			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
-			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
-			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
-
-			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
-			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
-			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
-			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
-			    AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION
-
-		';
             $res = $this->Query($sql);
             self::$_ForeignKeys[$this->current_db] = [];
             foreach ($res['data'] as $row) {
