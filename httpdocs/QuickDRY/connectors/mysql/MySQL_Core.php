@@ -345,6 +345,7 @@ class MySQL_Core extends SQL_Base
         if (is_array($where)) {
             $t = [];
             foreach ($where as $c => $v) {
+                $c = str_replace('+', '', $c);
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
@@ -444,7 +445,12 @@ class MySQL_Core extends SQL_Base
         $sql_order = '';
         if (is_array($order_by) && sizeof($order_by)) {
             foreach ($order_by as $col => $dir) {
-                $sql_order[] .= '`' . trim($col) . '` ' . $dir;
+                if(stristr($col, '.') !== false) {
+                    $col = explode('.', $col);
+                    $sql_order[] .= '`' . trim($col[0]) . '`.`' . trim($col[1]) . '` ' . $dir;
+                } else {
+                    $sql_order[] .= '`' . trim($col) . '` ' . $dir;
+                }
             }
             $sql_order = 'ORDER BY ' . implode(', ', $sql_order);
         }
@@ -453,6 +459,7 @@ class MySQL_Core extends SQL_Base
         if (is_array($where) && sizeof($where)) {
             $t = [];
             foreach ($where as $c => $v) {
+                $c = str_replace('+', '', $c);
                 $c = str_replace('.', '`.`', $c);
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];

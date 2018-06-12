@@ -285,6 +285,7 @@ class SQL_Base
 
         if(!is_null($where)) {
             foreach ($where as $col => $dir) {
+                $col = str_replace('+', '', $col);
                 if (!self::check_props(trim($col))) {
                     Halt($col . ' is not a valid where column for ' . get_called_class());
                     return null;
@@ -826,11 +827,10 @@ class SQL_Base
 
         $type = get_called_class();
 
-
         $hash = md5(serialize([$type, $order_by, $where]));
         if(!isset(static::$_select_cache[$hash]))
         {
-            $items = $type::GetAll($where, [$order_by=>'asc']);
+            $items = $type::GetAll($where, $order_by);
             static::$_select_cache[$hash] = $items;
         }
         else

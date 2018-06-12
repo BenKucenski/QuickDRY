@@ -15,7 +15,7 @@ var ConfirmDialogControl = {
     },
     Confirm : function () {
         QuickDRY.CloseDialogIfOpen('cc_dialog');
-        if (typeof(this._cc_callback) == "function") {
+        if (typeof(this._cc_callback) === "function") {
             this._cc_callback(this._cc_vars);
         }
     }

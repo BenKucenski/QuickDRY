@@ -8,77 +8,90 @@ Metrics::Start('Controller');
 if (file_exists($Web->ControllerFile)) {
     require_once $Web->ControllerFile;
 
+    $PageMode = QUICKDRY_MODE_BASIC;
+
     if ($Web->PageMode === QUICKDRY_MODE_STATIC || $Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
         $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL_STATIC);
 
-        if(is_numeric($PageModel[0])) {
+        if (is_numeric($PageModel[0])) {
             $PageModel = 'i' . $PageModel;
         }
+        if (class_exists($PageModel)) {
+            $PageMode = QUICKDRY_MODE_STATIC;
+        }
+    }
 
-        $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
-        $PageModel::DoInit();
-        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+    if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
+        $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL);
 
-        if ($Web->IsSecureMasterPage()) {
-            if ($Web->AccessDenied) {
-                if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
-                    HTTP::RedirectNotice('Please Sign In', '/signin');
-                } else {
-                    HTTP::RedirectError('Access Denied (1)');
+        if (is_numeric($class[0])) {
+            $class = 'i' . $class;
+        }
+        if (class_exists($PageModel)) {
+            $PageMode = QUICKDRY_MODE_INSTANCE;
+        }
+    }
+
+    switch ($PageMode) {
+        case QUICKDRY_MODE_STATIC:
+            $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
+            $PageModel::DoInit();
+            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+
+            if ($Web->IsSecureMasterPage()) {
+                if ($Web->AccessDenied) {
+                    if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
+                        HTTP::RedirectNotice('Please Sign In', '/signin');
+                    } else {
+                        HTTP::RedirectError('Access Denied (1)');
+                    }
                 }
             }
-        }
 
-        switch ($Web->Verb) {
-            case REQUEST_VERB_GET:
-                $PageModel::DoGet();
-                break;
-            case REQUEST_VERB_POST:
-                $PageModel::DoPost();
-                break;
-            case REQUEST_VERB_PUT:
-                $PageModel::DoPut();
-                break;
-            case REQUEST_VERB_DELETE:
-                $PageModel::DoDelete();
-                break;
-            case REQUEST_VERB_FIND:
-                $PageModel::DoFind();
-                break;
-            case REQUEST_VERB_HISTORY:
-                $PageModel::DoHistory();
-                break;
-        }
-
-        if ($Web->Request->export) {
-            switch (strtoupper($Web->Request->export)) {
-                case REQUEST_EXPORT_CSV:
-                    $PageModel::DoExportToCSV();
-                    exit;
-                case REQUEST_EXPORT_XLS:
-                    $PageModel::DoExportToXLS();
-                    exit;
-                case REQUEST_EXPORT_JSON:
-                    $PageModel::DoExportToJSON();
-                    exit;
-                case REQUEST_EXPORT_PDF:
-                    $PageModel::DoExportToPDF();
-                    $Web->RenderPDF = true;
-                    $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
-                    $Web->PDFFileName = $PageModel::$PDFFileName;
-                    $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
-                    $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+            switch ($Web->Verb) {
+                case REQUEST_VERB_GET:
+                    $PageModel::DoGet();
+                    break;
+                case REQUEST_VERB_POST:
+                    $PageModel::DoPost();
+                    break;
+                case REQUEST_VERB_PUT:
+                    $PageModel::DoPut();
+                    break;
+                case REQUEST_VERB_DELETE:
+                    $PageModel::DoDelete();
+                    break;
+                case REQUEST_VERB_FIND:
+                    $PageModel::DoFind();
+                    break;
+                case REQUEST_VERB_HISTORY:
+                    $PageModel::DoHistory();
                     break;
             }
-        }
-    } else {
-        if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
-            $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL);
 
-            if(is_numeric($class[0])) {
-                $class = 'i' . $class;
+            if ($Web->Request->export) {
+                switch (strtoupper($Web->Request->export)) {
+                    case REQUEST_EXPORT_CSV:
+                        $PageModel::DoExportToCSV();
+                        exit;
+                    case REQUEST_EXPORT_XLS:
+                        $PageModel::DoExportToXLS();
+                        exit;
+                    case REQUEST_EXPORT_JSON:
+                        $PageModel::DoExportToJSON();
+                        exit;
+                    case REQUEST_EXPORT_PDF:
+                        $PageModel::DoExportToPDF();
+                        $Web->RenderPDF = true;
+                        $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
+                        $Web->PDFFileName = $PageModel::$PDFFileName;
+                        $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
+                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+                        break;
+                }
             }
-
+            break;
+        case QUICKDRY_MODE_INSTANCE:
             /* @var $PageModel BasePage */
             $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
             $PageModel->Init();
@@ -89,8 +102,8 @@ if (file_exists($Web->ControllerFile)) {
                     if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                         HTTP::RedirectNotice('Please Sign In', '/signin');
                     } else {
-                        if($Web->CurrentUser) {
-                            HTTP::RedirectNotice('','/main');
+                        if ($Web->CurrentUser) {
+                            HTTP::RedirectNotice('', '/main');
                         } else {
                             HTTP::RedirectError('Access Denied (2)');
                         }
@@ -140,9 +153,7 @@ if (file_exists($Web->ControllerFile)) {
                         break;
                 }
             }
-
-        } else { // no page model
-
+        default:
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
                     HTTP::RedirectNotice('Please Sign In', '/signin');
@@ -150,7 +161,8 @@ if (file_exists($Web->ControllerFile)) {
                     HTTP::RedirectError('Access Denied (3)');
                 }
             }
-        }
+            $Web->MasterPage = isset($_MASTERPAGE) ? $_MASTERPAGE : MASTERPAGE_DEFAULT;
+
     }
 }
 

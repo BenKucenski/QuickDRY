@@ -66,7 +66,7 @@ var HTTP = {
                         QuickDRY.CloseDialogIfOpen(dialog);
                     }
 
-                    if (typeof(callback) == "function") {
+                    if (typeof(callback) === "function") {
                         callback(data);
                     }
                 }

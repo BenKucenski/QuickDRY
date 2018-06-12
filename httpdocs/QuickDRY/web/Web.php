@@ -1,6 +1,7 @@
 <?php
 define('QUICKDRY_MODE_STATIC', 1);
 define('QUICKDRY_MODE_INSTANCE', 2);
+define('QUICKDRY_MODE_BASIC', 3);
 
 define('REQUEST_VERB_GET','GET');
 define('REQUEST_VERB_POST','POST');

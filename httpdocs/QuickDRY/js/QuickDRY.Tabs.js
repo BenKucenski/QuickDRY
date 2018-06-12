@@ -19,6 +19,9 @@ function ShowTab(tab) {
     $('#tab_s_' + tab).show();
 
     current_tab = tab;
+    if(current_tab) {
+        window.location.hash = '#' + current_tab;
+    }
 
     SetBack();
 }

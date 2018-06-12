@@ -24,7 +24,7 @@ var QuickDRY = {
                 if (dialog) {
                     QuickDRY.CloseDialogIfOpen(dialog);
                 }
-                if (typeof(callback) == "function") {
+                if (typeof(callback) === "function") {
                     callback(data);
                 }
             }
@@ -38,7 +38,7 @@ var QuickDRY = {
             if (data.error) {
                 NoticeDialog('Error', data.error);
             } else {
-                if (typeof(callback) == "function") {
+                if (typeof(callback) === "function") {
                     callback(data);
                 }
             }
@@ -70,7 +70,7 @@ var QuickDRY = {
                 if (dialog) {
                     QuickDRY.CloseDialogIfOpen(dialog);
                 }
-                if (typeof(callback) == "function") {
+                if (typeof(callback) === "function") {
                     callback(data);
                 }
             }
@@ -321,7 +321,7 @@ var QuickDRY = {
                 NoticeDialog('Error', data.error);
             else {
                 $('#' + elem_id).append(data.html);
-                if (typeof(callback) == "function")
+                if (typeof(callback) === "function")
                     callback(data);
                 QuickDRY.InitDatePickers();
             }
@@ -334,7 +334,7 @@ var QuickDRY = {
                 NoticeDialog('Error', data.error);
             else {
                 $('#' + elem_id + ' > tbody:last').append(data.html);
-                if (typeof(callback) == "function")
+                if (typeof(callback) === "function")
                     callback(data);
                 QuickDRY.InitDatePickers();
             }
