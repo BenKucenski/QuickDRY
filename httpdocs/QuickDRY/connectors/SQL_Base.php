@@ -831,7 +831,7 @@ class SQL_Base
         $hash = md5(serialize([$type, $order_by, $where]));
         if(!isset(static::$_select_cache[$hash]))
         {
-            $items = $type::GetAll($where, $order_by);
+            $items = $type::GetAll($where, is_array($order_by) ? $order_by : [$order_by => 'asc']);
             static::$_select_cache[$hash] = $items;
         }
         else
