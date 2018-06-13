@@ -153,6 +153,7 @@ if (file_exists($Web->ControllerFile)) {
                         break;
                 }
             }
+            break;
         default:
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
@@ -175,7 +176,6 @@ if (file_exists($Web->ViewFile)) {
 Metrics::Stop('View');
 
 $Web->HTML = ob_get_clean();
-
 
 if ($Web->RenderPDF) {
 
