@@ -9,10 +9,19 @@ class Strings extends SafeClass
      * @param $filename
      * @return array
      */
-    public static function CSVToAssociativeArray($filename)
+    public static function CSVToAssociativeArray($filename, $clean_header = false)
     {
         $rows = array_map('str_getcsv', file($filename));
         $header = array_shift($rows);
+        if($clean_header) {
+            foreach($header as $i => $item) {
+                $item = preg_replace('/[^a-z0-9]/si',' ', $item);
+                $item = preg_replace('/\s+/si',' ', $item);
+                $item = trim($item);
+                $item = str_replace(' ', '_', $item);
+                $header[$i] = strtolower($item);
+            }
+        }
         $csv = [];
         foreach ($rows as $row) {
             $csv[] = array_combine($header, $row);

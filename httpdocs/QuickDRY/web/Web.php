@@ -129,6 +129,10 @@ class Web
         if(isset($_SERVER['SERVER_PROTOCOL'])) {
             $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
             define('BASE_URL', $protocol . HTTP_HOST);
+        } else {
+            if(!defined('BASE_URL')) {
+                define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
+            }
         }
 
         if(defined('HTTP_HOST')) {

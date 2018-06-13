@@ -297,13 +297,13 @@ class SQL_Base
     }
 
     /**
-     * @param string $sql_where
+     * @param array $where
      *
      * @return mixed
      */
-    public static function GetCount($sql_where = '1=1')
+    public static function GetCount($where = null)
     {
-        return static::_GetCount($sql_where);
+        return static::_GetCount($where);
     }
 
     /**
