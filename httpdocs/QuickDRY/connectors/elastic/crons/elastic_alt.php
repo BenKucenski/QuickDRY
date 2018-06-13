@@ -15,8 +15,7 @@ if (!$_HOST || !$_URL || !$_FILE) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -u<url> -f<file> - json format>' . "\r\n");
 }
 
-require_once('../localsettings.php');
-require_once('../init.php');
+require_once('../index.php');
 
 $fp = fopen($_FILE,'r');
 if(!$fp) {

@@ -1,21 +1,23 @@
 var current_tab = window.location.hash.replace('#','');
 
-function ShowTab(tab) {
-    var tab = typeof tab !== "undefined" ? tab : current_tab;
+function ShowTab(selected_tab) {
+    var tab = typeof selected_tab !== "undefined" ? selected_tab : current_tab;
 
     if(typeof tab === "undefined" || !tab) {
         tab = '0';
     }
 
+    var element_current_tab = $('#tab_' + current_tab);
+    var elected_selected_tab = $('#tab_' + tab);
     if (typeof current_tab !== "undefined" && current_tab > -1 && current_tab !== tab) {
-        $('#tab_' + current_tab).addClass('tab');
-        $('#tab_' + current_tab).removeClass('tab_selected');
-        $('#tab_' + current_tab).removeClass('active');
+        element_current_tab.addClass('tab');
+        element_current_tab.removeClass('tab_selected');
+        element_current_tab.removeClass('active');
         $('#tab_s_' + current_tab).hide();
     }
-    $('#tab_' + tab).addClass('tab_selected');
-    $('#tab_' + tab).addClass('active');
-    $('#tab_' + tab).removeClass('tab');
+    elected_selected_tab.addClass('tab_selected');
+    elected_selected_tab.addClass('active');
+    elected_selected_tab.removeClass('tab');
     $('#tab_s_' + tab).show();
 
     current_tab = tab;

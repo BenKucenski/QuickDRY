@@ -12,11 +12,17 @@ class Metrics
 
     private static $global_start = 0;
 
+    /**
+     *
+     */
     public static function StartGlobal()
     {
         static::$global_start = microtime(true);
     }
 
+    /**
+     * @return int|mixed
+     */
     public static function GetGlobal()
     {
         return microtime(true) - static::$global_start;
@@ -61,6 +67,9 @@ class Metrics
         return $res;
     }
 
+    /**
+     * @param $name
+     */
 	public static function Toggle($name)
     {
         if(isset(self::$_running[$name])) {

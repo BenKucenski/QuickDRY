@@ -418,6 +418,10 @@ class Strings extends SafeClass
         return $res;
     }
 
+    /**
+     * @param $val
+     * @return string
+     */
     public static function NumericPhone($val)
     {
         $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);
@@ -427,6 +431,10 @@ class Strings extends SafeClass
         return $res;
     }
 
+    /**
+     * @param $val
+     * @return string
+     */
     public static function PhoneNumber($val)
     {
         if (preg_match('/^\+?\d?(\d{3})(\d{3})(\d{4})$/', $val, $matches)) {
@@ -437,27 +445,47 @@ class Strings extends SafeClass
         return $val;
     }
 
+    /**
+     * @param $count
+     * @param string $str
+     * @return string
+     */
     public static function GetPlaceholders($count, $str = '{{}}')
     {
         return implode(',', array_fill(0, $count, $str));
     }
 
+    /**
+     * @param $count
+     * @return string
+     */
     public static function GetSQLServerPlaceholders($count)
     {
         return self::GetPlaceholders($count, '@');
     }
 
+    /**
+     * @param $val
+     * @return int
+     */
     public static function WordCount($val)
     {
         return sizeof(explode(' ', preg_replace('/\s+/si', ' ', $val)));
     }
 
+    /**
+     * @param $hex
+     * @return string
+     */
     public static function Base16to10($hex)
     {
         return base_convert($hex, 16, 10);
     }
 
-
+    /**
+     * @param $md5
+     * @return string
+     */
     public static function MD5toBase62($md5)
     {
         $o = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -488,6 +516,12 @@ class Strings extends SafeClass
         return $str;
     }
 
+    /**
+     * @param $str
+     * @param $length
+     * @param bool $words
+     * @return string
+     */
     public static function Truncate($str, $length, $words = false)
     {
         if (strlen($str) > $length) {
@@ -675,6 +709,11 @@ class Strings extends SafeClass
         return number_format($num, $dec, '.', $comma);
     }
 
+    /**
+     * @param $pattern
+     * @param $multiplier
+     * @return string
+     */
     public static function StringRepeatCS($pattern, $multiplier)
     {
         $t = [];
@@ -684,6 +723,12 @@ class Strings extends SafeClass
         return implode(',', $t);
     }
 
+    /**
+     * @param $array
+     * @param string $accessor
+     * @param string $function
+     * @return string
+     */
     public static function CreateQuickList($array, $accessor = '$item', $function = 'Show')
     {
         $t = array_keys($array);
@@ -696,33 +741,61 @@ class Strings extends SafeClass
         return $res;
     }
 
+    /**
+     * @param $var
+     * @param string $default
+     * @return string
+     */
     public static function ShowOrDefault($var, $default = 'n/a')
     {
         return $var ? htmlspecialchars_decode($var) : $default;
     }
 }
 
+/**
+ * @param $value
+ * @return mixed
+ */
 function FormFilter($value)
 {
     return Strings::FormFilter($value);
 }
 
+/**
+ * @param $var
+ * @return string
+ */
 function echo_js($var)
 {
     return Strings::EchoJS($var);
 }
 
-
+/**
+ * @param $data
+ * @return string
+ */
 function array_to_xml($data)
 {
     return Strings::ArrayToXML($data);
 }
 
+/**
+ * @param $value
+ * @param int $brightness
+ * @param int $max
+ * @param int $min
+ * @param string $thirdColorHex
+ * @return string
+ */
 function percent2Color($value, $brightness = 255, $max = 100, $min = 0, $thirdColorHex = '00')
 {
     return Strings::PercentToColor($value, $brightness, $max, $min, $thirdColorHex);
 }
 
+/**
+ * @param $string
+ * @return string
+ */
 function xml_entities($string)
 {
     return Strings::XMLEntities($string);
@@ -792,47 +865,84 @@ function replaceSpecialChar($arg, $replaceWith)
     return Strings::ReplaceSpecialChar($arg, $replaceWith);
 }
 
+/**
+ * @param $val
+ * @return float|string
+ */
 function Numeric($val)
 {
     return Strings::Numeric($val);
 }
 
+/**
+ * @param $val
+ * @return mixed
+ */
 function NumericPhone($val)
 {
     return NumericPhone($val);
 }
 
+/**
+ * @param $val
+ * @return string
+ */
 function phone_number($val)
 {
     return Strings::PhoneNumber($val);
 }
 
+/**
+ * @param $count
+ * @return string
+ */
 function GetPlaceholders($count)
 {
     return Strings::GetPlaceholders($count);
 }
 
+/**
+ * @param $val
+ * @return int
+ */
 function WordCount($val)
 {
     return Strings::WordCount($val);
 }
 
+/**
+ * @param $hex
+ * @return string
+ */
 function Base16to10($hex)
 {
     return Strings::Base16to10($hex);
 }
 
-
+/**
+ * @param $md5
+ * @return string
+ */
 function MD5toBase62($md5)
 {
     return Strings::MD5toBase62($md5);
 }
 
+/**
+ * @param $str
+ * @param $length
+ * @param bool $words
+ * @return string
+ */
 function Truncate($str, $length, $words = false)
 {
     return Strings::Truncate($str, $length, $words);
 }
 
+/**
+ * @param $json
+ * @return array|string
+ */
 function fix_json($json)
 {
     return Strings::FixJSON($json);
@@ -938,16 +1048,32 @@ function form_number_format($num, $dec = 2, $comma = '')
     return Strings::FormNumberFormat($num, $dec, $comma);
 }
 
+/**
+ * @param $pattern
+ * @param $multiplier
+ * @return string
+ */
 function StringRepeatCS($pattern, $multiplier)
 {
     return Strings::StringRepeatCS($pattern, $multiplier);
 }
 
+/**
+ * @param $array
+ * @param string $accessor
+ * @param string $function
+ * @return string
+ */
 function createQuickList($array, $accessor = '$item', $function = 'Show')
 {
     return Strings::CreateQuickList($array, $accessor, $function);
 }
 
+/**
+ * @param $var
+ * @param string $default
+ * @return string
+ */
 function ShowOrDefault($var, $default = 'n/a')
 {
     return Strings::ShowOrDefault($var, $default);

@@ -4,6 +4,9 @@ define('SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN', 1);
 define('SIMPLE_EXCEL_PROPERTY_TYPE_DATE', 2);
 define('SIMPLE_EXCEL_PROPERTY_TYPE_DATETIME', 3);
 
+/**
+ * Class SimpleExcel_Column
+ */
 class SimpleExcel_Column extends SafeClass
 {
     public $Header;

@@ -16,9 +16,7 @@ if (!$_HOST || !$_INDEX || !$_FILE) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type> -f<file> - json format>' . "\r\n");
 }
 
-require_once('../localsettings.php');
-require_once('../init.php');
-
+require_once('../index.php');
 
 class CreateIndex extends SafeClass
 {

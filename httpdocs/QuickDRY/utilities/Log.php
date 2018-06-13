@@ -11,6 +11,9 @@ class Log extends SafeClass
      */
     private static $_log_file;
 
+    /**
+     *
+     */
     private static function _init()
     {
         if (is_null(self::$_log_file)) {
@@ -18,6 +21,10 @@ class Log extends SafeClass
         }
     }
 
+    /**
+     * @param $message
+     * @param bool $echo
+     */
     public static function Insert($message, $echo = false)
     {
         self::_init();

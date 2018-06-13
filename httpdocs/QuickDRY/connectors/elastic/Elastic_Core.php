@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class Elastic_Core
+ */
 class Elastic_Core extends Elastic_Base
 {
     /* @var $client Elasticsearch\Client */

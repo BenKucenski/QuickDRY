@@ -238,8 +238,8 @@ var jscolor = {
 			return result;
 		};
 
-		this.toAbsolute = function(base) {
-			var base = new jscolor.URI(base);
+		this.toAbsolute = function(pBase) {
+			var base = new jscolor.URI(pBase);
 			var r = this;
 			var t = new jscolor.URI;
 
@@ -650,9 +650,10 @@ var jscolor = {
 			}
 
 			// load images in optimal order
+            var padImg;
 			switch(modeID) {
-				case 0: var padImg = 'hs.png'; break;
-				case 1: var padImg = 'hv.png'; break;
+				case 0: padImg = 'hs.png'; break;
+				case 1: padImg = 'hv.png'; break;
 			}
 			p.padM.style.background = "url('/images/cross.gif') no-repeat";
 			p.sldM.style.background = "url('/images/arrow.gif') no-repeat";
@@ -668,10 +669,12 @@ var jscolor = {
 
 
 		function redrawPad() {
+            var yComponent;
+
 			// redraw the pad pointer
 			switch(modeID) {
-				case 0: var yComponent = 1; break;
-				case 1: var yComponent = 2; break;
+				case 0: yComponent = 1; break;
+				case 1: yComponent = 2; break;
 			}
 			var x = Math.round((THIS.hsv[0]/6) * (jscolor.images.pad[0]-1));
 			var y = Math.round((1-THIS.hsv[yComponent]) * (jscolor.images.pad[1]-1));

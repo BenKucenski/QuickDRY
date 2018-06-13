@@ -5,6 +5,11 @@
  */
 class Dates extends SafeClass
 {
+    /**
+     * @param $min_date
+     * @param $max_date
+     * @return int
+     */
     public static function MonthsBetweenDates($min_date, $max_date)
     {
         $min_date = strtotime(Dates::Datestamp($min_date));
@@ -229,6 +234,10 @@ class Dates extends SafeClass
     }
 
 
+    /**
+     * @param $date
+     * @return false|string
+     */
     public static function ShortDateYear($date)
     {
         if ($date instanceof DateTime) {
@@ -251,6 +260,10 @@ class Dates extends SafeClass
         return date('M Y', $date);
     }
 
+    /**
+     * @param $date
+     * @return false|string
+     */
     public static function LongDateYear($date)
     {
         if ($date instanceof DateTime) {
@@ -306,8 +319,9 @@ class Dates extends SafeClass
     /**
      * @param int $time
      * @param null $null
-     *
-     * @return bool|null|string
+     * @param null $last_month
+     * @param null $last_year
+     * @return false|null|string
      */
     public static function StandardDate($time = 0, $null = null, $last_month = null, $last_year = null)
     {
@@ -371,7 +385,11 @@ class Dates extends SafeClass
         return date('n/j/Y h:i A', $time);
     }
 
-
+    /**
+     * @param int $time
+     * @param null $null
+     * @return false|null|string
+     */
     public static function StandardTime($time = 0, $null = null)
     {
         if (!is_numeric($time)) $time = strtotime($time);
@@ -379,6 +397,11 @@ class Dates extends SafeClass
         return date('h:iA', $time);
     }
 
+    /**
+     * @param $time
+     * @param UserClass $User
+     * @return bool|string
+     */
     public static function FromUserTimeToGMT($time, UserClass &$User)
     {
         if (!is_numeric($time)) {
@@ -431,6 +454,10 @@ class Dates extends SafeClass
         return date('H:i', $time);
     }
 
+    /**
+     * @param $ptime
+     * @return string
+     */
     public static function TimeElapsedString($ptime)
     {
         if (!is_numeric($ptime)) {
@@ -472,11 +499,20 @@ class Dates extends SafeClass
     }
 
 
+    /**
+     * @param $msg
+     * @return string
+     */
     public static function TimeString($msg)
     {
         return time() . ': ' . self::Timestamp() . ': ' . $msg . PHP_EOL;
     }
 
+    /**
+     * @param $week
+     * @param $year
+     * @return mixed
+     */
     public static function GetStartAndEndDate($week, $year)
     {
         $time = strtotime("1 January $year", time());
@@ -488,6 +524,12 @@ class Dates extends SafeClass
         return $return;
     }
 
+    /**
+     * @param int $time
+     * @param null $null
+     * @param string $format
+     * @return false|null|string
+     */
     public static function Datestamp($time = 0, $null = null, $format = 'Y-m-d')
     {
         if ($time instanceof DateTime) {
@@ -543,6 +585,10 @@ class Dates extends SafeClass
         return mktime($timePartArr[0], $timePartArr[1], $timePartArr[2], $datePartArr[1], $datePartArr[2], $datePartArr[0]);
     }
 
+    /**
+     * @param $time
+     * @return string
+     */
     public static function Age($time)
     {
         if (!is_numeric($time)) {
@@ -560,6 +606,9 @@ class Dates extends SafeClass
         return ceil($diff / 3600 / 24 - 0.5) . ' days';
     }
 
+    /**
+     * @return false|int
+     */
     public static function GMTtime()
     {
         return strtotime(gmdate('m/d/Y H:i:s'));

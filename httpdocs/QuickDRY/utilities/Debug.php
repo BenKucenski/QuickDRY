@@ -160,6 +160,10 @@ class Debug extends SafeClass
         return $trace;
     }
 
+    /**
+     * @param $errno
+     * @return string
+     */
     private static function _convert_error_no($errno)
     {
         switch ($errno) {

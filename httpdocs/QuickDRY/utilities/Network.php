@@ -1,9 +1,16 @@
 <?php
 
+/**
+ * Class Network
+ */
 class Network
 {
+    /* @var $interfaces string */
     private static $interfaces = null;
 
+    /**
+     * @return null|string
+     */
     public static function Interfaces()
     {
         if (!is_null(static::$interfaces)) {
@@ -39,6 +46,11 @@ class Network
     // https://mebsd.com/coding-snipits/php-ipcalc-coding-subnets-ip-addresses.html
     // convert cidr to netmask
     // e.g. 21 = 255.255.248.0
+
+    /**
+     * @param $cidr
+     * @return bool|string
+     */
     public static function cidr2netmask($cidr)
     {
         $bin = '';
@@ -57,6 +69,12 @@ class Network
 
     // get network address from cidr subnet
     // e.g. 10.0.2.56/21 = 10.0.0.0
+
+    /**
+     * @param $ip
+     * @param $cidr
+     * @return string
+     */
     public static function cidr2network($ip, $cidr)
     {
         $network = long2ip((ip2long($ip)) & ((-1 << (32 - (int)$cidr))));
@@ -66,6 +84,11 @@ class Network
 
     // convert netmask to cidr
     // e.g. 255.255.255.128 = 25
+
+    /**
+     * @param $netmask
+     * @return int
+     */
     private static function netmask2cidr($netmask)
     {
         $bits = 0;
@@ -81,6 +104,13 @@ class Network
     // is ip in subnet
     // e.g. is 10.5.21.30 in 10.5.16.0/20 == true
     //      is 192.168.50.2 in 192.168.30.0/23 == false
+
+    /**
+     * @param $ip
+     * @param $network
+     * @param $cidr
+     * @return bool
+     */
     private static function cidr_match($ip, $network, $cidr)
     {
         if(!is_numeric($cidr)) {

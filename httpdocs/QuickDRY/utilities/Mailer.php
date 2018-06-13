@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class Mailer
+ */
 class Mailer extends SafeClass
 {
     public $message;

@@ -95,7 +95,7 @@ var Strings = {
         }
 
         //var newnum = strMoney.replace("$","").replace(",","");
-        var newnum = strMoney.replace("$", "").replace(/[',']/gi, '');
+        var newnum = strMoney.replace("$", "").replace(/[',]/gi, '');
         if (!isNaN(newnum))
             return (newnum);
         else

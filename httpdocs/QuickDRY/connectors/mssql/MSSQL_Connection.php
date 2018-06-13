@@ -216,12 +216,10 @@ class MSSQL_Connection
     }
 
     /**
-     * @param       $sql
+     * @param $sql
      * @param array $params
-     * @param null  $return_type
-     * @param bool  $objects_only
-     *
-     * @return array
+     * @param null $map_function
+     * @return array|mixed
      */
     private function QueryWindows($sql, $params = [], $map_function = null)
     {
@@ -311,12 +309,10 @@ class MSSQL_Connection
     }
 
     /**
-     * @param       $sql
+     * @param $sql
      * @param array $params
-     * @param null  $return_type
-     * @param bool  $objects_only
-     *
-     * @return array
+     * @param null $map_function
+     * @return array|mixed
      */
     public function Query($sql, $params = [], $map_function = null)
     {
@@ -410,10 +406,9 @@ class MSSQL_Connection
         return $returnval['data'];
     }
 
-        /**
-     * @param       $sql
-     * @param array $params
-     *
+    /**
+     * @param $query
+     * @param bool $large
      * @return array
      */
     public function ExecuteWindows(&$query, $large = false)
@@ -678,10 +673,10 @@ class MSSQL_Connection
 
     private static $_UniqueKeys = null;
     private static $_Indexes = null;
+
     /**
      * @param $table_name
-     *
-     * @return []
+     * @return mixed
      */
     public function GetIndexes($table_name)
     {

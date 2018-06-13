@@ -1,6 +1,9 @@
 <?php
 class HTTP extends SafeClass
 {
+    /**
+     * @return bool
+     */
     public static function IsSecure()
     {
         if (!isset($_SERVER['HTTPS'])) {
@@ -12,6 +15,11 @@ class HTTP extends SafeClass
             || $_SERVER['SERVER_PORT'] == 443;
     }
 
+    /**
+     * @param $array
+     * @param $name
+     * @return string
+     */
     public static function ArrayToHTTPQuery($array, $name)
     {
         $res = [];
@@ -51,6 +59,10 @@ class HTTP extends SafeClass
         exit();
     }
 
+    /**
+     * @param $notice
+     * @param string $url
+     */
     public static function RedirectNotice($notice, $url = '/')
     {
         $_SESSION['notice'] = serialize($notice); // make it compatible with the Session object
@@ -63,12 +75,19 @@ class HTTP extends SafeClass
         exit();
     }
 
+    /**
+     *
+     */
     public static function ReloadPage()
     {
         header('location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
 
+    /**
+     * @param $url
+     * @param $title
+     */
     public static function ExitJavascript($url, $title) {
         echo 'Redirecting to <a id="redirect_url" href="' . $url . '">' . $title . '</a><script>
     (function() {
@@ -79,6 +98,10 @@ class HTTP extends SafeClass
         exit;
     }
 
+    /**
+     * @param $json
+     * @param int $HTTP_STATUS
+     */
     public static function ExitJSON($json, $HTTP_STATUS = HTTP_STATUS_OK)
     {
         if($HTTP_STATUS) {
@@ -130,13 +153,19 @@ class HTTP extends SafeClass
     }
 }
 
-
+/**
+ * @param $json
+ * @param int $HTTP_STATUS
+ */
 function exit_json($json, $HTTP_STATUS = HTTP_STATUS_OK)
 {
     return HTTP::ExitJSON($json, $HTTP_STATUS);
 }
 
-
+/**
+ * @param $serialized
+ * @return array
+ */
 function PostFromSerialized($serialized)
 {
     return HTTP::PostFromSerialized($serialized);

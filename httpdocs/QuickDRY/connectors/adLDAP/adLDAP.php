@@ -199,7 +199,7 @@ class adLDAP
     /**
      * Set whether to detect the true primary group
      *
-     * @param bool $_real_primary_group
+     * @param bool $_real_primarygroup
      * @return void
      */
     public function set_real_primarygroup($_real_primarygroup)
@@ -1420,7 +1420,7 @@ class adLDAP
     /**
      * Determine the list of groups a contact is a member of
      *
-     * @param string $distinguisedname The full DN of a contact
+     * @param string $distinguishedname The full DN of a contact
      * @param bool $recursive Recursively check groups
      * @return array
      */
@@ -1453,7 +1453,7 @@ class adLDAP
     /**
      * Get contact information
      *
-     * @param string $distinguisedname The full DN of a contact
+     * @param string $distinguishedname The full DN of a contact
      * @param array $fields Attributes to be returned
      * @return array
      */

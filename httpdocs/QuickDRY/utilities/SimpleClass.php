@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class SimpleClass
+ */
 class SimpleClass
 {
     private $_vars = [];
@@ -12,12 +16,19 @@ class SimpleClass
         return $this->_vars;
     }
 
+    /**
+     * @param array $row
+     */
     public function FromRow($row) {
         foreach($row as $k => $v) {
             $this->$k = $v;
         }
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         $value = !is_array($value) ? trim($value) : $value;

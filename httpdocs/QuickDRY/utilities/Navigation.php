@@ -19,6 +19,9 @@ class Navigation
         }
     }
 
+    /**
+     * @param $menu
+     */
     public function SetMenu($menu)
     {
         $this->_MENU = $menu;

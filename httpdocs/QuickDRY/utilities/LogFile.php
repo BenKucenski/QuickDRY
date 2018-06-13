@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * Class LogFile
+ */
 class LogFile
 {
     private static $StartTime;
@@ -10,6 +14,11 @@ class LogFile
         }
     }
 
+    /**
+     * @param $filename
+     * @param $message
+     * @param bool $echo
+     */
     public function Insert($filename, $message, $echo = false)
     {
         $f = preg_replace('/[^a-z]/si','_', $filename) . '.' . Dates::Datestamp();

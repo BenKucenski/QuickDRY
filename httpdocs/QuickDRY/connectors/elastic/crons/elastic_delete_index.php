@@ -16,8 +16,7 @@ if (!$_HOST || !$_INDEX) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type>' . "\r\n");
 }
 
-require_once('../localsettings.php');
-require_once('../init.php');
+require_once('../index.php');
 
 $res = 'null';
 try {
