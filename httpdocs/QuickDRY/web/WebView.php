@@ -2,6 +2,13 @@
 /* @var $Web Web */
 /* @var $CurrentUser UserClass */
 
+if(defined('UNDER_MAINTENANCE') && UNDER_MAINTENANCE) {
+    $Web->PageMode = QUICKDRY_MODE_BASIC;
+    $Web->ControllerFile = null;
+    $Web->MasterPage = MASTERPAGE_BLANK;
+    $Web->ViewFile = 'QuickDRYInstance/UnderMaintenance.php';
+}
+
 ob_start();
 
 Metrics::Start('Controller');
