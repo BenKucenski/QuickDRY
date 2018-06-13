@@ -27,7 +27,7 @@ if (file_exists($Web->ControllerFile)) {
         if (is_numeric($class[0])) {
             $class = 'i' . $class;
         }
-        if (class_exists($PageModel)) {
+        if (class_exists($class)) {
             $PageMode = QUICKDRY_MODE_INSTANCE;
         }
     }
