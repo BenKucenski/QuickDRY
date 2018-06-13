@@ -865,8 +865,13 @@ class SQL_Base
             $name = $id['name'];
             $id = $id['id'];
         }
-        if($display == "")
-            $display = $order_by;
+        if($display == "") {
+            if(is_array($order_by)) {
+                $display = array_keys($order_by)[0];
+            } else {
+                $display = $order_by;
+            }
+        }
 
         $select = "";
 
