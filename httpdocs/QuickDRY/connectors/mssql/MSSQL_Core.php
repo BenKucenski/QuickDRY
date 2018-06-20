@@ -243,6 +243,10 @@ class MSSQL_Core extends SQL_Base
         // extra + symbols allow us to do AND on the same column
         $col = str_replace('+', '', $col);
 
+        if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
+            $col = 'CONVERT(date, ' . $col . ') = @';
+            $val = trim(Strings::RemoveFromStart('{DATE}', $val));
+        } else
         if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
             $col = 'DATEPART(yyyy, ' . $col . ') = @';
             $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
