@@ -150,87 +150,68 @@ class Dates extends SafeClass
 
     /**
      * @param $date
-     *
-     * @return bool|string
+     * @param null $null
+     * @return false|int|null
      */
-    public static function FancyDateTime($date)
-    {
-        if (!is_numeric($date)) {
-            if (($date = strtotime($date)) === false)
-                return '<i>Invalid Date</i>';
-        }
-        if ($date == 0)
-            return '<i>Not Set</i>';
-        return date('F jS, Y g:iA', $date);
-    }
-
-    /**
-     * @param $date
-     *
-     * @return bool|string
-     */
-    public static function FancyDate($date)
-    {
-        if (is_null($date))
-            return '<i>Not Set</i>';
-
-        if (!is_numeric($date)) {
-            $date = self::Timestamp($date);
-            $date = strtotime($date);
-        }
-
-        if ($date == 0)
-            return '<i>Not Set</i>';
-
-        return date('F jS, Y', $date);
-    }
-
-    /**
-     * @param $date
-     *
-     * @return bool|string
-     */
-    public static function FancyDateB($date)
-    {
-        if (is_null($date))
-            return '<i>Not Set</i>';
-
-        if (!is_numeric($date)) {
-            $date = self::Timestamp($date);
-            $date = strtotime($date);
-        }
-
-        if ($date == 0)
-            return '<i>Not Set</i>';
-
-        return date('F j, Y', $date);
-    }
-
-    /**
-     * @param $date
-     *
-     * @return bool|string
-     */
-    public static function ShortDate($date)
+    public static function DateToInt($date, $null = null)
     {
         if ($date instanceof DateTime) {
             $date = $date->getTimestamp();
 
             if (!$date) {
-                return ''; // don't return null
+                return $null;
             }
         }
 
-        if (is_null($date))
-            return '<i>Not Set</i>';
+        if (is_null($date)) {
+            return $null;
+        }
 
-        if (!is_numeric($date))
+        if (!is_numeric($date)) {
             $date = strtotime($date);
+        }
 
-        if ($date == 0)
-            return '<i>Not Set</i>';
+        return $date;
+    }
 
-        return date('n/j/y', $date);
+    /**
+     * @param $date
+     *
+     * @return bool|string
+     */
+    public static function FancyDateTime($date, $null = null)
+    {
+        return self::Datestamp($date, $null, 'F jS, Y g:iA');
+    }
+
+    /**
+     * @param $date
+     *
+     * @return bool|string
+     */
+    public static function FancyDate($date, $null = null)
+    {
+        return self::Datestamp($date, $null, 'F jS, Y');
+    }
+
+    /**
+     * @param $date
+     *
+     * @return bool|string
+     */
+    public static function FancyDateB($date, $null = null)
+    {
+        return self::Datestamp($date, $null, 'F j, Y');
+    }
+
+    /**
+     * @param $date
+     *
+     * @return bool|string
+     */
+    public static function ShortDate($date, $null = null)
+    {
+        return self::Datestamp($date, $null, 'n/j/y');
     }
 
 
@@ -238,52 +219,18 @@ class Dates extends SafeClass
      * @param $date
      * @return false|string
      */
-    public static function ShortDateYear($date)
+    public static function ShortDateYear($date, $null = null)
     {
-        if ($date instanceof DateTime) {
-            $date = $date->getTimestamp();
-
-            if (!$date) {
-                return ''; // don't return null
-            }
-        }
-
-        if (is_null($date))
-            return '<i>Not Set</i>';
-
-        if (!is_numeric($date))
-            $date = strtotime($date);
-
-        if ($date == 0)
-            return '<i>Not Set</i>';
-
-        return date('M Y', $date);
+        return self::Datestamp($date, $null, 'M Y');
     }
 
     /**
      * @param $date
      * @return false|string
      */
-    public static function LongDateYear($date)
+    public static function LongDateYear($date, $null = null)
     {
-        if ($date instanceof DateTime) {
-            $date = $date->getTimestamp();
-
-            if (!$date) {
-                return ''; // don't return null
-            }
-        }
-
-        if (is_null($date))
-            return '<i>Not Set</i>';
-
-        if (!is_numeric($date))
-            $date = strtotime($date);
-
-        if ($date == 0)
-            return '<i>Not Set</i>';
-
-        return date('F Y', $date);
+        return self::Datestamp($date, $null, 'F Y');
     }
 
     /**
@@ -317,44 +264,13 @@ class Dates extends SafeClass
     }
 
     /**
-     * @param int $time
+     * @param int $date
      * @param null $null
-     * @param null $last_month
-     * @param null $last_year
      * @return false|null|string
      */
-    public static function StandardDate($time = 0, $null = null, $last_month = null, $last_year = null)
+    public static function StandardDate($date = 0, $null = null)
     {
-        if ($time instanceof DateTime) {
-            $time = $time->getTimestamp();
-            if (!$time) {
-                return $null; // don't return null
-            }
-
-        }
-        if (!is_numeric($time)) $time = strtotime($time);
-
-        if (!$time) {
-            if (is_null($null)) {
-                $time = time();
-            } else {
-                return $null;
-            }
-        }
-
-        if (!is_null($last_month) && !is_null($last_year)) {
-            $m = date('m', $time);
-            $y = date('Y', $time);
-
-            if ($m == $last_month && $y == $last_year) {
-                return date('j', $time);
-            }
-
-            if ($y == $last_year) {
-                return date('n/j', $time);
-            }
-        }
-        return date('n/j/Y', $time);
+        return self::Datestamp($date, $null, 'n/j/Y');
     }
 
     /**
@@ -363,11 +279,9 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function DayMonthDate($time = 0, $null = null)
+    public static function DayMonthDate($date = 0, $null = null)
     {
-        if (!is_numeric($time)) $time = strtotime($time);
-        if ($time == 0) if (is_null($null)) $time = self::AdjustedTime(); else return $null;
-        return date('n-j', $time);
+        return self::Datestamp($date, $null, 'n-j');
     }
 
     /**
@@ -376,13 +290,9 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function StandardDateTime($time = 0, $null = null, $debug = false)
+    public static function StandardDateTime($date = 0, $null = null)
     {
-        if (!is_numeric($time)) {
-            $time = strtotime(self::Timestamp($time, $null, $debug));
-        }
-        if ($time == 0) if (is_null($null)) $time = self::AdjustedTime(); else return $null;
-        return date('n/j/Y h:i A', $time);
+        return self::Datestamp($date, $null, 'n/j/Y h:i A');
     }
 
     /**
@@ -390,11 +300,9 @@ class Dates extends SafeClass
      * @param null $null
      * @return false|null|string
      */
-    public static function StandardTime($time = 0, $null = null)
+    public static function StandardTime($date = 0, $null = null)
     {
-        if (!is_numeric($time)) $time = strtotime($time);
-        if ($time == 0) if (is_null($null)) $time = self::AdjustedTime(); else return $null;
-        return date('h:iA', $time);
+        return self::Datestamp($date, $null, 'h:iA');
     }
 
     /**
@@ -404,9 +312,7 @@ class Dates extends SafeClass
      */
     public static function FromUserTimeToGMT($time, UserClass &$User)
     {
-        if (!is_numeric($time)) {
-            $time = strtotime($time);
-        }
+        $time = self::DateToInt($time);
 
         return self::Timestamp($time - $User->hours_diff * 3600);
     }
@@ -416,29 +322,9 @@ class Dates extends SafeClass
      *
      * @return bool|string
      */
-    public static function Timestamp($time = 0, $null = null, $debug = false)
+    public static function Timestamp($date = 0, $null = null)
     {
-        if ($time instanceof DateTime) {
-            $time = $time->getTimestamp();
-            if ($debug) {
-                CleanHalt(date('Y-m-d', $time));
-            }
-            if (!$time) {
-                return ''; // don't return null
-            }
-        }
-
-        if ($time && !is_numeric($time)) {
-            $time = strtotime($time);
-        }
-
-        if ($time == 0) {
-            if (!is_null($null)) {
-                return $null;
-            }
-            $time = self::AdjustedTime();
-        }
-        return date('Y-m-d H:i:s', $time);
+        return self::Datestamp($date, $null, 'Y-m-d H:i:s');
     }
 
     /**
@@ -447,23 +333,19 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function TimeOnlystamp($time = 0, $null = null)
+    public static function TimeOnlystamp($date = 0, $null = null)
     {
-        if (!is_numeric($time)) $time = strtotime($time);
-        if ($time == 0) if (is_null($null)) $time = self::AdjustedTime(); else return $null;
-        return date('H:i', $time);
+        return self::Datestamp($date, $null, 'H:i');
     }
 
     /**
-     * @param $ptime
+     * @param $date
      * @return string
      */
-    public static function TimeElapsedString($ptime)
+    public static function TimeElapsedString($date)
     {
-        if (!is_numeric($ptime)) {
-            $ptime = strtotime(self::Timestamp($ptime));
-        }
-        $etime = time() - $ptime;
+        $date = self::DateToInt($date);
+        $etime = time() - $date;
 
         if ($etime < 1) {
             return 'just now';
@@ -530,29 +412,18 @@ class Dates extends SafeClass
      * @param string $format
      * @return false|null|string
      */
-    public static function Datestamp($time = 0, $null = null, $format = 'Y-m-d')
+    public static function Datestamp($date = 0, $null = null, $format = 'Y-m-d')
     {
-        if ($time instanceof DateTime) {
-            $time = $time->getTimestamp();
-            if (!$time) {
-                return $null; // don't return null
-            }
-
-        }
-        if (!is_numeric($time)) $time = strtotime($time);
-
-        if (!$time) {
-            if (is_null($null)) {
-                $time = time();
-            } else {
-                return $null;
-            }
+        $date = self::DateToInt($date, $null);
+        if($date === $null) {
+            return $null;
         }
 
-        if (is_array($time))
-            Halt($time);
+        if (!$date && $null) {
+            return $null;
+        }
 
-        return date($format, $time);
+        return date($format, $date);
     }
 
     /**
@@ -560,15 +431,9 @@ class Dates extends SafeClass
      *
      * @return bool|string
      */
-    public static function SolrTime($time)
+    public static function SolrTime($date)
     {
-        if ($time instanceof DateTime) {
-            $time = $time->getTimestamp();
-        }
-
-        if (!is_numeric($time))
-            $time = strtotime($time);
-        return date("Y-m-d\TH:i:s\Z", $time);
+        return self::Datestamp($date, null, "Y-m-d\TH:i:s\Z");
     }
 
     /**
