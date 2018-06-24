@@ -1,7 +1,7 @@
 <script type="text/javascript" src="/QuickDRY/controls/ctl_notice.js"></script>
 
 
-<div class="modal fade" id="notice_dialog" style="display: none;" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel">
+<div class="modal fade" id="notice_dialog" style="display: none;" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">

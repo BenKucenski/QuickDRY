@@ -122,6 +122,7 @@ var QuickDRY = {
         for (var i in data.data) {
             var elem = $('#' + elem_id + '_' + i);
             var elem_cur = $('#' + elem_id + '_' + i + '_cur');
+            var elem_hidden = $('#' + elem_id + '_' + i + '_hidden');
             if (typeof (elem) == 'object') {
                 if (elem.prop("type") == 'checkbox') {
                     if (data.data[i] == 1) {
@@ -129,6 +130,11 @@ var QuickDRY = {
                     } else {
                         elem.prop('checked', false);
                     }
+                    if (typeof (elem_hidden) == 'object') {
+                        elem_hidden.val(data.data[i]);
+                    }
+
+
 
                     if (typeof (elem_cur) == 'object') {
                         if (data.data[i] == 1) {
@@ -166,7 +172,7 @@ var QuickDRY = {
     },
 
     InitDatePickers: function () {
-        $('.date-picker').prop('autocomplete','off');
+        $('.date-picker').prop('autocomplete', 'off');
 
         $('.date-picker').datepicker({
             format: 'mm/dd/yyyy',
@@ -189,6 +195,17 @@ var QuickDRY = {
 
         $('.timeonly-picker').datetimepicker({
             format: 'LT'
+        });
+
+        $(".color").colorpicker();
+        $(".color").each(function () {
+            $(this).css('background-color', '#' + $(this).val());
+        });
+        $(".color").on("focus", function (e) {
+            $(this).css('background-color', $(this).val());
+        });
+        $(".color").on("changeColor", function (e) {
+            $(this).css('background-color', $(this).val());
         });
     },
     ClearForm: function (form_id, clear_hidden) {

@@ -1,10 +1,8 @@
 var GoogleCharts = {
     NoPrintLink : false,
     Init : function (callback) {
-        google.load("visualization", "1.1", {
-            packages: ["corechart"],
-            callback: callback
-        });
+        google.charts.load('current', {packages: ['corechart']});
+        google.charts.setOnLoadCallback(callback);
     },
 
     ComboChart: function (title, data, element_id, options) {

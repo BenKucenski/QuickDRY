@@ -13,10 +13,10 @@ class Strings extends SafeClass
     {
         $rows = array_map('str_getcsv', file($filename));
         $header = array_shift($rows);
-        if($clean_header) {
-            foreach($header as $i => $item) {
-                $item = preg_replace('/[^a-z0-9]/si',' ', $item);
-                $item = preg_replace('/\s+/si',' ', $item);
+        if ($clean_header) {
+            foreach ($header as $i => $item) {
+                $item = preg_replace('/[^a-z0-9]/si', ' ', $item);
+                $item = preg_replace('/\s+/si', ' ', $item);
                 $item = trim($item);
                 $item = str_replace(' ', '_', $item);
                 $header[$i] = strtolower($item);
@@ -38,7 +38,9 @@ class Strings extends SafeClass
         // https://stackoverflow.com/questions/4801895/csv-to-associative-array
         // https://stackoverflow.com/questions/28690855/str-getcsv-on-a-tab-separated-file
         /* Map Rows and Loop Through Them */
-        $rows = array_map(function($v){return str_getcsv($v, "\t");}, explode("\n", $tsv));
+        $rows = array_map(function ($v) {
+            return str_getcsv($v, "\t");
+        }, explode("\n", $tsv));
         $header = array_shift($rows);
         $n = sizeof($header);
         $csv = [];
@@ -47,7 +49,7 @@ class Strings extends SafeClass
             for ($j = $m; $j < $n; $j++) {
                 $row[] = ''; // fill in missing fields with emptry strings
             }
-            if(sizeof($row) != $n) {
+            if (sizeof($row) != $n) {
                 Halt([$header, $row]);
             }
             $csv[] = array_combine($header, $row);
@@ -61,8 +63,8 @@ class Strings extends SafeClass
      */
     public static function KeyboardOnly($str)
     {
-        $str = preg_replace('/[^a-z0-9\!\@\#\$\%\^\&\*\(\)\-\=\_\+\[\]\\\{\}\|\;\'\:\"\,\.\/\<\>\\\?\ ]/si','', $str);
-        return preg_replace('/\s+/si',' ', $str);
+        $str = preg_replace('/[^a-z0-9\!\@\#\$\%\^\&\*\(\)\-\=\_\+\[\]\\\{\}\|\;\'\:\"\,\.\/\<\>\\\?\ ]/si', '', $str);
+        return preg_replace('/\s+/si', ' ', $str);
     }
 
     /**
@@ -595,7 +597,7 @@ class Strings extends SafeClass
         if (strlen($string) <= $length) {
             return $string;
         }
-            $string = substr($string, 0, strpos(substr($string, 0, $length), ' ')) . '...';
+        $string = substr($string, 0, strpos(substr($string, 0, $length), ' ')) . '...';
 
         return $string;
     }
@@ -749,6 +751,16 @@ class Strings extends SafeClass
     public static function ShowOrDefault($var, $default = 'n/a')
     {
         return $var ? htmlspecialchars_decode($var) : $default;
+    }
+
+    public static function FontColor($background_color)
+    {
+        $rgb = Color::HexToRGB($background_color);
+        $lumens = $rgb->Brightness();
+        if ($lumens >= 130) {
+            return '#000';
+        }
+        return '#fff';
     }
 }
 

@@ -16,6 +16,7 @@ require_once 'utilities/HTMLCalendar.php';
 require_once 'utilities/Navigation.php';
 require_once 'utilities/UploadHandler.php';
 require_once 'utilities/Mailer.php';
+require_once 'utilities/Color.php';
 require_once 'utilities/FineDiff.php';
 require_once 'utilities/SimpleReport.php';
 require_once 'utilities/SimpleExcel_Column.php';
@@ -58,6 +59,8 @@ require_once 'form/StatesClass.php';
 require_once 'form/YesNoClass.php';
 
 require_once 'math/Debt.php';
-require_once 'math/PrincipleInterest.php';
+require_once 'math/PrincipalInterest.php';
 require_once 'math/MathClass.php';
 require_once 'math/UTMClass.php';
+require_once 'math/SnowballMath.php';
+require_once 'math/Statistics.php';

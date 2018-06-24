@@ -412,8 +412,11 @@ class Dates extends SafeClass
      * @param string $format
      * @return false|null|string
      */
-    public static function Datestamp($date = 0, $null = null, $format = 'Y-m-d')
+    public static function Datestamp($date = null, $null = null, $format = 'Y-m-d')
     {
+        if(is_null($null) && is_null($date)) {
+            $date = time();
+        }
         $date = self::DateToInt($date, $null);
         if($date === $null) {
             return $null;

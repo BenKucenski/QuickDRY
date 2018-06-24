@@ -5,8 +5,9 @@
  */
 class Debt extends SafeClass
 {
+    public $id;
     public $interest_rate;
     public $payment;
-    public $principle;
+    public $principal;
     public $name;
 }

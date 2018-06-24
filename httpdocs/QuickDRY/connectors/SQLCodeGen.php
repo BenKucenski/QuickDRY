@@ -236,12 +236,17 @@ spl_autoload_register(\'' . $autoloader_class . '\');
 
         $aliases = [];
 
+        $HasUserLink = false;
+
         foreach ($cols as $col) { /* @var $col MSSQL_TableColumn */ // these are the same for MySQL and MSSQL, only claim it's one to help with code completion
             if($col->field !== $col->field_alias) {
                 $aliases[] = $col;
             }
             $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
             $props .= "'" . $col->field . "'=>['display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . (strcasecmp($col->null, 'no') == 0 ? 'false' : 'true') . "],\r\n\t\t";
+            if($col->field === 'user_id') {
+                $HasUserLink = true;
+            }
         }
 
 
@@ -494,7 +499,15 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         if($user->Is([ROLE_ID_ADMIN])) {
             return true;
         }
+' . ($HasUserLink ? '
+        if(!$this->id) {
+            return true;
+        }
 
+        if($this->user_id == $user->id) {
+            return true;
+        }
+' : '') . '
         return false;
     }
 
@@ -507,7 +520,15 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
         if($user->Is([ROLE_ID_ADMIN])) {
             return true;
         }
+' . ($HasUserLink ? '
+        if(!$this->id) {
+            return true;
+        }
 
+        if($this->user_id == $user->id) {
+            return true;
+        }
+' : '') . '
         return false;
     }
 
@@ -603,6 +624,17 @@ class ' . $c_name . ' extends db_' . $c_name . '
      */
     public function Save()
     {
+' . ($HasUserLink ? '
+        global $Web;
+        if($this->id) {
+            if($this->user_id !== $Web->CurrentUser->id) {
+                $res[\'error\'] = [\'No Permission\'];
+                return $res;
+            }
+        } else {
+            $this->user_id = $Web->CurrentUser->id;
+        }
+' : '') . '
         return $this->_Save();
     }
 
@@ -1246,12 +1278,18 @@ HTTP::ExitJSON($returnvals);
 
         foreach ($cols as $col)
             if (!in_array($col->field, $primary)) {
-                if (substr($col->field, strlen($col->field) - 6, 6) === '_by_id')
+                if($col->field === 'user_id') {
                     continue;
-                if (substr($col->field, strlen($col->field) - 3, 3) === '_at')
+                }
+                if (substr($col->field, strlen($col->field) - 6, 6) === '_by_id') {
                     continue;
-                if (substr($col->field, strlen($col->field) - 5, 5) === '_file')
+                }
+                if (substr($col->field, strlen($col->field) - 3, 3) === '_at') {
                     continue;
+                }
+                if (substr($col->field, strlen($col->field) - 5, 5) === '_file') {
+                    continue;
+                }
 
                 if (isset($refs[$col->field])) {
                     if ($refs[$col->field] === 'ColorClass') {
@@ -1310,7 +1348,7 @@ HTTP::ExitJSON($returnvals);
 
         $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/add.js"></script>
 
-<div class="modal fade" id="' . $c_name . '_dialog" style="display: none;" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel">
+<div class="modal fade" id="' . $c_name . '_dialog" style="display: none;" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -1438,8 +1476,7 @@ var ' . $c_name . ' = {
     {
         $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/history.js"></script>
 
-<div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog"
-     aria-labelledby="joinModalLabel">
+<div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">

@@ -217,6 +217,14 @@ class MySQL_Core extends SQL_Base
         }
         // adding a space to ensure that "in_" is not mistaken for an IN query
         // and the parameter must START with the special SQL command
+        if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
+            $col = 'DATE(' . $col . ') = {{}}';
+            $val = trim(Strings::RemoveFromStart('{DATE}', $val));
+        } else
+        if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
+            $col = 'YEAR(' . $col . ') = {{}}';
+            $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
+        } else
         if (substr($val, 0, 3) === 'IN ') {
             $val = explode(',', trim(Strings::RemoveFromStart('IN', $val)));
             if (($key = array_search('null', $val)) !== false) {
