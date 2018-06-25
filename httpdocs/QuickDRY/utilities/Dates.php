@@ -268,7 +268,7 @@ class Dates extends SafeClass
      * @param null $null
      * @return false|null|string
      */
-    public static function StandardDate($date = 0, $null = null)
+    public static function StandardDate($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'n/j/Y');
     }
@@ -279,7 +279,7 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function DayMonthDate($date = 0, $null = null)
+    public static function DayMonthDate($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'n-j');
     }
@@ -290,7 +290,7 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function StandardDateTime($date = 0, $null = null)
+    public static function StandardDateTime($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'n/j/Y h:i A');
     }
@@ -300,7 +300,7 @@ class Dates extends SafeClass
      * @param null $null
      * @return false|null|string
      */
-    public static function StandardTime($date = 0, $null = null)
+    public static function StandardTime($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'h:iA');
     }
@@ -322,7 +322,7 @@ class Dates extends SafeClass
      *
      * @return bool|string
      */
-    public static function Timestamp($date = 0, $null = null)
+    public static function Timestamp($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'Y-m-d H:i:s');
     }
@@ -333,7 +333,7 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function TimeOnlystamp($date = 0, $null = null)
+    public static function TimeOnlystamp($date = null, $null = null)
     {
         return self::Datestamp($date, $null, 'H:i');
     }
