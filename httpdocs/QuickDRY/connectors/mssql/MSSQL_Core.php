@@ -243,6 +243,11 @@ class MSSQL_Core extends SQL_Base
         // extra + symbols allow us to do AND on the same column
         $col = str_replace('+', '', $col);
 
+        if (substr($val, 0, strlen('{IN} ')) === '{IN} ') {
+            $val = trim(Strings::RemoveFromStart('{IN}', $val));
+            $val = explode(',', $val);
+            $col = $col . ' IN (' . Strings::StringRepeatCS('@', sizeof($val)). ')';
+        } else
         if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
             $col = 'CONVERT(date, ' . $col . ') = @';
             $val = trim(Strings::RemoveFromStart('{DATE}', $val));
@@ -387,12 +392,17 @@ class MSSQL_Core extends SQL_Base
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if (strtolower($v) === 'null')
-                    $t[] = '' . $c . ' IS NULL';
-                else {
-                    $v = $cv['val'];
-                    $params[] = $v;
+                if (!is_array($v) && strtolower($v) === 'null') {
+                    $t[] = $c . ' IS NULL';
+                } else {
                     $t[] = $cv['col'];
+                    if(is_array($v)) {
+                        foreach($v as $a) {
+                            $params[] = $a;
+                        }
+                    } else {
+                        $params[] = $v;
+                    }
                 }
             }
             $sql_where = implode(" AND ", $t);
