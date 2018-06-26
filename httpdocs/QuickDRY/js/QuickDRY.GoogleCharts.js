@@ -1,8 +1,14 @@
 var GoogleCharts = {
     NoPrintLink : false,
-    Init : function (callback) {
+    Init : function (callback) { // requires https://www.gstatic.com/charts/loader.js
         google.charts.load('current', {packages: ['corechart']});
         google.charts.setOnLoadCallback(callback);
+    },
+    InitJSAPI : function (callback) { // WebkitHTMLToPDF requires https://www.google.com/jsapi
+        google.load("visualization", "1.1", {
+            packages: ["corechart"],
+            callback: callback
+        });
     },
 
     ComboChart: function (title, data, element_id, options) {

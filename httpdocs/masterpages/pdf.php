@@ -55,7 +55,7 @@
     <?php } ?>
 
 </head>
-<body onload="if (typeof InitGoogleCharts === 'function') { InitGoogleCharts(); }">
+<body onload="if (typeof InitGoogleCharts === 'function') { GoogleCharts.InitJSAPI(InitGoogleCharts); }">
 
 <div class="container-fluid">
 

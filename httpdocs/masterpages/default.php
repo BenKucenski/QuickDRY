@@ -39,7 +39,7 @@
 
 
 </head>
-<body onload="if (typeof InitGoogleCharts === 'function') { InitGoogleCharts(); }">
+<body onload="if (typeof InitGoogleCharts === 'function') { GoogleCharts.Init(InitGoogleCharts); }">
 
 
 <div class="container-fluid">
