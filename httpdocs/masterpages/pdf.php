@@ -34,7 +34,7 @@
     <script type='text/javascript' src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-    <script type='text/javascript' src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
     <script type='text/javascript'
             src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js'></script>
 
