@@ -42,7 +42,7 @@
     <script type='text/javascript' src='/QuickDRY/js/jquery.cookie.js'></script>
     <script type='text/javascript' src='/QuickDRY/js/MD5.js'></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.Cookies.js"></script>
-    <script type="text/javascript" src="/QuickDRY/js/QuickDRY.GoogleCharts.PDF.js"></script>
+    <script type="text/javascript" src="/QuickDRY/js/QuickDRY.GoogleCharts.js"></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.HTTP.js"></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.js"></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.Strings.js"></script>
