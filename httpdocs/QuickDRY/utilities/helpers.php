@@ -7,6 +7,8 @@
  */
 function ToArray($arr, $null_string = false)
 {
+    // Cleans up an array of values so that it can ben
+    // put into a database object and be saved into the database
     foreach ($arr as $k => $v) {
         if (is_object($v) && get_class($v) === 'DateTime') {
             $arr[$k] = Dates::Timestamp($v);
@@ -18,6 +20,9 @@ function ToArray($arr, $null_string = false)
     return $arr;
 }
 
+/**
+ * @return string
+ */
 function EchoMemoryUsage()
 {
     $mem_usage = memory_get_usage(true);
@@ -32,37 +37,18 @@ function EchoMemoryUsage()
     return round($mem_usage / 1048576, 2) . " megabytes";
 }
 
-function EmailDevelopers($product, $section, $summary, $message)
-{
-
-}
-
-
-function LogQuery($sql, $err, $time)
-{
-
-}
-
-function LogError($errno, $errstr, $errfile, $errline)
-{
-
-}
-
-
+/**
+ * @return bool
+ */
 function IsWindows()
 {
     return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 }
 
 
-function mysql_password_hash($input, $hex = true)
-{
-    $sha1_stage1 = sha1($input, true);
-    $output = sha1($sha1_stage1, !$hex);
-    return '*' . strtoupper($output);
-} //END function mysql_password_hash
-
-
+/**
+ * @return string
+ */
 function GUID()
 {
     if (function_exists('com_create_guid') === true) {
@@ -72,6 +58,9 @@ function GUID()
     return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 }
 
+/**
+ * @return string
+ */
 function RecID()
 {
     if (function_exists('com_create_guid') === true) {
@@ -104,7 +93,10 @@ function LoadFile($filename)
     return $f;
 }
 
-
+/**
+ * @param $cmd
+ * @return int|string
+ */
 function run_in_background($cmd)
 {
     if (IsWindows()) {
@@ -114,35 +106,6 @@ function run_in_background($cmd)
 
     $PID = exec("nohup $cmd 1>/dev/null & echo $!");
     return ($PID);
-}
-
-
-
-
-/**
- * @param $field
- *
- * @return string
- */
-function FieldToDisplay($field)
-{
-    $t = ucwords(implode(' ', explode('_', $field)));
-    $t = str_replace(' ', '', $t);
-    if (strcasecmp(substr($t, -2), 'id') == 0)
-        $t = substr($t, 0, strlen($t) - 2);
-    return CapsToSpaces($t);
-}
-
-/**
- * @param $str
- *
- * @return string
- */
-function CapsToSpaces($str)
-{
-    $results = [];
-    preg_match_all('/[A-Z\d][^A-Z\d]*/', $str, $results);
-    return implode(' ', $results[0]);
 }
 
 /**
@@ -159,7 +122,10 @@ function BufferInclude($file)
     return $_PAGE_HTML;
 }
 
-
+/**
+ * @param $url
+ * @return mixed
+ */
 function getTinyUrl($url)
 {
     $ch = curl_init();
@@ -172,8 +138,6 @@ function getTinyUrl($url)
     return $data;
 }
 
-
-
 /**
  * @param $count
  * @param string $params
@@ -185,61 +149,5 @@ function getTinyUrl($url)
  */
 function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
 {
-    if ($params == null) {
-        $params = [];
-        foreach ($_GET as $k => $v) {
-            if (!in_array($k, ['sort_by', 'dir', 'page', 'per_page'])) {
-                $params[] = $k . '=' . $v;
-            }
-        }
-    }
-    if (is_array($params)) {
-        $params = implode('&', $params);
-    }
-
-
-    $_SORT_BY = $_SORT_BY ? $_SORT_BY : SORT_BY;
-    $_SORT_DIR = $_SORT_DIR ? $_SORT_DIR : SORT_DIR;
-    $_PER_PAGE = $_PER_PAGE ? $_PER_PAGE : PER_PAGE;
-    $_URL = $_URL ? $_URL : CURRENT_PAGE;
-
-    if ($_PER_PAGE > 0) {
-        $num_pages = ceil($count / $_PER_PAGE);
-        if ($num_pages <= 1) return '';
-
-        $start_page = PAGE - 10;
-        $end_page = PAGE + 10;
-        if ($start_page < 0)
-            $start_page = 0;
-        if ($start_page >= $num_pages)
-            $start_page = $num_pages - 1;
-        if ($end_page < 0)
-            $end_page = 0;
-        if ($end_page >= $num_pages)
-            $end_page = $num_pages - 1;
-
-        $html = '<ul class="pagination">';
-        if (PAGE > 10) {
-            $html .= '<li class="first"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (0) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;&lt;</a></li>';
-            $html .= '<li class="previous"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE - 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;</a></li>';
-        }
-
-        for ($j = $start_page; $j <= $end_page; $j++) {
-            if ($j != PAGE)
-                $html .= '<li class="page_number"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j + 1) . '</a></li>';
-            else
-                $html .= '<li class="page_number"><a href="#">' . ($j + 1) . '</a></li>';
-        }
-        if (PAGE < $num_pages - 10 && $num_pages > 10) {
-            $html .= '<li class="next"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
-            $html .= '<li class="last"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . ($num_pages - 1) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;&gt;</a></li>';
-        }
-
-        $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=0&' . $params . '">View All</a></li>';
-
-        return $html . '</ul>';
-    }
-    $html = '<br/><ul class="pagination">';
-    $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=0&' . $params . '">View Paginated</a></li>';
-    return $html . '</ul>';
+    return Navigation::BootstrapPaginationLinks($count, $params, $_SORT_BY, $_SORT_DIR, $_PER_PAGE, $_URL);
 }

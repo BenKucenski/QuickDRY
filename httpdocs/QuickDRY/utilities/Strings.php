@@ -762,6 +762,18 @@ class Strings extends SafeClass
         }
         return '#fff';
     }
+
+    /**
+     * @param $str
+     *
+     * @return string
+     */
+    public static function CapsToSpaces($str)
+    {
+        $results = [];
+        preg_match_all('/[A-Z\d][^A-Z\d]*/', $str, $results);
+        return implode(' ', $results[0]);
+    }
 }
 
 /**

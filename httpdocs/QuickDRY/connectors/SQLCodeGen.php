@@ -243,7 +243,7 @@ spl_autoload_register(\'' . $autoloader_class . '\');
                 $aliases[] = $col;
             }
             $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
-            $props .= "'" . $col->field . "'=>['display'=>'" . FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . ($col->null ? 'true' : 'false') . "],\r\n\t\t";
+            $props .= "'" . $col->field . "'=>['display'=>'" . SQLCodeGen::FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . ($col->null ? 'true' : 'false') . "],\r\n\t\t";
             if($col->field === 'user_id') {
                 $HasUserLink = true;
             }
@@ -1010,17 +1010,17 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 
 		if(!isset($res[\'error\']) || !$res[\'error\'])
 		{
-			$returnvals[\'success\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' Saved!\';
+			$returnvals[\'success\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' Saved!\';
 			$returnvals[$primary] = $c->$primary;
 			$returnvals[\'serialized\'] = $c->ToArray();
 		} else {
 			$returnvals[\'error\'] = $res[\'error\'];
         }
 	} else {
-		$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Save: Bad params passed in!\';
+		$returnvals[\'error\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Save: Bad params passed in!\';
     }
 } else {
-	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Save: Bad Request sent!\';
+	$returnvals[\'error\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Save: Bad Request sent!\';
 }
 
 HTTP::ExitJSON($returnvals);
@@ -1054,7 +1054,7 @@ if(isset($Web->Request->uuid))
 	$returnvals[\'serialized\'] = $c->ToArray();
 	$returnvals[\'can_delete\'] = $c->CanDelete($Web->' . $this->UserVar . ') ? 1 : 0;
 } else {
-	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\';
+	$returnvals[\'error\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\';
 }
 
 HTTP::ExitJSON($returnvals);
@@ -1153,14 +1153,14 @@ if($Web->Request->uuid)
 	$res = $c->Remove($Web->' . $this->UserVar . ');
 	if(!isset($res[\'error\']) || !$res[\'error\'])
 	{
-		$returnvals[\'success\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' Removed\';
+		$returnvals[\'success\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' Removed\';
 		$returnvals[\'uuid\'] = $Web->Request->uuid;
 		' . implode("\r\n\t\t", $u_ret) . '
 	} else {
 		$returnvals[\'error\'] = $res[\'error\'];
     }
 } else {
-	$returnvals[\'error\'] = \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
+	$returnvals[\'error\'] = \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Delete: Bad params passed in!\';
 }
 
 HTTP::ExitJSON($returnvals);
@@ -1190,7 +1190,7 @@ if(isset($Web->Request->uuid))
     }
 
 } else {
-	HTTP::ExitJSON(\'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
+	HTTP::ExitJSON(\'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' - Get: Bad params passed in!\', HTTP_STATUS_BAD_REQUEST);
 }
 
 
@@ -1307,12 +1307,12 @@ HTTP::ExitJSON($returnvals);
 				';
                     }
 
-                    $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><?php echo ' . $refs[$col->field] . '::Select(null, [\'name\'=>\'' . $col->field . '\',\'id\'=>\'' . $c_name . '_' . $col->field . '\']); ?></td></tr>' . "\r\n";
+                    $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><?php echo ' . $refs[$col->field] . '::Select(null, [\'name\'=>\'' . $col->field . '\',\'id\'=>\'' . $c_name . '_' . $col->field . '\']); ?></td></tr>' . "\r\n";
 
                 } else
                     switch ($col->type) {
                         case 'text':
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><textarea class="form-control" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '"></textarea></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><textarea class="form-control" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '"></textarea></td></tr>' . "\r\n";
                             break;
 
                         case 'bit':
@@ -1320,7 +1320,7 @@ HTTP::ExitJSON($returnvals);
                         case 'tinyint':
                             $elem = $c_name . '_' . $col->field;
 
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field">
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field">
 					<input type="checkbox" id="' . $elem . '" onclick="$(\'#' . $elem . '_hidden\').val(this.checked ? 1 : 0);" />
 					<input type="hidden" name="' . $col->field . '" id="' . $elem . '_hidden" value="0" />
 					</td></tr>' . "\r\n";
@@ -1328,19 +1328,19 @@ HTTP::ExitJSON($returnvals);
 
                         case 'datetime':
                         case 'timestamp':
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><input class="time-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="time-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
                             break;
 
                         case 'date':
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><input class="date-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="date-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
                             break;
 
                         case 'varchar(6)':
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><input class="color form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="color form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
                             break;
 
                         default:
-                            $form .= '<tr><td class="name">' . FieldToDisplay($col->field) . '</td><td class="field"><input class="form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
                     }
             }
 
@@ -1516,7 +1516,7 @@ var ' . $c_name . 'History = {
             } else {
                 $(\'#' . $c_name . '_history_dialog_title\').html("' . $c_name . '");
                 $(\'#' . $c_name . '_history_div\').html(data.html);
-                QuickDRY.ShowModal(\'' . $c_name . '_history_dialog\', \'' . CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
+                QuickDRY.ShowModal(\'' . $c_name . '_history_dialog\', \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
             }
         });
     }
@@ -1537,7 +1537,7 @@ var ' . $c_name . 'History = {
         <div class="panel-title">' . $table_nice_name . '</div>
     </div>
     <div class="panel-body">
-<?php echo BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
+<?php echo Navigation::BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
 <table class="table table-striped" style="font-size: 0.9em;">
     <thead>
     <?php echo ' . $table_nice_name . '::$TableHeader; ?>
@@ -1546,7 +1546,7 @@ var ' . $c_name . 'History = {
         <?php echo $item->ToRow(true); ?>
     <?php } ?>
 </table>
-<?php echo BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
+<?php echo Navigation::BootstrapPaginationLinks(' . $table_nice_name . '::$Count); ?>
 
     </div>
 </div>
@@ -1597,4 +1597,17 @@ class ' . $table_nice_name . ' extends BasePage
 
     }
 
+    /**
+     * @param $field
+     *
+     * @return string
+     */
+    public static function FieldToDisplay($field)
+    {
+        $t = ucwords(implode(' ', explode('_', $field)));
+        $t = str_replace(' ', '', $t);
+        if (strcasecmp(substr($t, -2), 'id') == 0)
+            $t = substr($t, 0, strlen($t) - 2);
+        return Strings::CapsToSpaces($t);
+    }
 }

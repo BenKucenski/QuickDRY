@@ -245,4 +245,74 @@ class Navigation
         }
         return $_MENU_HTML;
     }
+
+    /**
+     * @param $count
+     * @param string $params
+     * @param null $_SORT_BY
+     * @param null $_SORT_DIR
+     * @param null $_PER_PAGE
+     * @param null $_URL
+     * @return string
+     */
+    public static function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
+    {
+        if ($params == null) {
+            $params = [];
+            foreach ($_GET as $k => $v) {
+                if (!in_array($k, ['sort_by', 'dir', 'page', 'per_page'])) {
+                    $params[] = $k . '=' . $v;
+                }
+            }
+        }
+        if (is_array($params)) {
+            $params = implode('&', $params);
+        }
+
+
+        $_SORT_BY = $_SORT_BY ? $_SORT_BY : SORT_BY;
+        $_SORT_DIR = $_SORT_DIR ? $_SORT_DIR : SORT_DIR;
+        $_PER_PAGE = $_PER_PAGE ? $_PER_PAGE : PER_PAGE;
+        $_URL = $_URL ? $_URL : CURRENT_PAGE;
+
+        if ($_PER_PAGE > 0) {
+            $num_pages = ceil($count / $_PER_PAGE);
+            if ($num_pages <= 1) return '';
+
+            $start_page = PAGE - 10;
+            $end_page = PAGE + 10;
+            if ($start_page < 0)
+                $start_page = 0;
+            if ($start_page >= $num_pages)
+                $start_page = $num_pages - 1;
+            if ($end_page < 0)
+                $end_page = 0;
+            if ($end_page >= $num_pages)
+                $end_page = $num_pages - 1;
+
+            $html = '<ul class="pagination">';
+            if (PAGE > 10) {
+                $html .= '<li class="first"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (0) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;&lt;</a></li>';
+                $html .= '<li class="previous"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE - 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;</a></li>';
+            }
+
+            for ($j = $start_page; $j <= $end_page; $j++) {
+                if ($j != PAGE)
+                    $html .= '<li class="page_number"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j + 1) . '</a></li>';
+                else
+                    $html .= '<li class="page_number"><a href="#">' . ($j + 1) . '</a></li>';
+            }
+            if (PAGE < $num_pages - 10 && $num_pages > 10) {
+                $html .= '<li class="next"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
+                $html .= '<li class="last"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . ($num_pages - 1) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;&gt;</a></li>';
+            }
+
+            $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=0&' . $params . '">View All</a></li>';
+
+            return $html . '</ul>';
+        }
+        $html = '<br/><ul class="pagination">';
+        $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=0&' . $params . '">View Paginated</a></li>';
+        return $html . '</ul>';
+    }
 }

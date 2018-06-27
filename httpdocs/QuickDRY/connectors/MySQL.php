@@ -12,9 +12,10 @@ class MySQL extends SafeClass
      *
      * @return mixed
      */
-    public static function EscapeQuery($conn, $sql, $params) {
+    public static function EscapeQuery($conn, $sql, $params)
+    {
 
-        if(is_null($conn)) {
+        if (is_null($conn)) {
             Halt('no connection');
         }
         $count = 0;
@@ -22,22 +23,29 @@ class MySQL extends SafeClass
         use ($params, &$count, $conn, $sql) {
             if (isset($result[1])) {
 
-                if(isset($params[$count])) {
+                if (isset($params[$count])) {
                     $count++;
-                    if($result[1] !== 'nq') {
+                    if ($result[1] !== 'nq') {
                         return '"' . mysqli_escape_string($conn, $params[$count - 1]) . '"';
                     } else {
                         return $params[$count - 1]; // don't use mysqli_escape_string here because it will escape quotes which breaks things
                     }
                 }
 
-                if(isset($params[$result[1]]))
+                if (isset($params[$result[1]]))
                     return '"' . mysqli_escape_string($conn, $params[$result[1]]) . '"';
 
                 Halt(array($sql, $params), $result[0] . ' does not having a matching parameter (mysql_escape_query).');
             }
             return null;
         }, $sql);
+    }
+
+    public static function PasswordHash($input, $hex = true)
+    {
+        $sha1_stage1 = sha1($input, true);
+        $output = sha1($sha1_stage1, !$hex);
+        return '*' . strtoupper($output);
     }
 }
 

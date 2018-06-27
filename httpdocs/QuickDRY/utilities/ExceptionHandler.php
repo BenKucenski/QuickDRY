@@ -13,9 +13,13 @@ class ExceptionHandler
         if (defined('SHOW_ERRORS') && SHOW_ERRORS) {
             Halt($err);
         }
-        LogError(-1, $err, '', '');
+        self::LogError(-1, $err, '', '');
     }
 
+    public static function LogError($errno, $errstr, $errfile, $errline)
+    {
+        Log::Insert([$errno, $errstr, $errfile, $errline]);
+    }
 
     /**
      * @param $errno
@@ -32,7 +36,7 @@ class ExceptionHandler
                 throw new Exception(json_encode([$errno, $errstr, $errfile, $errline]));
             }
         }
-        //LogError($errno, $errstr, $errfile, $errline);
+        self::LogError($errno, $errstr, $errfile, $errline);
         return false;
     }
 
