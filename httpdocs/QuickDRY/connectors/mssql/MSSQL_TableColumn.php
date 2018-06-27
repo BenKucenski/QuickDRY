@@ -33,7 +33,7 @@ class MSSQL_TableColumn
                     $this->field_alias = $value;
                     break;
                 case 'DATA_TYPE': $this->type = $value; break;
-                case 'IS_NULLABLE': $this->null = $value === 'YES' ? 1 : 0; break;
+                case 'IS_NULLABLE': $this->null = $value === 'YES' ? true : false; break;
                 case 'COLUMN_DEFAULT': $this->default = $value; break;
             }
         }

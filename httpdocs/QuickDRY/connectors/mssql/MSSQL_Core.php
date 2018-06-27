@@ -641,7 +641,7 @@ class MSSQL_Core extends SQL_Base
 
         if (strcasecmp($value, 'null') == 0) {
             if (!$just_checking) {
-                if (!static::$prop_definitions[$name]['nullable']) {
+                if (!static::$prop_definitions[$name]['is_nullable']) {
                     Debug::Halt($name . ' cannot be null');
                 }
             }

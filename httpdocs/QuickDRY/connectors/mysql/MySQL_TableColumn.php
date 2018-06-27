@@ -32,7 +32,7 @@ class MySQL_TableColumn
                     $this->field_alias = $value;
                     break;
                 case 'Type': $this->type = $value; break;
-                case 'Null': $this->null = $value === 'YES' ? 1 : 0; break;
+                case 'Null': $this->null = $value === 'YES' ? true : false; break;
                 case 'Default': $this->default = $value; break;
             }
         }

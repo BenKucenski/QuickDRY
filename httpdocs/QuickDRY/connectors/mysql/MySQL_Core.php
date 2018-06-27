@@ -579,7 +579,7 @@ class MySQL_Core extends SQL_Base
             return null;
 
         if (strcasecmp($value, 'null') == 0) {
-            if (!static::$prop_definitions[$name]['nullable']) {
+            if (!static::$prop_definitions[$name]['is_nullable']) {
                 throw new Exception($name . ' cannot be null');
             }
             return null;
