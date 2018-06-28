@@ -243,6 +243,11 @@ class MSSQL_Core extends SQL_Base
         // extra + symbols allow us to do AND on the same column
         $col = str_replace('+', '', $col);
 
+        if (substr($val, 0, strlen('{BETWEEN} ')) === '{BETWEEN} ') {
+            $val = trim(Strings::RemoveFromStart('{BETWEEN}', $val));
+            $val = explode(',', $val);
+            $col = $col . ' BETWEEN @ AND @';
+        } else
         if (substr($val, 0, strlen('{IN} ')) === '{IN} ') {
             $val = trim(Strings::RemoveFromStart('{IN}', $val));
             $val = explode(',', $val);
