@@ -63,6 +63,7 @@ class GoogleAPI {
                 $res = self::ParseResult($gcsv);
                 $this->latitude = $res['latitude'];
                 $this->longitude = $res['longitude'];
+                $this->error = $res['error'];
 
                 return;
 			} else {
