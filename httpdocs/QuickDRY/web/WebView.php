@@ -18,7 +18,7 @@ if (file_exists($Web->ControllerFile)) {
     $PageMode = QUICKDRY_MODE_BASIC;
 
     if ($Web->PageMode === QUICKDRY_MODE_STATIC || $Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
-        $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL_STATIC);
+        $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->PageClass ? $Web->PageClass : PAGE_MODEL_STATIC);
 
         if (is_numeric($PageModel[0])) {
             $PageModel = 'i' . $PageModel;
@@ -29,7 +29,7 @@ if (file_exists($Web->ControllerFile)) {
     }
 
     if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
-        $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->CurrentPageName ? $Web->CurrentPageName : PAGE_MODEL);
+        $class = $Web->InstanceModel ? $Web->InstanceModel : ($Web->PageClass ? $Web->PageClass : PAGE_MODEL);
 
         if (is_numeric($class[0])) {
             $class = 'i' . $class;
@@ -38,6 +38,7 @@ if (file_exists($Web->ControllerFile)) {
             $PageMode = QUICKDRY_MODE_INSTANCE;
         }
     }
+
 
     switch ($PageMode) {
         case QUICKDRY_MODE_STATIC:

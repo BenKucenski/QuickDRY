@@ -24,14 +24,21 @@ var HTTP = {
         WaitDialog(title, text);
         window.location = url;
     },
-    Post: function (url, vars, callback, error_callback, dialog) {
+    Get: function (url, vars, callback, error_callback, dialog) {
+        return HTTP.Post(url, vars, callback, error_callback, dialog, 'GET');
+    },
+    Post: function (url, vars, callback, error_callback, dialog, method) {
+
+        if (!method) {
+            method = "POST";
+        }
 
         if (dialog) {
             var modalClass = dialog.replace('_dialog', '');
         }
 
         $.ajax({
-            method: "POST",
+            method: method,
             url: url,
             data: vars,
             dataType: "json",

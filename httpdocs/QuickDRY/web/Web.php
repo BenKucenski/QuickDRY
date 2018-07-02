@@ -21,12 +21,14 @@ define('REQUEST_EXPORT_XLS','XLS');
  *
  * @property string ControllerFile
  * @property string ViewFile
+ * @property string PageClass
  * @property Request Request
  * @property Session Session
  * @property Cookie Cookie
  * @property Server Server
  * @property Navigation Navigation
  * @property bool AccessDenied
+ * @property bool IsJSON
  * @property string[] SecureMasterPages
  * @property string MasterPage
  * @property string SettingsFile
@@ -44,6 +46,9 @@ class Web
 {
     public $ControllerFile;
     public $ViewFile;
+    public $PageClass;
+    public $IsJSON;
+
     public $Request;
     public $Session;
     public $Cookie;
@@ -210,8 +215,25 @@ class Web
         $page = 'pages' . $this->CurrentPage . '.php';
         $code = 'pages' . $this->CurrentPage . '.code.php';
 
-        $this->ControllerFile = file_exists($code) ? $code : $code_alt;
-        $this->ViewFile = file_exists($page) ? $page : $page_alt;
+        $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt :  null);
+        $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt :  null);
+
+        // Accept page.json.php and json.page.php
+        $this->IsJSON = false;
+        if(stristr($this->CurrentPageName,'.json') !== false) {
+            $this->ControllerFile = $this->ViewFile;
+            $this->ViewFile = null;
+            $this->IsJSON = true;
+        } else {
+            if (stristr($this->CurrentPageName, 'json.') !== false) {
+                $this->ControllerFile = $this->ViewFile;
+                $this->ViewFile = null;
+                $this->IsJSON = true;
+            }
+        }
+
+        $temp = explode('.', $this->CurrentPageName);
+        $this->PageClass = $temp[0];
 
         $this->Verb = $this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD;
     }
