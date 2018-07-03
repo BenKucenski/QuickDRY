@@ -52,6 +52,26 @@ class SimpleExcel extends SafeClass
     }
 
     /**
+     * @param Spreadsheet $sheet
+     */
+    private static function SetDefaultSecurity(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet &$sheet)
+    {
+        // when marking a sheet protected, there are a number of settings that should not be set by default
+        $protection = $sheet->getProtection();
+        $protection->setSelectUnlockedCells(false);
+        $protection->setSelectLockedCells(false);
+        $protection->setFormatCells(true);
+        $protection->setFormatColumns(true);
+        $protection->setFormatRows(true);
+        $protection->setInsertColumns(true);
+        $protection->setInsertHyperlinks(true);
+        $protection->setInsertRows(true);
+        $protection->setDeleteColumns(true);
+        $protection->setDeleteRows(true);
+
+    }
+
+    /**
      * @param SimpleExcel $se
      */
     public static function ExportSpreadsheet(SimpleExcel &$se)
@@ -71,6 +91,7 @@ class SimpleExcel extends SafeClass
         } catch (Exception $ex) {
             Debug::Halt($ex);
         }
+        self::SetDefaultSecurity($sheet);
         $sheet->setTitle($se->Title);
         $sheet_row = 1;
         $sheet_column = 'A';
@@ -146,8 +167,9 @@ class SimpleExcel extends SafeClass
             } catch (Exception $ex) {
                 Halt($ex);
             }
-            $sheet_row = 1;
+            self::SetDefaultSecurity($sheet);
 
+            $sheet_row = 1;
 
             $sheet_column = 'A';
             foreach ($report->Columns as $column) {
