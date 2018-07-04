@@ -303,6 +303,16 @@ class SimpleExcel extends SafeClass
                     Debug::Halt($ex);
                 }
             }
+            if($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_CURRENCY) {
+                try {
+                    $sheet
+                        ->getStyle($sheet_column . $sheet_row)
+                        ->getNumberFormat()
+                        ->setFormatCode('#,##0.00');
+                } catch (Exception $ex) {
+                    Debug::Halt($ex);
+                }
+            }
 
             if (is_array($value)) {
                 Debug::Halt(['value cannot be an array', $value]);
