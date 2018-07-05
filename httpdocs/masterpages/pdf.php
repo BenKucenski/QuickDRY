@@ -14,8 +14,8 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.2/css/bootstrap-colorpicker.css" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.2/css/bootstrap-colorpicker.css.map" />
 
-    <link rel="stylesheet" type="text/css" href="/css/jquery.notifications.css" />
-    <link rel="stylesheet" type="text/css" href="/css/jquery.fileupload-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/QuickDRY/css/jquery.notifications.css" />
+    <link rel="stylesheet" type="text/css" href="/QuickDRY/css/jquery.fileupload-ui.css" />
     <link rel='stylesheet' type="text/css" href='/QuickDRY/css/GoogleChartFix.css'/>
 
     <?php if(file_exists('pages'.CURRENT_PAGE. '/' . CURRENT_PAGE_NAME . '.css')) { ?>
@@ -41,7 +41,6 @@
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.js"></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.Strings.js"></script>
     <script type="text/javascript" src="/QuickDRY/js/QuickDRY.Tabs.js"></script>
-
 
     <?php if(file_exists('pages'.CURRENT_PAGE. '/' . CURRENT_PAGE_NAME . '.js')) { ?>
         <script type="text/javascript" src="/pages<?php echo CURRENT_PAGE. '/' . CURRENT_PAGE_NAME . '.js'; ?>"></script>
