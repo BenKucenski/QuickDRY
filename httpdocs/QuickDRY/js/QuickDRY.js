@@ -252,17 +252,7 @@ var QuickDRY = {
         $('#' + elem_id).modal('show');
         //$('#' + elem_id).disableSelection();
     },
-    ReloadPage: function (title, text) {
-        if (typeof (text) == "undefined")
-            title = "Reloading Page";
-        if (typeof (title) == "undefined")
-            text = "Please Wait";
 
-        WaitDialog(title, text);
-        setTimeout(function () {
-            window.location.reload(true);
-        }, 1000);
-    },
     AutoComplete: function (elem_id, form_id, source_url, select_function) {
         $('#' + elem_id).autocomplete({
             source: source_url,
@@ -282,7 +272,7 @@ var QuickDRY = {
                 $.ajax({
                     url: url,
                     dataType: 'json',
-                    data: {term: request.term},
+                    data: {term: request.term, verb : 'FIND'},
                     success: function (data) {
                         response(data);
                     }
