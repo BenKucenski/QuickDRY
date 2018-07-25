@@ -33,7 +33,11 @@ require_once 'connectors/MSSQL.php';
 require_once 'connectors/Curl.php';
 require_once 'connectors/WSDL.php';
 require_once 'connectors/adLDAP.php';
-require_once 'connectors/oauth.php';
+
+if(!class_exists('OAuth')) { // when not using the PHP OAuth extension
+    require_once 'connectors/oauth.php';
+}
+
 require_once 'connectors/elastic.php';
 require_once 'connectors/GoogleAPI.php';
 require_once 'connectors/APIRequest.php';
