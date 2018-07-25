@@ -11,7 +11,20 @@ class Strings extends SafeClass
      */
     public static function CSVToAssociativeArray($filename, $clean_header = false)
     {
-        $rows = array_map('str_getcsv', file($filename));
+        return self::CSVArrayToAssociativeArray(file($filename), $clean_header);
+    }
+
+    /**
+     * @param $filename
+     * @return array
+     */
+    public static function CSVArrayToAssociativeArray($array, $clean_header = false)
+    {
+        if(!is_array($array)) {
+            $array = explode("\n", trim($array));
+        }
+
+        $rows = array_map('str_getcsv', $array);
         $header = array_shift($rows);
         if ($clean_header) {
             foreach ($header as $i => $item) {
