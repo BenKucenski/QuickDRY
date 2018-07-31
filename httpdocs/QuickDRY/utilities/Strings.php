@@ -5,6 +5,17 @@
  */
 class Strings extends SafeClass
 {
+    // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
+    public static function Ordinal($number)
+    {
+        $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+        if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
+            return $number . 'th';
+        } else {
+            return $number . $ends[$number % 10];
+        }
+    }
+
     /**
      * @param $filename
      * @return array
