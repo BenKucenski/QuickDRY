@@ -185,18 +185,7 @@ class Debug extends SafeClass
     }
 }
 
-function CleanHalt($var, $message = null)
-{
-    Debug::CleanHalt($var, $message);
-}
 
-/**
- * @param $var
- */
-function Halt($var, $message = null)
-{
-    Debug::Halt($var, $message);
-}
 
 
 

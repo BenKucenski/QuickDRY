@@ -153,20 +153,3 @@ class HTTP extends SafeClass
     }
 }
 
-/**
- * @param $json
- * @param int $HTTP_STATUS
- */
-function exit_json($json, $HTTP_STATUS = HTTP_STATUS_OK)
-{
-    return HTTP::ExitJSON($json, $HTTP_STATUS);
-}
-
-/**
- * @param $serialized
- * @return array
- */
-function PostFromSerialized($serialized)
-{
-    return HTTP::PostFromSerialized($serialized);
-}

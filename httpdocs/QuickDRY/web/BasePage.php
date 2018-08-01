@@ -1,7 +1,4 @@
 <?php
-define('PDF_PAGE_ORIENTATION_LANDSCAPE', 'landscape');
-define('PDF_PAGE_ORIENTATION_PORTRAIT', 'portrait');
-
 /**
  * Class BasePage
  *

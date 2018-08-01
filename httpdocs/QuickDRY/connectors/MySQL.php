@@ -49,16 +49,45 @@ class MySQL extends SafeClass
     }
 }
 
+function autoloader_QuickDRY_MySQL($class)
+{
+    $class_map = [
+        'MySQL_Core' => 'mysql/MySQL_Core.php',
+        'MySQL_TableColumn' => 'mysql/MySQL_TableColumn.php',
+        'MySQL_ForeignKey' => 'mysql/MySQL_ForeignKey.php',
+        'MySQL_Connection' => 'mysql/MySQL_Connection.php',
+        'MySQL_A' => 'mysql/MySQL_A.php',
+        'MySQL_B' => 'mysql/MySQL_B.php',
+        'MySQL_C' => 'mysql/MySQL_C.php',
+        'MySQL_Queue' => 'mysql/MySQL_Queue.php',
+        'MySQL_StoredProcParam' => 'mysql/MySQL_StoredProcParam.php',
+        'MySQL_StoredProc' => 'mysql/MySQL_StoredProc.php',
+        'MySQL_CodeGen' => 'mysql/MySQL_CodeGen.php',
+    ];
 
-require_once 'mysql/MySQL_Core.php';
-require_once 'mysql/MySQL_TableColumn.php';
-require_once 'mysql/MySQL_ForeignKey.php';
-require_once 'mysql/MySQL_Connection.php';
-require_once 'mysql/MySQL_A.php';
-require_once 'mysql/MySQL_B.php';
-require_once 'mysql/MySQL_C.php';
-require_once 'mysql/MySQL_Queue.php';
-require_once 'mysql/MySQL_StoredProcParam.php';
-require_once 'mysql/MySQL_StoredProc.php';
-require_once 'mysql/MySQL_CodeGen.php';
+
+    if (!isset($class_map[$class])) {
+        return;
+    }
+
+    $file = $class_map[$class];
+    $file = 'QuickDRY/connectors/' . $file;
+
+    if (file_exists($file)) { // web
+        require_once $file;
+    } else {
+        if (file_exists('../' . $file)) { // cron folder
+            require_once '../' . $file;
+        } else { // scripts folder
+            require_once '../httpdocs/' . $file;
+        }
+    }
+}
+
+
+spl_autoload_register('autoloader_QuickDRY_MySQL');
+
+
+
+
 

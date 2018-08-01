@@ -108,14 +108,40 @@ class MSSQL extends SafeClass
     }
 }
 
-require_once 'mssql/MSSQL_Core.php';
-require_once 'mssql/MSSQL_TableColumn.php';
-require_once 'mssql/MSSQL_ForeignKey.php';
-require_once 'mssql/MSSQL_Connection.php';
-require_once 'mssql/MSSQL_A.php';
-require_once 'mssql/MSSQL_B.php';
-require_once 'mssql/MSSQL_C.php';
-require_once 'mssql/MSSQL_Queue.php';
-require_once 'mssql/MSSQL_StoredProcParam.php';
-require_once 'mssql/MSSQL_StoredProc.php';
-require_once 'mssql/MSSQL_CodeGen.php';
+function autoloader_QuickDRY_MSSQL($class)
+{
+    $class_map = [
+        'MSSQL_Core' => 'mssql/MSSQL_Core.php',
+        'MSSQL_TableColumn' => 'mssql/MSSQL_TableColumn.php',
+        'MSSQL_ForeignKey' => 'mssql/MSSQL_ForeignKey.php',
+        'MSSQL_Connection' => 'mssql/MSSQL_Connection.php',
+        'MSSQL_A' => 'mssql/MSSQL_A.php',
+        'MSSQL_B' => 'mssql/MSSQL_B.php',
+        'MSSQL_C' => 'mssql/MSSQL_C.php',
+        'MSSQL_Queue' => 'mssql/MSSQL_Queue.php',
+        'MSSQL_StoredProcParam' => 'mssql/MSSQL_StoredProcParam.php',
+        'MSSQL_StoredProc' => 'mssql/MSSQL_StoredProc.php',
+        'MSSQL_CodeGen' => 'mssql/MSSQL_CodeGen.php',
+    ];
+
+
+    if (!isset($class_map[$class])) {
+        return;
+    }
+
+    $file = $class_map[$class];
+    $file = 'QuickDRY/connectors/' . $file;
+
+    if (file_exists($file)) { // web
+        require_once $file;
+    } else {
+        if (file_exists('../' . $file)) { // cron folder
+            require_once '../' . $file;
+        } else { // scripts folder
+            require_once '../httpdocs/' . $file;
+        }
+    }
+}
+
+
+spl_autoload_register('autoloader_QuickDRY_MSSQL');

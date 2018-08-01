@@ -78,15 +78,44 @@
 
 
 
+function autoloader_QuickDRY_FineDiff($class)
+{
+    $class_map = [
+        'FineDiffOp' => 'FineDiff/FineDiffOp.php',
+        'FineDiffOps' => 'FineDiff/FineDiffOps.php',
+        'FineDiffCopyOp' => 'FineDiff/FineDiffCopyOp.php',
+        'FineDiffDeleteOp' => 'FineDiff/FineDiffDeleteOp.php',
+        'FineDiffInsertOp' => 'FineDiff/FineDiffInsertOp.php',
+        'FineDiffReplaceOp' => 'FineDiff/FineDiffReplaceOp.php',
+        'FineDiff' => 'FineDiff/FineDiff.php',
+    ];
 
 
-require_once 'FineDiff/FineDiffOp.php';
-require_once 'FineDiff/FineDiffOps.php';
-require_once 'FineDiff/FineDiffCopyOp.php';
-require_once 'FineDiff/FineDiffDeleteOp.php';
-require_once 'FineDiff/FineDiffInsertOp.php';
-require_once 'FineDiff/FineDiffReplaceOp.php';
-require_once 'FineDiff/FineDiff.php';
+    if (!isset($class_map[$class])) {
+        return;
+    }
+
+    $file = $class_map[$class];
+    $file = 'QuickDRY/utilities/' . $file;
+
+    if (file_exists($file)) { // web
+        require_once $file;
+    } else {
+        if (file_exists('../' . $file)) { // cron folder
+            require_once '../' . $file;
+        } else { // scripts folder
+            require_once '../httpdocs/' . $file;
+        }
+    }
+}
+
+
+spl_autoload_register('autoloader_QuickDRY_FineDiff');
+
+
+
+
+
 
 
 

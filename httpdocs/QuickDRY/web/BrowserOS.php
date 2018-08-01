@@ -92,4 +92,3 @@ class BrowserOS
 		/* ============================ */
 	}
 }
-BrowserOS::Configure();

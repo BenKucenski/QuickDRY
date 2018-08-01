@@ -1,7 +1,4 @@
 <?php
-
-define('SELECT_NO', 1);
-define('SELECT_YES', 2);
 /**
  * Class YesNoClass
  */

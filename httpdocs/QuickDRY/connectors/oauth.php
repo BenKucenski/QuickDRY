@@ -1,12 +1,39 @@
 <?php
-require_once 'oauth/OAuthConsumer.php';
-require_once 'oauth/OAuthDataStore.php';
-require_once 'oauth/OAuthException.php';
-require_once 'oauth/OAuthRequest.php';
-require_once 'oauth/OAuthServer.php';
-require_once 'oauth/OAuthSignatureMethod.php';
-require_once 'oauth/OAuthSignatureMethod_HMAC_SHA1.php';
-require_once 'oauth/OAuthSignatureMethod_PLAINTEXT.php';
-require_once 'oauth/OAuthSignatureMethod_RSA_SHA1.php';
-require_once 'oauth/OAuthToken.php';
-require_once 'oauth/OAuthUtil.php';
+function autoloader_QuickDRY_OAuth($class)
+{
+    $class_map = [
+        'OAuthConsumer' => 'oauth/OAuthConsumer.php',
+        'OAuthDataStore' => 'oauth/OAuthDataStore.php',
+        'OAuthException' => 'oauth/OAuthException.php',
+        'OAuthRequest' => 'oauth/OAuthRequest.php',
+        'OAuthServer' => 'oauth/OAuthServer.php',
+        'OAuthSignatureMethod' => 'oauth/OAuthSignatureMethod.php',
+        'OAuthSignatureMethod_HMAC_SHA1' => 'oauth/OAuthSignatureMethod_HMAC_SHA1.php',
+        'OAuthSignatureMethod_PLAINTEXT' => 'oauth/OAuthSignatureMethod_PLAINTEXT.php',
+        'OAuthSignatureMethod_RSA_SHA1' => 'oauth/OAuthSignatureMethod_RSA_SHA1.php',
+        'OAuthToken' => 'oauth/OAuthToken.php',
+        'OAuthUtil' => 'oauth/OAuthUtil.php',
+    ];
+
+    if (!isset($class_map[$class])) {
+        return;
+    }
+
+    $file = $class_map[$class];
+    $file = 'QuickDRY/connectors/' . $file;
+
+    if (file_exists($file)) { // web
+        require_once $file;
+    } else {
+        if (file_exists('../' . $file)) { // cron folder
+            require_once '../' . $file;
+        } else { // scripts folder
+            require_once '../httpdocs/' . $file;
+        }
+    }
+}
+
+
+spl_autoload_register('autoloader_QuickDRY_OAuth');
+
+

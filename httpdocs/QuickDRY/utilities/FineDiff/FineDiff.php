@@ -568,5 +568,3 @@ class FineDiff {
     }
 }
 
-define('FINE_DIFF_GRANULARITY_WORD', json_encode(FineDiff::$wordGranularity));
-define('FINE_DIFF_GRANULARITY_PARAGRAPH', 0);

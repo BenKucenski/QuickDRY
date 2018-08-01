@@ -119,4 +119,3 @@ class Metrics
     }
 }
 
-Metrics::StartGlobal();

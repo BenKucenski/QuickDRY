@@ -1,20 +1,4 @@
 <?php
-define('QUICKDRY_MODE_STATIC', 1);
-define('QUICKDRY_MODE_INSTANCE', 2);
-define('QUICKDRY_MODE_BASIC', 3);
-
-define('REQUEST_VERB_GET','GET');
-define('REQUEST_VERB_POST','POST');
-define('REQUEST_VERB_PUT','PUT');
-define('REQUEST_VERB_DELETE','DELETE');
-define('REQUEST_VERB_HISTORY','HISTORY');
-
-define('REQUEST_VERB_FIND','FIND');
-define('REQUEST_EXPORT_CSV','CSV');
-define('REQUEST_EXPORT_PDF','PDF');
-define('REQUEST_EXPORT_JSON','JSON');
-define('REQUEST_EXPORT_XLS','XLS');
-
 
 /**
  * Class Web

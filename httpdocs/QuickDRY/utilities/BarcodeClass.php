@@ -24,8 +24,9 @@ class BarcodeClass
 
 		$barcode_font = $root . 'FREE3OF9.TTF';
 
-		if($Web->Request->d)
-			Debug($barcode_font, false);
+		if($Web->Request->d) {
+            Halt($barcode_font);
+        }
 
 		if(!is_dir($root . $width))
 			mkdir($root . $width);
