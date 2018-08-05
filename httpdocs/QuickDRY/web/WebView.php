@@ -91,6 +91,7 @@ if (file_exists($Web->ControllerFile)) {
                     case REQUEST_EXPORT_PDF:
                         $PageModel::DoExportToPDF();
                         $Web->RenderPDF = true;
+                        $Web->PDFPageSize = $PageModel::$PDFPageSize;
                         $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
                         $Web->PDFFileName = $PageModel::$PDFFileName;
                         $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
@@ -154,6 +155,7 @@ if (file_exists($Web->ControllerFile)) {
                     case REQUEST_EXPORT_PDF:
                         $PageModel->ExportToPDF();
                         $Web->RenderPDF = true;
+                        $Web->PDFPageSize = $PageModel->PDFPageSize;
                         $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;
                         $Web->PDFFileName = $PageModel->PDFFileName;
                         $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;

@@ -10,6 +10,41 @@ define('SIMPLE_EXCEL_PROPERTY_TYPE_CURRENCY', 4);
 define('PDF_PAGE_ORIENTATION_LANDSCAPE', 'landscape');
 define('PDF_PAGE_ORIENTATION_PORTRAIT', 'portrait');
 
+// http://doc.qt.io/archives/qt-4.8/qprinter.html#PaperSize-enum
+define('PDF_PAGE_SIZE_A0', 'A0');
+define('PDF_PAGE_SIZE_A1', 'A1');
+define('PDF_PAGE_SIZE_A2', 'A2');
+define('PDF_PAGE_SIZE_A3', 'A3');
+define('PDF_PAGE_SIZE_A4', 'A4');
+define('PDF_PAGE_SIZE_A5', 'A5');
+define('PDF_PAGE_SIZE_A6', 'A6');
+define('PDF_PAGE_SIZE_A7', 'A7');
+define('PDF_PAGE_SIZE_A8', 'A8');
+define('PDF_PAGE_SIZE_A9', 'A9');
+
+define('PDF_PAGE_SIZE_B0', 'B0');
+define('PDF_PAGE_SIZE_B1', 'B1');
+define('PDF_PAGE_SIZE_B2', 'B2');
+define('PDF_PAGE_SIZE_B3', 'B3');
+define('PDF_PAGE_SIZE_B4', 'B4');
+define('PDF_PAGE_SIZE_B5', 'B5');
+define('PDF_PAGE_SIZE_B6', 'B6');
+define('PDF_PAGE_SIZE_B7', 'B7');
+define('PDF_PAGE_SIZE_B8', 'B8');
+define('PDF_PAGE_SIZE_B9', 'B9');
+define('PDF_PAGE_SIZE_B10', 'B10');
+
+define('PDF_PAGE_SIZE_C5E', 'C5E');
+define('PDF_PAGE_SIZE_COMM10E', 'Comm10E');
+define('PDF_PAGE_SIZE_DLE', 'DLE');
+define('PDF_PAGE_SIZE_EXECUTIVE', 'Executive');
+define('PDF_PAGE_SIZE_FOLIO', 'Folio');
+define('PDF_PAGE_SIZE_LEDGER', 'Ledger');
+define('PDF_PAGE_SIZE_LEGAL', 'Legal');
+define('PDF_PAGE_SIZE_LETTER', 'Letter');
+define('PDF_PAGE_SIZE_TABLOID', 'Tabloid');
+
+
 // HTTPStatus
 define('HTTP_STATUS_OK', 200);
 define('HTTP_STATUS_NOT_MODIFIED', 304);

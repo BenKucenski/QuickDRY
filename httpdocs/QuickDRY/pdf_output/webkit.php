@@ -33,6 +33,8 @@ $params = [];
 $params[] = '--javascript-delay 5000';
 $params[] = '--enable-javascript';
 $params[] = '--disable-smart-shrinking';
+$params[] = '--page-size ' . ($Web->PDFPageSize ? $Web->PDFPageSize : PDF_PAGE_SIZE_LETTER);
+
 // $params[] = '--debug-javascript';
 $params[] = '-O ' . $Web->PDFPageOrientation;
 if($Web->PDFHeader) {

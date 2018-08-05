@@ -8,6 +8,9 @@ class BasePage extends SafeClass
     /* @var string $PDFPageOrientation */
     public static $PDFPageOrientation;
 
+    /* @var string $PDFPageSize */
+    public static $PDFPageSize;
+
     /* @var string $PDFFileName */
     public static $PDFFileName;
 
@@ -47,6 +50,9 @@ class BasePage extends SafeClass
         switch ($name) {
             case 'PDFPageOrientation':
                 return self::$PDFPageOrientation;
+
+            case 'PDFPageSize':
+                return self::$PDFPageSize;
 
             case 'PDFFileName':
                 return self::$PDFFileName;
@@ -88,6 +94,10 @@ class BasePage extends SafeClass
         switch ($name) {
             case 'PDFPageOrientation':
                 self::$PDFPageOrientation = $value;
+                break;
+
+            case 'PDFPageSize':
+                self::$PDFPageSize = $value;
                 break;
 
             case 'PDFFileName':

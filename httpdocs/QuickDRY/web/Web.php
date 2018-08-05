@@ -20,6 +20,7 @@
  * @property string HTML;
  * @property string Verb
  * @property string PDFPageOrientation
+ * @property string PDFPageSize
  * @property string PDFFileName
  * @property string PDFHeader
  * @property string PDFFooter
@@ -50,6 +51,7 @@ class Web
 
     public $RenderPDF;
     public $PDFPageOrientation;
+    public $PDFPageSize;
     public $PDFFileName;
     public $PDFPostRedirect;
     public $PDFHeader;
