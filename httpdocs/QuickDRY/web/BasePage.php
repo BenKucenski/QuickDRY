@@ -14,6 +14,12 @@ class BasePage extends SafeClass
     /* @var string $PDFFileName */
     public static $PDFFileName;
 
+    /* @var string $DOCXPageOrientation */
+    public static $DOCXPageOrientation;
+
+    /* @var string $DOCXFileName */
+    public static $DOCXFileName;
+
     /* @var string $PDFPostRedirect */
     public static $PDFPostRedirect;
 
@@ -287,6 +293,11 @@ class BasePage extends SafeClass
         Halt('ExportToPDF is not implemented');
     }
 
+    public function ExportToDOCX()
+    {
+        Halt('ExportToDOCX is not implemented');
+    }
+
     public function ExportToCSV()
     {
         Halt('ExportToCSV is not implemented');
@@ -305,6 +316,11 @@ class BasePage extends SafeClass
     public static function DoExportToPDF()
     {
         Halt('DoExportToPDF is not implemented');
+    }
+
+    public static function DoExportToDOCX()
+    {
+        Halt('DoExportToDOCX is not implemented');
     }
 
     public static function DoExportToCSV()

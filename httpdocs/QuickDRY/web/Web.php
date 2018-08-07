@@ -17,6 +17,7 @@
  * @property string MasterPage
  * @property string SettingsFile
  * @property bool RenderPDF;
+ * @property bool RenderDOCX;
  * @property string HTML;
  * @property string Verb
  * @property string PDFPageOrientation
@@ -25,6 +26,8 @@
  * @property string PDFHeader
  * @property string PDFFooter
  * @property string PDFPostRedirect
+ * @property string DOCXPageOrientation
+ * @property string DOCXFileName
  * @property UserClass CurrentUser
  */
 class Web
@@ -56,6 +59,10 @@ class Web
     public $PDFPostRedirect;
     public $PDFHeader;
     public $PDFFooter;
+
+    public $RenderDOCX;
+    public $DOCXPageOrientation;
+    public $DOCXFileName;
 
     public $StaticModel;
     public $InstanceModel;

@@ -88,6 +88,14 @@ if (file_exists($Web->ControllerFile)) {
                     case REQUEST_EXPORT_JSON:
                         $PageModel::DoExportToJSON();
                         exit;
+                    case REQUEST_EXPORT_DOCX:
+                        $PageModel::DoExportToDOCX();
+                        $Web->RenderDOCX= true;
+                        $Web->DOCXPageOrientation = $PageModel::$DOCXPageOrientation;
+                        $Web->DOCXFileName = $PageModel::$DOCXFileName;
+                        $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
+                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+                        break;
                     case REQUEST_EXPORT_PDF:
                         $PageModel::DoExportToPDF();
                         $Web->RenderPDF = true;
@@ -161,6 +169,13 @@ if (file_exists($Web->ControllerFile)) {
                         $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
                         $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
                         break;
+                    case REQUEST_EXPORT_DOCX:
+                        $PageModel->ExportToDOCX();
+                        $Web->RenderDOCX = true;
+                        $Web->DOCXPageOrientation = $PageModel->PDFPageOrientation;
+                        $Web->DOCXFileName = $PageModel->PDFFileName;
+                        $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+                        break;
                 }
             }
             break;
@@ -202,6 +217,23 @@ if ($Web->RenderPDF) {
     require_once 'QuickDRY/pdf_output/webkit.php';
 
     Metrics::Stop('render pdf');
+    exit;
+}
+
+if ($Web->RenderDOCX) {
+
+    ob_start();
+    if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
+        require_once 'masterpages/' . $Web->MasterPage . '.php';
+    } else {
+        Debug::Halt($Web->MasterPage . ' does not exist: ' . $Web->ViewFile);
+    }
+    $Web->HTML = ob_get_clean();
+
+
+    Metrics::Start('render docx');
+    SimpleWordDoc::RenderHTML($Web->HTML, $Web->DOCXFileName);
+    Metrics::Stop('render docx');
     exit;
 }
 
