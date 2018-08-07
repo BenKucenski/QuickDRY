@@ -174,29 +174,30 @@ var QuickDRY = {
     InitDatePickers: function () {
         $('.date-picker').prop('autocomplete', 'off');
 
-        $('.date-picker').datepicker({
-            format: 'mm/dd/yyyy',
-            startDate: '01/01/1900',
-            endDate: '12/31/2100',
-            todayHighlight: true,
-            autoclose: true
-        }).on('focus', function (e) {
-            var t = $(this).datepicker.isOpen;
-            if (!t) {
-                $(this).datepicker('update', $(this).val());
-            }
-            $(this).datepicker.isOpen = true;
+        if($('.date-picker').datepicker) {
+            $('.date-picker').datepicker({
+                format: 'mm/dd/yyyy',
+                startDate: '01/01/1900',
+                endDate: '12/31/2100',
+                todayHighlight: true,
+                autoclose: true
+            }).on('focus', function (e) {
+                var t = $(this).datepicker.isOpen;
+                if (!t) {
+                    $(this).datepicker('update', $(this).val());
+                }
+                $(this).datepicker.isOpen = true;
 
-        }).on('hide', function (e) {
-            $(this).datepicker.isOpen = false;
-        });
+            }).on('hide', function (e) {
+                $(this).datepicker.isOpen = false;
+            });
 
-        $(".time-picker").datetimepicker({});
+            $(".time-picker").datetimepicker({});
 
-        $('.timeonly-picker').datetimepicker({
-            format: 'LT'
-        });
-
+            $('.timeonly-picker').datetimepicker({
+                format: 'LT'
+            });
+        }
         $(".color").colorpicker();
         $(".color").each(function () {
             $(this).css('background-color', '#' + $(this).val());

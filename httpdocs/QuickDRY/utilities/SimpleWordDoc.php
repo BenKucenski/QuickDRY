@@ -5,8 +5,10 @@ class SimpleWordDoc extends SafeClass
 {
     public static function RenderHTML($html, $filename)
     {
-        // CleanHalt($html);
-        PhpOffice\PhpWord\Settings::setTempDir('C:\web\SurveyPHP\temp');
+        if(!defined('WORD_TEMP_DIR')) {
+            Halt('WORD_TEMP_DIR must be defined');
+        }
+        PhpOffice\PhpWord\Settings::setTempDir(WORD_TEMP_DIR);
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();

@@ -187,8 +187,9 @@ if (file_exists($Web->ControllerFile)) {
                     HTTP::RedirectError('Access Denied (3)');
                 }
             }
-            $Web->MasterPage = isset($_MASTERPAGE) ? $_MASTERPAGE : MASTERPAGE_DEFAULT;
-
+            if(!$Web->MasterPage) {
+                $Web->MasterPage = isset($_MASTERPAGE) ? $_MASTERPAGE : MASTERPAGE_DEFAULT;
+            }
     }
 }
 

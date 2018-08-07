@@ -213,15 +213,21 @@ class Web
 
         // Accept page.json.php and json.page.php
         $this->IsJSON = false;
-        if(stristr($this->CurrentPageName,'.json') !== false) {
+        if(stristr($this->CurrentPageName,'.html') !== false) {
             $this->ControllerFile = $this->ViewFile;
             $this->ViewFile = null;
-            $this->IsJSON = true;
+            $this->IsJSON = false;
         } else {
-            if (stristr($this->CurrentPageName, 'json.') !== false) {
+            if (stristr($this->CurrentPageName, '.json') !== false) {
                 $this->ControllerFile = $this->ViewFile;
                 $this->ViewFile = null;
                 $this->IsJSON = true;
+            } else {
+                if (stristr($this->CurrentPageName, 'json.') !== false) {
+                    $this->ControllerFile = $this->ViewFile;
+                    $this->ViewFile = null;
+                    $this->IsJSON = true;
+                }
             }
         }
 
