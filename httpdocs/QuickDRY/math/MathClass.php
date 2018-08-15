@@ -5,6 +5,10 @@
  */
 class MathClass
 {
+    /**
+     * @param $arr
+     * @return float|int
+     */
     public static function Median($arr) {
         $count = count($arr); //total numbers in array
         $middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
@@ -16,6 +20,23 @@ class MathClass
             $median = (($low+$high)/2);
         }
         return $median;
+    }
+
+    /**
+     * @param $arr
+     * @return mixed
+     */
+    public static function Mode($arr)
+    {
+        $summary = [];
+        foreach($arr as $val) {
+            if(!isset($summary[$val])) {
+                $summary[$val] = 0;
+            }
+            $summary[$val]++;
+        }
+        $maxs = array_keys($summary, max($summary));
+        return $maxs[0];
     }
 
     /**

@@ -79,7 +79,7 @@ class SimpleExcel extends SafeClass
         if(!$se->Filename) {
             Halt('Filename required');
         }
-        $se->Title = substr($se->Title, 0, 31); // max 31 characters
+        $se->Title = $se->Title ? substr($se->Title, 0, 31) : 'Sheet'; // max 31 characters
         $parts = pathinfo($se->Filename);
         if(!isset($parts['extension']) || strcasecmp($parts['extension'], 'xlsx') !== 0) {
             $se->Filename .= '.xlsx';
@@ -106,11 +106,12 @@ class SimpleExcel extends SafeClass
                 if(!is_object($item)) {
                     Halt($item);
                 }
-                if(!property_exists(get_class($item), $column->Property) && !isset($item->{$column->Property})) {
-                    $value = '';
-                } else {
+                try { // need to use try catch so that magic __get columns are accessible
                     $value = $item->{$column->Property};
+                } catch(Exception $ex) {
+                    $value = '';
                 }
+
                 self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                 $sheet_column++;
             }
@@ -163,7 +164,7 @@ class SimpleExcel extends SafeClass
             }
             try {
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setTitle($report->Title);
+                $sheet->setTitle($report->Title ? $report->Title : 'Sheet ' . ($sheet + 1));
             } catch (Exception $ex) {
                 Halt($ex);
             }
@@ -184,10 +185,10 @@ class SimpleExcel extends SafeClass
                         if(!is_object($item)) {
                             Halt($item);
                         }
-                        if(!property_exists(get_class($item), $column->Property) && !isset($item->{$column->Property})) {
-                            $value = '';
-                        } else {
+                        try { // need to use try catch so that magic __get columns are accessible
                             $value = $item->{$column->Property};
+                        } catch(Exception $ex) {
+                            $value = '';
                         }
                         self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                         $sheet_column++;
