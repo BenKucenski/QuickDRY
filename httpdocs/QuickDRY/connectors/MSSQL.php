@@ -53,6 +53,9 @@ class MSSQL extends SafeClass
             return 'null';
         }
 
+        $data = str_replace('{{{', '', $data);
+        $data = str_replace('}}}', '', $data);
+
         return "'" . $data . "'";
     }
 
