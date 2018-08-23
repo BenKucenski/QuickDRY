@@ -25,8 +25,6 @@ $Web = new Web();
 $Web->Init('signin', 'admin', dirname(__FILE__));
 $Web->SetSecureMasterPages([MASTERPAGE_DEFAULT]);
 
-
-
 if (file_exists($Web->SettingsFile)) {
     require_once $Web->SettingsFile;
 } else {
@@ -43,11 +41,12 @@ if (file_exists($Web->SettingsFile)) {
     }
 }
 
+$Web->SetURLs();
+
 if (defined('ROUTE_REQUESTS') && ROUTE_REQUESTS) {
     require_once ROUTE_REQUESTS;
     exit;
 }
-
 
 if ($Web->Server->REQUEST_URI) {
 

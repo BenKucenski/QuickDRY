@@ -122,17 +122,6 @@ class Web
             }
         }
 
-        define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
-
-        if(isset($_SERVER['SERVER_PROTOCOL'])) {
-            $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
-            define('BASE_URL', $protocol . HTTP_HOST);
-        } else {
-            if(!defined('BASE_URL')) {
-                define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
-            }
-        }
-
         if(defined('HTTP_HOST')) {
             $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
         }
@@ -236,6 +225,21 @@ class Web
 
         $this->Verb = $this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD;
     }
+	
+	public function SetURLs()
+	{
+		// this must be done after the settings file is loaded to support proxy situations
+		define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
+
+        if(isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
+            $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
+            define('BASE_URL', $protocol . HTTP_HOST);
+        } else {
+            if(!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
+                define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
+            }
+        }
+	}
 
     public function InitMenu()
     {
