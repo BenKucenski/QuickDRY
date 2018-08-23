@@ -163,6 +163,25 @@ class Curl
         $res->HeaderHash = $head_hash;
         return $res;
     }
+
+    /**
+     * @param $url
+     * @return bool|string
+     */
+    public static function URLGetContents($url)
+    {
+        // this turns off the SSL error checking for grabbing files from trusted sources
+        // https://stackoverflow.com/questions/26148701/file-get-contents-ssl-operation-failed-with-code-1-and-more
+        $context = [
+            "ssl" => [
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            ],
+        ];
+
+        $html = file_get_contents($url, false, stream_context_create($context));
+        return $html;
+    }
 }
 
 
