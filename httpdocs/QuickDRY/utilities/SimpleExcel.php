@@ -101,11 +101,11 @@ class SimpleExcel extends SafeClass
         }
         $sheet_row++;
         foreach ($se->Report as $item) {
+            if(!is_object($item)) {
+                Halt($item);
+            }
             $sheet_column = 'A';
             foreach ($se->Columns as $column) {
-                if(!is_object($item)) {
-                    Halt($item);
-                }
                 try { // need to use try catch so that magic __get columns are accessible
                     $value = $item->{$column->Property};
                 } catch(Exception $ex) {
@@ -180,11 +180,11 @@ class SimpleExcel extends SafeClass
             $sheet_row++;
             if ($report->Report && is_array($report->Report)) {
                 foreach ($report->Report as $item) {
+                    if(!is_object($item)) {
+                        Halt($item);
+                    }
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
-                        if(!is_object($item)) {
-                            Halt($item);
-                        }
                         try { // need to use try catch so that magic __get columns are accessible
                             $value = $item->{$column->Property};
                         } catch(Exception $ex) {
