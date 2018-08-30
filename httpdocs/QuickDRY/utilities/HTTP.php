@@ -6,6 +6,10 @@ class HTTP extends SafeClass
      */
     public static function IsSecure()
     {
+        if(defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE) { // needed for sites running behind a proxy
+            return true;
+        }
+
         if (!isset($_SERVER['HTTPS'])) {
             return false;
         }

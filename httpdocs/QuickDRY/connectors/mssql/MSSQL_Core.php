@@ -763,7 +763,7 @@ class MSSQL_Core extends SQL_Base
                 $st_value = static::StrongType($name, $value);
 
 
-                if ((is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !static::$PRESERVE_NULL_STRINGS) {
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !static::$PRESERVE_NULL_STRINGS) {
                     $props[] = '[' . $name . '] = NULL';
                 } else {
                     $props[] = '[' . $name . '] = @';
