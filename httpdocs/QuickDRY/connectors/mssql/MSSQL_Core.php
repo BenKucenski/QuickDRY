@@ -4,7 +4,7 @@ class MSSQL_Core extends SQL_Base
 {
     protected static $DatabaseTypePrefix = 'ms';
     protected static $DB_HOST;
-    protected static $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
+    protected $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
     /**
      * @return array
@@ -732,7 +732,7 @@ class MSSQL_Core extends SQL_Base
                 $st_value = static::StrongType($name, $value);
 
 
-                if ((is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !static::$PRESERVE_NULL_STRINGS) {
+                if ((is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
                     $qs[] = 'NULL';
                 } else {
                     $qs[] = '@';
@@ -763,7 +763,7 @@ class MSSQL_Core extends SQL_Base
                 $st_value = static::StrongType($name, $value);
 
 
-                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !static::$PRESERVE_NULL_STRINGS) {
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
                     $props[] = '[' . $name . '] = NULL';
                 } else {
                     $props[] = '[' . $name . '] = @';
