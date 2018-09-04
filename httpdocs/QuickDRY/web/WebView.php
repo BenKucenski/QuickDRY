@@ -198,6 +198,10 @@ Metrics::Stop('Controller');
 Metrics::Start('View');
 if (file_exists($Web->ViewFile)) {
     require_once $Web->ViewFile;
+} else {
+    if($Web->DefaultURL) {
+        HTTP::RedirectError('Page Not Found', $Web->DefaultURL);
+    }
 }
 Metrics::Stop('View');
 

@@ -29,6 +29,7 @@
  * @property string DOCXPageOrientation
  * @property string DOCXFileName
  * @property UserClass CurrentUser
+ * @property string DefaultURL
  */
 class Web
 {
@@ -49,6 +50,7 @@ class Web
     public $PageMode;
     public $CurrentPage;
     public $CurrentPageName;
+    public $DefaultURL;
 
     private $SecureMasterPages;
 
