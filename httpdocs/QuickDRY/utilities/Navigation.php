@@ -7,6 +7,9 @@ class Navigation
 {
     private $_PERMISSIONS = [];
     private $_MENU = [];
+
+    public $Legend;
+
     /**
      * @param $_ADD
      */
