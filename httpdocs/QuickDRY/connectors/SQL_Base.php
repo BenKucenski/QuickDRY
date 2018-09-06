@@ -12,8 +12,9 @@ class SQL_Base
     protected $_change_log = [];
     protected $_history = null;
     protected $_from_db = null;
-    protected $_smart_code = null;
-    protected $_smart_location = null;
+
+    public static $UseLog = false;
+    public static $Log = [];
 
     /**
      * @param $database_prefix

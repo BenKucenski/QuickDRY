@@ -249,60 +249,62 @@ class MSSQL_Core extends SQL_Base
             $val = explode(',', $val);
             $col = $col . ' BETWEEN @ AND @';
         } else
-        if (substr($val, 0, strlen('{IN} ')) === '{IN} ') {
-            $val = trim(Strings::RemoveFromStart('{IN}', $val));
-            $val = explode(',', $val);
-            $col = $col . ' IN (' . Strings::StringRepeatCS('@', sizeof($val)). ')';
-        } else
-        if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
-            $col = 'CONVERT(date, ' . $col . ') = @';
-            $val = trim(Strings::RemoveFromStart('{DATE}', $val));
-        } else
-        if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
-            $col = 'DATEPART(yyyy, ' . $col . ') = @';
-            $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
-        } else
-        if (substr($val, 0, strlen('NLIKE ')) === 'NLIKE ') {
-            $col = $col . ' NOT LIKE @';
-            $val = trim(Strings::RemoveFromStart('NLIKE', $val));
-        } else
-            if (substr($val, 0, strlen('NILIKE ')) === 'NILIKE ') {
-                $col = 'LOWER(' . $col . ')' . ' NOT LIKE LOWER(@) ';
-                $val = trim(Strings::RemoveFromStart('NILIKE', $val));
+            if (substr($val, 0, strlen('{IN} ')) === '{IN} ') {
+                $val = trim(Strings::RemoveFromStart('{IN}', $val));
+                $val = explode(',', $val);
+                $col = $col . ' IN (' . Strings::StringRepeatCS('@', sizeof($val)) . ')';
             } else
-                if (substr($val, 0, strlen('ILIKE ')) === 'ILIKE ') {
-                    $col = 'LOWER(' . $col . ')' . ' ILIKE LOWER(@) ';
-                    $val = trim(Strings::RemoveFromStart('ILIKE', $val));
+                if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
+                    $col = 'CONVERT(date, ' . $col . ') = @';
+                    $val = trim(Strings::RemoveFromStart('{DATE}', $val));
                 } else
-                    if (substr($val, 0, strlen('LIKE ')) === 'LIKE ') {
-                        $col = $col . ' LIKE @';
-                        $val = trim(Strings::RemoveFromStart('LIKE', $val));
+                    if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
+                        $col = 'DATEPART(yyyy, ' . $col . ') = @';
+                        $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
                     } else
-                        if (substr($val, 0, strlen('<= ')) === '<= ') {
-                            $col = $col . ' <= @ ';
-                            $val = trim(Strings::RemoveFromStart('<=', $val));
+                        if (substr($val, 0, strlen('NLIKE ')) === 'NLIKE ') {
+                            $col = $col . ' NOT LIKE @';
+                            $val = trim(Strings::RemoveFromStart('NLIKE', $val));
                         } else
-                            if (substr($val, 0, strlen('>= ')) === '>= ') {
-                                $col = $col . ' >= @ ';
-                                $val = trim(Strings::RemoveFromStart('>=', $val));
+                            if (substr($val, 0, strlen('NILIKE ')) === 'NILIKE ') {
+                                $col = 'LOWER(' . $col . ')' . ' NOT LIKE LOWER(@) ';
+                                $val = trim(Strings::RemoveFromStart('NILIKE', $val));
                             } else
-                                if (substr($val, 0, strlen('<> ')) === '<> ') {
-                                    $val = trim(Strings::RemoveFromStart('<>', $val));
-                                    if ($val !== 'null')
-                                        $col = $col . ' <> @ ';
-                                    else
-                                        $col = $col . ' IS NOT NULL';
+                                if (substr($val, 0, strlen('ILIKE ')) === 'ILIKE ') {
+                                    $col = 'LOWER(' . $col . ')' . ' ILIKE LOWER(@) ';
+                                    $val = trim(Strings::RemoveFromStart('ILIKE', $val));
                                 } else
-                                    if (substr($val, 0, strlen('< ')) === '< ') {
-                                        $col = $col . ' < @ ';
-                                        $val = trim(Strings::RemoveFromStart('<', $val));
+                                    if (substr($val, 0, strlen('LIKE ')) === 'LIKE ') {
+                                        $col = $col . ' LIKE @';
+                                        $val = trim(Strings::RemoveFromStart('LIKE', $val));
                                     } else
-                                        if (substr($val, 0, strlen('> ')) === '> ') {
-                                            $col = $col . ' > @ ';
-                                            $val = trim(Strings::RemoveFromStart('>', $val));
-                                        } else {
-                                            $col = $col . ' = @ ';
-                                        }
+                                        if (substr($val, 0, strlen('<= ')) === '<= ') {
+                                            $col = $col . ' <= @ ';
+                                            $val = trim(Strings::RemoveFromStart('<=', $val));
+                                        } else
+                                            if (substr($val, 0, strlen('>= ')) === '>= ') {
+                                                $col = $col . ' >= @ ';
+                                                $val = trim(Strings::RemoveFromStart('>=', $val));
+                                            } else
+                                                if (substr($val, 0, strlen('<> ')) === '<> ') {
+                                                    $val = trim(Strings::RemoveFromStart('<>', $val));
+                                                    if ($val !== 'null') {
+                                                        $col = $col . ' <> @ ';
+                                                    } else {
+                                                        $col = $col . ' IS NOT NULL';
+                                                        $val = null;
+                                                    }
+                                                } else
+                                                    if (substr($val, 0, strlen('< ')) === '< ') {
+                                                        $col = $col . ' < @ ';
+                                                        $val = trim(Strings::RemoveFromStart('<', $val));
+                                                    } else
+                                                        if (substr($val, 0, strlen('> ')) === '> ') {
+                                                            $col = $col . ' > @ ';
+                                                            $val = trim(Strings::RemoveFromStart('>', $val));
+                                                        } else {
+                                                            $col = $col . ' = @ ';
+                                                        }
 
         return ['col' => $col, 'val' => $val];
     }
@@ -322,15 +324,19 @@ class MSSQL_Core extends SQL_Base
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if ($v === 'null')
-                    $t[] = '' . $c . ' IS NULL';
-                else {
-                    $v = $cv['val'];
-                    if (strtolower($v) !== 'null') {
-                        $params[] = $v;
+                if (!is_array($v) && strtolower($v) === 'null') {
+                    $t[] = $c . ' IS NULL';
+                } else {
+                    $t[] = $cv['col'];
+                    if (is_array($v)) {
+                        foreach ($v as $a) {
+                            $params[] = $a;
+                        }
+                    } else {
+                        if(!is_null($v)) {
+                            $params[] = $v;
+                        }
                     }
-                    $c = $cv['col'];
-                    $t[] = $c;
                 }
             }
             $where_sql = implode(" AND ", $t);
@@ -358,7 +364,26 @@ class MSSQL_Core extends SQL_Base
 			';
 
 
+        if(self::$UseLog) {
+            $log = new SQL_Log();
+            $log->source = $type;
+            $log->start_time = microtime(true);
+            $log->query = $sql;
+            $log->params = $params;
+        }
+
         $res = static::Query($sql, $params);
+
+        if(self::$UseLog) {
+            $log->end_time = microtime(true);
+            $log->duration = $log->end_time - $log->start_time;
+            self::$Log[] = $log;
+        }
+
+        if($res['error']) {
+            Halt($res);
+        }
+
         if (isset($res['data'])) {
             foreach ($res['data'] as $r) {
                 $t = new $type();
@@ -402,12 +427,14 @@ class MSSQL_Core extends SQL_Base
                     $t[] = $c . ' IS NULL';
                 } else {
                     $t[] = $cv['col'];
-                    if(is_array($v)) {
-                        foreach($v as $a) {
+                    if (is_array($v)) {
+                        foreach ($v as $a) {
                             $params[] = $a;
                         }
                     } else {
-                        $params[] = $v;
+                        if(!is_null($v)) {
+                            $params[] = $v;
+                        }
                     }
                 }
             }
@@ -425,7 +452,26 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
+        if(self::$UseLog) {
+            $log = new SQL_Log();
+            $log->source = get_called_class();
+            $log->start_time = microtime(true);
+            $log->query = $sql;
+            $log->params = $params;
+        }
+
         $res = static::Query($sql, $params, true);
+
+        if(isset($res['error'])) {
+            Halt($res);
+        }
+
+        if(self::$UseLog) {
+            $log->end_time = microtime(true);
+            $log->duration = $log->end_time - $log->start_time;
+            self::$Log[] = $log;
+        }
+
         return $res;
     }
 
@@ -465,7 +511,23 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_where . '
 		';
 
+        if(self::$UseLog) {
+            $log = new SQL_Log();
+            $log->source = get_called_class();
+            $log->start_time = microtime(true);
+            $log->query = $sql;
+            $log->params = $params;
+        }
+
         $res = static::Query($sql, $params);
+
+        if(self::$UseLog) {
+            $log->end_time = microtime(true);
+            $log->duration = $log->end_time - $log->start_time;
+            self::$Log[] = $log;
+        }
+
+
         if ($res['error']) {
             Halt($res);
         }
@@ -637,7 +699,7 @@ class MSSQL_Core extends SQL_Base
             return null;
         }
 
-        if(is_object($value)) {
+        if (is_object($value)) {
             if ($value instanceof DateTime) {
                 $value = Dates::Timestamp($value);
             } else {
