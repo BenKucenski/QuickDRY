@@ -5,6 +5,11 @@
  */
 class Strings extends SafeClass
 {
+    public static function ExcelTitleOnly($str)
+    {
+        return preg_replace('/\s+/si',' ', preg_replace('/[^a-z0-9\s]/si',' ', trim($str)));
+    }
+
     // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
     public static function Ordinal($number)
     {
@@ -48,6 +53,9 @@ class Strings extends SafeClass
         }
         $csv = [];
         foreach ($rows as $row) {
+            if(sizeof($header) != sizeof($row)) {
+                continue;
+            }
             $csv[] = array_combine($header, $row);
         }
         return $csv;
