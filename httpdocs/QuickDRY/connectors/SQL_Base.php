@@ -84,7 +84,10 @@ class SQL_Base
         if (defined('DISABLE_CHANGE_LOG') && DISABLE_CHANGE_LOG) {
             return false;
         }
-        if (strcmp(static::$table, 'change_log') == 0) { // don't change log the change log
+        if (strcasecmp(static::$table, 'change_log') == 0) { // don't change log the change log
+            return false;
+        }
+        if (strcasecmp(static::$table, 'changelog') == 0) { // don't change log the change log
             return false;
         }
 

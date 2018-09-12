@@ -742,8 +742,8 @@ class MSSQL_Core extends SQL_Base
      */
     protected function _Save($force_insert = false)
     {
-        /* @var $CurrentUser UserClass */
-        global $CurrentUser;
+        /* @var $Web Web */
+        global $Web;
 
         $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
 
@@ -855,7 +855,7 @@ class MSSQL_Core extends SQL_Base
                 $cl->table = static::$table;
                 $cl->uuid = $uuid;
                 $cl->changes = json_encode($this->_change_log);
-                $cl->user_id = is_object($CurrentUser) ? $CurrentUser->GetUUID() : null;
+                $cl->user_id = is_object($Web) ? $Web->CurrentUser->GetUUID() : null;
                 $cl->created_at = Dates::Timestamp();
                 $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                 $cl->is_deleted = false;
