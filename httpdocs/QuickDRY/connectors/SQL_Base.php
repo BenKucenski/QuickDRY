@@ -586,7 +586,7 @@ class SQL_Base
             if(!in_array($name, $ignore))
             {
                 if(array_key_exists($name, $swap))
-                    $value = $this->$swap[$name];
+                    $value = $this->{$swap[$name]};
                 else
                     $value = $this->$name;
 
@@ -607,7 +607,7 @@ class SQL_Base
                 if(is_array($value))
                 {
                     $name = $value['value'];
-                    $value = $this->$value['value'];
+                    $value = $this->{$value['value']};
                 }
                 else
                 {
@@ -670,7 +670,7 @@ class SQL_Base
             if(!in_array($name, $ignore))
             {
                 if(array_key_exists($name, $swap))
-                    $value = $this->$swap[$name];
+                    $value = $this->{$swap[$name]};
                 else
                     $value = $this->ValueToNiceValue($name, $this->$name);
 
@@ -696,7 +696,7 @@ class SQL_Base
                 if(is_array($value))
                 {
                     $name = $value['value'];
-                    $value = $this->$value['value'];
+                    $value = $this->{$value['value']};
                 }
                 else
                 {
