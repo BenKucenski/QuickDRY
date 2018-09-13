@@ -198,16 +198,18 @@ var QuickDRY = {
                 format: 'LT'
             });
         }
-        $(".color").colorpicker();
-        $(".color").each(function () {
-            $(this).css('background-color', '#' + $(this).val());
-        });
-        $(".color").on("focus", function (e) {
-            $(this).css('background-color', $(this).val());
-        });
-        $(".color").on("changeColor", function (e) {
-            $(this).css('background-color', $(this).val());
-        });
+        if($('.color').colorpicker) {
+            $(".color").colorpicker();
+            $(".color").each(function () {
+                $(this).css('background-color', '#' + $(this).val());
+            });
+            $(".color").on("focus", function (e) {
+                $(this).css('background-color', $(this).val());
+            });
+            $(".color").on("changeColor", function (e) {
+                $(this).css('background-color', $(this).val());
+            });
+        }
     },
     ClearForm: function (form_id, clear_hidden) {
         $('#' + form_id).each(function () {
