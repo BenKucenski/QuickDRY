@@ -823,7 +823,7 @@ class ' . $table_nice_name . 'Base extends BasePage
             HTTP::ExitJSON([\'error\' => \'No Permission\'], HTTP_STATUS_BAD_REQUEST);
         }
 
-        $res = self::$Item->ToArray();
+        $res = self::$Item->ToJSONArray();
         $res[\'can_delete\'] = self::$Item->CanDelete(self::$CurrentUser);
         HTTP::ExitJSON([\'data\' => $res], HTTP_STATUS_OK);
     }

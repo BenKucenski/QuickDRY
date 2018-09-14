@@ -368,6 +368,16 @@ class SQL_Base
     }
 
     /**
+     * @param $user
+     *
+     * @return array
+     */
+    public function ToJSONArray()
+    {
+        return ToArray($this->props, false);
+    }
+
+    /**
      * @param $name
      * @param string $value
      *
