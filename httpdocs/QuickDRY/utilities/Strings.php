@@ -7,7 +7,7 @@ class Strings extends SafeClass
 {
     public static function ExcelTitleOnly($str)
     {
-        return preg_replace('/\s+/si',' ', preg_replace('/[^a-z0-9\s]/si',' ', trim($str)));
+        return self::Truncate(preg_replace('/\s+/si',' ', preg_replace('/[^a-z0-9\s]/si',' ', trim($str))), 31, false, false);
     }
 
     // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
@@ -556,14 +556,14 @@ class Strings extends SafeClass
      * @param bool $words
      * @return string
      */
-    public static function Truncate($str, $length, $words = false)
+    public static function Truncate($str, $length, $words = false, $dots = true)
     {
         if (strlen($str) > $length) {
             if ($words) {
                 $s = strpos($str, ' ', $length);
-                return substr($str, 0, $s) . '...';
+                return substr($str, 0, $s) . ($dots ? '...' : '');
             } else {
-                return substr($str, 0, $length) . '...';
+                return substr($str, 0, $length) . ($dots ? '...' : '');
             }
         }
         return $str;
