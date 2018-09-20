@@ -225,7 +225,7 @@ class Web
         $temp = explode('.', $this->CurrentPageName);
         $this->PageClass = $temp[0];
 
-        $this->Verb = $this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD;
+        $this->Verb = strtoupper($this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD);
     }
 	
 	public function SetURLs()

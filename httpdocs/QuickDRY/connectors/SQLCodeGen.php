@@ -544,19 +544,24 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     /**
      * @param $column_name
      * @param null $value
+     * @param false $force_value
      * @return mixed
      */
-    public function ValueToNiceValue($column_name, $value = null)
+    public function ValueToNiceValue($column_name, $value = null, $force_value = false)
     {
         if($value instanceof DateTime) {
-            return Dates::Timestamp($value, \'\');
+            $value = Dates::Timestamp($value, \'\');
+        }
+
+        if($value || $force_value) {
+            return $value;
         }
 
         if($this->$column_name instanceof DateTime) {
             return Dates::Timestamp($this->$column_name, \'\');
         }
 
-        return $value ? $value : $this->$column_name;
+        return $this->$column_name;
     }
 
     /**
@@ -730,7 +735,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
         $primary = $DatabaseClass::GetPrimaryKey($table_name);
 
         $this->Add($c_name, $table_name, $cols, $primary, $table_nice_name);
-        $this->History($c_name, $table_nice_name);
+        $this->History($c_name, $table_nice_name, $primary);
         $this->Manage($c_name, $table_nice_name);
 
         $this->CRUDClass($c_name, $table_name, $table_nice_name, $primary);
@@ -956,10 +961,10 @@ class ' . $table_nice_name . 'Base extends BasePage
                 }
                 $r = [
                     \'Rev\' => $m - $i,
-                    \'Column\' => ' . $c_name . '::ColumnNameToNiceName($column),
+                    \'Column\' => $column,
                     \'Value\' => self::$Item->ValueToNiceValue($column),
-                    \'Was\' => self::$Item->ValueToNiceValue($column, $change->old),
-                    \'Now\' => self::$Item->ValueToNiceValue($column, $change->new),
+                    \'Was\' => self::$Item->ValueToNiceValue($column, $change->old, true),
+                    \'Now\' => self::$Item->ValueToNiceValue($column, $change->new, true),
                     \'When\' => Dates::StandardDateTime($cl->created_at),
                     \'By\' => $cl->GetUser(),
 
@@ -1089,6 +1094,11 @@ HTTP::ExitJSON($returnvals);
         fclose($fp);
     }
 
+    /**
+     * @param $c_name
+     * @param $unique
+     * @param $primary
+     */
     protected function DeleteJSON($c_name, $unique, $primary)
     {
         if (!isset($primary[0])) {
@@ -1472,8 +1482,17 @@ var ' . $c_name . ' = {
 
     }
 
-    protected function History($c_name, $table_nice_name)
+    /**
+     * @param $c_name
+     * @param $table_nice_name
+     * @param $primary
+     */
+    protected function History($c_name, $table_nice_name, $primary)
     {
+        if (!sizeof($primary)) {
+            return;
+        }
+
         $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/history.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog">
@@ -1486,8 +1505,22 @@ var ' . $c_name . ' = {
             </div>
             <div class="modal-body">
 
+                <table id="' . $c_name . '_history_table" class="table table-striped" style="font-size: 0.9em;">
+                    <thead>
+                    <tr>
+                        <th>Rev</th>
+                        <th>Column</th>
+                        <th>Value</th>
+                        <th>Was</th>
+                        <th>Now</th>
+                        <th>When</th>
+                        <th>By</th>
+                    </tr>
+                    </thead>
+                    <tbody>
 
-                <div id="' . $c_name . '_history_div" style="height: 400px; overflow-y: auto;"></div>
+                    </tbody>
+                </table>
 
             </div>
         </div>
@@ -1508,14 +1541,28 @@ var ' . $c_name . 'History = {
             return;
         }
 
-        HTTP.Post(\'/json/' . $c_name . '/history.json\', {
-            uuid : uuid
+        HTTP.Post(\'/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '\', {
+            ' . $primary[0] . ' : uuid,
+            verb : \'HISTORY\'
         }, function(data) {
             if (data.error) {
                 NoticeDialog(\'Error\',data.error);
             } else {
                 $(\'#' . $c_name . '_history_dialog_title\').html("' . $c_name . '");
-                $(\'#' . $c_name . '_history_div\').html(data.html);
+                for(var i in data.history) {
+                    var row = data.history[i];
+                    var html = \'<tr>\' +
+                        \'<td>\' + row.Rev + \'</td>\' +
+                        \'<td>\' + row.Column + \'</td>\' +
+                        \'<td>\' + row.Value + \'</td>\' +
+                        \'<td>\' + row.Was + \'</td>\' +
+                        \'<td>\' + row.Now + \'</td>\' +
+                        \'<td>\' + row.When + \'</td>\' +
+                        \'<td>\' + row.By + \'</td>\' +
+                        \'</tr>\';
+                    $(\'#' . $c_name . '_history_table > tbody:last-child\').append(html);
+                }
+                
                 QuickDRY.ShowModal(\'' . $c_name . '_history_dialog\', \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
             }
         });
@@ -1527,6 +1574,10 @@ var ' . $c_name . 'History = {
         fclose($fp);
     }
 
+    /**
+     * @param $c_name
+     * @param $table_nice_name
+     */
     protected function Manage($c_name, $table_nice_name)
     {
         $page_dir = str_replace('Class', '', $c_name);
