@@ -162,11 +162,13 @@ class Dates extends SafeClass
     public static function DateToInt($date, $null = null)
     {
         if ($date instanceof DateTime) {
-            $date = $date->getTimestamp();
+            $temp = $date->getTimestamp();
+            $str = $date->format('Y-m-d H:i:s');
 
-            if (!$date) {
+            if (!$temp && !$str) { // don't interpret 1970-01-01 as not set
                 return $null;
             }
+            $date = $temp;
         }
 
         if (is_null($date)) {
