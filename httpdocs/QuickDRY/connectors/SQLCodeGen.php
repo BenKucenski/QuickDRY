@@ -1342,7 +1342,7 @@ HTTP::ExitJSON($returnvals);
                             break;
 
                         case 'date':
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="date-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
+                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="form-control" type="date" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
                             break;
 
                         case 'varchar(6)':

@@ -168,10 +168,10 @@ class Dates extends SafeClass
             if (!$temp && !$str) { // don't interpret 1970-01-01 as not set
                 return $null;
             }
-            $date = $temp;
+            return $temp;
         }
 
-        if (is_null($date)) {
+        if (!$date) {
             return $null;
         }
 
