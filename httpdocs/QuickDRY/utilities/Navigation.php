@@ -301,9 +301,9 @@ class Navigation
 
             for ($j = $start_page; $j <= $end_page; $j++) {
                 if ($j != PAGE)
-                    $html .= '<li class="page_number"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j + 1) . '</a></li>';
+                    $html .= '<li class="page-item"><a class="page-link" href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=' . $_PER_PAGE . '&' . $params . '">' . ($j + 1) . '</a></li>';
                 else
-                    $html .= '<li class="page_number"><a href="#">' . ($j + 1) . '</a></li>';
+                    $html .= '<li class="page-item active"><a class="page-link" href="#">' . ($j + 1) . '</a></li>';
             }
             if (PAGE < $num_pages - 10 && $num_pages > 10) {
                 $html .= '<li class="next"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
