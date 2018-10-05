@@ -5,13 +5,13 @@
  * @param bool $null_blank
  * @return mixed
  */
-function ToArray($arr, $null_string = false)
+function ToArray($arr, $null_string = false, $prop_definitions = null)
 {
     // Cleans up an array of values so that it can ben
     // put into a database object and be saved into the database
     foreach ($arr as $k => $v) {
         if (is_object($v) && get_class($v) === 'DateTime') {
-            $arr[$k] = Dates::Timestamp($v);
+            $arr[$k] = isset($prop_definitions[$k]['type']) && strcasecmp($prop_definitions[$k]['type'], 'date') == 0 ? Dates::Datestamp($v) : Dates::Timestamp($v);
         }
         if($null_string && is_null($v)) {
             $arr[$k] = 'null';

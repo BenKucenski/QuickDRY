@@ -364,7 +364,7 @@ class SQL_Base
      */
     public function ToArray()
     {
-        return ToArray($this->props, true);
+        return ToArray($this->props, true, static::$prop_definitions);
     }
 
     /**
@@ -374,7 +374,7 @@ class SQL_Base
      */
     public function ToJSONArray()
     {
-        return ToArray($this->props, false);
+        return ToArray($this->props, false, static::$prop_definitions);
     }
 
     /**
