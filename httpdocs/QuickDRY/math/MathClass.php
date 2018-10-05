@@ -392,6 +392,10 @@ class MathClass
 
     public static function APY($current_time, $current_price, $start_time, $start_price)
     {
+        if($start_price == 0) {
+            return 0;
+        }
+
         if(!is_numeric($current_time)) {
             $current_time = strtotime($current_time);
         }
@@ -407,5 +411,36 @@ class MathClass
         return 100.0 * pow(
                 ($current_price) /
                 ($start_price), 1.0 / (($current_time - $start_time) * 1.0 / (365.0 * 24.0 * 3600.0))) - 100.0;
+    }
+
+    public static function GetFutureValue($present_value, $payment, $interest_rate, $years, $payments_per_year)
+    {
+        $interest_rate /= 100;
+        $rk = $interest_rate / $payments_per_year;
+        $int = pow((1 + $rk), $years * $payments_per_year);
+        return $present_value * $int + $payment * (($int - 1) / $rk);
+    }
+
+    /**
+     * @param $present_value
+     * @param $future_value
+     * @param $payment
+     * @param $interest_rate
+     * @param $payments_per_year
+     * @return float|int
+     */
+    public static function GetYearsToFutureValue($present_value, $future_value, $payment, $interest_rate, $payments_per_year)
+    {
+        $interest_rate /= 100.0;
+        $rk = $interest_rate / $payments_per_year;
+
+        $x = $rk * $future_value + $payment;
+        if($present_value * $rk + $payment == 0) {
+            return 0;
+        }
+        $x /= $present_value * $rk + $payment;
+
+        return log($x, (1.0 + $rk)) / $payments_per_year;
+
     }
 }
