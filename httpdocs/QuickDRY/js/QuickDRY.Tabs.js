@@ -21,7 +21,7 @@ function ShowTab(selected_tab) {
     $('#tab_s_' + tab).show();
 
     current_tab = tab;
-    if(current_tab) {
+    if(current_tab * 1.0) {
         window.location.hash = '#' + current_tab;
     }
 
