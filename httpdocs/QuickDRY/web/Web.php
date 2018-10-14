@@ -174,6 +174,8 @@ class Web
         if(!$cur_page) {
             $cur_page = $this->CurrentUser ? $default_user_page : $default_page;
             $full_path = '/' . $cur_page;
+            $cur_page = explode('/', $cur_page);
+            $cur_page = $cur_page[sizeof($cur_page) - 1];
         }
 
         $host = explode('.', HTTP_HOST);
@@ -198,6 +200,7 @@ class Web
 
         $page = 'pages' . $this->CurrentPage . '.php';
         $code = 'pages' . $this->CurrentPage . '.code.php';
+
 
         $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt :  null);
         $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt :  null);
