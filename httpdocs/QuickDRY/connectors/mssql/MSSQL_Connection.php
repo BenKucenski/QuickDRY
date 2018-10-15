@@ -389,8 +389,9 @@ class MSSQL_Connection
 
             $returnval['error'] = 'Exception: '.$e->getMessage();
             $returnval['sql'] = print_r([$sql,$params],true);
-            if(defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
+            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
+            }
             Metrics::Stop('MSSQL');
             return $returnval;
         }

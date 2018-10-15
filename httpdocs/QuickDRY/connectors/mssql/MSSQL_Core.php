@@ -115,6 +115,17 @@ class MSSQL_Core extends SQL_Base
         return null;
     }
 
+    public static function QueryMap($sql, $params, $map_function)
+    {
+        static::_connect();
+
+        if (isset(static::$database)) {
+            static::$connection->SetDatabase(static::$database);
+        }
+
+        return static::$connection->Query($sql, $params, $map_function);
+    }
+
     /**
      * @param      $sql
      * @param null $params
