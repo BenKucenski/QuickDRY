@@ -15,9 +15,11 @@ class APIRequest
     private $_data = null;
     private $_raw = null;
     private $_headers = null;
+    private $_cache_file = null;
 
     public static $UseLog = false;
     public static $CacheTimeoutSeconds;
+    public static $ShowURL;
 
     /**
      * @param $name
@@ -40,6 +42,9 @@ class APIRequest
 
             case 'res':
                 return $this->_res;
+
+            case 'cache_file':
+                return $this->_cache_file;
 
             case 'error':
                 return $this->_error;
@@ -68,6 +73,10 @@ class APIRequest
                 $this->_res = $value;
                 break;
 
+            case 'cache_file':
+                $this->_cache_file = $value;
+                break;
+
             case 'error':
                 $this->_error = $value;
                 break;
@@ -77,6 +86,15 @@ class APIRequest
         }
     }
 
+    public function ClearCache()
+    {
+        $file = $this->_cache_file;
+
+        if($file && file_exists($file) && filesize($file)) {
+            unlink($file);
+        }
+
+    }
     /**
      * @param $path
      * @param null $data
@@ -93,7 +111,9 @@ class APIRequest
                 mkdir($dir);
             }
             $file = $dir .'/' .$hash .'.txt';
-            if(file_exists($file)) {
+            $this->_cache_file = $file;
+
+            if(file_exists($file) && filesize($file)) {
                 if(time() - filectime($file) < self::$CacheTimeoutSeconds) {
                     $fp = fopen($file, 'r');
                     $retr = fread($fp, filesize($file));
@@ -144,6 +164,10 @@ class APIRequest
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+
+        if(self::$ShowURL) {
+            Log::Insert($url, true);
+        }
 
         // grab URL and pass it to the browser
         $retr = curl_exec($ch);
