@@ -32,6 +32,9 @@ class BasePage extends SafeClass
     /* @var Cookie $Cookie */
     public static $Cookie;
 
+    /* @var Server $Server */
+    public static $Server;
+
     /* @var UserClass $CurrentUser */
     public static $CurrentUser;
 
@@ -74,6 +77,9 @@ class BasePage extends SafeClass
 
             case 'Cookie':
                 return static::$Cookie;
+
+            case 'Server':
+                return static::$Server;
 
             case 'CurrentUser':
                 return static::$CurrentUser;
@@ -122,6 +128,10 @@ class BasePage extends SafeClass
                 static::$Session = $value;
                 break;
 
+            case 'Server':
+                static::$Server = $value;
+                break;
+
             case 'Cookie':
                 static::$Cookie = $value;
                 break;
@@ -155,9 +165,9 @@ class BasePage extends SafeClass
      * @param Cookie $Cookie
      * @param UserClass|null $CurrentUser
      */
-    public function __construct(Request &$Request, Session &$Session, Cookie &$Cookie, UserClass &$CurrentUser = null)
+    public function __construct(Request &$Request, Session &$Session, Cookie &$Cookie, UserClass &$CurrentUser = null, Server &$Server = null)
     {
-        static::Construct($Request, $Session, $Cookie, $CurrentUser);
+        static::Construct($Request, $Session, $Cookie, $CurrentUser, $Server);
     }
 
     public static function DoGet()
@@ -201,12 +211,13 @@ class BasePage extends SafeClass
      * @param Cookie $Cookie
      * @param UserClass|null $CurrentUser
      */
-    public static function Construct(Request &$Request, Session &$Session, Cookie &$Cookie, UserClass &$CurrentUser = null)
+    public static function Construct(Request &$Request, Session &$Session, Cookie &$Cookie, UserClass &$CurrentUser = null, Server &$Server = null)
     {
         static::$Request = $Request;
         static::$Cookie = $Cookie;
         static::$Session = $Session;
         static::$CurrentUser = $CurrentUser;
+        static::$Server = $Server;
         static::$PostData = json_decode(file_get_contents('php://input'), false); // return a standard object
     }
 

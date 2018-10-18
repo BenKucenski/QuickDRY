@@ -92,6 +92,7 @@ function autoloader_QuickDRY($class)
         'Metrics' => 'utilities/Metrics.php',
         'Network' => 'utilities/Network.php',
         'LogFile' => 'utilities/LogFile.php',
+        'Encrypt' => 'utilities/Encrypt.php',
         'Log' => 'utilities/Log.php',
         'Debug' => 'utilities/Debug.php',
         'Dates' => 'utilities/Dates.php',

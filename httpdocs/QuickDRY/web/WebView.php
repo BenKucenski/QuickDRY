@@ -42,7 +42,7 @@ if (file_exists($Web->ControllerFile)) {
 
     switch ($PageMode) {
         case QUICKDRY_MODE_STATIC:
-            $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
+            $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser, $Web->Server);
             $PageModel::DoInit();
             $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
 
@@ -110,7 +110,7 @@ if (file_exists($Web->ControllerFile)) {
             break;
         case QUICKDRY_MODE_INSTANCE:
             /* @var $PageModel BasePage */
-            $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser);
+            $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser, $Web->Server);
             $PageModel->Init();
             $Web->MasterPage = $PageModel->MasterPage ? $PageModel->MasterPage : null;
 
