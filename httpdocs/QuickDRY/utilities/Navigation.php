@@ -318,4 +318,80 @@ class Navigation
         $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=0&' . $params . '">View Paginated</a></li>';
         return $html . '</ul>';
     }
+
+    /**
+     * @param $_MENU
+     * @return string
+     */
+    public function RenderTree($_MENU = null)
+    {
+        if ($_MENU) {
+            $this->_MENU = $_MENU;
+        }
+
+        $_MENU_HTML = '';
+        foreach ($this->_MENU AS $name => $values) {
+
+            $has_visible = false;
+            if (isset($values['links']) && sizeof($values['links'])) {
+                foreach ($values['links'] as $link_name => $url) {
+                    if (isset($url['link']) && strcasecmp($url['link'], $name) == 0) {
+                        continue;
+                    }
+
+                    if (!isset($url['link'])) {
+                    } else {
+                    }
+
+                    $has_visible = true;
+                    break;
+                }
+            }
+
+            if ($has_visible) {
+                $_MENU_HTML .= '<li>' . $name . '';
+                ksort($values['links']);
+                reset($values['links']);
+                $_MENU_HTML .= '<ul>';
+                foreach ($values['links'] as $link_name => $url) {
+                    if (!is_array($url)) {
+                        $_MENU_HTML .= '<li><a href="' . $url . '">' . $link_name . '</a></li>' . PHP_EOL;
+                    } else {
+                        if (isset($url['onclick'])) {
+                            $_MENU_HTML .= '<li><a href="#" onclick="' . $url['onclick'] . '">' . $name . '</a></li>';
+                        }
+
+                        if (isset($url['links']) && sizeof($url['links'])) {
+
+                            $_MENU_HTML .= '<li>' . $name . '';
+                            $_MENU_HTML .= '<ul>' . PHP_EOL;
+                            foreach ($url['links'] as $sub_name => $sub_url) {
+                                $_MENU_HTML .= '<li><a href="' . $sub_url . '">' . $sub_name . '</a></li>' . PHP_EOL;
+                            }
+                            $_MENU_HTML .= '</ul>' . PHP_EOL;
+                        } else {
+                            if (isset($url['onclick'])) {
+                                $_MENU_HTML .= '<li><a href="#" onclick="' . $url['onclick'] . '">' . $name . '</a></li>';
+                            } else {
+                                if (isset($url['link'])) {
+
+                                    $_MENU_HTML .= '<li><a href="' . $url['link'] . '">' . $link_name . '</a></li>' . PHP_EOL;
+                                }
+                            }
+                        }
+                    }
+                }
+                $_MENU_HTML .= '</ul></li>' . PHP_EOL;
+            } else {
+                if (isset($values['onclick'])) {
+                    $_MENU_HTML .= '<li><a href="#" onclick="' . $values['onclick'] . '">' . $name . '</a></li>';
+                } else {
+                    if (isset($values['link'])) {
+                        $_MENU_HTML .= '<li><a href="' . $values['link'] . '"><b>' . $name . '</b></a></li>' . PHP_EOL;
+                    }
+                }
+            }
+        }
+        return $_MENU_HTML;
+    }
 }
