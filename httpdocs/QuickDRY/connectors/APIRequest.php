@@ -16,6 +16,8 @@ class APIRequest
     private $_raw = null;
     private $_headers = null;
     private $_cache_file = null;
+    private $_return_headers = null;
+    private $_curl_info = null;
 
     public static $UseLog = false;
     public static $CacheTimeoutSeconds;
@@ -28,6 +30,12 @@ class APIRequest
     public function __get($name)
     {
         switch ($name) {
+            case 'curl_info':
+                return $this->_curl_info;
+
+            case 'return_headers':
+                return $this->_return_headers;
+
             case 'headers':
                 return $this->_headers;
 
@@ -61,8 +69,16 @@ class APIRequest
     public function __set($name, $value)
     {
         switch ($name) {
+            case 'curl_info':
+                $this->_curl_info = $value;
+                break;
+
             case 'headers':
                 $this->_headers = $value;
+                break;
+
+            case 'return_headers':
+                $this->_return_headers = $value;
                 break;
 
             case 'path':
@@ -90,11 +106,13 @@ class APIRequest
     {
         $file = $this->_cache_file;
 
-        if($file && file_exists($file) && filesize($file)) {
-            unlink($file);
+        if ($file && file_exists($file) && filesize($file)) {
+            rename($file, 'last_attempt.txt');
+            //unlink($file);
         }
 
     }
+
     /**
      * @param $path
      * @param null $data
@@ -104,17 +122,17 @@ class APIRequest
      */
     private function _Request($path, $data = null, $headers = null, $post = true)
     {
-        if(self::$CacheTimeoutSeconds > -1) {
+        if (self::$CacheTimeoutSeconds > -1) {
             $hash = md5(serialize([$path, $data, $headers, $post]));
             $dir = DOC_ROOT_PATH . '/logs/cache';
-            if(!is_dir($dir)) {
+            if (!is_dir($dir)) {
                 mkdir($dir);
             }
-            $file = $dir .'/' .$hash .'.txt';
+            $file = $dir . '/' . $hash . '.txt';
             $this->_cache_file = $file;
 
-            if(file_exists($file) && filesize($file)) {
-                if(time() - filectime($file) < self::$CacheTimeoutSeconds) {
+            if (file_exists($file) && filesize($file)) {
+                if (time() - filectime($file) < self::$CacheTimeoutSeconds) {
                     $fp = fopen($file, 'r');
                     $retr = fread($fp, filesize($file));
                     fclose($fp);
@@ -144,7 +162,7 @@ class APIRequest
         $this->headers = $headers;
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_HEADER, true);
 
         curl_setopt($ch, CURLOPT_POST, $post);
         if ($data) {
@@ -165,22 +183,40 @@ class APIRequest
 
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
-        if(self::$ShowURL) {
+        if (self::$ShowURL) {
             Log::Insert($url, true);
         }
 
         // grab URL and pass it to the browser
-        $retr = curl_exec($ch);
+        $content = curl_exec($ch);
 
         $this->_error = curl_error($ch);
+        $this->_curl_info = curl_getinfo($ch);
 
-        if(self::$CacheTimeoutSeconds > -1) {
+
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $header = substr($content, 0, $header_size);
+        $body = substr($content, $header_size);
+        curl_close($ch);
+
+
+        $head = explode("\n", $header);
+        $this->_return_headers = [];
+        foreach ($head as $val) {
+            $val = explode(": ", $val);
+            if (isset($val[1])) {
+                $this->_return_headers[$val[0]] = $val[1];
+            }
+        }
+
+
+        if (self::$CacheTimeoutSeconds > -1) {
             $fp = fopen($file, 'w');
-            fwrite($fp, $retr);
+            fwrite($fp, $body);
             fclose($fp);
         }
 
-        return $retr;
+        return $body;
     }
 
     /**
@@ -214,18 +250,18 @@ class APIRequest
 
         $this->_method = $Method;
 
-        if(!self::$UseLog) {
+        if (!self::$UseLog) {
             return;
         }
 
-        if(!$Web) {
+        if (!$Web) {
             $a = unserialize($_SESSION['api_log']);
             $a[] = $this;
             $_SESSION['api_log'] = serialize($a);
             return;
         }
 
-        if(!$Web->Session) {
+        if (!$Web->Session) {
             return;
         }
         $a = $Web->Session->api_log;
