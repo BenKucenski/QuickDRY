@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * @author ben
@@ -128,6 +129,15 @@ class APIRequest
             if (!is_dir($dir)) {
                 mkdir($dir);
             }
+            $dir .= '/' . $hash[0];
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+            $dir .= '/' . $hash[1];
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+
             $file = $dir . '/' . $hash . '.txt';
             $this->_cache_file = $file;
 
