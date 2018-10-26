@@ -292,9 +292,11 @@ class MSSQL_Connection
 
             $returnval['error'] = 'Exception: '.$e->getMessage();
             $returnval['sql'] = print_r([$sql,$params],true);
+
             Metrics::Stop('MSSQL');
-            if(defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
+            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
+            }
             return $returnval;
         }
 
@@ -302,6 +304,11 @@ class MSSQL_Connection
         Metrics::Stop('MSSQL');
         $this->Log($sql, $params, $t, $returnval['error']);
 
+        if($returnval['error']) {
+            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+                Halt($returnval);
+            }
+        }
         if(!$map_function || $returnval['error']) {
             return $returnval;
         }
@@ -400,6 +407,12 @@ class MSSQL_Connection
         Metrics::Stop('MSSQL');
 
         $this->Log($sql, $params, $t, $returnval['error']);
+
+        if($returnval['error']) {
+            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+                Halt($returnval);
+            }
+        }
 
         if(!$map_function || $returnval['error']) {
             return $returnval;
