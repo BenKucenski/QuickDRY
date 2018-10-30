@@ -889,13 +889,15 @@ class SQL_Base
 
         $select = "";
 
-        if(is_array($selected))
-            $select .= '<select class="form-control" onchange="' . $onchange. '" multiple size="' . (sizeof($items)+1 <= 10 ? sizeof($items)+1 : 10 ) .'" id="' . $id . '" name="' . $name . '[]">';
-        else
-            $select .= '<select class="form-control" onchange="' . $onchange. '"  id="' . $id . '"name="' . $name . '">';
+        if(is_array($selected)) {
+            $select .= '<select class="form-control" onchange="' . $onchange . '" multiple size="' . (sizeof($items) + 1 <= 10 ? sizeof($items) + 1 : 10) . '" id="' . $id . '" name="' . $name . '[]">';
+        } else {
+            $select .= '<select class="form-control" onchange="' . $onchange . '"  id="' . $id . '"name="' . $name . '">';
+        }
 
-        if($show_none)
-            $select .= '<option value="null">' . ($show_none == true ? 'None' : $show_none) . '</option>' . "\r\n";
+        if($show_none) {
+            $select .= '<option value="null">' . (is_bool($show_none) ? 'None' : $show_none) . '</option>' . "\r\n";
+        }
 
         if(sizeof($items) > 0)
         {
