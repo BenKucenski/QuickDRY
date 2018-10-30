@@ -5,6 +5,24 @@
  */
 class Dates extends SafeClass
 {
+    public static function ConvertToUserDate($datetime, $timezone)
+    {
+        $datetime = Dates::Timestamp($datetime);
+        $tz = new DateTimeZone($timezone);
+        $date = new DateTime($datetime . ' GMT');
+        $date->setTimezone($tz);
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    public static function ConvertToServerDate($datetime, $timezone)
+    {
+        $datetime = Dates::Timestamp($datetime);
+        $tz = new DateTimeZone('GMT');
+        $date = new DateTime($datetime . ' ' . $timezone);
+        $date->setTimezone($tz);
+        return $date->format('Y-m-d H:i:s');
+    }
+
     /**
      * @param $min_date
      * @param $max_date
@@ -262,11 +280,16 @@ class Dates extends SafeClass
      *
      * @return int
      */
-    public static function AdjustedTime($time = 0)
+    public static function AdjustedTime($time = 0, $offset = 0)
     {
         if (!$time) $time = time();
 
         if (!is_numeric($time)) $time = strtotime($time);
+        if($offset < 0) {
+            $time = strtotime($offset . ' hour', $time);
+        } else {
+            $time = strtotime('+' . $offset . ' hour', $time);
+        }
 
         return $time;
     }
