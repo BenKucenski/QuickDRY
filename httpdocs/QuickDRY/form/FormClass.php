@@ -39,7 +39,7 @@ class FormClass
 
         $res = '<select onchange="' . $onchange . '" class="' . $class . '" name="' . $name . '" id="' . $id . '">';
         if($add_none) {
-            $res .= '<option value="' . $add_none . '">Select One...</input>';
+            $res .= '<option value="null">' . (is_bool($add_none) ? 'Select One...' : $add_none) . '</input>';
         }
         foreach ($options as $id => $disp) {
             if ($id == $selected) {
