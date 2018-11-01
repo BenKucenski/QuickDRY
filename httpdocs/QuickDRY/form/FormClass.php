@@ -162,14 +162,14 @@ class FormClass
         }
 
         $res = '<div id="' . $id . '_div" style="' . $outer_style . '">';
-        foreach ($options as $i => $option) {
+        foreach ($options as $option => $display) {
             if (in_array($option, $selected)) {
-                $res .= '<input checked="checked" type="radio" style="' . $inner_style . '" name="' . $name . '" id="' . $id . '_' . $i
-                    . '" value="' . $option . '" />' . $option;
+                $res .= '<input checked="checked" type="radio" style="' . $inner_style . '" name="' . $name . '" id="' . $id . '_' . $option
+                    . '" value="' . $option . '" />' . $display;
             } else {
                 $res .=
-                    '<input type="radio" style="' . $inner_style . '" name="' . $name . '" id="' . $id . '_' . $i . '" value="' . $option
-                    . '" />' . $option;
+                    '<input type="radio" style="' . $inner_style . '" name="' . $name . '" id="' . $id . '_' . $option . '" value="' . $option
+                    . '" />' . $display;
             }
             if ($new_line) {
                 $res .= '<br/>';
