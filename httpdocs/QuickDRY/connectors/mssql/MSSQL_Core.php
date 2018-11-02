@@ -806,9 +806,9 @@ class MSSQL_Core extends SQL_Base
 
 
                 if ((is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
-                    $qs[] = 'NULL';
+                    $qs[] = 'NULL --' . $name . PHP_EOL;
                 } else {
-                    $qs[] = '@';
+                    $qs[] = '@ --' . $name . PHP_EOL;
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
 
@@ -837,9 +837,9 @@ class MSSQL_Core extends SQL_Base
 
 
                 if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
-                    $props[] = '[' . $name . '] = NULL';
+                    $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
                 } else {
-                    $props[] = '[' . $name . '] = @';
+                    $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
             }
