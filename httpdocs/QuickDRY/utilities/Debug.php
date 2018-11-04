@@ -78,6 +78,8 @@ class Debug extends SafeClass
      */
     public static function _Debug($var, $msg = null, $print = false, $exit = false, $backtrace = true)
     {
+        global $Web;
+
         $finalMsg = '';
         if ($msg) {
             $finalMsg .= '<h3>' . $msg . '</h3>';
@@ -85,13 +87,17 @@ class Debug extends SafeClass
         $finalMsg .= '<pre>';
         $finalMsg .= print_r($var, true);
         $finalMsg .= "\r\n\r\n";
+        $finalMsg .= print_r($_SERVER, true);
+        $finalMsg .= "\r\n\r\n";
+        $finalMsg .= print_r($Web, true);
+        $finalMsg .= "\r\n\r\n";
         if ($backtrace)
             $finalMsg .= static::_debug_string_backtrace();
         $finalMsg .= '</pre>' . PHP_EOL;
 
         if (defined('IS_PRODUCTION') && IS_PRODUCTION) {
             $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_FILENAME'];
-            $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, 'HALT: ' . $uri, $finalMsg);
+            $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, SMTP_FROM_NAME. ' HALT: ' . $uri, $finalMsg);
             try {
                 $t->Send();
             } catch(Exception $ex) {
