@@ -11,7 +11,7 @@
 
 
 <h3 id="ctl_wait_text">Please Wait</h3>
-<img src="/images/ajax-loader-lg.gif"/>
+<img src="/QuickDRY/images/ajax-loader-lg.gif"/>
 
             </div>
             <div class="modal-footer">
