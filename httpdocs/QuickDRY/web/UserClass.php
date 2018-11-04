@@ -24,7 +24,7 @@ class UserClass extends SafeClass
             case 'login':
                 return $this->Username;
         }
-        return parent::__get($name); 
+        return parent::__get($name);
     }
 
     /**
@@ -47,26 +47,32 @@ class UserClass extends SafeClass
             if ($ldap->authenticate($username, $password)) {
 
                 // May not be necessary to use an administrative account to get role information
-                $ldadmin = new adLDAP();
-                $ldadmin->set_use_tls(defined('LDAP_USE_TLS') ? LDAP_USE_TLS : false);
-                $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
+                if(defined('LDAP_ADMIN_USER') && LDAP_ADMIN_USER && defined('LDAP_ADMIN_PASS') && LDAP_ADMIN_PASS) {
+                    $ldadmin = new adLDAP();
+                    $ldadmin->set_use_tls(defined('LDAP_USE_TLS') ? LDAP_USE_TLS : false);
+                    $ldadmin->authenticate(LDAP_ADMIN_USER, LDAP_ADMIN_PASS);
+                }
 
                 $user = new self();
                 $user->Username = $username;
                 $user->id = md5($username);
-                $user->Roles = $ldadmin->user_groups($username, true);
+                $user->Roles = $ldadmin ? $ldadmin->user_groups($username, true) : [];
 
                 // user may log in with email address but roles may be linked to root account name
                 if (!sizeof($user->Roles)) {
                     $username = explode('@', $username);
                     $username = $username[0];
-                    $user->Roles = $ldadmin->user_groups($username, true);
+                    $user->Roles = $ldadmin ? $ldadmin->user_groups($username, true) : [];
                 }
                 return $user;
 
             }
         } catch (Exception $ex) {
-            return null;
+            $err = $ex->getMessage();
+            if(stristr($err,'Invalid credentials') !== false) {
+                return null;
+            }
+            Halt($ex);
         }
         return null;
 
