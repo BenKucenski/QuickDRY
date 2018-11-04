@@ -88,6 +88,7 @@ function autoloader_QuickDRY($class)
 {
     $class_map = [
         'SafeClass' => 'utilities/SafeClass.php',
+        'FPDF' => 'utilities/fpdf16/fpdf.php',
         'SimpleClass' => 'utilities/SimpleClass.php',
         'Metrics' => 'utilities/Metrics.php',
         'Network' => 'utilities/Network.php',
