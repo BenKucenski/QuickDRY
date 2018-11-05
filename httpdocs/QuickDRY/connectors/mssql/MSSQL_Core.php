@@ -732,6 +732,16 @@ class MSSQL_Core extends SQL_Base
             case 'date':
                 return $value ? Dates::Datestamp($value) : null;
 
+            case 'numeric':
+                if(!is_numeric($value)) {
+                    if(!$value) {
+                        $value = static::$prop_definitions[$name]['is_nullable'] ? null : 0;
+                    } else {
+                        Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be numeric']);
+                    }
+                }
+                return $value * 1.0;
+
             case 'tinyint(1)':
                 return $value ? 1 : 0;
 
