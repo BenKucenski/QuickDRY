@@ -706,6 +706,10 @@ class MSSQL_Core extends SQL_Base
      */
     protected static function StrongType($name, $value, $just_checking = false)
     {
+        if($value === '#NULL!') { // Excel files may have this
+            $value = null;
+        }
+
         if (is_array($value)) {
             return null;
         }
@@ -732,12 +736,14 @@ class MSSQL_Core extends SQL_Base
             case 'date':
                 return $value ? Dates::Datestamp($value) : null;
 
+            case 'int':
+            case 'float':
             case 'numeric':
                 if(!is_numeric($value)) {
                     if(!$value) {
                         $value = static::$prop_definitions[$name]['is_nullable'] ? null : 0;
                     } else {
-                        Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be numeric']);
+                        Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
                     }
                 }
                 return $value * 1.0;
