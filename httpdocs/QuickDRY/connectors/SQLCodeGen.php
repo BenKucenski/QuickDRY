@@ -243,7 +243,7 @@ spl_autoload_register(\'' . $autoloader_class . '\');
                 $aliases[] = $col;
             }
             $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
-            $props .= "'" . $col->field . "'=>['display'=>'" . SQLCodeGen::FieldToDisplay($col->field) . "', 'type'=>'" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable'=>" . ($col->null ? 'true' : 'false') . "],\r\n\t\t";
+            $props .= "'" . $col->field . "' => ['type' => '" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable' => " . ($col->null ? 'true' : 'false') . ", 'display' => '" . SQLCodeGen::FieldToDisplay($col->field) . "'],\r\n\t\t";
             if($col->field === 'user_id') {
                 $HasUserLink = true;
             }

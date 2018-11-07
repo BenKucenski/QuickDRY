@@ -731,7 +731,6 @@ class MSSQL_Core extends SQL_Base
             return null;
         }
 
-
         switch (static::$prop_definitions[$name]['type']) {
             case 'date':
                 return $value ? Dates::Datestamp($value) : null;
@@ -739,6 +738,9 @@ class MSSQL_Core extends SQL_Base
             case 'int':
             case 'float':
             case 'numeric':
+                if(is_null($value) && static::$prop_definitions[$name]['is_nullable']) {
+                    return null;
+                }
                 if(!is_numeric($value)) {
                     if(!$value) {
                         $value = static::$prop_definitions[$name]['is_nullable'] ? null : 0;
@@ -821,7 +823,7 @@ class MSSQL_Core extends SQL_Base
                 $st_value = static::StrongType($name, $value);
 
 
-                if ((is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
                     $qs[] = 'NULL --' . $name . PHP_EOL;
                 } else {
                     $qs[] = '@ --' . $name . PHP_EOL;
@@ -852,7 +854,7 @@ class MSSQL_Core extends SQL_Base
                 $st_value = static::StrongType($name, $value);
 
 
-                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && !self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS) {
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
                     $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
                 } else {
                     $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
