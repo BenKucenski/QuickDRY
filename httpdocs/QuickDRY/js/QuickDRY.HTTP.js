@@ -50,7 +50,11 @@ var HTTP = {
                 }
 
                 var json = JSON.parse(XMLHttpRequest.responseText);
-                NoticeDialog('Error', json.error);
+                if (typeof(error_callback) === "function") {
+                    error_callback(data);
+                } else {
+                    NoticeDialog('Error', json.error);
+                }
             },
             success: function (data) {
                 QuickDRY.CloseDialogIfOpen('wait_dialog');
