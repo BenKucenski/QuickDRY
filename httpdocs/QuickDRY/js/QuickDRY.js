@@ -1,80 +1,67 @@
 var QuickDRY = {
-    Create: function (type, vars, callback, dialog) {
+    _Post : function(url, vars, callback, dialog) {
         if (dialog) {
             var modalClass = dialog.replace('_dialog', '');
         }
 
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: vars,
+            success: function(data){
+                QuickDRY.CloseDialogIfOpen('wait_dialog');
+                if (data.error) {
+                    NoticeDialog('Error', data.error);
+                    if (modalClass) {
+                        eval(modalClass + '._active = true;');
+                    }
+                }
+                else {
+                    if (data.success && $.n) {
+                        $.n.success(data.success);
+                    }
+                    if (dialog) {
+                        QuickDRY.CloseDialogIfOpen(dialog);
+                    }
+                    if (typeof(callback) === "function") {
+                        callback(data);
+                    }
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                data = XMLHttpRequest.responseJSON;
+                QuickDRY.CloseDialogIfOpen('wait_dialog');
+                if (data.error) {
+                    NoticeDialog('Error', data.error);
+                    if (modalClass) {
+                        eval(modalClass + '._active = true;');
+                    }
+                }
+            }
+        });
+
+    },
+    Create: function (type, vars, callback, dialog) {
         if (!QuickDRY.DialogIsOpen('wait_dialog')) {
             WaitDialog('Please Wait', 'Saving...');
         }
 
         vars.verb = 'PUT';
-        $.post('/json/' + type, vars, function (data) {
-            QuickDRY.CloseDialogIfOpen('wait_dialog');
-            if (data.error) {
-                NoticeDialog('Error', data.error);
-                if (modalClass) {
-                    eval(modalClass + '._active = true;');
-                }
-            }
-            else {
-                if (data.success && $.n) {
-                    $.n.success(data.success);
-                }
-                if (dialog) {
-                    QuickDRY.CloseDialogIfOpen(dialog);
-                }
-                if (typeof(callback) === "function") {
-                    callback(data);
-                }
-            }
-        }, "json");
+        QuickDRY._Post('/json/' + type, vars, callback, dialog)
     },
 
     Read: function (type, vars, callback) {
         vars.verb = 'GET';
-        HTTP.Post('/json/' + type, vars, function (data) {
-            QuickDRY.CloseDialogIfOpen('wait_dialog');
-            if (data.error) {
-                NoticeDialog('Error', data.error);
-            } else {
-                if (typeof(callback) === "function") {
-                    callback(data);
-                }
-            }
-        }, "json");
+        QuickDRY._Post('/json/' + type, vars, callback)
     },
 
     Update: function (type, vars, callback, dialog) {
-        if (dialog) {
-            var modalClass = dialog.replace('_dialog', '');
-        }
-
         if (!QuickDRY.DialogIsOpen('wait_dialog')) {
             WaitDialog('Please Wait', 'Saving...');
         }
 
         vars.verb = 'POST';
-        $.post('/json/' + type, vars, function (data) {
-            QuickDRY.CloseDialogIfOpen('wait_dialog');
-            if (data.error) {
-                NoticeDialog('Error', data.error);
-                if (modalClass) {
-                    eval(modalClass + '._active = true;');
-                }
-            }
-            else {
-                if (data.success && $.n) {
-                    $.n.success(data.success);
-                }
-                if (dialog) {
-                    QuickDRY.CloseDialogIfOpen(dialog);
-                }
-                if (typeof(callback) === "function") {
-                    callback(data);
-                }
-            }
-        }, "json");
+        QuickDRY._Post('/json/' + type, vars, callback, dialog)
     },
 
     ConfirmDelete: function (object_type, object_name, vars, document_number, callback, dialog) {
