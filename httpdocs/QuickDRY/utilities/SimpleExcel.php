@@ -279,17 +279,6 @@ class SimpleExcel extends SafeClass
         }
 
         if ($property_type === SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {
-            try {
-                $sheet
-                    ->getStyle($sheet_column . $sheet_row)
-                    ->getNumberFormat()
-                    ->setFormatCode(
-                        \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
-                    );
-            } catch (Exception $ex) {
-                Debug::Halt($ex);
-            }
-
             $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         } else {
             if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
