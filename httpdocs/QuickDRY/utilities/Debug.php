@@ -87,12 +87,13 @@ class Debug extends SafeClass
         $finalMsg .= '<pre>';
         $finalMsg .= print_r($var, true);
         $finalMsg .= "\r\n\r\n";
-        $finalMsg .= print_r($_SERVER, true);
-        $finalMsg .= "\r\n\r\n";
-        $finalMsg .= print_r($Web, true);
-        $finalMsg .= "\r\n\r\n";
-        if ($backtrace)
+        if ($backtrace) {
+            $finalMsg .= print_r($_SERVER, true);
+            $finalMsg .= "\r\n\r\n";
+            $finalMsg .= print_r($Web, true);
+            $finalMsg .= "\r\n\r\n";
             $finalMsg .= static::_debug_string_backtrace();
+        }
         $finalMsg .= '</pre>' . PHP_EOL;
 
         if (defined('IS_PRODUCTION') && IS_PRODUCTION) {
