@@ -177,10 +177,14 @@ class APIRequest
         curl_setopt($ch, CURLOPT_POST, $post);
         if ($data) {
             if ($post) {
-                if (isset($data['json'])) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data['json']));
+                if (isset($data['raw_post_data'])) {
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $data['raw_post_data']);
                 } else {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+                    if (isset($data['json'])) {
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data['json']));
+                    } else {
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+                    }
                 }
             } else {
                 $url .= (stristr($url, '?') === false ? '?' : '&') . http_build_query($data);
