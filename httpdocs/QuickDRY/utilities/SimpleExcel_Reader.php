@@ -73,7 +73,7 @@ class SimpleExcel_Reader extends SafeClass
                     if ($debug) {
                         Log::Insert($row . ' / ' . $rows, true);
                     }
-                    $end = ($row + $per_page);
+                    $end = ($row + $per_page - 1);
                     if ($end > $rows) {
                         $end = $rows;
                     }
