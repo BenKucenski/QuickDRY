@@ -163,18 +163,18 @@ class SimpleExcel extends SafeClass
                 Debug::Halt($ex);
             }
             try {
-                $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setTitle($report->Title ? $report->Title : 'Sheet ' . ($sheet + 1));
+                $xls_sheet = $spreadsheet->getActiveSheet();
+                $xls_sheet->setTitle($report->Title ? $report->Title : 'Sheet ' . ($sheet + 1));
             } catch (Exception $ex) {
                 Halt($ex);
             }
-            self::SetDefaultSecurity($sheet);
+            self::SetDefaultSecurity($xls_sheet);
 
             $sheet_row = 1;
 
             $sheet_column = 'A';
             foreach ($report->Columns as $column) {
-                self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
+                self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $column->Header, $column->PropertyType);
                 $sheet_column++;
             }
             $sheet_row++;
@@ -190,7 +190,7 @@ class SimpleExcel extends SafeClass
                         } catch(Exception $ex) {
                             $value = '';
                         }
-                        self::_SetSpreadsheetCellValue($sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
+                        self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                         $sheet_column++;
                     }
                     $sheet_row++;
