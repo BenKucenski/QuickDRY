@@ -457,7 +457,7 @@ class MSSQL_Core extends SQL_Base
 			' . ($limit ? 'TOP ' . $limit : '') . '
 				*
 			FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
 			WHERE
 				' . $sql_where . '
 				' . $sql_order . '
@@ -517,7 +517,7 @@ class MSSQL_Core extends SQL_Base
 			SELECT
 				COUNT(*) AS cnt
 			FROM
-				[' . static::$database . '].dbo.[' . static::$table . ']
+				[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
 			WHERE
 				' . $sql_where . '
 		';
@@ -606,7 +606,7 @@ class MSSQL_Core extends SQL_Base
         if (is_array($left_join)) {
             $sql_left = '';
             foreach ($left_join as $join)
-                $sql_left .= 'LEFT JOIN  [' . $join['database'] . '].dbo.[' . $join['table'] . '] AS ' . $join['as'] . ' ON ' . $join['on'] . "\r\n";
+                $sql_left .= 'LEFT JOIN  [' . $join['database'] . '].dbo.[' . $join['table'] . '] AS ' . $join['as'] . ' WITH (NOLOCK) ON ' . $join['on'] . "\r\n";
         }
 
 
@@ -615,17 +615,20 @@ class MSSQL_Core extends SQL_Base
 				SELECT
 					COUNT(*) AS num
 				FROM
-					[' . static::$database . '].dbo.[' . static::$table . ']
+					[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
 					' . $sql_left . '
 				WHERE
 					' . $sql_where . '
 				';
         } else {
             $sql = '
-				SELECT COUNT(*) AS num FROM (SELECT TOP ' . $limit . ' * FROM [' . static::$database . '].dbo.[' . static::$table . ']
-					' . $sql_left . '
-				WHERE
-					' . $sql_where . '
+				SELECT 
+				  COUNT(*) AS num 
+                FROM (
+                    SELECT TOP ' . $limit . ' * FROM [' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
+                        ' . $sql_left . '
+                    WHERE
+                        ' . $sql_where . '
 				) AS c
 			';
         }
@@ -642,7 +645,7 @@ class MSSQL_Core extends SQL_Base
 				SELECT
 					[' . static::$table . '].*
 				FROM
-					[' . static::$database . '].dbo.[' . static::$table . ']
+					[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
 					' . $sql_left . '
 				WHERE
 					 ' . $sql_where . '
