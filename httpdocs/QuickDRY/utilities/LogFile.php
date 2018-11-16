@@ -21,7 +21,7 @@ class LogFile
      */
     public function Insert($filename, $message, $echo = false)
     {
-        $f = preg_replace('/[^a-z]/si','_', $filename) . '.' . Dates::Datestamp();
+        $f = preg_replace('/[^a-z0-9]/si','_', $filename) . '.' . Dates::Datestamp();
         $log_path = DOC_ROOT_PATH . '/logs/' . $f . '.log';
 
         $fp = fopen($log_path,'a');
