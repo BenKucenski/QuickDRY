@@ -321,9 +321,9 @@ class Dates extends SafeClass
      *
      * @return bool|null|string
      */
-    public static function StandardDateTime($date = null, $null = null)
+    public static function StandardDateTime($date = null, $null = null, $offset = null)
     {
-        return self::Datestamp($date, $null, 'n/j/Y h:i A');
+        return self::Datestamp($date, $null, 'n/j/Y h:i A', $offset);
     }
 
     /**
@@ -443,7 +443,7 @@ class Dates extends SafeClass
      * @param string $format
      * @return false|null|string
      */
-    public static function Datestamp($date = null, $null = null, $format = 'Y-m-d')
+    public static function Datestamp($date = null, $null = null, $format = 'Y-m-d', $offset = null)
     {
         if(is_null($null) && is_null($date)) {
             $date = time();
@@ -457,6 +457,9 @@ class Dates extends SafeClass
             return $null;
         }
 
+        if($offset) {
+            $date += $offset * 3600;
+        }
         return date($format, $date);
     }
 
