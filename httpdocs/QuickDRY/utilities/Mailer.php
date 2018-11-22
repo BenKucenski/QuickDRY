@@ -54,8 +54,6 @@ class Mailer extends SafeClass
     /**
      * @param bool $debug
      * @return int
-     * @throws Exception
-     * @throws phpmailerException
      */
     public function Send($debug = false)
     {
@@ -67,7 +65,7 @@ class Mailer extends SafeClass
         }
 
         if (!defined('SMTP_FROM_EMAIL') || !defined('SMTP_FROM_NAME')) {
-            exit('SMTP_FROM_EMAIL or SMTP_FROM_NAME not defined');
+            Halt('SMTP_FROM_EMAIL or SMTP_FROM_NAME not defined');
         }
 
         if (defined('SMTP_DEBUG') && SMTP_DEBUG) {
@@ -116,15 +114,25 @@ class Mailer extends SafeClass
                         Halt(['error' => 'invalid attachment', $name => $path]);
                         continue;
                     }
-                    $mail->AddAttachment($path, $name);
+                    try {
+                        $mail->AddAttachment($path, $name);
+                    } catch (Exception $ex) {
+                        $this->log = $ex->getMessage();
+                        return 0;
+                    }
                 }
             }
 
-            if (!$mail->Send()) {
-                if ($debug) {
-                    Halt([$mail->ErrorInfo, $mail]);
+            try {
+                if (!$mail->Send()) {
+                    if ($debug) {
+                        Halt([$mail->ErrorInfo, $mail]);
+                    }
+                    $this->log = $mail->ErrorInfo;
+                    return 0;
                 }
-                $this->log = $mail->ErrorInfo;
+            } catch(Exception $e) {
+                $this->log = $e->getMessage();
                 return 0;
             }
         }
