@@ -443,4 +443,21 @@ class MathClass
         return log($x, (1.0 + $rk)) / $payments_per_year;
 
     }
+
+    public static function GetAdditionalPayment($present_value, $current_payment, $interest_rate, $months)
+    {
+        // https://www.sapling.com/8609716/calculate-months-pay-off-loan
+        $interest_rate /= 100.0;
+        $interest_rate /= 12.0;
+
+
+        $pmt = -$present_value * $interest_rate / (exp(-$months * log(1.0 + $interest_rate)) - 1);
+        $extra_payment = $pmt - $current_payment;
+
+        $N = -(log(1 - (($present_value * $interest_rate) / $pmt) ) / log(1 + $interest_rate));
+        // $N should equal $months
+
+        return $extra_payment;
+
+    }
 }
