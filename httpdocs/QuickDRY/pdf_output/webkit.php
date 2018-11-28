@@ -42,11 +42,15 @@ if(defined('PDF_API')) {
 
 // $params[] = '--debug-javascript';
     $params[] = '-O ' . $Web->PDFPageOrientation;
-    if ($Web->PDFHeader) {
-        $params[] = '--header-html "' . $Web->PDFHeader . '"';
-    }
-    if ($Web->PDFFooter) {
-        $params[] = '--footer-html "' . $Web->PDFFooter . '"';
+    if($Web->PDFSimplePageNumbers) {
+        $params[] = '--footer-center [page]/[topage]';
+    } else {
+        if ($Web->PDFHeader) {
+            $params[] = '--header-html "' . $Web->PDFHeader . '"';
+        }
+        if ($Web->PDFFooter) {
+            $params[] = '--footer-html "' . $Web->PDFFooter . '"';
+        }
     }
 
 

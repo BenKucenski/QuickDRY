@@ -61,6 +61,7 @@ class Web
     public $PDFPostRedirect;
     public $PDFHeader;
     public $PDFFooter;
+    public $PDFSimplePageNumbers;
 
     public $RenderDOCX;
     public $DOCXPageOrientation;
