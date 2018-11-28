@@ -219,7 +219,7 @@ if ($Web->RenderPDF) {
 
 
     Metrics::Start('render pdf');
-    require_once 'QuickDRY/pdf_output/webkit.php';
+    require_once 'QuickDRY/web/WebKit.php';
 
     Metrics::Stop('render pdf');
     exit;

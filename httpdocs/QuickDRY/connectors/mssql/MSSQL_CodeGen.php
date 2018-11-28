@@ -89,7 +89,7 @@ class MSSQL_CodeGen extends SQLCodeGen
     public static function GetReport(' . implode(', ', $func_params) . ')
     {
         $sql = \'
-        EXEC	\' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
+        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
         ' . implode(", ", $sql_params) . '
 
         \';

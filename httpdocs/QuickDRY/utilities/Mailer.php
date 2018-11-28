@@ -65,7 +65,7 @@ class Mailer extends SafeClass
         }
 
         if (!defined('SMTP_FROM_EMAIL') || !defined('SMTP_FROM_NAME')) {
-            Halt('SMTP_FROM_EMAIL or SMTP_FROM_NAME not defined');
+            exit('SMTP_FROM_EMAIL or SMTP_FROM_NAME not defined');
         }
 
         if (defined('SMTP_DEBUG') && SMTP_DEBUG) {
@@ -111,7 +111,7 @@ class Mailer extends SafeClass
                         $path = '../' . $path;
                     }
                     if (!file_exists($path)) {
-                        Halt(['error' => 'invalid attachment', $name => $path]);
+                        Log::Insert(['error' => 'invalid attachment', $name => $path]);
                         continue;
                     }
                     try {
