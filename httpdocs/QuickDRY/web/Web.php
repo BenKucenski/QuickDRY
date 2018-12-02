@@ -231,7 +231,7 @@ class Web
 
         $this->Verb = strtoupper($this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD);
     }
-	
+
 	public function SetURLs()
 	{
 		// this must be done after the settings file is loaded to support proxy situations
@@ -239,8 +239,16 @@ class Web
 
         if(isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
             $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
+
+            if(!HTTP::IsSecure() && defined('FORCE_SSL') && FORCE_SSL) {
+                HTTP::Redirect('https://' . HTTP_HOST);
+            }
+
             define('BASE_URL', $protocol . HTTP_HOST);
         } else {
+            if(defined('FORCE_SSL') && FORCE_SSL) {
+                HTTP::Redirect('https://' . HTTP_HOST);
+            }
             if(!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
                 define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
             }
