@@ -71,6 +71,8 @@ class Web
     public $InstanceModel;
 
     public $Verb;
+    public $StartTime;
+    public $InitTime;
 
     /**
      * @param string[] $MasterPages
@@ -98,6 +100,7 @@ class Web
      */
     public function Init($default_page, $default_user_page, $script_dir)
     {
+        $this->StartTime = time();
         $this->RenderPDF = false;
 
         $this->Request = new Request();

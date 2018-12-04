@@ -192,8 +192,11 @@ class Strings extends SafeClass
      * @param $ends_with
      * @return bool
      */
-    public static function EndsWith($string, $ends_with)
+    public static function EndsWith($string, $ends_with, $case_sensitive = true)
     {
+        if(!$case_sensitive) {
+            return strcasecmp(substr($string, -strlen($ends_with), strlen($ends_with)), $ends_with) == 0;
+        }
         return substr($string, -strlen($ends_with), strlen($ends_with)) === $ends_with;
     }
 
