@@ -1055,10 +1055,12 @@ class adLDAP
         if (!$this->_bind) {
             return null;
         }
+        $parts = explode('\\', $username);
+        $nicename = $parts[sizeof($parts) - 1];
 
-        $filter = "samaccountname=$username";
+        $filter = "samaccountname=$nicename";
         if ($fields === NULL) {
-            $fields = ["samaccountname", "mail", "memberof", "department", "displayname", "telephonenumber", "primarygroupid", "objectsid"];
+            $fields = ["sAMAccountName", "mail", "memberof", "department", "displayname", "telephonenumber", "primarygroupid", "objectsid"];
         }
         $sr = ldap_search($this->_conn, $this->_base_dn, $filter, $fields);
         $entries = ldap_get_entries($this->_conn, $sr);
