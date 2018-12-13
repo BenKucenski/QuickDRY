@@ -67,3 +67,35 @@ class MSAccess
 		return $returnval;
 	}
 }
+
+function autoloader_QuickDRY_ACCESS($class)
+{
+    $class_map = [
+        'ACCESS_Connection' => 'access/ACCESS_Connection.php',
+        'ACCESS_A' => 'access/ACCESS_A.php',
+        'ACCESS_CodeGen' => 'access/ACCESS_CodeGen.php',
+        'ACCESS_Core' => 'access/ACCESS_Core.php',
+        'ACCESS_TableColumn' => 'access/ACCESS_TableColumn.php',
+    ];
+
+
+    if (!isset($class_map[$class])) {
+        return;
+    }
+
+    $file = $class_map[$class];
+    $file = 'QuickDRY/connectors/' . $file;
+
+    if (file_exists($file)) { // web
+        require_once $file;
+    } else {
+        if (file_exists('../' . $file)) { // cron folder
+            require_once '../' . $file;
+        } else { // scripts folder
+            require_once '../httpdocs/' . $file;
+        }
+    }
+}
+
+
+spl_autoload_register('autoloader_QuickDRY_ACCESS');

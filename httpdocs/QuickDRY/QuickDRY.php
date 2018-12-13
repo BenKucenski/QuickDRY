@@ -185,6 +185,7 @@ require_once 'utilities/phpmailer.php';
 
 require_once 'connectors/MySQL.php';
 require_once 'connectors/MSSQL.php';
+require_once 'connectors/MSAccess.php';
 require_once 'connectors/elastic.php';
 
 Metrics::StartGlobal();
