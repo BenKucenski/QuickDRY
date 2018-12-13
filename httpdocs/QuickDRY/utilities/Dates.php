@@ -353,9 +353,9 @@ class Dates extends SafeClass
      *
      * @return bool|string
      */
-    public static function Timestamp($date = null, $null = null)
+    public static function Timestamp($date = null, $null = null, $format = 'Y-m-d H:i:s')
     {
-        return self::Datestamp($date, $null, 'Y-m-d H:i:s');
+        return self::Datestamp($date, $null, $format);
     }
 
     /**
