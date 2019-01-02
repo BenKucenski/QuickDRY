@@ -1049,7 +1049,7 @@ class adLDAP
      */
     public function user_info($username, $fields = NULL)
     {
-        if ($username === NULL) {
+        if (is_null($username)) {
             return null;
         }
         if (!$this->_bind) {
@@ -1059,12 +1059,15 @@ class adLDAP
         $nicename = $parts[sizeof($parts) - 1];
 
         $filter = "samaccountname=$nicename";
-        if ($fields === NULL) {
+        if (is_null($fields)) {
             $fields = ["sAMAccountName", "mail", "memberof", "department", "displayname", "telephonenumber", "primarygroupid", "objectsid"];
         }
         $sr = ldap_search($this->_conn, $this->_base_dn, $filter, $fields);
         $entries = ldap_get_entries($this->_conn, $sr);
 
+        if(!isset($entries[0])) {
+            return null;
+        }
         if ($entries[0]['count'] >= 1) {
             // AD does not return the primary group in the ldap query, we may need to fudge it
             if ($this->_real_primarygroup && isset($entries[0]["primarygroupid"][0]) && isset($entries[0]["objectsid"][0])) {
