@@ -73,6 +73,7 @@ function autoloader_QuickDRY_ACCESS($class)
     $class_map = [
         'ACCESS_Connection' => 'access/ACCESS_Connection.php',
         'ACCESS_A' => 'access/ACCESS_A.php',
+        'ACCESS_B' => 'access/ACCESS_B.php',
         'ACCESS_CodeGen' => 'access/ACCESS_CodeGen.php',
         'ACCESS_Core' => 'access/ACCESS_Core.php',
         'ACCESS_TableColumn' => 'access/ACCESS_TableColumn.php',

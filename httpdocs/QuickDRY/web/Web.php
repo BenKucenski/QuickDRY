@@ -94,11 +94,7 @@ class Web
         return in_array($this->MasterPage, $this->SecureMasterPages);
     }
 
-    /**
-     * @param string $default_page
-     * @param string $default_user_page
-     */
-    public function Init($default_page, $default_user_page, $script_dir)
+    public function __construct()
     {
         $this->StartTime = time();
         $this->RenderPDF = false;
@@ -115,7 +111,7 @@ class Web
             $this->CurrentUser = $this->Session->user;
         }
 
-        if(isset( $this->Server->REQUEST_URI)) {
+        if (isset($this->Server->REQUEST_URI)) {
             if (!defined('HTTP_HOST')) {
                 if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
                     $host = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
@@ -128,18 +124,41 @@ class Web
             }
         }
 
-        if(defined('HTTP_HOST')) {
+        if (defined('HTTP_HOST')) {
             $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
         }
 
-        if(defined('MYSQL_LOG') && MYSQL_LOG) {
+        if (defined('MYSQL_LOG') && MYSQL_LOG) {
             MySQL_Connection::$use_log = true;
         }
 
-        if(defined('MSSQL_LOG') && MSSQL_LOG) {
+        if (defined('MSSQL_LOG') && MSSQL_LOG) {
             MSSQL_Connection::$use_log = true;
         }
 
+        if (file_exists($this->SettingsFile)) {
+            require_once $this->SettingsFile;
+        } else {
+            if (file_exists('../' . $this->SettingsFile)) {
+                require_once '../' . $this->SettingsFile;
+
+            } else {
+                if (file_exists('../httpdocs/' . $this->SettingsFile)) {
+                    require_once '../httpdocs/' . $this->SettingsFile;
+
+                } else {
+                    Debug::Halt($this->SettingsFile . ' does not exist');
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $default_page
+     * @param string $default_user_page
+     */
+    public function Init($default_page, $default_user_page, $script_dir)
+    {
         $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
         if($t[strlen($t) - 1] == '/') {
             $t = substr($t,0,strlen($t) - 1);
