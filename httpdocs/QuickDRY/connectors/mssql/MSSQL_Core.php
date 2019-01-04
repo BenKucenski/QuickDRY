@@ -494,20 +494,26 @@ class MSSQL_Core extends SQL_Base
     protected static function _GetCount($where = null)
     {
         $sql_where = '1=1';
-        $params = null;
+        $params = [];
         if (is_array($where)) {
             $t = [];
-            $params = [];
             foreach ($where as $c => $v) {
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-                if ($v === 'null')
-                    $t[] = '' . $c . ' IS NULL';
-                else {
-                    $v = $cv['val'];
-                    $params[] = $v;
+                if (!is_array($v) && strtolower($v) === 'null') {
+                    $t[] = $c . ' IS NULL';
+                } else {
                     $t[] = $cv['col'];
+                    if (is_array($v)) {
+                        foreach ($v as $a) {
+                            $params[] = $a;
+                        }
+                    } else {
+                        if(!is_null($v)) {
+                            $params[] = $v;
+                        }
+                    }
                 }
             }
             $sql_where = implode(" AND ", $t);
@@ -583,20 +589,25 @@ class MSSQL_Core extends SQL_Base
         }
 
         $sql_where = '1=1';
-        if (is_array($where) && sizeof($where)) {
+        if (is_array($where)) {
             $t = [];
             foreach ($where as $c => $v) {
                 $cv = self::_parse_col_val($c, $v);
                 $v = $cv['val'];
 
-
-                if (strtolower($v) === 'null')
-                    $t[] = '[' . $c . '] IS NULL';
-                else {
-                    $v = $cv['val'];
-                    $c = $cv['col'];
-                    $params[] = $v;
-                    $t[] = $c;
+                if (!is_array($v) && strtolower($v) === 'null') {
+                    $t[] = $c . ' IS NULL';
+                } else {
+                    $t[] = $cv['col'];
+                    if (is_array($v)) {
+                        foreach ($v as $a) {
+                            $params[] = $a;
+                        }
+                    } else {
+                        if(!is_null($v)) {
+                            $params[] = $v;
+                        }
+                    }
                 }
             }
             $sql_where = implode(" AND ", $t);
