@@ -21,7 +21,8 @@ class ACCESS_Connection
             Halt('ACCESS_DRIVER must be defined.  See source code of ACCESS_Connection.php');
         }
         // https://www.freethinkingdesign.co.uk/blog/accessing-access-db-file-accdb-windows-64bit-via-php-using-odbc/ -- read this on 64 bit php
-        // https://www.microsoft.com/en-us/download/details.aspx?id=23734 -- install this if you have 64 bit php
+        // https://www.microsoft.com/en-us/download/details.aspx?id=23734 -- install this if you have 32 bit php
+        // https://www.microsoft.com/en-us/download/confirmation.aspx?id=13255 -- install this if you have 64 bit php
 
         // https://support.microsoft.com/en-us/help/295297/prb-error-message-0x80004005-general-error-unable-to-open-registry-key
 
