@@ -90,6 +90,39 @@ class Strings extends SafeClass
     }
 
     /**
+     * @param $tsv
+     * @return array
+     */
+    public static function TSVToArrayMap(&$tsv, $mapping_function = null, $filename = null, $class = null)
+    {
+        $tsv = trim($tsv); // remove trailing whitespace
+        // https://stackoverflow.com/questions/4801895/csv-to-associative-array
+        // https://stackoverflow.com/questions/28690855/str-getcsv-on-a-tab-separated-file
+        /* Map Rows and Loop Through Them */
+        $rows = array_map(function ($v) {
+            return str_getcsv($v, "\t");
+        }, explode("\n", $tsv));
+        $header = array_shift($rows);
+        $n = sizeof($header);
+        $csv = [];
+        foreach ($rows as $row) {
+            $m = sizeof($row);
+            for ($j = $m; $j < $n; $j++) {
+                $row[] = ''; // fill in missing fields with emptry strings
+            }
+            if (sizeof($row) != $n) {
+                Halt([$header, $row]);
+            }
+            if($mapping_function) {
+                call_user_func($mapping_function, array_combine($header, $row), $filename, $class);
+            } else {
+                $csv[] = array_combine($header, $row);
+            }
+        }
+        return $csv;
+    }
+
+    /**
      * @param $str
      * @return null|string|string[]
      */
