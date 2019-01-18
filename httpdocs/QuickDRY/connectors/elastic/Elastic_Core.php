@@ -51,7 +51,7 @@ class Elastic_Core extends Elastic_Base
         if (!$this->_id) {
             $vars = [$this->ToArray(true)];
             $res = static::_Insert(static::$_index, static::$_type, $vars);
-            if(!isset($res['items'][0]['index']['_id'])) {
+            if (!isset($res['items'][0]['index']['_id'])) {
                 CleanHalt($res['items']);
             }
             $this->_id = $res['items'][0]['index']['_id'];
@@ -119,6 +119,11 @@ class Elastic_Core extends Elastic_Base
         return static::_Aggregation(static::$_index, static::$_type, $query);
     }
 
+    public static function ScrollIndexType($index, $type, $where, $map_function = null)
+    {
+        return static::_ScrollIndexType($index, $type, $where, $map_function);
+    }
+
     public static function SearchInIndexType(
         $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
     )
@@ -143,25 +148,40 @@ class Elastic_Core extends Elastic_Base
         return static::_Insert($index, $type, $json);
     }
 
-    public static function GetAllForIndexType($index, $type, $where, $limit = 10000)
+    public static function GetAllForIndexType($index, $type, $where, $limit = 10000, $map_function = null)
     {
         $res = self::SearchInIndexType($index, $type, $where, 0, 0);
         $count = $res['count'];
+
         if (!$count) {
             return [];
         }
         $list = [];
+
+        if (!$limit && $count > 10000) {
+            $res = self::ScrollIndexType($index, $type, $where, $map_function);
+            if (isset($res['data'])) {
+                foreach ($res['data'] as $row) {
+                    $list[] = $row;
+                }
+            }
+            return $list;
+        }
+
+
+        $count = $limit ? ($count < $limit ? $count : $limit) : $count;
         $page = 0;
         $per_page = 10000; // arbitrary limit
         $max_page = ceil($count / $per_page);
 
-        while ($page < $max_page && (!$limit || $page * $per_page < $limit)) {
+        while ($page < $max_page) {
             // Log::Insert([$page, $max_page], true);
             $res = self::SearchInIndexType($index, $type, $where, $page, $per_page);
             foreach ($res['data'] as $row) {
                 $list[] = $row;
             }
             $page++;
+            Log::Insert($page . ': ' . sizeof($res['data']), true);
         }
         return $list;
     }
@@ -333,6 +353,68 @@ class Elastic_Core extends Elastic_Base
         return $list;
     }
 
+    private static function _ScrollIndexTypeScrollID($index, $type, $where, $ScrollID, &$list, $map_function = null)
+    {
+        if ($where && sizeof($where)) {
+            $params = [];
+            $params[] = 'q=' . urlencode(implode(' AND ', $where));
+        }
+        $params[] = 'pretty';
+        if ($ScrollID) {
+            $params[] = 'scroll_id=' . $ScrollID;
+            $url = rtrim(static::$ACTIVE_ELASTIC_URL, '/\\ ') . '/_search/scroll?scroll=5m&' . implode('&', $params);
+        } else {
+            $params[] = 'size=10000';
+            $url = rtrim(static::$ACTIVE_ELASTIC_URL, '/\\ ') . '/' . $index . '/' . $type . '/_search/?scroll=5m&' . implode('&', $params);
+
+        }
+
+
+        $res = Curl::Post($url, null);
+
+        $array = json_decode($res->Body, true);
+
+        $list['count'] = isset($array['hits']['total']) ? $array['hits']['total'] : 0;
+        $list['qtime'] = isset($array['took']) ? $array['took'] : 0;
+        //$list['error'] = isset($array['error']) ? $array['error']['msg'] . ' (' . $array['error']['code'] .  ')': '';
+
+        if (isset($array['hits']['hits']) && sizeof($array['hits']['hits'])) {
+            foreach ($array['hits']['hits'] as $row) {
+                $t = $row['_source'];
+                $t['_id'] = $row['_id'];
+                if($map_function) {
+                    call_user_func($map_function, $t);
+                } else {
+                    $list['data'][] = $t;
+                }
+            }
+        } else {
+            return null;
+        }
+
+        if ($where && sizeof($where)) {
+            $list['query'] = implode(' AND ', $where);
+        } else {
+            $list['query'] = '';
+        }
+        $list['url'] = $url;
+
+        return isset($array['_scroll_id']) ? $array['_scroll_id'] : null;
+    }
+
+    protected static function _ScrollIndexType($index, $type, $where, $map_function = null)
+    {
+
+        $list = [];
+        $list['data'] = [];
+        $scroll_id = null;
+        $scroll_id = self::_ScrollIndexTypeScrollID($index, $type, $where, $scroll_id, $list, $map_function);
+        while ($scroll_id) {
+            $scroll_id = self::_ScrollIndexTypeScrollID($index, $type, $where, $scroll_id, $list, $map_function);
+        }
+        return $list;
+    }
+
     protected static function _Search(
         $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
     )
@@ -348,7 +430,7 @@ class Elastic_Core extends Elastic_Base
             $per_page = 20;
         }
 
-        if($where && sizeof($where)) {
+        if ($where && sizeof($where)) {
             $params = [];
             $params[] = 'q=' . urlencode(implode(' AND ', $where));
             if ($fields) {
@@ -395,7 +477,7 @@ class Elastic_Core extends Elastic_Base
                 }
             }
         }
-        if($where && sizeof($where)) {
+        if ($where && sizeof($where)) {
             $list['query'] = implode(' AND ', $where);
         } else {
             $list['query'] = '';
@@ -531,8 +613,8 @@ class Elastic_Core extends Elastic_Base
 
         $query = [
             'index' => $index,
-            'type'  => $type,
-            'body'  => [
+            'type' => $type,
+            'body' => [
                 'query' => [
                     'match' => $params
                 ]
@@ -558,8 +640,8 @@ class Elastic_Core extends Elastic_Base
         // (object) is required for match_all to turn the [] into {} in JSON as expected
         $query = [
             'index' => $index,
-            'type'  => $type,
-            'body'  => [
+            'type' => $type,
+            'body' => [
                 'query' => [
                     'match_all' => (object)[]
                 ]
@@ -612,7 +694,8 @@ class Elastic_Core extends Elastic_Base
         return json_decode($res->Body, true);
     }
 
-    public static function GetMappings($index) {
+    public static function GetMappings($index)
+    {
         $url = static::$ACTIVE_ELASTIC_URL . '/' . $index . '/_mapping?pretty';
         $res = Curl::Get($url, null);
         return json_decode($res->Body, true);

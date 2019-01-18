@@ -842,5 +842,19 @@ class Strings extends SafeClass
         preg_match_all('/[A-Z\d][^A-Z\d]*/', $str, $results);
         return implode(' ', $results[0]);
     }
+
+    public static function FlattenArray($array, $parents = null, &$dest = null)
+    {
+        foreach ($array as $k => $v) {
+
+            $k = preg_replace('/[^a-z0-9]/si', '', $k);
+
+            if (!is_array($v)) {
+                $dest[$parents . $k] = $v;
+                continue;
+            }
+            self::FlattenArray($v, $parents . $k . '_', $dest);
+        }
+    }
 }
 
