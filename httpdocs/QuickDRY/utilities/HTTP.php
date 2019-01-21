@@ -1,6 +1,17 @@
 <?php
 class HTTP extends SafeClass
 {
+    public static function RemoveParameters($query_str, $params)
+    {
+        parse_str($query_str, $get);
+        foreach ($params as $param) {
+            if(!isset($get[$param])) {
+                continue;
+            }
+            unset($get[$param]);
+        }
+        return http_build_query($get);
+    }
     /**
      * @return bool
      */
