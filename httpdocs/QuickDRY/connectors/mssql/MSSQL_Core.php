@@ -15,6 +15,12 @@ class MSSQL_Core extends SQL_Base
         return static::$connection->GetTables();
     }
 
+    public static function GetDatabases()
+    {
+        static::_connect();
+        return static::$connection->GetDatabases();
+    }
+
     public static function SetDatabase($db_base)
     {
         static::_connect();

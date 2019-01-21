@@ -588,6 +588,25 @@ class MSSQL_Connection
         return isset($res['data'][0]['lid']) ? $res['data'][0]['lid'] : null;
     }
 
+    public function GetDatabases()
+    {
+        $sql = 'SELECT * FROM sys.databases ORDER BY name';
+        $res = $this->Query($sql);
+        $list = [];
+        if($res['error']) {
+            Halt($res);
+        }
+        foreach($res['data'] as $row)
+        {
+            $t = $row['name'];
+            if(substr($t,0,strlen('TEMP')) === 'TEMP')
+                continue;
+
+            $list[] = $t;
+        }
+        return $list;
+    }
+
     /**
      * @return array
      */
@@ -596,6 +615,10 @@ class MSSQL_Connection
         $sql = 'SELECT * FROM ['  . $this->current_db. '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
         $res = $this->Query($sql);
         $list = [];
+        if($res['error']) {
+            Halt($res);
+        }
+
         foreach($res['data'] as $row)
         {
             $t = $row['TABLE_NAME'];
