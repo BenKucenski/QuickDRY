@@ -479,11 +479,11 @@ class Strings extends SafeClass
      * @param $val
      * @return float|string
      */
-    public static function NumbersOnly($val)
+    public static function NumbersOnly($val, $return_orig_on_zero = true)
     {
         $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);
         if (!$res) {
-            return $val * 1.0;
+            return $return_orig_on_zero ? $val * 1.0 : 0;
         }
         return $res;
     }
