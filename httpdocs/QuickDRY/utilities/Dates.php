@@ -355,6 +355,9 @@ class Dates extends SafeClass
      */
     public static function Timestamp($date = null, $null = null, $format = 'Y-m-d H:i:s')
     {
+        if(!$format) {
+            $format = 'Y-m-d H:i:s';
+        }
         return self::Datestamp($date, $null, $format);
     }
 
@@ -445,6 +448,10 @@ class Dates extends SafeClass
      */
     public static function Datestamp($date = null, $null = null, $format = 'Y-m-d', $offset = null)
     {
+        if(!$format) {
+            $format = 'Y-m-d';
+        }
+
         if(is_null($null) && is_null($date)) {
             $date = time();
         }
