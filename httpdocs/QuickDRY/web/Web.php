@@ -74,6 +74,9 @@ class Web
     public $StartTime;
     public $InitTime;
 
+    public $DefaultPage;
+    public $DefaultUserPage;
+
     /**
      * @param string[] $MasterPages
      */
@@ -159,6 +162,9 @@ class Web
      */
     public function Init($default_page, $default_user_page, $script_dir)
     {
+        $this->DefaultPage = $default_page;
+        $this->DefaultUserPage = $default_user_page;
+
         $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
         if($t[strlen($t) - 1] == '/') {
             $t = substr($t,0,strlen($t) - 1);
@@ -195,7 +201,7 @@ class Web
         $cur_page = $t[sizeof($t)-1];
 
         if(!$cur_page) {
-            $cur_page = $this->CurrentUser ? $default_user_page : $default_page;
+            $cur_page = $this->CurrentUser ? $this->DefaultUserPage : $this->DefaultPage;
             $full_path = '/' . $cur_page;
             $cur_page = explode('/', $cur_page);
             $cur_page = $cur_page[sizeof($cur_page) - 1];

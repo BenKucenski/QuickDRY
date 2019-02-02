@@ -117,10 +117,10 @@ if (file_exists($Web->ControllerFile)) {
             if ($Web->IsSecureMasterPage()) {
                 if ($Web->AccessDenied) {
                     if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
-                        HTTP::RedirectNotice('Please Sign In', '/signin');
+                        HTTP::RedirectNotice('Please Sign In', '/' . $Web->DefaultPage);
                     } else {
                         if ($Web->CurrentUser) {
-                            HTTP::RedirectNotice('', '/main');
+                            HTTP::RedirectNotice('', '/' . $Web->DefaultUserPage);
                         } else {
                             HTTP::RedirectError('Access Denied (2)');
                         }
@@ -182,7 +182,7 @@ if (file_exists($Web->ControllerFile)) {
         default:
             if ($Web->AccessDenied) {
                 if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
-                    HTTP::RedirectNotice('Please Sign In', '/signin');
+                    HTTP::RedirectNotice('Please Sign In', '/' . $Web->DefaultPage);
                 } else {
                     HTTP::RedirectError('Access Denied (3)');
                 }
