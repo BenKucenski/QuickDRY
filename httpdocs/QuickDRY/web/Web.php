@@ -90,7 +90,7 @@ class Web
      */
     public function IsSecureMasterPage()
     {
-        if(!is_array($this->SecureMasterPages)) {
+        if (!is_array($this->SecureMasterPages)) {
             return false;
         }
 
@@ -166,8 +166,8 @@ class Web
         $this->DefaultUserPage = $default_user_page;
 
         $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
-        if($t[strlen($t) - 1] == '/') {
-            $t = substr($t,0,strlen($t) - 1);
+        if ($t[strlen($t) - 1] == '/') {
+            $t = substr($t, 0, strlen($t) - 1);
         }
         define('DOC_ROOT_PATH', $t);
 
@@ -189,18 +189,18 @@ class Web
         $page = str_replace('?' . $qs, '', $ru);
         $page = str_replace('/' . $qs, '/', $page);
 
-        if(strstr($page,'/') === false)
+        if (strstr($page, '/') === false)
             $page .= '/';
 
-        if($page[strlen($page) - 1] == '/') {
-            $page = substr($page, 0,strlen($page) - 1);
+        if ($page[strlen($page) - 1] == '/') {
+            $page = substr($page, 0, strlen($page) - 1);
         }
 
         $full_path = $page != '/' ? $page : '/';
         $t = explode('/', $full_path);
-        $cur_page = $t[sizeof($t)-1];
+        $cur_page = $t[sizeof($t) - 1];
 
-        if(!$cur_page) {
+        if (!$cur_page) {
             $cur_page = $this->CurrentUser ? $this->DefaultUserPage : $this->DefaultPage;
             $full_path = '/' . $cur_page;
             $cur_page = explode('/', $cur_page);
@@ -210,13 +210,13 @@ class Web
         $host = explode('.', HTTP_HOST);
         $m = sizeof($host);
 
-        if(sizeof($host) >= 2) {
-            define('URL_DOMAIN',$host[$m-2] . '.' . $host[$m-1]);
+        if (sizeof($host) >= 2) {
+            define('URL_DOMAIN', $host[$m - 2] . '.' . $host[$m - 1]);
         } else {
-            define('URL_DOMAIN',$host[0]);
+            define('URL_DOMAIN', $host[0]);
         }
 
-        define('COOKIE_DOMAIN','.'.URL_DOMAIN);
+        define('COOKIE_DOMAIN', '.' . URL_DOMAIN);
 
         define('CURRENT_PAGE', $full_path);
         define('CURRENT_PAGE_NAME', $cur_page);
@@ -231,12 +231,12 @@ class Web
         $code = 'pages' . $this->CurrentPage . '.code.php';
 
 
-        $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt :  null);
-        $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt :  null);
+        $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt : null);
+        $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt : null);
 
         // Accept page.json.php and json.page.php
         $this->IsJSON = false;
-        if(stristr($this->CurrentPageName,'.html') !== false) {
+        if (stristr($this->CurrentPageName, '.html') !== false) {
             $this->ControllerFile = $this->ViewFile;
             $this->ViewFile = null;
             $this->IsJSON = false;
@@ -260,15 +260,15 @@ class Web
         $this->Verb = strtoupper($this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD);
     }
 
-	public function SetURLs()
-	{
-		// this must be done after the settings file is loaded to support proxy situations
-		define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
+    public function SetURLs()
+    {
+        // this must be done after the settings file is loaded to support proxy situations
+        define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
 
-        if(isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
+        if (isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
             $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
 
-            if(!HTTP::IsSecure() && defined('FORCE_SSL') && FORCE_SSL) {
+            if (!HTTP::IsSecure() && defined('FORCE_SSL') && FORCE_SSL) {
                 HTTP::Redirect('https://' . HTTP_HOST);
             }
 
