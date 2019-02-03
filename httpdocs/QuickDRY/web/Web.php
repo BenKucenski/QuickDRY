@@ -274,14 +274,16 @@ class Web
 
             define('BASE_URL', $protocol . HTTP_HOST);
         } else {
-            if(defined('FORCE_SSL') && FORCE_SSL) {
-                HTTP::Redirect('https://' . HTTP_HOST);
+            if (isset($_SERVER['HTTP_HOST'])) {
+                if (defined('FORCE_SSL') && FORCE_SSL) {
+                    HTTP::Redirect('https://' . HTTP_HOST);
+                }
             }
-            if(!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
+            if (!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
                 define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
             }
         }
-	}
+    }
 
     public function InitMenu()
     {
