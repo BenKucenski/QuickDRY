@@ -98,11 +98,24 @@ class Debug extends SafeClass
 
         if (defined('IS_PRODUCTION') && IS_PRODUCTION) {
             $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_FILENAME'];
-            $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, SMTP_FROM_NAME. ' HALT: ' . $uri, $finalMsg);
-            try {
-                $t->Send();
-            } catch(Exception $ex) {
-                echo $ex->getMessage();
+            if(defined('SMTP_DEBUG_EMAIL') && defined('SMTP_FROM_NAME')) {
+                $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, SMTP_FROM_NAME . ' HALT: ' . $uri, $finalMsg);
+                try {
+                    $t->Send();
+                } catch (Exception $ex) {
+                    echo $ex->getMessage();
+                }
+            }
+            if(defined('SMTP_DEBUG_SMS')) {
+                $t = Mailer::Queue(SMTP_DEBUG_SMS, SMTP_DEBUG_SMS, ' HALT: ' . $uri, 'There was a critical error.  Check email.');
+                try {
+                    $t->Send();
+                } catch (Exception $ex) {
+                    echo $ex->getMessage();
+                }
+            }
+            if(defined('PRETTY_ERROR')) {
+                exit(PRETTY_ERROR);
             }
             exit('An Error Occured.  Please Try Again Later.');
         }
