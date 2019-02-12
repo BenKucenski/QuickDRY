@@ -481,9 +481,9 @@ class Strings extends SafeClass
      */
     public static function NumbersOnly($val, $return_orig_on_zero = true)
     {
-        $res = trim(preg_replace('/[^0-9]/si', '', $val) * 1.0);
+        $res = trim(preg_replace('/[^0-9]/si', '', $val));
         if (!$res) {
-            return $return_orig_on_zero ? $val * 1.0 : 0;
+            return $return_orig_on_zero ? $val : 0;
         }
         return $res;
     }
