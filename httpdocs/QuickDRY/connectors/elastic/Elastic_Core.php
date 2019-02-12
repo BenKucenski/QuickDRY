@@ -569,6 +569,15 @@ class Elastic_Core extends Elastic_Base
         $res = static::$client->bulk($params);
         Metrics::Stop('ELASTIC');
 
+        if(isset($res['errors']) && $res['errors']) {
+            $res['error_list'] = [];
+            foreach($res['items'] as $i => $row) {
+                if(isset($row['index']['error'])){
+                    $res['error_list'] = $row;
+                }
+            }
+            unset($res['items']);
+        }
         return $res;
     }
 

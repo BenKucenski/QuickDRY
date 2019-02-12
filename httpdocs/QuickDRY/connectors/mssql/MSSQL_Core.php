@@ -350,7 +350,7 @@ class MSSQL_Core extends SQL_Base
                             $params[] = $a;
                         }
                     } else {
-                        if(!is_null($v)) {
+                        if (!is_null($v)) {
                             $params[] = $v;
                         }
                     }
@@ -381,7 +381,7 @@ class MSSQL_Core extends SQL_Base
 			';
 
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log = new SQL_Log();
             $log->source = $type;
             $log->start_time = microtime(true);
@@ -391,13 +391,13 @@ class MSSQL_Core extends SQL_Base
 
         $res = static::Query($sql, $params);
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log->end_time = microtime(true);
             $log->duration = $log->end_time - $log->start_time;
             self::$Log[] = $log;
         }
 
-        if($res['error']) {
+        if ($res['error']) {
             Halt($res);
         }
 
@@ -449,7 +449,7 @@ class MSSQL_Core extends SQL_Base
                             $params[] = $a;
                         }
                     } else {
-                        if(!is_null($v)) {
+                        if (!is_null($v)) {
                             $params[] = $v;
                         }
                     }
@@ -469,7 +469,7 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log = new SQL_Log();
             $log->source = get_called_class();
             $log->start_time = microtime(true);
@@ -479,11 +479,11 @@ class MSSQL_Core extends SQL_Base
 
         $res = static::Query($sql, $params, true);
 
-        if(isset($res['error'])) {
+        if (isset($res['error'])) {
             Halt($res);
         }
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log->end_time = microtime(true);
             $log->duration = $log->end_time - $log->start_time;
             self::$Log[] = $log;
@@ -516,7 +516,7 @@ class MSSQL_Core extends SQL_Base
                             $params[] = $a;
                         }
                     } else {
-                        if(!is_null($v)) {
+                        if (!is_null($v)) {
                             $params[] = $v;
                         }
                     }
@@ -534,7 +534,7 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_where . '
 		';
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log = new SQL_Log();
             $log->source = get_called_class();
             $log->start_time = microtime(true);
@@ -544,7 +544,7 @@ class MSSQL_Core extends SQL_Base
 
         $res = static::Query($sql, $params);
 
-        if(self::$UseLog) {
+        if (self::$UseLog) {
             $log->end_time = microtime(true);
             $log->duration = $log->end_time - $log->start_time;
             self::$Log[] = $log;
@@ -610,7 +610,7 @@ class MSSQL_Core extends SQL_Base
                             $params[] = $a;
                         }
                     } else {
-                        if(!is_null($v)) {
+                        if (!is_null($v)) {
                             $params[] = $v;
                         }
                     }
@@ -726,7 +726,7 @@ class MSSQL_Core extends SQL_Base
      */
     protected static function StrongType($name, $value, $just_checking = false)
     {
-        if($value === '#NULL!') { // Excel files may have this
+        if ($value === '#NULL!') { // Excel files may have this
             $value = null;
         }
 
@@ -758,11 +758,11 @@ class MSSQL_Core extends SQL_Base
             case 'int':
             case 'float':
             case 'numeric':
-                if(is_null($value) && static::$prop_definitions[$name]['is_nullable']) {
+                if (is_null($value) && static::$prop_definitions[$name]['is_nullable']) {
                     return null;
                 }
-                if(!is_numeric($value)) {
-                    if(!$value) {
+                if (!is_numeric($value)) {
+                    if (!$value) {
                         $value = static::$prop_definitions[$name]['is_nullable'] ? null : 0;
                     } else {
                         Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
@@ -782,6 +782,108 @@ class MSSQL_Core extends SQL_Base
                 return $value ? Dates::Timestamp($value) : null;
         }
         return $value;
+    }
+
+    protected function _GetSaveQuery($force_insert = false)
+    {
+        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+
+        if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
+
+            foreach (static::$_unique as $cols) {
+                $params = [];
+                $unique_set = 0;
+
+                foreach ($cols as $col) {
+                    if (is_null($this->$col))
+                        $params[$col] = 'null';
+                    else {
+                        $params[$col] = $this->$col;
+                        $unique_set++;
+                    }
+                }
+                if ($unique_set && !$this->$primary) {
+                    $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+                    $t = $type::Get($params);
+
+                    if (!is_null($t)) {
+                        if ($t->$primary)
+                            $this->$primary = $t->$primary;
+                        $vars = $t->ToArray();
+                        foreach ($vars as $k => $v)
+                            if (isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
+                                $this->$k = $v;
+                        break; // only find the first match with unique key definition
+                    }
+                }
+            }
+        }
+
+        if (!$this->$primary || $force_insert) {
+            $sql = "
+				INSERT INTO
+					[" . static::$database . "].dbo.[" . static::$table . "]
+				";
+            $props = [];
+            $params = [];
+            $qs = [];
+            foreach ($this->props as $name => $value) {
+                if (strcmp($name, $primary) == 0 && !$this->$primary) continue;
+
+                $props[] = $name;
+
+                $st_value = static::StrongType($name, $value);
+
+
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                    $qs[] = 'NULL --' . $name . PHP_EOL;
+                } else {
+                    $qs[] = '@ --' . $name . PHP_EOL;
+                    $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+                }
+
+            }
+            $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
+
+            if ($this->$primary && !$force_insert)
+                $sql .= "
+				WHERE
+					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
+				";
+
+            $res = [$sql, $params];
+        } else {
+            $sql = '
+				UPDATE
+					[' . static::$database . '].dbo.[' . static::$table . ']
+                SET
+				';
+            $props = [];
+            $params = [];
+            foreach ($this->props as $name => $value) {
+                if (strcmp($name, $primary) == 0) continue;
+
+                $st_value = static::StrongType($name, $value);
+
+
+                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                    $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
+                } else {
+                    $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
+                    $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+                }
+            }
+            $sql .= implode(',', $props);
+
+            if ($this->$primary && !$force_insert)
+                $sql .= '
+				WHERE
+					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+				';
+
+            $res = [$sql, $params];
+        }
+        return $res;
     }
 
     /**
@@ -854,18 +956,18 @@ class MSSQL_Core extends SQL_Base
             $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
 
             if ($this->$primary && !$force_insert)
-                $sql .= "
+                $sql .= '
 				WHERE
-					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
-				";
+					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+				';
 
             $res = static::Execute($sql, $params);
         } else {
-            $sql = "
+            $sql = '
 				UPDATE
-					[" . static::$database . "].dbo.[" . static::$table . "]
+					[' . static::$database . '].dbo.[' . static::$table . ']
                 SET
-				";
+				';
             $props = [];
             $params = [];
             foreach ($this->props as $name => $value) {
@@ -884,10 +986,10 @@ class MSSQL_Core extends SQL_Base
             $sql .= implode(',', $props);
 
             if ($this->$primary && !$force_insert)
-                $sql .= "
+                $sql .= '
 				WHERE
-					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
-				";
+					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+				';
 
             $res = static::Execute($sql, $params);
         }
@@ -914,4 +1016,98 @@ class MSSQL_Core extends SQL_Base
         return $res;
     }
 
+    /**
+     * @param bool $return_query
+     *
+     * @return array
+     */
+    protected function _Insert($return_query = false)
+    {
+        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+
+        $sql = '
+				INSERT INTO
+					[' . static::$database . '].dbo.[' . static::$table . ']
+				';
+        $props = [];
+        $params = [];
+        $qs = [];
+        foreach ($this->props as $name => $value) {
+            if (strcmp($name, $primary) == 0 && !$this->$primary) {
+                continue;
+            }
+
+            $props[] = $name;
+
+            $st_value = static::StrongType($name, $value);
+
+
+            if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                $qs[] = 'NULL --' . $name . PHP_EOL;
+            } else {
+                $qs[] = '@ --' . $name . PHP_EOL;
+                $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+            }
+
+        }
+        $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
+
+
+        if ($return_query) {
+            return [$sql, $params];
+        }
+        $res = static::Execute($sql, $params);
+
+        return $res;
+    }
+
+    /**
+     * @param bool $force_insert
+     *
+     * @return array
+     */
+    protected function _Update($return_query)
+    {
+
+        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+
+        $sql = '
+				UPDATE
+					[' . static::$database . '].dbo.[' . static::$table . ']
+                SET
+				';
+        $props = [];
+        $params = [];
+        foreach ($this->props as $name => $value) {
+            if (strcmp($name, $primary) == 0) continue;
+
+            $st_value = static::StrongType($name, $value);
+
+
+            if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
+            } else {
+                $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
+                $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+            }
+        }
+        $sql .= implode(',', $props);
+
+        $sql .= '
+				WHERE
+					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+				';
+
+        if ($return_query) {
+            return [$sql, $params];
+        }
+        
+
+        $res = static::Execute($sql, $params);
+
+        if (!$this->$primary)
+            $this->$primary = static::LastID();
+
+        return $res;
+    }
 }
