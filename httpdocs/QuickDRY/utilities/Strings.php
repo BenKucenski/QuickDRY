@@ -7,7 +7,7 @@ class Strings extends SafeClass
 {
     public static function ExcelTitleOnly($str)
     {
-        return self::Truncate(preg_replace('/\s+/si',' ', preg_replace('/[^a-z0-9\s]/si',' ', trim($str))), 31, false, false);
+        return self::Truncate(preg_replace('/\s+/si', ' ', preg_replace('/[^a-z0-9\s]/si', ' ', trim($str))), 31, false, false);
     }
 
     // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
@@ -36,7 +36,7 @@ class Strings extends SafeClass
      */
     public static function CSVArrayToAssociativeArray($array, $clean_header = false)
     {
-        if(!is_array($array)) {
+        if (!is_array($array)) {
             $array = explode("\n", trim($array));
         }
 
@@ -53,7 +53,7 @@ class Strings extends SafeClass
         }
         $csv = [];
         foreach ($rows as $row) {
-            if(sizeof($header) != sizeof($row)) {
+            if (sizeof($header) != sizeof($row)) {
                 continue;
             }
             $csv[] = array_combine($header, $row);
@@ -113,7 +113,7 @@ class Strings extends SafeClass
             if (sizeof($row) != $n) {
                 Halt([$header, $row]);
             }
-            if($mapping_function) {
+            if ($mapping_function) {
                 call_user_func($mapping_function, array_combine($header, $row), $filename, $class);
             } else {
                 $csv[] = array_combine($header, $row);
@@ -227,7 +227,7 @@ class Strings extends SafeClass
      */
     public static function EndsWith($string, $ends_with, $case_sensitive = true)
     {
-        if(!$case_sensitive) {
+        if (!$case_sensitive) {
             return strcasecmp(substr($string, -strlen($ends_with), strlen($ends_with)), $ends_with) == 0;
         }
         return substr($string, -strlen($ends_with), strlen($ends_with)) === $ends_with;
@@ -468,6 +468,15 @@ class Strings extends SafeClass
      */
     public static function Numeric($val)
     {
+        // handle scientific notation, force into decimal format
+        if (stristr($val, 'E')) {
+            $val = explode('E', $val);
+            if (sizeof($val) == 2) {
+                // https://stackoverflow.com/questions/1471674/why-is-php-printing-my-number-in-scientific-notation-when-i-specified-it-as-00
+                return rtrim(rtrim(sprintf('%.8F', $val[0] * pow(10, $val[1])), '0'), ".");
+            }
+        }
+        // handle basic numbers
         $res = trim(preg_replace('/[^0-9\.-]/si', '', $val) * 1.0);
         if (!$res) {
             return $val * 1.0;
@@ -670,6 +679,101 @@ class Strings extends SafeClass
         return $string;
     }
 
+
+    public static function CleanCompanyName($company)
+    {
+        $company = strtolower($company);
+        $company = preg_replace('/\s+/', ' ', $company);
+        $company = preg_replace('/[\.,\(\)\*]/', '', $company);
+        $company = trim($company);
+
+        $company = explode(' ', $company);
+        foreach ($company as $i => $part) {
+            if (in_array($part, [
+                'n/a',
+                'co',
+                'corp',
+                'corporation',
+                'company',
+                'llc',
+                'of',
+                'for',
+                'the',
+                '&',
+                'inc',
+                'na',
+                //'mgt',
+                //'mgmt',
+                'llp',
+                //'ny',
+                'at',
+                'ltd',
+                'plc',
+                'for',
+                'in',
+                //'dept',
+                //'ctr',
+                //'cntr',
+                //'tech',
+                //'assoc',
+                //'assn',
+                //'cty',
+                //'gvmt',
+                //'govt',
+                'inst',
+                'limited',
+                'pvt',
+                'and',
+            ])) {
+                unset($company[$i]);
+                continue;
+            }
+
+            switch ($part) {
+                case 'dept':
+                    $company[$i] = 'Department';
+                    break;
+                case 'mgt':
+                    $company[$i] = 'Management';
+                    break;
+                case 'mgmt':
+                    $company[$i] = 'Management';
+                    break;
+                case 'ny':
+                    $company[$i] = 'NewYork';
+                    break;
+                case 'ctr':
+                    $company[$i] = 'Center';
+                    break;
+                case 'cntr':
+                    $company[$i] = 'Center';
+                    break;
+                case 'tech':
+                    $company[$i] = 'Technology';
+                    break;
+                case 'assoc':
+                    $company[$i] = 'Association';
+                    break;
+                case 'assn':
+                    $company[$i] = 'Association';
+                    break;
+                case 'cty':
+                    $company[$i] = 'City';
+                    break;
+                case 'gvmt':
+                    $company[$i] = 'Government';
+                    break;
+                case 'govt':
+                    $company[$i] = 'Government';
+                    break;
+                case 'inst':
+                    $company[$i] = 'Institute';
+                    break;
+            }
+        }
+        $company = trim(implode(' ', $company));
+        return strtolower($company);
+    }
 
     /**
      * @param $text

@@ -757,6 +757,7 @@ class MSSQL_Core extends SQL_Base
 
             case 'int':
             case 'float':
+            case 'decimal':
             case 'numeric':
                 if (is_null($value) && static::$prop_definitions[$name]['is_nullable']) {
                     return null;
@@ -765,10 +766,13 @@ class MSSQL_Core extends SQL_Base
                     if (!$value) {
                         $value = static::$prop_definitions[$name]['is_nullable'] ? null : 0;
                     } else {
-                        Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
+                        $value = Strings::Numeric($value);
+                        if(!$value) {
+                            Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
+                        }
                     }
                 }
-                return $value * 1.0;
+                return $value;
 
             case 'tinyint(1)':
                 return $value ? 1 : 0;
