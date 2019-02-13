@@ -87,12 +87,12 @@ class UserClass extends SafeClass
     public static function LogInLDAP($username, $password, $default_host = null)
     {
         if (!defined('LDAP_ADMIN_USER')) {
-            Halt('LDAP_ADMIN_USER must be defined in settings');
+            Halt('QuickDRY Error: LDAP_ADMIN_USER must be defined in settings');
             return null;
         }
 
         if (!defined('LDAP_ADMIN_PASS')) {
-            Halt('LDAP_ADMIN_PASS must be defined in settings');
+            Halt('QuickDRY Error: LDAP_ADMIN_PASS must be defined in settings');
             return null;
         }
 

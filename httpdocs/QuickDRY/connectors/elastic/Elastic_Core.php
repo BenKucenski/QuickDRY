@@ -27,7 +27,7 @@ class Elastic_Core extends Elastic_Base
     private static function _connect()
     {
         if (!static::$ACTIVE_ELASTIC_URL) {
-            Halt('$ACTIVE_ELASTIC_URL is not set');
+            Halt('QuickDRY Error: $ACTIVE_ELASTIC_URL is not set');
             return null;
         }
 
@@ -36,7 +36,7 @@ class Elastic_Core extends Elastic_Base
         }
 
         if (!static::$client) {
-            Halt('Could not connect to ' . static::$ACTIVE_ELASTIC_URL);
+            Halt('QuickDRY Error: Could Not Connect to Elastic Search Server ' . static::$ACTIVE_ELASTIC_URL);
         }
 
         return static::$client;
@@ -45,7 +45,7 @@ class Elastic_Core extends Elastic_Base
     public function Save()
     {
         if (!static::$_index) {
-            Halt('static::$_index not defined');
+            Halt('QuickDRY Error: static::$_index not defined');
         }
 
         if (!$this->_id) {
@@ -315,7 +315,7 @@ class Elastic_Core extends Elastic_Base
     protected static function _SearchQuery($index, $type, $query, $page = 0, $per_page = 20)
     {
         if (!static::_connect()) {
-            Halt('could not connect');
+            Halt('QuickDRY Error: Could Not Connect to Elastic Search Server');
         }
 
         $start_time = microtime(true);
@@ -685,11 +685,11 @@ class Elastic_Core extends Elastic_Base
                         $res = static::$client->cluster()->reroute($json);
                         break;
                     default:
-                        Halt('unknown command ' . $command);
+                        Halt('QuickDRY Error: unknown command ' . $command);
                 }
                 break;
             default:
-                Halt('unknown path ' . $path);
+                Halt('QuickDRY Error: unknown path ' . $path);
         }
         Metrics::Stop('ELASTIC');
 

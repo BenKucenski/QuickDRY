@@ -86,7 +86,7 @@ class Elastic_Base extends SafeClass
 
 
         if (sizeof($missing)) {
-            Halt('Calling missing property: ' . implode("\r\n", $missing));
+            Halt('QuickDRY Error: Calling missing property: ' . implode("\r\n", $missing));
         }
     }
 

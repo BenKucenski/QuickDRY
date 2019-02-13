@@ -37,7 +37,7 @@ class FileClass extends SafeClass
     public static function UploadFolder($hash, $ext = 'tmp')
     {
         if(!defined('UPLOAD_DIR')) {
-            Halt('UPLOAD_DIR is undefined');
+            Halt('QuickDRY Error: UPLOAD_DIR is undefined');
             exit;
         }
         $dir = UPLOAD_DIR;

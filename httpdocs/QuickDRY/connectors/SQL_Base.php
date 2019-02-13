@@ -13,6 +13,8 @@ class SQL_Base
     protected $_history = null;
     protected $_from_db = null;
 
+    public $HasChanges;
+
     public static $UseLog = false;
     public static $Log = [];
 
@@ -268,16 +270,18 @@ class SQL_Base
      */
     public static function GetAll($where = null, $order_by = null, $limit = null )
     {
-        if(!is_null($order_by) && !is_array($order_by))
-            Halt('$order_by must be an assoc array ("col"=>"asc,desc",...)', true);
+        if(!is_null($order_by) && !is_array($order_by)) {
+            Halt('QuickDRY Error: GetAll $order_by must be an assoc array ["col"=>"asc,desc",...]', true);
+        }
 
-        if(!is_null($where) && !is_array($where))
-            Halt('$where must be an assoc array ("col"=>"val",...) ', true);
+        if(!is_null($where) && !is_array($where)) {
+            Halt('QuickDRY Error: GetAll $where must be an assoc array ["col"=>"val",...]', true);
+        }
 
         if(!is_null($order_by)) {
             foreach ($order_by as $col => $dir) {
                 if (!self::check_props(trim($col))) {
-                    Halt($col . ' is not a valid order by column for ' . get_called_class());
+                    Halt('QuickDRY Error: ' . $col . ' is not a valid order by column for ' . get_called_class());
                     return null;
                 }
             }
@@ -291,7 +295,7 @@ class SQL_Base
             foreach ($where as $col => $dir) {
                 $col = str_replace('+', '', $col);
                 if (!self::check_props(trim($col))) {
-                    Halt($col . ' is not a valid where column for ' . get_called_class());
+                    Halt('QuickDRY Error: ' . $col . ' is not a valid where column for ' . get_called_class());
                     return null;
                 }
             }
@@ -385,15 +389,19 @@ class SQL_Base
     protected function SetProperty($name, $value)
     {
         if (!array_key_exists($name, $this->props)) {
-            Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
+            Halt('QuickDRY Error: ' . $name . ' is not a property of ' . get_class($this) . "\r\n");
         }
 
         if (is_array($value)) {
-            Halt(['properties must be string or number', $value]);
+            Halt(['QuickDRY Error: Value assigned to property cannot be an array.', $value]);
         }
 
         if (is_object($value)) {
-            Halt(['properties must be string or number', $value]);
+            if ($value instanceof DateTime) {
+                $value = Dates::Timestamp($value);
+            } else {
+                Halt(['QuickDRY Error: Value assigned to property cannot be an object.', $value]);
+            }
         }
 
         if (strcasecmp($value, 'null') == 0) {
@@ -427,6 +435,7 @@ class SQL_Base
                 $old_val = 'null';
             }
             $this->_change_log[$name] = ['new' => $new_val, 'old' => $old_val];
+            $this->HasChanges = true;
         }
         $this->props[$name] = $value;
     }

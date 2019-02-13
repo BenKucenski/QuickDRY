@@ -16,7 +16,7 @@ class MySQL extends SafeClass
     {
 
         if (is_null($conn)) {
-            Halt('no connection');
+            Halt('QuickDRY Error: No MySQL Connection');
         }
         $count = 0;
         return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)

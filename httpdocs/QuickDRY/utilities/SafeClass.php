@@ -39,7 +39,7 @@ class SafeClass
     public function __get($name)
     {
         if ($this->_HaltOnError) {
-            Halt('public $' . $name . '; is not a property of ' . get_class($this));
+            Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
         } else {
             $this->_MissingProperties[] = 'public $' . $name . ';';
         }
@@ -54,7 +54,7 @@ class SafeClass
     public function __set($name, $value)
     {
         if ($this->_HaltOnError) {
-            Halt('public $' . $name . '; is not a property of ' . get_class($this));
+            Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
         } else {
             $this->_MissingProperties[] = 'public $' . $name . ';';
         }
@@ -108,7 +108,7 @@ class SafeClass
     public static function ToCSV($array, $filename, $headers = null)
     {
         if (!is_array($array) || !sizeof($array)) {
-            Halt('Not an array or empty');
+            Halt('QuickDRY Error: Not an array or empty');
         }
 
         $header = $headers ? $headers : array_keys(get_object_vars($array[0]));

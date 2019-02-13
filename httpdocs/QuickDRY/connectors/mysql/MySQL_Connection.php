@@ -166,7 +166,7 @@ class MySQL_Connection
                     fwrite($fp, $sql);
                     fclose($fp);
                 } else {
-                    Halt('error writing mysql file');
+                    Halt('QuickDRY Error: error writing mysql file');
                 }
 
                 $file =  'mysql_config.' . GUID . '.cnf';

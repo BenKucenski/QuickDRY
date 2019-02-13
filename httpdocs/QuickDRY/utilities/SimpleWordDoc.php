@@ -6,7 +6,7 @@ class SimpleWordDoc extends SafeClass
     public static function RenderHTML($html, $filename)
     {
         if(!defined('WORD_TEMP_DIR')) {
-            Halt('WORD_TEMP_DIR must be defined');
+            Halt('QuickDRY Error: WORD_TEMP_DIR must be defined');
         }
         PhpOffice\PhpWord\Settings::setTempDir(WORD_TEMP_DIR);
 

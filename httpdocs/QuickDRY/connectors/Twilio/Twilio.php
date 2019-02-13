@@ -65,7 +65,7 @@ class Twilio extends SafeClass
                 self::$from_number = TWILIO_FROM_TEST_NUMBER;
                 break;
             default:
-                Halt('invalid twilio mode');
+                Halt('QuickDRY Error: invalid twilio mode');
         }
         self::$mode = $mode;
     }

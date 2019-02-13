@@ -296,51 +296,51 @@ class BasePage extends SafeClass
 
     public function ExportToXLS()
     {
-        Halt('ExportToXLS is not implemented');
+        Halt('QuickDRY Error: ExportToXLS is not implemented');
     }
 
     public function ExportToPDF()
     {
-        Halt('ExportToPDF is not implemented');
+        Halt('QuickDRY Error: ExportToPDF is not implemented');
     }
 
     public function ExportToDOCX()
     {
-        Halt('ExportToDOCX is not implemented');
+        Halt('QuickDRY Error: ExportToDOCX is not implemented');
     }
 
     public function ExportToCSV()
     {
-        Halt('ExportToCSV is not implemented');
+        Halt('QuickDRY Error: ExportToCSV is not implemented');
     }
 
     public function ExportToJSON()
     {
-        Halt('ExportToJSON is not implemented');
+        Halt('QuickDRY Error: ExportToJSON is not implemented');
     }
 
     public static function DoExportToXLS()
     {
-        Halt('DoExportToXLS is not implemented');
+        Halt('QuickDRY Error: DoExportToXLS is not implemented');
     }
 
     public static function DoExportToPDF()
     {
-        Halt('DoExportToPDF is not implemented');
+        Halt('QuickDRY Error: DoExportToPDF is not implemented');
     }
 
     public static function DoExportToDOCX()
     {
-        Halt('DoExportToDOCX is not implemented');
+        Halt('QuickDRY Error: DoExportToDOCX is not implemented');
     }
 
     public static function DoExportToCSV()
     {
-        Halt('DoExportToCSV is not implemented');
+        Halt('QuickDRY Error: DoExportToCSV is not implemented');
     }
 
     public static function DoExportToJSON()
     {
-        Halt('DoExportToJSON is not implemented');
+        Halt('QuickDRY Error: DoExportToJSON is not implemented');
     }
 }

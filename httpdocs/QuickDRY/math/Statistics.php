@@ -46,7 +46,7 @@ class Statistics
                 $t += $val;
             } else {
                 if (!isset($val[$key])) {
-                    Halt('invalid data set');
+                    Halt('QuickDRY Error: invalid data set');
                 }
                 $t += $val[$key];
             }

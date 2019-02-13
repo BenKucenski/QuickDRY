@@ -11,7 +11,7 @@ class HTTPStatus
     public static function GetDescription($http_status_code)
     {
         if(!is_numeric($http_status_code)) {
-            Halt('Invalid status code: ' . $http_status_code);
+            Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
         }
 
         switch($http_status_code)
@@ -34,7 +34,7 @@ class HTTPStatus
 
         }
 
-        Halt('Invalid status code: ' . $http_status_code);
+        Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
         return null;
     }
 }

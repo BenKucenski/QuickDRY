@@ -23,7 +23,7 @@ class SimpleExcel extends SafeClass
      */
     public static function MultiSheet($filename, $reports)
     {
-        Halt('Deprecated: Use ExportSpreadsheets');
+        Halt('QuickDRY Error: Deprecated: Use ExportSpreadsheets');
     }
 
     /**
@@ -32,7 +32,7 @@ class SimpleExcel extends SafeClass
      */
     public static function MultiSheet2007($filename, $reports)
     {
-        Halt('Deprecated: Use ExportSpreadsheets');
+        Halt('QuickDRY Error: Deprecated: Use ExportSpreadsheets');
     }
 
     /**
@@ -40,7 +40,7 @@ class SimpleExcel extends SafeClass
      */
     public static function SingleSheet(SimpleExcel $report)
     {
-        Halt('Deprecated: use ExportSpreadsheet');
+        Halt('QuickDRY Error: Deprecated: use ExportSpreadsheet');
     }
 
     /**
@@ -48,7 +48,7 @@ class SimpleExcel extends SafeClass
      */
     public static function SingleSheet2007(SimpleExcel $report)
     {
-        Halt('Deprecated: use ExportSpreadsheet');
+        Halt('QuickDRY Error: Deprecated: use ExportSpreadsheet');
     }
 
     /**
@@ -77,7 +77,7 @@ class SimpleExcel extends SafeClass
     public static function ExportSpreadsheet(SimpleExcel &$se)
     {
         if(!$se->Filename) {
-            Halt('Filename required');
+            Halt('QuickDRY Error: Filename required');
         }
         $se->Title = $se->Title ? substr($se->Title, 0, 31) : 'Sheet'; // max 31 characters
         $parts = pathinfo($se->Filename);

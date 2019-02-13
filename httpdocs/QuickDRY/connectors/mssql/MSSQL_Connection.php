@@ -176,7 +176,7 @@ class MSSQL_Connection
             return;
 
         if(!$sql) {
-            Halt('empty query');
+            Halt('QuickDRY Error: empty query');
         }
 
         $this->query_time += $time;

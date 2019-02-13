@@ -18,7 +18,7 @@ class ACCESS_Connection
         // define('ACCESS_DRIVER','odbc:Driver={Microsoft Access Driver (*.mdb)}');
 
         if (!defined('ACCESS_DRIVER')) {
-            Halt('ACCESS_DRIVER must be defined.  See source code of ACCESS_Connection.php');
+            Halt('QuickDRY Error: ACCESS_DRIVER must be defined.  See source code of ACCESS_Connection.php');
         }
         // https://www.freethinkingdesign.co.uk/blog/accessing-access-db-file-accdb-windows-64bit-via-php-using-odbc/ -- read this on 64 bit php
         // https://www.microsoft.com/en-us/download/details.aspx?id=23734 -- install this if you have 32 bit php
