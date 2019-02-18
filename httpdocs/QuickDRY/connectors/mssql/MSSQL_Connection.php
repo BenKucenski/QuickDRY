@@ -88,7 +88,7 @@ class MSSQL_Connection
         $time = microtime(true);
         $error = '';
 
-        if($db_base && strcmp($this->current_db,$db_base) == 0 && $this->db) {
+        if(strcmp($this->current_db,$db_base) == 0 && $this->db) {
             $this->_LastConnection['reuse connection'] = $this->current_db . ' = ' . $db_base;
             return;
         }
@@ -141,7 +141,8 @@ class MSSQL_Connection
         $this->current_db = $db_base;
         $time = microtime(true) - $time;
         $this->query_time += $time;
-        self::Log($db_base, null, $time, $error);
+        $sql  = 'Set Database: ' . $db_base;
+        self::Log($sql, null, $time, $error);
 
         $this->_LastConnection['current_db'] = $db_base;
 
