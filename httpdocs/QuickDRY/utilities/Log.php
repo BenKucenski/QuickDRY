@@ -25,13 +25,13 @@ class Log extends SafeClass
      * @param $message
      * @param bool $echo
      */
-    public static function Insert($message, $echo = false)
+    public static function Insert($message, $echo = false, $write_to_file = true)
     {
         self::_init();
         if (!defined('GUID')) {
             return;
         }
 
-        self::$_log_file->Insert($_SERVER["SCRIPT_FILENAME"], $message, $echo);
+        self::$_log_file->Insert($_SERVER["SCRIPT_FILENAME"], $message, $echo, $write_to_file);
     }
 }
