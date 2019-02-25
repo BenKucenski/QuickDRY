@@ -99,7 +99,7 @@ var QuickDRY = {
             return false;
         }
 
-        WaitDialog('Please Wait', 'Deleting...', function () {
+        WaitDialogControl.Load('Please Wait', 'Deleting...', function () {
             vars.verb = 'DELETE';
             HTTP.Post('/json/' + type, vars, callback, null, dialog);
         });
@@ -230,7 +230,7 @@ var QuickDRY = {
     DialogIsOpen: function (dialog_id) {
 
         var elem = $("#" + dialog_id);
-        if (elem.hasClass('in')) {
+        if (elem.hasClass('in') || elem.hasClass('show')) {
             return true;
         }
 
