@@ -7,6 +7,7 @@ class SafeClass
 {
     private $_HaltOnError = true;
     private $_MissingProperties = [];
+    private $_Aliases = [];
 
     /**
      * @return bool
@@ -95,6 +96,11 @@ class SafeClass
             Halt($row);
         }
         foreach ($row as $k => $v) {
+            $a = preg_replace('/[^a-z0-9_]/si','', $k);
+            if($a != $k) {
+                $this->_Aliases['_' . $a] = $k;
+                $k = '_' . $a;
+            }
             $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
         }
     }

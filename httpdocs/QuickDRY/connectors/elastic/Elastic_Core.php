@@ -171,7 +171,7 @@ class Elastic_Core extends Elastic_Base
 
         $count = $limit ? ($count < $limit ? $count : $limit) : $count;
         $page = 0;
-        $per_page = 10000; // arbitrary limit
+        $per_page = $limit ? $limit : 10000; // arbitrary limit
         $max_page = ceil($count / $per_page);
 
         while ($page < $max_page) {
@@ -181,7 +181,7 @@ class Elastic_Core extends Elastic_Base
                 $list[] = $row;
             }
             $page++;
-            Log::Insert($page . ': ' . sizeof($res['data']), true);
+            // Log::Insert($page . ': ' . sizeof($res['data']), true);
         }
         return $list;
     }
