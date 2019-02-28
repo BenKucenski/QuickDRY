@@ -73,8 +73,12 @@ class SimpleExcel extends SafeClass
 
     /**
      * @param SimpleExcel $se
+     * @param bool $SafeMode
+     *
+     * Safe Mode means that the values are cleaned up of any characters not found
+     * on a standard US keyboard
      */
-    public static function ExportSpreadsheet(SimpleExcel &$se)
+    public static function ExportSpreadsheet(SimpleExcel &$se, $SafeMode = false)
     {
         if(!$se->Filename) {
             Halt('QuickDRY Error: Filename required');
@@ -107,7 +111,7 @@ class SimpleExcel extends SafeClass
             $sheet_column = 'A';
             foreach ($se->Columns as $column) {
                 try { // need to use try catch so that magic __get columns are accessible
-                    $value = $item->{$column->Property};
+                    $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
                 } catch(Exception $ex) {
                     $value = '';
                 }
