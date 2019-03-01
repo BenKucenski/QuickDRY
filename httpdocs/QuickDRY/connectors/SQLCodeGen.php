@@ -97,6 +97,7 @@ class SQLCodeGen extends SafeClass
         switch (strtolower($col_type)) {
             case 'varchar':
             case 'char':
+            case 'nchar':
             case 'keyword':
             case 'text':
             case 'nvarchar':
@@ -118,7 +119,9 @@ class SQLCodeGen extends SafeClass
                 return 'float';
 
             case 'smalldatetime':
-                return 'datetime';
+            case 'datetime':
+            case 'date':
+                return 'DateTime';
         }
         return $col_type;
     }
