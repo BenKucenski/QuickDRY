@@ -1,4 +1,5 @@
 <?php
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -80,12 +81,12 @@ class SimpleExcel extends SafeClass
      */
     public static function ExportSpreadsheet(SimpleExcel &$se, $SafeMode = false)
     {
-        if(!$se->Filename) {
+        if (!$se->Filename) {
             Halt('QuickDRY Error: Filename required');
         }
         $se->Title = $se->Title ? substr($se->Title, 0, 31) : 'Sheet'; // max 31 characters
         $parts = pathinfo($se->Filename);
-        if(!isset($parts['extension']) || strcasecmp($parts['extension'], 'xlsx') !== 0) {
+        if (!isset($parts['extension']) || strcasecmp($parts['extension'], 'xlsx') !== 0) {
             $se->Filename .= '.xlsx';
         }
 
@@ -105,14 +106,14 @@ class SimpleExcel extends SafeClass
         }
         $sheet_row++;
         foreach ($se->Report as $item) {
-            if(!is_object($item)) {
+            if (!is_object($item)) {
                 Halt($item);
             }
             $sheet_column = 'A';
             foreach ($se->Columns as $column) {
                 try { // need to use try catch so that magic __get columns are accessible
                     $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
-                } catch(Exception $ex) {
+                } catch (Exception $ex) {
                     $value = '';
                 }
 
@@ -184,14 +185,14 @@ class SimpleExcel extends SafeClass
             $sheet_row++;
             if ($report->Report && is_array($report->Report)) {
                 foreach ($report->Report as $item) {
-                    if(!is_object($item)) {
+                    if (!is_object($item)) {
                         Halt($item);
                     }
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
                         try { // need to use try catch so that magic __get columns are accessible
                             $value = $item->{$column->Property};
-                        } catch(Exception $ex) {
+                        } catch (Exception $ex) {
                             $value = '';
                         }
                         self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
@@ -297,12 +298,23 @@ class SimpleExcel extends SafeClass
                     Debug::Halt($ex);
                 }
             }
-            if($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_CURRENCY) {
+            if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_CURRENCY) {
                 try {
                     $sheet
                         ->getStyle($sheet_column . $sheet_row)
                         ->getNumberFormat()
                         ->setFormatCode('#,##0.00');
+                } catch (Exception $ex) {
+                    Debug::Halt($ex);
+                }
+            }
+
+            if ($value && $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_HYPERLINK) {
+                // don't try to set a url if the url is an empty value, it throws an exception
+                try {
+                    $sheet->getCell($sheet_column . $sheet_row)
+                        ->getHyperlink()
+                        ->setUrl($value);
                 } catch (Exception $ex) {
                     Debug::Halt($ex);
                 }
