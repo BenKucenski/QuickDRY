@@ -105,6 +105,21 @@ class MySQL_Core extends SQL_Base
     }
 
     /**
+     * @param $sql
+     * @param null $params
+     * @param null $map_function
+     * @return array
+     */
+    public static function QueryMap($sql, $params = null, $map_function = null)
+    {
+        $res =  self::Query($sql, $params, false, $map_function);
+        if(isset($res['error'])) {
+            Halt($res);
+        }
+        return $res;
+    }
+
+    /**
      * @param      $sql
      * @param null $params
      * @param null $return_type
