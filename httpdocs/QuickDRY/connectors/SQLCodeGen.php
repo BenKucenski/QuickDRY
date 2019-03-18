@@ -111,6 +111,7 @@ class SQLCodeGen extends SafeClass
             case 'numeric':
             case 'tinyint':
             case 'smallint':
+            case 'bigint':
             case 'bit':
                 return 'int';
 
