@@ -950,9 +950,9 @@ class MSSQL_Core extends SQL_Base
 
 
                 if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
-                    $qs[] = 'NULL --' . $name . PHP_EOL;
+                    $qs[] = 'NULL --' . $name . ' / ' . static::$prop_definitions[$name]['type'] . PHP_EOL;
                 } else {
-                    $qs[] = '@ --' . $name . PHP_EOL;
+                    $qs[] = '@ --' . $name . ' / ' . static::$prop_definitions[$name]['type'] . PHP_EOL;
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
 
@@ -981,9 +981,9 @@ class MSSQL_Core extends SQL_Base
 
 
                 if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
-                    $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
+                    $props[] = '[' . $name . '] = NULL -- ' . $name . ' / ' . static::$prop_definitions[$name]['type'] . PHP_EOL;
                 } else {
-                    $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
+                    $props[] = '[' . $name . '] = @ --' . $name . ' / ' . static::$prop_definitions[$name]['type'] . PHP_EOL;
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
             }
