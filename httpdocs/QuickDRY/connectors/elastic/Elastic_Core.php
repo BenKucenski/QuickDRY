@@ -5,6 +5,9 @@
  */
 class Elastic_Core extends Elastic_Base
 {
+    // http://domain:9200/_cat/indices?v&pretty
+    // http://domain:9200/index/type/_search?q=*:*&pretty
+
     /* @var $client Elasticsearch\Client */
     protected static $client = null;
 
@@ -145,7 +148,14 @@ class Elastic_Core extends Elastic_Base
 
     public static function Insert($index, $type, &$json)
     {
-        return static::_Insert($index, $type, $json);
+        $res = static::_Insert($index, $type, $json);
+        if (isset($res['items'][0]['index']['error'])) {
+            return ['error' => $res['items'][0]['index']['error']];
+        }
+        return [
+            'last_id' => $res['items'][0]['index']['_id'],
+            'error' => ''
+        ];
     }
 
     public static function GetAllForIndexType($index, $type, $where, $limit = 10000, $map_function = null)
@@ -603,6 +613,7 @@ class Elastic_Core extends Elastic_Base
         foreach ($json as $key => $el) {
             $params['body'][] = $el;
         }
+
         $res = static::$client->bulk($params);
         Metrics::Stop('ELASTIC');
 
