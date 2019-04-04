@@ -117,6 +117,7 @@ function autoloader_QuickDRY($class)
         'ChangeLog' => 'connectors/ChangeLog.php',
         'CoreClass' => 'connectors/CoreClass.php',
         'SQL_Base' => 'connectors/SQL_Base.php',
+        'SQL_Query' => 'connectors/SQL_Query.php',
         'SQL_Log' => 'connectors/SQL_Log.php',
         'Curl' => 'connectors/Curl.php',
         'WSDL' => 'connectors/WSDL.php',

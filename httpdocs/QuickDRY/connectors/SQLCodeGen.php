@@ -467,6 +467,24 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     }
 
     /**
+     * @param bool $return_query
+     * @return array|SQL_Query
+     */
+    public function Insert($return_query = false)
+    {
+        return $this->_Insert($return_query);
+    }
+
+    /**
+     * @param bool $return_query
+     * @return array|SQL_Query
+     */
+    public function Update($return_query = false)
+    {
+        return $this->_Update($return_query);
+    }
+    
+    /**
      * @param $req
      * @param bool $save
      * @param bool $overwrite

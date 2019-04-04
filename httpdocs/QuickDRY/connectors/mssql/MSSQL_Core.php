@@ -1023,7 +1023,7 @@ class MSSQL_Core extends SQL_Base
     /**
      * @param bool $return_query
      *
-     * @return array
+     * @return array|SQL_Query
      */
     protected function _Insert($return_query = false)
     {
@@ -1058,7 +1058,7 @@ class MSSQL_Core extends SQL_Base
 
 
         if ($return_query) {
-            return [$sql, $params];
+            return new SQL_Query($sql, $params);
         }
         $res = static::Execute($sql, $params);
 
@@ -1068,10 +1068,13 @@ class MSSQL_Core extends SQL_Base
     /**
      * @param bool $force_insert
      *
-     * @return array
+     * @return array|SQL_Query
      */
     protected function _Update($return_query)
     {
+        if(!sizeof($this->_change_log)) {
+            return null;
+        }
 
         $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
 
@@ -1083,6 +1086,9 @@ class MSSQL_Core extends SQL_Base
         $props = [];
         $params = [];
         foreach ($this->props as $name => $value) {
+            if(!isset($this->_change_log[$name])) {
+                continue;
+            }
             if (strcmp($name, $primary) == 0) continue;
 
             $st_value = static::StrongType($name, $value);
@@ -1103,7 +1109,7 @@ class MSSQL_Core extends SQL_Base
 				';
 
         if ($return_query) {
-            return [$sql, $params];
+            return new SQL_Query($sql, $params);
         }
         
 

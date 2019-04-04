@@ -27,6 +27,7 @@ class MSSQL_Queue
             return null;
         }
 
+        Metrics::Toggle('MSSQL_Queue::Flush');
         $sql = implode(PHP_EOL . ';' . PHP_EOL, $this->_sql);
         $sql = '
         		SET QUOTED_IDENTIFIER ON
@@ -35,6 +36,7 @@ class MSSQL_Queue
 
         $class = $this->MSSQL_CLASS;
         $res = $class::Execute($sql, null, true);
+        Metrics::Toggle('MSSQL_Queue::Flush');
         if ($res['error']) {
             Log::Insert($res, true);
             echo $res['query'];
