@@ -470,18 +470,21 @@ class Strings extends SafeClass
     {
         // handle scientific notation, force into decimal format
         if (stristr($val, 'E')) {
-            $val = explode('E', $val);
-            if (sizeof($val) == 2) {
+            $temp = explode('E', $val);
+            if (sizeof($temp) == 2) {
                 // https://stackoverflow.com/questions/1471674/why-is-php-printing-my-number-in-scientific-notation-when-i-specified-it-as-00
-                return rtrim(rtrim(sprintf('%.8F', $val[0] * pow(10, $val[1])), '0'), ".");
+                return rtrim(rtrim(sprintf('%.8F', $temp[0] * pow(10, $temp[1])), '0'), ".");
             }
         }
         // handle basic numbers
-        $res = trim(preg_replace('/[^0-9\.-]/si', '', $val) * 1.0);
-        if (!$res) {
-            return $val * 1.0;
+        $val = preg_replace('/[^0-9\.-]/si', '', $val);
+        if(is_numeric($val)) {
+            $res = trim($val * 1.0);
+            if ($res) {
+                return $res;
+            }
         }
-        return $res;
+        return $val;
     }
 
     /**
