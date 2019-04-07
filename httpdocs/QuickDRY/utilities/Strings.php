@@ -889,15 +889,16 @@ class Strings extends SafeClass
     /**
      * @param $pattern
      * @param $multiplier
+     * @param string $separator
      * @return string
      */
-    public static function StringRepeatCS($pattern, $multiplier)
+    public static function StringRepeatCS($pattern, $multiplier, $separator = ',')
     {
         $t = [];
         for ($j = 0; $j < $multiplier; $j++) {
             $t[] = $pattern;
         }
-        return implode(',', $t);
+        return implode($separator, $t);
     }
 
     /**
