@@ -329,7 +329,7 @@ class Elastic_Core extends Elastic_Base
         }
 
         $start_time = microtime(true);
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::_SearchQuery');
 
         if (!is_array($query)) {
             $query = json_decode($query, true);
@@ -358,7 +358,7 @@ class Elastic_Core extends Elastic_Base
             }
         }
 
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::_SearchQuery');
         self::LogQuery($query, microtime(true) - $start_time);
         return $list;
     }
@@ -430,7 +430,7 @@ class Elastic_Core extends Elastic_Base
     )
     {
         $start_time = microtime(true);
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::_Search');
 
         if (is_null($page)) {
             $page = 0;
@@ -494,7 +494,7 @@ class Elastic_Core extends Elastic_Base
         }
         $list['url'] = $url;
 
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::_Search');
         self::LogQuery($list['query'], microtime(true) - $start_time);
 
         return $list;
@@ -514,7 +514,7 @@ class Elastic_Core extends Elastic_Base
             return null;
         }
 
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::_Stats');
         $query['from'] = 0;
         $query['size'] = 0;
 
@@ -535,7 +535,7 @@ class Elastic_Core extends Elastic_Base
         }
         $array = static::$client->search($params);
         $res = $array['aggregations'];
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::_Stats');
         return $res;
     }
 
@@ -550,7 +550,7 @@ class Elastic_Core extends Elastic_Base
         if (!static::_connect()) {
             return null;
         }
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::_InsertUpdate');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
         $json = Strings::FixJSON($json);
@@ -577,7 +577,7 @@ class Elastic_Core extends Elastic_Base
             $params['body'][] = $el;
         }
         $res = static::$client->bulk($params);
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::_InsertUpdate');
 
         if(isset($res['errors']) && $res['errors']) {
             $res['error_list'] = [];
@@ -602,7 +602,7 @@ class Elastic_Core extends Elastic_Base
         if (!static::_connect()) {
             return null;
         }
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::_Insert');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
         $json = Strings::FixJSON($json);
@@ -615,7 +615,7 @@ class Elastic_Core extends Elastic_Base
         }
 
         $res = static::$client->bulk($params);
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::_Insert');
 
         return $res;
     }
@@ -684,7 +684,7 @@ class Elastic_Core extends Elastic_Base
         if (!static::_connect()) {
             return null;
         }
-        Metrics::Start('ELASTIC');
+        Metrics::Start('ELASTIC::Execute');
 
         // this is necessary to fix any UTF-8 encoding errors from the database
         $json = Strings::FixJSON($json);
@@ -702,7 +702,7 @@ class Elastic_Core extends Elastic_Base
             default:
                 Halt('QuickDRY Error: unknown path ' . $path);
         }
-        Metrics::Stop('ELASTIC');
+        Metrics::Stop('ELASTIC::Execute');
 
         return $res;
     }
