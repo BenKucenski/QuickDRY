@@ -27,7 +27,7 @@ class SQL_Base
      */
     public static function TableToClass($database_prefix, $table, $lowercase_table, $database_type_prefix)
     {
-        if($lowercase_table) {
+        if ($lowercase_table) {
             $table = strtolower($table);
         }
 
@@ -35,11 +35,11 @@ class SQL_Base
         $t = explode('_', $database_prefix . '_' . $table);
 
         $type = '';
-        foreach($t as $w) {
+        foreach ($t as $w) {
             $type .= preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
         }
         $type .= 'Class';
-        if(is_numeric($type[0]))
+        if (is_numeric($type[0]))
             $type = 'i' . $type;
         return $database_type_prefix . '_' . $type;
     }
@@ -53,18 +53,18 @@ class SQL_Base
      */
     public static function TableToNiceName($table, $lowercase_table)
     {
-        if($lowercase_table) {
+        if ($lowercase_table) {
             $table = strtolower($table);
         }
 
         $t = explode('_', $table);
 
         $type = '';
-        foreach($t as $w) {
+        foreach ($t as $w) {
             $type .= preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
         }
 
-        if(is_numeric($type[0])) {
+        if (is_numeric($type[0])) {
             $type = 'i' . $type;
         }
         return $type;
@@ -131,36 +131,32 @@ class SQL_Base
 
         $props = [];
 
-        $fp = fopen($filename,'r');
-        $code = fread($fp,filesize($filename));
+        $fp = fopen($filename, 'r');
+        $code = fread($fp, filesize($filename));
         fclose($fp);
         $orig_code = $code;
         $pattern = '/@property\s+(.*?)[\r\n]/si';
         $matches = [];
-        preg_match_all($pattern,$code,$matches);
+        preg_match_all($pattern, $code, $matches);
 
-        foreach($matches[1] as $var)
-        {
+        foreach ($matches[1] as $var) {
             $parts = explode(' ', $var);
-            $props[$parts[sizeof($parts) - 1]] = trim(str_replace($parts[sizeof($parts) - 1],'',$var));
+            $props[$parts[sizeof($parts) - 1]] = trim(str_replace($parts[sizeof($parts) - 1], '', $var));
         }
 
 
         $pattern = '/public function __get\(\$name\)(.*?)\n\t}/si';
         $matches = [];
-        preg_match($pattern,$code,$matches);
-        if(isset($matches[1]))
-        {
+        preg_match($pattern, $code, $matches);
+        if (isset($matches[1])) {
             $code = $matches[1];
             $pattern = '/case \'(.*?)\':/si';
             $matches = [];
-            preg_match_all($pattern,$code,$matches);
-            if(isset($matches[1]))
-            {
+            preg_match_all($pattern, $code, $matches);
+            if (isset($matches[1])) {
                 $code = $matches[1];
-                foreach($code as $get)
-                {
-                    if(!isset($props[$get]))
+                foreach ($code as $get) {
+                    if (!isset($props[$get]))
                         $props[$get] = 'undefined';
                 }
             }
@@ -173,15 +169,15 @@ class SQL_Base
  * QuickDRY Framework ' . date('Y') . '
  *
 ';
-        foreach($props as $var => $type)
+        foreach ($props as $var => $type)
             $php .= ' * @property ' . $type . ' ' . $var . "\r\n";
 
         $php .= ' */';
-        $code = preg_replace('/\<\?php\s+\/\*\*.*?\*\//si','',$orig_code);
+        $code = preg_replace('/\<\?php\s+\/\*\*.*?\*\//si', '', $orig_code);
         $code = $php . $code;
 
-        $fp = fopen($filename,'w');
-        fwrite($fp,$code);
+        $fp = fopen($filename, 'w');
+        fwrite($fp, $code);
         fclose($fp);
     }
 
@@ -191,10 +187,9 @@ class SQL_Base
      */
     public function __get($name)
     {
-        switch($name)
-        {
+        switch ($name) {
             case 'history':
-                if(is_null($this->_history)) {
+                if (is_null($this->_history)) {
                     $this->_history = $this->_history();
                 }
                 return $this->_history;
@@ -211,10 +206,9 @@ class SQL_Base
      */
     public function __set($name, $value)
     {
-        switch($name)
-        {
+        switch ($name) {
             default:
-                $this->SetProperty($name,$value);
+                $this->SetProperty($name, $value);
         }
         return $value;
     }
@@ -224,7 +218,7 @@ class SQL_Base
      */
     private function _history()
     {
-        if(class_exists('ChangeLogHandler')) {
+        if (class_exists('ChangeLogHandler')) {
             return ChangeLogHandler::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
         }
         return null;
@@ -246,7 +240,7 @@ class SQL_Base
     public static function GetColumns()
     {
         $cols = [];
-        foreach(static::$prop_definitions as $name => $def)
+        foreach (static::$prop_definitions as $name => $def)
             $cols[] = $name;
         return $cols;
     }
@@ -268,17 +262,17 @@ class SQL_Base
      *
      * @return null
      */
-    public static function GetAll($where = null, $order_by = null, $limit = null )
+    public static function GetAll($where = null, $order_by = null, $limit = null)
     {
-        if(!is_null($order_by) && !is_array($order_by)) {
+        if (!is_null($order_by) && !is_array($order_by)) {
             Halt('QuickDRY Error: GetAll $order_by must be an assoc array ["col"=>"asc,desc",...]', true);
         }
 
-        if(!is_null($where) && !is_array($where)) {
+        if (!is_null($where) && !is_array($where)) {
             Halt('QuickDRY Error: GetAll $where must be an assoc array ["col"=>"val",...]', true);
         }
 
-        if(!is_null($order_by)) {
+        if (!is_null($order_by)) {
             foreach ($order_by as $col => $dir) {
                 if (!self::check_props(trim($col))) {
                     Halt('QuickDRY Error: ' . $col . ' is not a valid order by column for ' . get_called_class());
@@ -287,11 +281,11 @@ class SQL_Base
             }
         }
 
-        if(is_array($where) && sizeof($where) == 0) {
+        if (is_array($where) && sizeof($where) == 0) {
             $where = null;
         }
 
-        if(!is_null($where)) {
+        if (!is_null($where)) {
             foreach ($where as $col => $dir) {
                 $col = str_replace('+', '', $col);
                 if (!self::check_props(trim($col))) {
@@ -315,17 +309,17 @@ class SQL_Base
     }
 
     /**
-     * @param null   $order_by
+     * @param null $order_by
      * @param string $dir
-     * @param int    $page
-     * @param int    $per_page
+     * @param int $page
+     * @param int $per_page
      * @param string $sql_where
-     * @param int    $left_join
-     * @param int    $limit
+     * @param int $left_join
+     * @param int $limit
      *
      * @return null
      */
-    public static function GetAllPaginated($where = null, $order_by = null, $page = 0, $per_page = 0, $left_join = null, $limit = null )
+    public static function GetAllPaginated($where = null, $order_by = null, $page = 0, $per_page = 0, $left_join = null, $limit = null)
     {
         return static::_GetAllPaginated($where, $order_by, $page, $per_page, $left_join, $limit);
     }
@@ -336,7 +330,7 @@ class SQL_Base
     public static function GetVars()
     {
         $vars = [];
-        foreach(static::$prop_definitions as $name => $def)
+        foreach (static::$prop_definitions as $name => $def)
             $vars[$name] = null;
         return $vars;
     }
@@ -345,18 +339,18 @@ class SQL_Base
      * @param string|null $name
      * @return mixed|null
      */
-    protected function GetProperty( $name = null)
+    protected function GetProperty($name = null)
     {
-        if(array_key_exists($name, $this->props))
-        {
+        if (array_key_exists($name, $this->props)) {
             return $this->props[$name];
         }
         Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
         return null;
     }
 
-    public function ClearProps() {
-        foreach($this->props as $n => $v) {
+    public function ClearProps()
+    {
+        foreach ($this->props as $n => $v) {
             $this->props[$n] = null;
         }
     }
@@ -418,7 +412,13 @@ class SQL_Base
             if (!is_null($old_val) && is_null($new_val)) {
                 $changed = true;
             } else {
-                if (is_numeric($old_val) && is_numeric($new_val) && $new_val != $old_val) {
+                if (is_numeric($old_val) && is_numeric($new_val) && abs($new_val - $old_val) > 0.000000001) {
+
+                    /**
+                    [new] => 5270.6709775679 -- PHP thinks these two numbers are different, so we need to compare to a very small number, not equal
+                    [old] => 5270.6709775679
+                     * // from PHP's manual "never trust floating number results to the last digit, and do not compare floating point numbers directly for equality" - https://www.php.net/manual/en/language.types.float.php
+                     */
                     $changed = true;
                 } else {
                     if (strcmp($new_val, $old_val) != 0) {
@@ -443,12 +443,12 @@ class SQL_Base
     /**
      * @param string $sort_by
      * @param string $dir
-     * @param bool   $modify
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $add
+     * @param array $ignore
      * @param string $add_params
-     * @param bool   $sortable
-     * @param array  $column_order
+     * @param bool $sortable
+     * @param array $column_order
      *
      * @return string
      */
@@ -460,12 +460,12 @@ class SQL_Base
     /**
      * @param string $sort_by
      * @param string $dir
-     * @param bool   $modify
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $add
+     * @param array $ignore
      * @param string $add_params
-     * @param bool   $sortable
-     * @param array  $column_order
+     * @param bool $sortable
+     * @param array $column_order
      *
      * @return string
      */
@@ -478,12 +478,12 @@ class SQL_Base
      * @param        $props
      * @param        $sort_by
      * @param        $dir
-     * @param bool   $modify
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $add
+     * @param array $ignore
      * @param string $add_params
-     * @param bool   $sortable
-     * @param array  $column_order
+     * @param bool $sortable
+     * @param array $column_order
      *
      * @return string
      */
@@ -494,21 +494,19 @@ class SQL_Base
 
         $columns = [];
 
-        foreach($props as $name => $info)
-            if(!in_array($name, $ignore))
-                if($sortable)
-                    $columns[$name] = '<th><a href="' .  CURRENT_PAGE . '?sort_by=' . $name . '&dir=' . (strcasecmp($sort_by, $name) == 0 ? $not_dir : 'asc') . '&per_page=' . PER_PAGE . '&' . $add_params . '">' . static::ColumnNameToNiceName($name) . '</a>' . (strcasecmp($sort_by, $name) == 0 ? ' ' . $arrow : ''). '</th>';
+        foreach ($props as $name => $info)
+            if (!in_array($name, $ignore))
+                if ($sortable)
+                    $columns[$name] = '<th><a href="' . CURRENT_PAGE . '?sort_by=' . $name . '&dir=' . (strcasecmp($sort_by, $name) == 0 ? $not_dir : 'asc') . '&per_page=' . PER_PAGE . '&' . $add_params . '">' . static::ColumnNameToNiceName($name) . '</a>' . (strcasecmp($sort_by, $name) == 0 ? ' ' . $arrow : '') . '</th>';
                 else
                     $columns[$name] = '<th>' . static::ColumnNameToNiceName($name) . '</th>';
 
-        if(sizeof($add) > 0)
-            foreach($add as $header=>$value)
-            {
-                if(is_array($value) && $sortable)
-                    $columns[$value['value']] = '<th><a href="' .  CURRENT_PAGE . '?sort_by=' . $value['sort_by'] . '&dir=' . ($sort_by == $value['sort_by'] ? $not_dir : 'asc') . '&per_page=' . PER_PAGE . '&' . $add_params . '">' . $header . '</a>' . ($sort_by == $value['sort_by'] ? ' ' . $arrow : ''). '</th>';
-                else
-                {
-                    if(is_array($value))
+        if (sizeof($add) > 0)
+            foreach ($add as $header => $value) {
+                if (is_array($value) && $sortable)
+                    $columns[$value['value']] = '<th><a href="' . CURRENT_PAGE . '?sort_by=' . $value['sort_by'] . '&dir=' . ($sort_by == $value['sort_by'] ? $not_dir : 'asc') . '&per_page=' . PER_PAGE . '&' . $add_params . '">' . $header . '</a>' . ($sort_by == $value['sort_by'] ? ' ' . $arrow : '') . '</th>';
+                else {
+                    if (is_array($value))
                         $columns[$value['value']] = '<th>' . $header . '</th>';
                     else
                         $columns[$value] = '<th>' . $header . '</th>';
@@ -516,16 +514,14 @@ class SQL_Base
             }
 
         $res = '<thead><tr>';
-        if(sizeof($column_order) > 0)
-        {
-            foreach($column_order as $order)
+        if (sizeof($column_order) > 0) {
+            foreach ($column_order as $order)
                 $res .= $columns[$order];
-        }
-        else
-            foreach($columns as $column)
+        } else
+            foreach ($columns as $column)
                 $res .= $column;
 
-        if($modify)
+        if ($modify)
             $res .= '<th>Action</th>';
 
         return $res . '</tr></thead>';
@@ -535,12 +531,12 @@ class SQL_Base
      * @param        $props
      * @param        $sort_by
      * @param        $dir
-     * @param bool   $modify
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $add
+     * @param array $ignore
      * @param string $add_params
-     * @param bool   $sortable
-     * @param array  $column_order
+     * @param bool $sortable
+     * @param array $column_order
      *
      * @return string
      */
@@ -548,21 +544,19 @@ class SQL_Base
     {
         $columns = [];
 
-        foreach($props as $name => $info)
-            if(!in_array($name, $ignore))
-                if($sortable)
+        foreach ($props as $name => $info)
+            if (!in_array($name, $ignore))
+                if ($sortable)
                     $columns[$name] = '<th>' . $info['display'] . '</th>' . "\r\n";
                 else
                     $columns[$name] = '<th>' . $info['display'] . '</th>' . "\r\n";
 
-        if(sizeof($add) > 0)
-            foreach($add as $header=>$value)
-            {
-                if(is_array($value) && $sortable)
+        if (sizeof($add) > 0)
+            foreach ($add as $header => $value) {
+                if (is_array($value) && $sortable)
                     $columns[$value['value']] = '<th>' . $header . '</th>' . "\r\n";
-                else
-                {
-                    if(is_array($value))
+                else {
+                    if (is_array($value))
                         $columns[$value['value']] = '<th>' . $header . '</th>' . "\r\n";
                     else
                         $columns[$value] = '<th>' . $header . '</th>' . "\r\n";
@@ -570,113 +564,100 @@ class SQL_Base
             }
 
         $res = '<thead><tr>';
-        if(sizeof($column_order) > 0)
-        {
-            foreach($column_order as $order)
+        if (sizeof($column_order) > 0) {
+            foreach ($column_order as $order)
                 $res .= $columns[$order];
-        }
-        else
-            foreach($columns as $column)
+        } else
+            foreach ($columns as $column)
                 $res .= $column;
 
-        if($modify)
+        if ($modify)
             $res .= '<th>Action</th>' . "\r\n";
 
         return $res . '</tr></thead>';
     }
 
     /**
-     * @param bool   $modify
-     * @param array  $swap
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $swap
+     * @param array $add
+     * @param array $ignore
      * @param string $custom_link
      * @param string $row_style
-     * @param array  $column_order
+     * @param array $column_order
      *
      * @return string
      */
-    public function ToRowLegacy($modify = false, $swap = [], $add = [], $ignore = [], $custom_link = '', $row_style ='', $column_order = [])
+    public function ToRowLegacy($modify = false, $swap = [], $add = [], $ignore = [], $custom_link = '', $row_style = '', $column_order = [])
     {
         $res = '<tr style="' . $row_style . '">';
         $columns = [];
 
-        foreach($this->props as $name => $value)
-            if(!in_array($name, $ignore))
-            {
-                if(array_key_exists($name, $swap))
+        foreach ($this->props as $name => $value)
+            if (!in_array($name, $ignore)) {
+                if (array_key_exists($name, $swap))
                     $value = $this->{$swap[$name]};
                 else
                     $value = $this->$name;
 
 
-
-                if(is_array($value))
-                    $value = implode(',',$value);
+                if (is_array($value))
+                    $value = implode(',', $value);
                 $class = 'data_text';
-                if(is_numeric(str_replace('-','',$value)))
+                if (is_numeric(str_replace('-', '', $value)))
                     $class = 'data_num';
 
                 $columns[$name] = '<td class="' . $class . '">' . $value . '</td>';
             }
 
-        if(sizeof($add) > 0)
-            foreach($add as $header=>$value)
-            {
-                if(is_array($value))
-                {
+        if (sizeof($add) > 0)
+            foreach ($add as $header => $value) {
+                if (is_array($value)) {
                     $name = $value['value'];
                     $value = $this->{$value['value']};
-                }
-                else
-                {
+                } else {
                     $name = $value;
                     $value = $this->$value;
                 }
-                if(is_array($value))
-                    $value = implode(',',$value);
+                if (is_array($value))
+                    $value = implode(',', $value);
                 $class = 'data_text';
-                if(is_numeric(str_replace('-','',$value)))
+                if (is_numeric(str_replace('-', '', $value)))
                     $class = 'data_num';
 
                 $columns[$name] = '<td class="' . $class . '">' . $value . '</td>';
             }
-        if(sizeof($column_order) > 0)
-        {
-            foreach($column_order as $name)
+        if (sizeof($column_order) > 0) {
+            foreach ($column_order as $name)
                 $res .= $columns[$name];
-        }
-        else
-        {
-            foreach($columns as $name => $html)
+        } else {
+            foreach ($columns as $name => $html)
                 $res .= $html;
         }
 
-        if($modify)
-        {
+        if ($modify) {
             $res .= '
    			<td class="data_text" style="white-space: nowrap;">
    				[ <a class="action_link" href="' . CURRENT_PAGE_URL . '/edit?id=' . $this->props['id'] . '">edit</a> ]
    			';
-            if($modify !== 'NO_DELETE')
+            if ($modify !== 'NO_DELETE')
                 $res .= '[ <a class="action_link" onclick="return confirm(\'Are you sure?\');" href="' . CURRENT_PAGE_URL . '/edit?a=delete&id=' . $this->props['id'] . '">delete</a> ]';
             $res .= '</td>';
         }
-        if(is_array($custom_link))
-        {
+        if (is_array($custom_link)) {
             $res .= '<td class="data_text"><a href="' . $custom_link['page'] . '?' . $custom_link['var'] . '=' . $this->props['id'] . '">' . $custom_link['title'] . '</a></td>';
         }
         return $res . '</tr>';
     }
 
     /**
-     * @param bool   $modify
-     * @param array  $swap
-     * @param array  $add
-     * @param array  $ignore
+     * @param bool $modify
+     * @param array $swap
+     * @param array $add
+     * @param array $ignore
      * @param string $custom_link
      * @param string $row_style
-     * @param array  $column_order
+     * @param array $column_order
      *
      * @return string
      */
@@ -685,22 +666,20 @@ class SQL_Base
         $res = '<tr>';
         $columns = [];
 
-        foreach($this->props as $name => $value)
-            if(!in_array($name, $ignore))
-            {
-                if(array_key_exists($name, $swap))
+        foreach ($this->props as $name => $value)
+            if (!in_array($name, $ignore)) {
+                if (array_key_exists($name, $swap))
                     $value = $this->{$swap[$name]};
                 else
                     $value = $this->ValueToNiceValue($name, $this->$name);
 
 
-                if(!is_object($value))
-                {
-                    if(is_array($value))
-                        $value = implode(',',$value);
+                if (!is_object($value)) {
+                    if (is_array($value))
+                        $value = implode(',', $value);
                     $columns[$name] = '<td>' . $value . '</td>';
                 } else {
-                    if($value instanceof DateTime) {
+                    if ($value instanceof DateTime) {
                         $columns[$name] = '<td>' . Dates::Timestamp($value) . '</td>';
                     } else {
                         $columns[$name] = '<td><i>Object: </i>' . get_class($value) . '</td>';
@@ -709,46 +688,37 @@ class SQL_Base
 
             }
 
-        if(sizeof($add) > 0)
-            foreach($add as $header=>$value)
-            {
-                if(is_array($value))
-                {
+        if (sizeof($add) > 0)
+            foreach ($add as $header => $value) {
+                if (is_array($value)) {
                     $name = $value['value'];
                     $value = $this->{$value['value']};
-                }
-                else
-                {
+                } else {
                     $name = $value;
                     $value = $this->$value;
                 }
-                if(is_array($value)) {
+                if (is_array($value)) {
                     $value = implode(',', $value);
                 }
 
                 $columns[$name] = '<td>' . $value . '</td>';
             }
-        if(sizeof($column_order) > 0)
-        {
-            foreach($column_order as $name)
+        if (sizeof($column_order) > 0) {
+            foreach ($column_order as $name)
                 $res .= $columns[$name];
-        }
-        else
-        {
-            foreach($columns as $name => $html)
+        } else {
+            foreach ($columns as $name => $html)
                 $res .= $html;
         }
 
-        if($modify)
-        {
+        if ($modify) {
             $res .= '
    			<td class="data_text">
    				<a href="#"  onclick="' . get_class($this) . '.Load(' . $this->{static::$_primary[0]} . ');"><i class="fa fa-edit"></i></a>
    			</td>
    			';
         }
-        if(is_array($custom_link))
-        {
+        if (is_array($custom_link)) {
             $res .= '<td class="data_text"><a href="' . $custom_link['page'] . '?' . static::$_primary[0] . '=' . $this->{static::$_primary[0]} . '">' . $custom_link['title'] . '</a></td>';
         }
         return $res . '</tr>';
@@ -760,12 +730,12 @@ class SQL_Base
     public function GetUUID()
     {
         $uuid = [];
-        foreach(static::$_primary as $col) {
+        foreach (static::$_primary as $col) {
             if ($col) {
                 $uuid[] = $col . ':' . $this->$col;
             }
         }
-        return implode(',',$uuid);
+        return implode(',', $uuid);
     }
 
     // overwrite false is for FORM data so pass changes through set_property to trigger change log
@@ -780,16 +750,16 @@ class SQL_Base
 
         $this->_from_db = true;
 
-        foreach($row as $name => $value) {
-            if(property_exists(get_called_class(), $name)) {
+        foreach ($row as $name => $value) {
+            if (property_exists(get_called_class(), $name)) {
                 $this->$name = $value;
                 continue;
             }
 
-            if(!isset(static::$prop_definitions[$name])) {
-               continue;
+            if (!isset(static::$prop_definitions[$name])) {
+                continue;
             }
-            if(!is_null($User)) {
+            if (!is_null($User)) {
                 if (static::$prop_definitions[$name]['type'] === 'datetime') {
                     if (!$value) {
                         $value = null;
@@ -818,11 +788,11 @@ class SQL_Base
      */
     public function FromRequest(&$req, $save = true, $overwrite = false)
     {
-        foreach($this->props as $name => $value) {
+        foreach ($this->props as $name => $value) {
             $this->$name = isset($req[$name]) ? $req[$name] : ($overwrite ? null : $this->props[$name]);
         }
 
-        if($save) {
+        if ($save) {
             return $this->Save();
         }
         return true;
@@ -837,14 +807,14 @@ class SQL_Base
      * @param        $value
      * @param        $order_by
      * @param string $display
-     * @param null   $where
-     * @param bool   $show_none
+     * @param null $where
+     * @param bool $show_none
      *
      * @return string
      */
     protected static function _Select($selected, $id, $value, $order_by, $display = "", $where = null, $show_none = true, $onchange = '')
     {
-        if(is_null($show_none)) {
+        if (is_null($show_none)) {
             $show_none = true;
         }
 
@@ -852,12 +822,10 @@ class SQL_Base
 
 
         $hash = md5(serialize([$type, $order_by, $where]));
-        if(!isset(static::$_select_cache[$hash]))
-        {
+        if (!isset(static::$_select_cache[$hash])) {
             $items = $type::GetAll($where, is_array($order_by) ? $order_by : [$order_by => 'asc']);
             static::$_select_cache[$hash] = $items;
-        }
-        else
+        } else
             $items = static::$_select_cache[$hash];
 
         $res = self::_SelectItems($items, $selected, $id, $value, $order_by, $display, $show_none, $onchange);
@@ -871,25 +839,24 @@ class SQL_Base
      * @param        $value
      * @param        $order_by
      * @param string $display
-     * @param bool   $show_none
+     * @param bool $show_none
      *
      * @return string
      */
     protected static function _SelectItems($items, $selected, $id, $value, $order_by, $display = "", $show_none = true, $onchange = '')
     {
-        if(is_null($show_none)) {
+        if (is_null($show_none)) {
             $show_none = true;
         }
 
-        if(!is_array($id))
+        if (!is_array($id))
             $name = $id;
-        else
-        {
+        else {
             $name = $id['name'];
             $id = $id['id'];
         }
-        if($display == "") {
-            if(is_array($order_by)) {
+        if ($display == "") {
+            if (is_array($order_by)) {
                 $display = array_keys($order_by)[0];
             } else {
                 $display = $order_by;
@@ -898,30 +865,26 @@ class SQL_Base
 
         $select = "";
 
-        if(is_array($selected)) {
+        if (is_array($selected)) {
             $select .= '<select class="form-control" onchange="' . $onchange . '" multiple size="' . (sizeof($items) + 1 <= 10 ? sizeof($items) + 1 : 10) . '" id="' . $id . '" name="' . $name . '[]">';
         } else {
             $select .= '<select class="form-control" onchange="' . $onchange . '"  id="' . $id . '"name="' . $name . '">';
         }
 
-        if($show_none) {
+        if ($show_none) {
             $select .= '<option value="null">' . (is_bool($show_none) ? 'None' : $show_none) . '</option>' . "\r\n";
         }
 
-        if(sizeof($items) > 0)
-        {
-            if(is_array($selected))
-            {
-                foreach($items as $item)
-                    if(in_array($item->$value, $selected))
+        if (sizeof($items) > 0) {
+            if (is_array($selected)) {
+                foreach ($items as $item)
+                    if (in_array($item->$value, $selected))
                         $select .= '<option selected="selected" value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
                     else
                         $select .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
-            }
-            else
-            {
-                foreach($items as $item)
-                    if($selected != $item->$value) // needs to be a loose comparison otherwise it doesn't work with numbers
+            } else {
+                foreach ($items as $item)
+                    if ($selected != $item->$value) // needs to be a loose comparison otherwise it doesn't work with numbers
                         $select .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
                     else
                         $select .= '<option selected="selected" value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
@@ -965,34 +928,30 @@ class SQL_Base
     {
         include_once 'controls/drag_select.js.php';
 
-        if($display == "")
+        if ($display == "")
             $display = $value;
 
 
         $remove = [];
         $add = [];
 
-        if(sizeof($items) > 0)
-        {
-            if(is_array($selected))
-            {
-                foreach($items as $item)
-                    if(in_array($item->$value, $selected))
+        if (sizeof($items) > 0) {
+            if (is_array($selected)) {
+                foreach ($items as $item)
+                    if (in_array($item->$value, $selected))
                         $remove[$item->$value] = $item->$display;
                     else
                         $add[$item->$value] = $item->$display;
-            }
-            else
-            {
-                foreach($items as $item)
-                    if($selected != $item->$value)
+            } else {
+                foreach ($items as $item)
+                    if ($selected != $item->$value)
                         $add[$item->$value] = $item->$display;
                     else
                         $remove[$item->$value] = $item->$display;
             }
         }
         $not_selected = [];
-        foreach($add as $cid => $val)
+        foreach ($add as $cid => $val)
             $not_selected[] = $cid;
 
         $html = '
@@ -1006,13 +965,13 @@ class SQL_Base
 
 <ul class="dds" id="list_' . $id . '_1">
 		';
-        foreach($remove as $item_id => $name)
+        foreach ($remove as $item_id => $name)
             $html .= '<li class="dds" id="list_' . $id . '_1_item_' . $item_id . '">' . $name . '</li>';
 
         $html .= '
 </ul>
 <input type="hidden" name="modify_' . $id . '" value="1" />
-<input type="hidden" name="' . $id . '" id=\'list_' . $id . '_1_serialised\' value="' . implode(',',$selected) . '" />
+<input type="hidden" name="' . $id . '" id=\'list_' . $id . '_1_serialised\' value="' . implode(',', $selected) . '" />
 </div>
 ';
 
@@ -1027,12 +986,12 @@ class SQL_Base
 
 <ul class="dds" id="list_' . $id . '_2">
 		';
-        foreach($add as $item_id => $name)
+        foreach ($add as $item_id => $name)
             $html .= '<li class="dds" id="list_' . $id . '_2_item_' . $item_id . '">' . $name . '</li>';
 
         $html .= '
 </ul>
-<input type="hidden" name="' . $id . '_remaining" id=\'list_' . $id . '_2_serialised\' value="' . implode(',',$not_selected) . '" />
+<input type="hidden" name="' . $id . '_remaining" id=\'list_' . $id . '_2_serialised\' value="' . implode(',', $not_selected) . '" />
 </div>
 ';
 
@@ -1074,26 +1033,22 @@ class SQL_Base
      */
     protected static function _EasySelectItems($items, $selected, $id, $value, $order_by, $display = "")
     {
-        if($display == "")
+        if ($display == "")
             $display = $order_by;
 
         $select_remove = '<select multiple size="10" id="remove_' . $id . '[]"name="remove_' . $id . '[]"><option value="">None</option>';
         $select_add = '<select multiple size="10" id="add_' . $id . '[]"name="add_' . $id . '[]"><option value="">None</option>';
 
-        if(sizeof($items) > 0)
-        {
-            if(is_array($selected))
-            {
-                foreach($items as $item)
-                    if(in_array($item->$value, $selected))
+        if (sizeof($items) > 0) {
+            if (is_array($selected)) {
+                foreach ($items as $item)
+                    if (in_array($item->$value, $selected))
                         $select_remove .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
                     else
                         $select_add .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
-            }
-            else
-            {
-                foreach($items as $item)
-                    if($selected != $item->$value)
+            } else {
+                foreach ($items as $item)
+                    if ($selected != $item->$value)
                         $select_add .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
                     else
                         $select_remove .= '<option value="' . $item->$value . '">' . $item->$display . '</option>\r\n';
