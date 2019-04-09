@@ -5,6 +5,11 @@
  */
 class MathClass
 {
+    public static function KMtoMiles($km)
+    {
+        return $km * 0.621371;
+    }
+
     /**
      * @param $arr
      * @return float|int
