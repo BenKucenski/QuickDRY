@@ -738,17 +738,26 @@ class SQL_Base
         return implode(',', $uuid);
     }
 
-    // overwrite false is for FORM data so pass changes through set_property to trigger change log
+    // overwrite false is for FORM data to pass changes through set_property to trigger change log.
     // when coming from database, don't trigger change log
+    // strict will halt when the hash passed in contains columns not in the table definition
     /**
      * @param      $row
      * @param bool $overwrite
      */
-    public function FromRow(&$row, $overwrite = true)
+    public function FromRow(&$row, $overwrite = true, $strict = false)
     {
         global $User;
 
+        if (is_null($overwrite)) {
+            $overwrite = true;
+        }
+        if (is_null($strict)) {
+            $strict = false;
+        }
+
         $this->_from_db = true;
+        $missing = [];
 
         foreach ($row as $name => $value) {
             if (property_exists(get_called_class(), $name)) {
@@ -757,6 +766,9 @@ class SQL_Base
             }
 
             if (!isset(static::$prop_definitions[$name])) {
+                if ($strict) {
+                    $missing[] = $name;
+                }
                 continue;
             }
             if (!is_null($User)) {
@@ -776,6 +788,9 @@ class SQL_Base
             } else {
                 $this->$name = isset($row[$name]) ? $value : ($overwrite ? null : $value);
             }
+        }
+        if ($strict && sizeof($missing)) {
+            Halt(['error' => 'QuickDRY Error: Missing Columns', 'Columns' => $missing, 'Values' => $row]);
         }
     }
 
