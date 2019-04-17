@@ -247,3 +247,9 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
 } else {
     Debug::Halt($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile);
 }
+
+if(defined('IS_PRODUCTION') && !IS_PRODUCTION) {
+    if ($Web->Request->debug) {
+        echo '<pre>' . Metrics::ToString(true) . '</pre>';
+    }
+}
