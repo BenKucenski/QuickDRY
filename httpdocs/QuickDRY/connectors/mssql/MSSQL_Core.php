@@ -788,6 +788,10 @@ class MSSQL_Core extends SQL_Base
         return $value;
     }
 
+    /**
+     * @param bool $force_insert
+     * @return SQL_Query|null
+     */
     protected function _GetSaveQuery($force_insert = false)
     {
         $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
@@ -855,7 +859,7 @@ class MSSQL_Core extends SQL_Base
 					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
 				";
 
-            $res = [$sql, $params];
+            $res = new SQL_Query($sql, $params);
         } else {
             $sql = '
 				UPDATE
@@ -865,7 +869,12 @@ class MSSQL_Core extends SQL_Base
             $props = [];
             $params = [];
             foreach ($this->props as $name => $value) {
-                if (strcmp($name, $primary) == 0) continue;
+                if(!isset($this->_change_log[$name])) {
+                    continue;
+                }
+                if (strcmp($name, $primary) == 0) {
+                    continue;
+                }
 
                 $st_value = static::StrongType($name, $value);
 
@@ -877,6 +886,10 @@ class MSSQL_Core extends SQL_Base
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
             }
+            if(!sizeof($props)) {
+                return null;
+            }
+
             $sql .= implode(',', $props);
 
             if ($this->$primary && !$force_insert)
@@ -885,7 +898,7 @@ class MSSQL_Core extends SQL_Base
 					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
 				';
 
-            $res = [$sql, $params];
+            $res = new SQL_Query($sql, $params);
         }
         return $res;
     }
@@ -975,7 +988,12 @@ class MSSQL_Core extends SQL_Base
             $props = [];
             $params = [];
             foreach ($this->props as $name => $value) {
-                if (strcmp($name, $primary) == 0) continue;
+                if(!isset($this->_change_log[$name])) {
+                    continue;
+                }
+                if (strcmp($name, $primary) == 0) {
+                    continue;
+                }
 
                 $st_value = static::StrongType($name, $value);
 
@@ -987,13 +1005,18 @@ class MSSQL_Core extends SQL_Base
                     $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
                 }
             }
+            if(!sizeof($props)) {
+                return ['error' => ''];
+            }
+
             $sql .= implode(',', $props);
 
-            if ($this->$primary && !$force_insert)
+            if ($this->$primary && !$force_insert) {
                 $sql .= '
 				WHERE
 					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
 				';
+            }
 
             $res = static::Execute($sql, $params);
         }
