@@ -5,7 +5,7 @@
  * @author ben
  * @property string path
  * @property array data
- * @property stdClass res
+ * @property stdClass[] res
  */
 class APIRequest
 {
