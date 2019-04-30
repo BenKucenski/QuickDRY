@@ -14,10 +14,16 @@ class Curl
      * @param $params
      * @return Curl
      */
-    public static function Post($path, $params)
+    public static function Post($path, $params, $tweak_params = false)
     {
         if (is_array($params)) {
             $params = http_build_query($params);
+            if($tweak_params) {
+                // USPS sends XML as a parameter and it needs a few characters "fixed"
+                $params = str_replace('+', '%20', $params);
+                $params = str_replace('%3D', '=', $params);
+                $params = str_replace('%2F', '/', $params);
+            }
         }
         // Initiate CURL
         $ch = curl_init();

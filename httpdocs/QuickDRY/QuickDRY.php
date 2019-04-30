@@ -124,6 +124,7 @@ function autoloader_QuickDRY($class)
         'adLDAP' => 'connectors/adLDAP.php',
 
         'GoogleAPI' => 'connectors/GoogleAPI.php',
+        'USPSAPI' => 'connectors/USPSAPI.php',
         'APIRequest' => 'connectors/APIRequest.php',
 
         'BasePage' => 'web/BasePage.php',
