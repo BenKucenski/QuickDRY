@@ -11,6 +11,7 @@ class MSSQL_ForeignKey
     public $foreign_column_name;
     public $FK_CONSTRAINT_NAME;
     public $REFERENCED_CONSTRAINT_NAME;
+    public $REFERENCED_COLUMN_ID;
 
     /**
      * @param $row
@@ -28,6 +29,7 @@ class MSSQL_ForeignKey
                 case 'REFERENCED_COLUMN_NAME': $this->foreign_column_name = $value; break;
                 case 'FK_CONSTRAINT_NAME': $this->FK_CONSTRAINT_NAME = $value; break;
                 case 'REFERENCED_CONSTRAINT_NAME': $this->REFERENCED_CONSTRAINT_NAME = $value; break;
+                case 'REFERENCED_COLUMN_ID': $this->REFERENCED_COLUMN_ID = $value; break;
             }
         }
     }
@@ -42,7 +44,9 @@ class MSSQL_ForeignKey
             $this->foreign_column_name = [$this->foreign_column_name];
         }
 
-        $this->column_name[] = $row['FK_COLUMN_NAME'];
-        $this->foreign_column_name[] = $row['REFERENCED_COLUMN_NAME'];
+        $this->column_name[$row['REFERENCED_COLUMN_ID']] = $row['FK_COLUMN_NAME'];
+        $this->foreign_column_name[$row['REFERENCED_COLUMN_ID']] = $row['REFERENCED_COLUMN_NAME'];
+        ksort($this->column_name);
+        ksort($this->foreign_column_name);
     }
 }

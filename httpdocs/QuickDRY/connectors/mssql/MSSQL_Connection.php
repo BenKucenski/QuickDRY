@@ -811,6 +811,7 @@ SELECT
     , col1.name AS FK_COLUMN_NAME
     , tab2.name AS REFERENCED_TABLE_NAME
     , col2.name AS REFERENCED_COLUMN_NAME
+    , fkc.referenced_column_id AS REFERENCED_COLUMN_ID
 FROM ['  . $this->current_db. '].sys.foreign_key_columns fkc
 INNER JOIN ['  . $this->current_db. '].sys.objects obj ON obj.object_id = fkc.constraint_object_id
 INNER JOIN ['  . $this->current_db. '].sys.tables tab1 ON tab1.object_id = fkc.parent_object_id
@@ -818,7 +819,7 @@ INNER JOIN ['  . $this->current_db. '].sys.schemas sch ON tab1.schema_id = sch.s
 INNER JOIN ['  . $this->current_db. '].sys.columns col1 ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id
 INNER JOIN ['  . $this->current_db. '].sys.tables tab2 ON tab2.object_id = fkc.referenced_object_id
 INNER JOIN ['  . $this->current_db. '].sys.columns col2 ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id            
-ORDER BY obj.name
+ORDER BY obj.name, fkc.referenced_column_id
             ';
 
             $res = $this->Query($sql);
