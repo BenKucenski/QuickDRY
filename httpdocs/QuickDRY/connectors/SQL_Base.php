@@ -797,7 +797,7 @@ class SQL_Base
     /**
      * @param      $req
      * @param bool $save
-     * @param bool $overwrite
+     * @param bool $trigger_change_log
      *
      * @return bool
      */
