@@ -743,14 +743,14 @@ class SQL_Base
     // strict will halt when the hash passed in contains columns not in the table definition
     /**
      * @param      $row
-     * @param bool $overwrite
+     * @param bool $trigger_change_log
      */
     public function FromRow(&$row, $trigger_change_log = false, $strict = false)
     {
         global $User;
 
         if (is_null($trigger_change_log)) {
-            $overwrite = false;
+            $trigger_change_log = false;
         }
         if (is_null($strict)) {
             $strict = false;
@@ -784,9 +784,9 @@ class SQL_Base
             }
 
             if ($trigger_change_log) {
-                $this->$name = isset($row[$name]) ? $value : ($overwrite ? null : $value);
+                $this->$name = isset($row[$name]) ? $value : (!$trigger_change_log ? null : $value);
             } else {
-                $this->props[$name] = isset($row[$name]) ? $value : ($overwrite ? null : $value);
+                $this->props[$name] = isset($row[$name]) ? $value : (!$trigger_change_log ? null : $value);
             }
         }
         if ($strict && sizeof($missing)) {
