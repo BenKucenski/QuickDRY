@@ -65,13 +65,16 @@ class Strings extends SafeClass
      * @param $tsv
      * @return array
      */
-    public static function TSVToArray($tsv)
+    public static $_SEPARATOR;
+
+    public static function TSVToArray($tsv, $separator = "\t")
     {
+        self::$_SEPARATOR = $separator;
         // https://stackoverflow.com/questions/4801895/csv-to-associative-array
         // https://stackoverflow.com/questions/28690855/str-getcsv-on-a-tab-separated-file
         /* Map Rows and Loop Through Them */
         $rows = array_map(function ($v) {
-            return str_getcsv($v, "\t");
+            return str_getcsv($v, self::$_SEPARATOR);
         }, explode("\n", $tsv));
         $header = array_shift($rows);
         $n = sizeof($header);

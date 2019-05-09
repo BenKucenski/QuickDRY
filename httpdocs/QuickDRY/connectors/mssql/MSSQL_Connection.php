@@ -48,12 +48,12 @@ class MSSQL_Connection
      */
     public function TableToClass($database, $table)
     {
-        $t = explode('_', $database .'_' . $table);
+        $t = explode('_', $database . '_' . $table);
         $type = '';
-        foreach($t as $w)
-            $type .= preg_replace('/[^a-z0-9]/si','',ucfirst($w));
+        foreach ($t as $w)
+            $type .= preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
         $type .= 'Class';
-        if(is_numeric($type[0]))
+        if (is_numeric($type[0]))
             $type = 'i' . $type;
         return 'MS' . $type;
     }
@@ -88,45 +88,45 @@ class MSSQL_Connection
         $time = microtime(true);
         $error = '';
 
-        if(strcmp($this->current_db,$db_base) == 0 && $this->db) {
+        if (strcmp($this->current_db, $db_base) == 0 && $this->db) {
             $this->_LastConnection['reuse connection'] = $this->current_db . ' = ' . $db_base;
             return;
         }
 
 
-        if(!$this->_usesqlsrv && IsWindows() && function_exists('sqlsrv_connect')) {
+        if (!$this->_usesqlsrv && IsWindows() && function_exists('sqlsrv_connect')) {
             $this->_usesqlsrv = true;
             $this->_LastConnection['_usesqlsrv'] = 'true';
         }
 
-        if(!isset($this->db_conns[$db_base]) || is_null($this->db_conns[$db_base])) {
+        if (!isset($this->db_conns[$db_base]) || is_null($this->db_conns[$db_base])) {
             try {
-                if(!$this->_usesqlsrv) {
+                if (!$this->_usesqlsrv) {
                     $this->db_conns[$db_base] = mssql_connect($this->DB_HOST, $this->DB_USER, $this->DB_PASS);
-                    if(!$this->db_conns[$db_base]) {
+                    if (!$this->db_conns[$db_base]) {
                         Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
                     }
                     mssql_min_error_severity(1);
                     if ($db_base) {
                         $error = mssql_get_last_message();
-                        if($error) {
+                        if ($error) {
                             throw new Exception($error);
                         }
                         mssql_select_db($db_base, $this->db_conns[$db_base]);
                     }
                 } else {
                     sqlsrv_errors(SQLSRV_ERR_ERRORS);
-                    if(stristr($db_base,'.') !== false) { // linked server support
+                    if (stristr($db_base, '.') !== false) { // linked server support
                         $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
                     } else {
                         $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["Database" => $db_base, "UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
                     }
-                    $error = print_r(sqlsrv_errors(),true);
-                    if(isset($error['message']) && $error['message']) {
+                    $error = print_r(sqlsrv_errors(), true);
+                    if (isset($error['message']) && $error['message']) {
                         throw new Exception($error);
                     }
                 }
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 // Log exception
                 Halt($e);
             }
@@ -135,22 +135,21 @@ class MSSQL_Connection
         $this->_LastConnection['error'] = $error;
 
         $this->db = $this->db_conns[$db_base];
-        if(!$this->db) {
+        if (!$this->db) {
             Halt($this->_LastConnection);
         }
         $this->current_db = $db_base;
         $time = microtime(true) - $time;
         $this->query_time += $time;
-        $sql  = 'Set Database: ' . $db_base;
+        $sql = 'Set Database: ' . $db_base;
         self::Log($sql, null, $time, $error);
 
         $this->_LastConnection['current_db'] = $db_base;
 
         /**
-        if(!$this->_usesqlsrv) {
-            //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
-        }
-
+         * if(!$this->_usesqlsrv) {
+         * //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
+         * }
          * **/
         /*
             // this query should show "1" for arithabort when run from SSMS
@@ -168,21 +167,21 @@ class MSSQL_Connection
     /**
      * @param      $sql
      * @param      $params
-     * @param int  $time
+     * @param int $time
      * @param null $err
      */
     private function Log(&$sql, $params, $time = 0, $err = null)
     {
-        if(!static::$use_log)
+        if (!static::$use_log)
             return;
 
-        if(!$sql) {
+        if (!$sql) {
             Halt('QuickDRY Error: empty query');
         }
 
         $this->query_time += $time;
         $this->query_count++;
-        if(!isset(self::$log[$sql])) {
+        if (!isset(self::$log[$sql])) {
             self::$log[$sql] = [
                 'params' => [],
                 'err' => [],
@@ -193,13 +192,13 @@ class MSSQL_Connection
             ];
         }
         self::$log[$sql]['params'][] = $params;
-        if($err) {
+        if ($err) {
             self::$log[$sql]['err'][] = $err;
         }
         self::$log[$sql]['time'][] = $time;
-        self::$log[$sql]['total_time']+=$time;
+        self::$log[$sql]['total_time'] += $time;
         self::$log[$sql]['count']++;
-        self::$log[$sql]['avg_time'] =self::$log[$sql]['total_time'] / self::$log[$sql]['count'];
+        self::$log[$sql]['avg_time'] = self::$log[$sql]['total_time'] / self::$log[$sql]['count'];
 
 
     }
@@ -210,7 +209,7 @@ class MSSQL_Connection
 
         $res = [];
 
-        foreach($errs as $err) {
+        foreach ($errs as $err) {
             $res[] = $err['SQLSTATE'] . ', ' . $err['code'] . ': ' . $err['message'];
         }
         return implode("\r\n", $res);
@@ -242,60 +241,53 @@ class MSSQL_Connection
         $this->_connect();
 
         // If still no link, then the query will not run...
-        if(!$this->db)
-        {
+        if (!$this->db) {
             // Notify that DB is crashed
             $returnval['error'] = ['QueryWindows No DB Connection', $this->_LastConnection, $this->db_conns];
             Metrics::Stop('MSSQL');
             return $returnval;
         }
-        try
-        {
+        try {
             $list = [];
             $result = sqlsrv_query($this->db, $query);
 
-            if(!$result)
-            {
-                $returnval = ['error'=>static::SQLErrorsToString(),'query'=>$query,'params'=>$params];
-                if($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
+            if (!$result) {
+                $returnval = ['error' => static::SQLErrorsToString(), 'query' => $query, 'params' => $params];
+                if ($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
                     Halt($returnval);
-            }
-            else
-            {
-                while($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+            } else {
+                while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
                     $list[] = is_null($map_function) ? $r : call_user_func($map_function, $r);
                 }
                 $more = [];
                 $i = 0;
                 while (sqlsrv_next_result($result)) {
                     $more[$i] = [];
-                    while($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                    while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
                         $more[$i][] = is_null($map_function) ? $r : call_user_func($map_function, $r);
                     }
                     $i++;
                 }
                 $returnval = [
-                    'data'=>$list,
-                    'error'=>'',
-                    'time'=>microtime(true) - $start,
-                    'query'=>$query,
-                    'params'=>$params,
-                    'sql'=>$sql
+                    'data' => $list,
+                    'error' => '',
+                    'time' => microtime(true) - $start,
+                    'query' => $query,
+                    'params' => $params,
+                    'sql' => $sql
                 ];
-                if(sizeof($more)) {
+                if (sizeof($more)) {
                     $returnval['more'] = $more;
                 }
-                sqlsrv_free_stmt( $result);
+                sqlsrv_free_stmt($result);
             }
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
 
-            $returnval['error'] = 'Exception: '.$e->getMessage();
-            $returnval['sql'] = print_r([$sql,$params],true);
+            $returnval['error'] = 'Exception: ' . $e->getMessage();
+            $returnval['sql'] = print_r([$sql, $params], true);
 
             Metrics::Stop('MSSQL');
-            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+            if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
             }
             return $returnval;
@@ -305,12 +297,12 @@ class MSSQL_Connection
         Metrics::Stop('MSSQL');
         $this->Log($sql, $params, $t, $returnval['error']);
 
-        if($returnval['error']) {
-            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+        if ($returnval['error']) {
+            if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
             }
         }
-        if(!$map_function || $returnval['error']) {
+        if (!$map_function || $returnval['error']) {
             return $returnval;
         }
         return $returnval['data'];
@@ -326,7 +318,7 @@ class MSSQL_Connection
     {
         $this->_connect();
 
-        if($this->_usesqlsrv)
+        if ($this->_usesqlsrv)
             return $this->QueryWindows($sql, $params, $map_function);
 
         Metrics::Start('MSSQL');
@@ -345,20 +337,18 @@ class MSSQL_Connection
         $returnval['query'] = $query;
 
         // If still no link, then the query will not run...
-        if(!$this->db)
-        {
+        if (!$this->db) {
             Metrics::Stop('MSSQL');
             // Notify that DB is crashed
             $returnval['error'] = 'Query No DB Connection';
             return $returnval;
         }
-        try
-        {
+        try {
             $list = [];
             $result = false;
             $query = MSSQL::EscapeQuery($sql, $params);
 
-            if(defined('QUERY_RETRY')) {
+            if (defined('QUERY_RETRY')) {
                 $count = 0;
                 while (!$result && $count <= QUERY_RETRY) {
                     $result = @mssql_query($query, $this->db);
@@ -377,27 +367,22 @@ class MSSQL_Connection
             } else {
                 $result = @mssql_query($query, $this->db);
             }
-            if(!$result)
-            {
-                $returnval = ['error'=>print_r(mssql_get_last_message(),true),'query'=>$query,'params'=>$params, 'sql' => $sql];
-                if($returnval['error']) {
+            if (!$result) {
+                $returnval = ['error' => print_r(mssql_get_last_message(), true), 'query' => $query, 'params' => $params, 'sql' => $sql];
+                if ($returnval['error']) {
                     Halt($returnval);
                 }
-            }
-            else
-            {
-                while($r = mssql_fetch_assoc($result)) {
+            } else {
+                while ($r = mssql_fetch_assoc($result)) {
                     $list[] = is_null($map_function) ? $r : call_user_func($map_function, $r);
                 }
-                $returnval = ['data'=>$list,'error'=>'', 'time'=>microtime(true) - $start,'query'=>$sql,'params'=>$params];
+                $returnval = ['data' => $list, 'error' => '', 'time' => microtime(true) - $start, 'query' => $sql, 'params' => $params];
             }
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
 
-            $returnval['error'] = 'Exception: '.$e->getMessage();
-            $returnval['sql'] = print_r([$sql,$params],true);
-            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+            $returnval['error'] = 'Exception: ' . $e->getMessage();
+            $returnval['sql'] = print_r([$sql, $params], true);
+            if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
             }
             Metrics::Stop('MSSQL');
@@ -409,13 +394,13 @@ class MSSQL_Connection
 
         $this->Log($sql, $params, $t, $returnval['error']);
 
-        if($returnval['error']) {
-            if($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
+        if ($returnval['error']) {
+            if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
                 Halt($returnval);
             }
         }
 
-        if(!$map_function || $returnval['error']) {
+        if (!$map_function || $returnval['error']) {
             return $returnval;
         }
         return $returnval['data'];
@@ -433,9 +418,9 @@ class MSSQL_Connection
         $start = microtime(true);
 
         $returnval = ['error' => 'command not executed',
-                      'numrows' => 0,
-                      'data'  => [],
-                      'query' => $query
+            'numrows' => 0,
+            'data' => [],
+            'query' => $query
         ];
 
         $this->_connect();
@@ -450,15 +435,15 @@ class MSSQL_Connection
         }
         try {
             if ($large) {
-                if(!is_dir('sql')) {
+                if (!is_dir('sql')) {
                     mkdir('sql');
                 }
-                $fname = 'sql/' . time() . rand(0, 10000) . '.mssql.txt';
+                $fname = 'sql/' . time() . '.' . rand(0, 10000) . '.mssql.txt';
 
                 $fp = fopen($fname, 'w');
-                while(!$fp) {
+                while (!$fp) {
                     sleep(1);
-                    $fname = 'sql/' . time() . rand(0, 1000000) . '.mssql.txt';
+                    $fname = 'sql/' . time() . '.' . rand(0, 1000000) . '.mssql.txt';
                     $fp = fopen($fname, 'w');
                 }
                 fwrite($fp, $query);
@@ -467,13 +452,28 @@ class MSSQL_Connection
                 // -x turns off variable interpretation - must be set
                 // https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility
                 // adding -l 0 to avoid login timeout errors
-                $cmd = 'sqlcmd  -l 0 -a 32767 -x -U' . $this->DB_USER . ' -P"' . $this->DB_PASS . '" -S' . $this->DB_HOST . ' -i"' . $fname . '"';
 
-                if(self::$keep_files) {
+                $opts = [];
+                if (defined('MSSQL_TIMEOUT')) {
+                    $opts[] = '-t' . MSSQL_TIMEOUT;
+                }
+                $opts[] = '-j';
+                $opts[] = '-l 0';
+                $opts[] = '-a 32767';
+                $opts[] = '-x';
+                $opts[] = '-U"' . $this->DB_USER . '"';
+                $opts[] = '-P"' . $this->DB_PASS . '"';
+                $opts[] = '-S"' . $this->DB_HOST . '"';
+                $opts[] = '-i"' . $fname . '"';
+
+                $cmd = 'sqlcmd ' . implode(' ', $opts);
+
+                if (self::$keep_files) {
                     Log::Insert($cmd, true);
                 }
+
                 $res = exec($cmd, $output);
-                if(self::$keep_files) {
+                if (self::$keep_files) {
                     Log::Insert($output, true);
                 }
 
@@ -481,14 +481,18 @@ class MSSQL_Connection
                         PHP_EOL, $output
                     );
                 $returnval['error'] = '';
-                if(!self::$keep_files) {
+                if (!self::$keep_files) {
                     unlink($fname);
+                } else {
+                    if (stristr($returnval['exec'], 'Timeout expired') !== false) {
+                        rename($fname, 'sql/timeout.' . str_replace('sql/', '', $fname));
+                    }
                 }
             } else {
                 $result = sqlsrv_query($this->db, $query);
                 if (!$result) {
                     $returnval = ['error' => static::SQLErrorsToString(),
-                                  'query' => $query];
+                        'query' => $query];
                 } else {
                     $returnval['error'] = '';
                     $returnval['numrows'] = sqlsrv_rows_affected($result);
@@ -507,7 +511,7 @@ class MSSQL_Connection
 
         $t = microtime(true) - $start;
         Metrics::Stop('MSSQL');
-        if(!$large) {
+        if (!$large) {
             $this->Log($query, null, $t, $returnval['error']);
         }
 
@@ -525,7 +529,7 @@ class MSSQL_Connection
         Metrics::Start('MSSQL');
 
         $start = microtime(true);
-        if(!is_null($params) && sizeof($params)) {
+        if (!is_null($params) && sizeof($params)) {
             $query = MSSQL::EscapeQuery($sql, $params);
         } else {
             $query = $sql;
@@ -540,32 +544,28 @@ class MSSQL_Connection
 
         $this->_connect();
 
-        if($this->_usesqlsrv) {
+        if ($this->_usesqlsrv) {
             return $this->ExecuteWindows($query, $large);
         }
 
 
         // If still no link, then the query will not run...
-        if(!$this->db)
-        {
+        if (!$this->db) {
             // Notify that DB is crashed
             $returnval['error'] = 'Execute No DB Connection';
             return $returnval;
         }
-        try
-        {
+        try {
             $result = mssql_query($query, $this->db);
-            if(!$result)
-                $returnval = ['error'=>print_r(mssql_get_last_message()),'query'=>$query];
+            if (!$result)
+                $returnval = ['error' => print_r(mssql_get_last_message()), 'query' => $query];
             else {
                 $returnval['error'] = '';
                 $returnval['numrows'] = mssql_rows_affected($this->db);
             }
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
 
-            $returnval['error'] = 'Exception: '.$e->getMessage();
+            $returnval['error'] = 'Exception: ' . $e->getMessage();
             $returnval['sql'] = $query;
             return $returnval;
         }
@@ -594,13 +594,12 @@ class MSSQL_Connection
         $sql = 'SELECT * FROM sys.databases ORDER BY name';
         $res = $this->Query($sql);
         $list = [];
-        if($res['error']) {
+        if ($res['error']) {
             Halt($res);
         }
-        foreach($res['data'] as $row)
-        {
+        foreach ($res['data'] as $row) {
             $t = $row['name'];
-            if(substr($t,0,strlen('TEMP')) === 'TEMP')
+            if (substr($t, 0, strlen('TEMP')) === 'TEMP')
                 continue;
 
             $list[] = $t;
@@ -613,17 +612,16 @@ class MSSQL_Connection
      */
     public function GetTables()
     {
-        $sql = 'SELECT * FROM ['  . $this->current_db. '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
+        $sql = 'SELECT * FROM [' . $this->current_db . '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
         $res = $this->Query($sql);
         $list = [];
-        if($res['error']) {
+        if ($res['error']) {
             Halt($res);
         }
 
-        foreach($res['data'] as $row)
-        {
+        foreach ($res['data'] as $row) {
             $t = $row['TABLE_NAME'];
-            if(substr($t,0,strlen('TEMP')) === 'TEMP')
+            if (substr($t, 0, strlen('TEMP')) === 'TEMP')
                 continue;
 
             $list[] = $t;
@@ -642,14 +640,13 @@ class MSSQL_Connection
 			SELECT
 				*
 			FROM
-				['  . $this->current_db. '].INFORMATION_SCHEMA.COLUMNS
+				[' . $this->current_db . '].INFORMATION_SCHEMA.COLUMNS
 			WHERE
 				TABLE_NAME=@
 		';
         $res = $this->Query($sql, [$table_name]);
         $list = [];
-        foreach($res['data'] as $row)
-        {
+        foreach ($res['data'] as $row) {
             $t = new MSSQL_TableColumn();
             $t->FromRow($row);
             $list[] = $t;
@@ -685,10 +682,10 @@ class MSSQL_Connection
 				IC.[is_descending_key],
 				IC.[is_included_column]
 			FROM
-				['  . $this->current_db. '].sys.[tables] AS T
-  			INNER JOIN ['  . $this->current_db. '].sys.[indexes] I ON T.[object_id] = I.[object_id]
-  			INNER JOIN ['  . $this->current_db. '].sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
-  			INNER JOIN ['  . $this->current_db. '].sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
+				[' . $this->current_db . '].sys.[tables] AS T
+  			INNER JOIN [' . $this->current_db . '].sys.[indexes] I ON T.[object_id] = I.[object_id]
+  			INNER JOIN [' . $this->current_db . '].sys.[index_columns] IC ON I.[object_id] = IC.[object_id]
+  			INNER JOIN [' . $this->current_db . '].sys.[all_columns] AC ON T.[object_id] = AC.[object_id] AND IC.[column_id] = AC.[column_id]
 			WHERE
 				T.[is_ms_shipped] = 0
 				AND I.[type_desc] <> \'HEAP\'
@@ -698,10 +695,9 @@ class MSSQL_Connection
 				I.[index_id],
 				IC.[key_ordinal]
 		';
-        $res =$this->Query($sql, [$table_name]);
+        $res = $this->Query($sql, [$table_name]);
         $indexes = [];
-        foreach($res['data'] as $row)
-        {
+        foreach ($res['data'] as $row) {
             $indexes[$row['index_name']]['is_unique'] = $row['is_unique'];
             $indexes[$row['index_name']]['is_primary_key'] = $row['is_primary_key'];
             $indexes[$row['index_name']]['columns'][] = $row['column_name'];
@@ -718,10 +714,10 @@ class MSSQL_Connection
      */
     public function GetIndexes($table_name)
     {
-        if(is_null(self::$_Indexes)) {
+        if (is_null(self::$_Indexes)) {
             $this->GetUniqueKeys($table_name);
         }
-        if(!isset(self::$_Indexes[$table_name])) {
+        if (!isset(self::$_Indexes[$table_name])) {
             self::$_Indexes[$table_name] = [];
         }
         return self::$_Indexes[$table_name];
@@ -733,7 +729,7 @@ class MSSQL_Connection
      */
     public function GetUniqueKeys($table_name)
     {
-        if(is_null(self::$_UniqueKeys)) {
+        if (is_null(self::$_UniqueKeys)) {
             self::$_UniqueKeys = [];
             self::$_Indexes = [];
             // https://stackoverflow.com/questions/765867/list-of-all-index-index-columns-in-sql-server-db
@@ -748,13 +744,13 @@ SELECT
      ic.*,
      col.* 
 FROM 
-     ['  . $this->current_db. '].sys.indexes ind 
+     [' . $this->current_db . '].sys.indexes ind 
 INNER JOIN 
-     ['  . $this->current_db. '].sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+     [' . $this->current_db . '].sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
 INNER JOIN 
-     ['  . $this->current_db. '].sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
+     [' . $this->current_db . '].sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
 INNER JOIN 
-     ['  . $this->current_db. '].sys.tables t ON ind.object_id = t.object_id 
+     [' . $this->current_db . '].sys.tables t ON ind.object_id = t.object_id 
 
 ORDER BY
      t.name, ind.name, ind.index_id, ic.index_column_id
@@ -762,27 +758,27 @@ ORDER BY
         ';
 
             $res = $this->Query($sql);
-            if($res['error']) {
+            if ($res['error']) {
                 Halt($res);
             }
-            foreach($res['data'] as $row) {
-                if($row['is_primary_key']) {
+            foreach ($res['data'] as $row) {
+                if ($row['is_primary_key']) {
                     continue;
                 }
-                if($row['is_unique']) {
-                    if(!isset(self::$_UniqueKeys[$row['TableName']][$row['IndexName']])) {
+                if ($row['is_unique']) {
+                    if (!isset(self::$_UniqueKeys[$row['TableName']][$row['IndexName']])) {
                         self::$_UniqueKeys[$row['TableName']][$row['IndexName']] = [];
                     }
                     self::$_UniqueKeys[$row['TableName']][$row['IndexName']][] = $row['ColumnName'];
                 } else {
-                    if(!isset(self::$_Indexes[$row['TableName']][$row['IndexName']])) {
+                    if (!isset(self::$_Indexes[$row['TableName']][$row['IndexName']])) {
                         self::$_Indexes[$row['TableName']][$row['IndexName']] = [];
                     }
                     self::$_Indexes[$row['TableName']][$row['IndexName']][] = $row['ColumnName'];
                 }
             }
         }
-        if(!isset(self::$_UniqueKeys[$table_name])) {
+        if (!isset(self::$_UniqueKeys[$table_name])) {
             self::$_UniqueKeys[$table_name] = [];
         }
         return self::$_UniqueKeys[$table_name];
@@ -812,13 +808,13 @@ SELECT
     , tab2.name AS REFERENCED_TABLE_NAME
     , col2.name AS REFERENCED_COLUMN_NAME
     , fkc.referenced_column_id AS REFERENCED_COLUMN_ID
-FROM ['  . $this->current_db. '].sys.foreign_key_columns fkc
-INNER JOIN ['  . $this->current_db. '].sys.objects obj ON obj.object_id = fkc.constraint_object_id
-INNER JOIN ['  . $this->current_db. '].sys.tables tab1 ON tab1.object_id = fkc.parent_object_id
-INNER JOIN ['  . $this->current_db. '].sys.schemas sch ON tab1.schema_id = sch.schema_id
-INNER JOIN ['  . $this->current_db. '].sys.columns col1 ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id
-INNER JOIN ['  . $this->current_db. '].sys.tables tab2 ON tab2.object_id = fkc.referenced_object_id
-INNER JOIN ['  . $this->current_db. '].sys.columns col2 ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id            
+FROM [' . $this->current_db . '].sys.foreign_key_columns fkc
+INNER JOIN [' . $this->current_db . '].sys.objects obj ON obj.object_id = fkc.constraint_object_id
+INNER JOIN [' . $this->current_db . '].sys.tables tab1 ON tab1.object_id = fkc.parent_object_id
+INNER JOIN [' . $this->current_db . '].sys.schemas sch ON tab1.schema_id = sch.schema_id
+INNER JOIN [' . $this->current_db . '].sys.columns col1 ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id
+INNER JOIN [' . $this->current_db . '].sys.tables tab2 ON tab2.object_id = fkc.referenced_object_id
+INNER JOIN [' . $this->current_db . '].sys.columns col2 ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id            
 ORDER BY obj.name, fkc.referenced_column_id
             ';
 
@@ -863,14 +859,14 @@ ORDER BY obj.name, fkc.referenced_column_id
 			    ,KCU1.TABLE_NAME AS REFERENCED_TABLE_NAME
 			    ,KCU1.COLUMN_NAME AS REFERENCED_COLUMN_NAME
 			    ,KCU1.ORDINAL_POSITION AS REFERENCED_ORDINAL_POSITION
-			FROM ['  . $this->current_db. '].INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+			FROM [' . $this->current_db . '].INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
-			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+			LEFT JOIN [' . $this->current_db . '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
 			    ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG
 			    AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA
 			    AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME
 
-			LEFT JOIN ['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+			LEFT JOIN [' . $this->current_db . '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
 			    ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG
 			    AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA
 			    AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
@@ -914,17 +910,17 @@ ORDER BY obj.name, fkc.referenced_column_id
 			SELECT
 				column_name
 			FROM
-				['  . $this->current_db. '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+				[' . $this->current_db . '].INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 			WHERE
 				OBJECTPROPERTY(OBJECT_ID(constraint_name), \'IsPrimaryKey\') = 1
 				AND table_name = @
 		';
         $res = $this->Query($sql, [$table_name]);
-        if($res['error']) {
+        if ($res['error']) {
             Halt($res);
         }
         $list = [];
-        foreach($res['data'] as $col) {
+        foreach ($res['data'] as $col) {
             $list[] = $col['column_name'];
         }
         return $list;
@@ -939,16 +935,16 @@ ORDER BY obj.name, fkc.referenced_column_id
 select 
   routines.*
   ,object_definition(object_id) AS SOURCE_CODE
-  from ['  . $this->current_db. '].information_schema.routines 
-  INNER JOIN ['  . $this->current_db. '].sys.objects ON objects.name = ROUTINE_NAME
+  from [' . $this->current_db . '].information_schema.routines 
+  INNER JOIN [' . $this->current_db . '].sys.objects ON objects.name = ROUTINE_NAME
  where routine_type = \'PROCEDURE\'
  ORDER BY SPECIFIC_NAME
         ';
         /* @var $res MSSQL_StoredProc[] */
-        $res = $this->Query($sql, null, function($row) {
+        $res = $this->Query($sql, null, function ($row) {
             return new MSSQL_StoredProc($row);
         });
-        if(isset($res['error'])) {
+        if (isset($res['error'])) {
             CleanHalt($res);
         }
         return $res;
@@ -962,7 +958,7 @@ select
      */
     public function GetStoredProcParams($stored_proc)
     {
-        if(sizeof($this->_StoredProcParams)) {
+        if (sizeof($this->_StoredProcParams)) {
             return isset($this->_StoredProcParams[$stored_proc]) ? $this->_StoredProcParams[$stored_proc] : [];
         }
 
@@ -981,13 +977,13 @@ select
                    case when system_type_id in (35, 99, 167, 175, 231, 239)
                    then ServerProperty(\'collation\') end)
 
-  from ['  . $this->current_db. '].sys.parameters
+  from [' . $this->current_db . '].sys.parameters
   ORDER BY parameter_id
         ';
 
         $res = $this->Query($sql);
-        foreach($res['data'] as $row) {
-            if(!isset($this->_StoredProcParams[$row['StoredProc']])) {
+        foreach ($res['data'] as $row) {
+            if (!isset($this->_StoredProcParams[$row['StoredProc']])) {
                 $this->_StoredProcParams[$row['StoredProc']] = [];
             }
             $this->_StoredProcParams[$row['StoredProc']][] = new MSSQL_StoredProcParam($row);

@@ -629,24 +629,24 @@ class MSSQL_Core extends SQL_Base
 
         if (!$limit) {
             $sql = '
-				SELECT
-					COUNT(*) AS num
-				FROM
-					[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
-					' . $sql_left . '
-				WHERE
-					' . $sql_where . '
-				';
+SELECT
+    COUNT(*) AS num
+FROM
+    [' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
+    ' . $sql_left . '
+WHERE
+    ' . $sql_where . '
+';
         } else {
             $sql = '
-				SELECT 
-				  COUNT(*) AS num 
-                FROM (
-                    SELECT TOP ' . $limit . ' * FROM [' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
-                        ' . $sql_left . '
-                    WHERE
-                        ' . $sql_where . '
-				) AS c
+SELECT 
+  COUNT(*) AS num 
+FROM (
+    SELECT TOP ' . $limit . ' * FROM [' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
+        ' . $sql_left . '
+    WHERE
+        ' . $sql_where . '
+) AS c
 			';
         }
 
@@ -659,18 +659,18 @@ class MSSQL_Core extends SQL_Base
         $list = [];
         if ($count > 0) {
             $sql = '
-				SELECT
-					[' . static::$table . '].*
-				FROM
-					[' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
-					' . $sql_left . '
-				WHERE
-					 ' . $sql_where . '
-				' . $sql_order . '
+SELECT
+    [' . static::$table . '].*
+FROM
+    [' . static::$database . '].dbo.[' . static::$table . '] WITH (NOLOCK)
+    ' . $sql_left . '
+WHERE
+     ' . $sql_where . '
+' . $sql_order . '
 			';
             if ($per_page != 0) {
                 $sql .= '
-                OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
+OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
 				';
             }
 
@@ -854,17 +854,17 @@ class MSSQL_Core extends SQL_Base
             $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
 
             if ($this->$primary && !$force_insert)
-                $sql .= "
-				WHERE
-					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
-				";
+                $sql .= '
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
 
             $res = new SQL_Query($sql, $params);
         } else {
             $sql = '
-				UPDATE
-					[' . static::$database . '].dbo.[' . static::$table . ']
-                SET
+UPDATE
+    [' . static::$database . '].dbo.[' . static::$table . ']
+SET
 				';
             $props = [];
             $params = [];
@@ -894,9 +894,9 @@ class MSSQL_Core extends SQL_Base
 
             if ($this->$primary && !$force_insert)
                 $sql .= '
-				WHERE
-					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-				';
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
 
             $res = new SQL_Query($sql, $params);
         }
@@ -974,17 +974,17 @@ class MSSQL_Core extends SQL_Base
 
             if ($this->$primary && !$force_insert)
                 $sql .= '
-				WHERE
-					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-				';
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
 
             $res = static::Execute($sql, $params);
         } else {
             $sql = '
-				UPDATE
-					[' . static::$database . '].dbo.[' . static::$table . ']
-                SET
-				';
+UPDATE
+    [' . static::$database . '].dbo.[' . static::$table . ']
+SET
+';
             $props = [];
             $params = [];
             foreach ($this->props as $name => $value) {
@@ -1013,9 +1013,9 @@ class MSSQL_Core extends SQL_Base
 
             if ($this->$primary && !$force_insert) {
                 $sql .= '
-				WHERE
-					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-				';
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
             }
 
             $res = static::Execute($sql, $params);
@@ -1053,9 +1053,9 @@ class MSSQL_Core extends SQL_Base
         $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
 
         $sql = '
-				INSERT INTO
-					[' . static::$database . '].dbo.[' . static::$table . ']
-				';
+INSERT INTO
+    [' . static::$database . '].dbo.[' . static::$table . ']
+';
         $props = [];
         $params = [];
         $qs = [];
@@ -1102,10 +1102,10 @@ class MSSQL_Core extends SQL_Base
         $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
 
         $sql = '
-				UPDATE
-					[' . static::$database . '].dbo.[' . static::$table . ']
-                SET
-				';
+UPDATE
+    [' . static::$database . '].dbo.[' . static::$table . ']
+SET
+';
         $props = [];
         $params = [];
         foreach ($this->props as $name => $value) {
@@ -1127,9 +1127,9 @@ class MSSQL_Core extends SQL_Base
         $sql .= implode(',', $props);
 
         $sql .= '
-				WHERE
-					' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-				';
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
 
         if ($return_query) {
             return new SQL_Query($sql, $params);

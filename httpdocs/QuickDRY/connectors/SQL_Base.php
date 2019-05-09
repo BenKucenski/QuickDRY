@@ -738,19 +738,19 @@ class SQL_Base
         return implode(',', $uuid);
     }
 
-    // overwrite false is for FORM data to pass changes through set_property to trigger change log.
+    // $trigger_change_log true is for FORM data to pass changes through set_property to trigger change log.
     // when coming from database, don't trigger change log
     // strict will halt when the hash passed in contains columns not in the table definition
     /**
      * @param      $row
      * @param bool $overwrite
      */
-    public function FromRow(&$row, $overwrite = true, $strict = false)
+    public function FromRow(&$row, $trigger_change_log = false, $strict = false)
     {
         global $User;
 
-        if (is_null($overwrite)) {
-            $overwrite = true;
+        if (is_null($trigger_change_log)) {
+            $overwrite = false;
         }
         if (is_null($strict)) {
             $strict = false;
@@ -783,10 +783,10 @@ class SQL_Base
                 }
             }
 
-            if ($overwrite) {
-                $this->props[$name] = isset($row[$name]) ? $value : ($overwrite ? null : $value);
-            } else {
+            if ($trigger_change_log) {
                 $this->$name = isset($row[$name]) ? $value : ($overwrite ? null : $value);
+            } else {
+                $this->props[$name] = isset($row[$name]) ? $value : ($overwrite ? null : $value);
             }
         }
         if ($strict && sizeof($missing)) {
@@ -801,10 +801,10 @@ class SQL_Base
      *
      * @return bool
      */
-    public function FromRequest(&$req, $save = true, $overwrite = false)
+    public function FromRequest(&$req, $save = true, $trigger_change_log = true)
     {
         foreach ($this->props as $name => $value) {
-            $this->$name = isset($req[$name]) ? $req[$name] : ($overwrite ? null : $this->props[$name]);
+            $this->$name = isset($req[$name]) ? $req[$name] : (!$trigger_change_log ? null : $this->props[$name]);
         }
 
         if ($save) {

@@ -32,7 +32,7 @@ class MSSQL_Queue
         $sql = '
         		SET QUOTED_IDENTIFIER ON
         		;
-        		' . $sql;
+        		' . $sql . ' ;';
 
         $class = $this->MSSQL_CLASS;
         $res = $class::Execute($sql, null, true);

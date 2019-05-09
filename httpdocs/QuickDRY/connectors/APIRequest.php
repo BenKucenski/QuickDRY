@@ -225,6 +225,11 @@ class APIRequest
 
 
         if (self::$CacheTimeoutSeconds > -1) {
+
+            if (file_exists($file)) {
+                unlink($file); // delete the old file so the created time updates
+            }
+
             $fp = fopen($file, 'w');
             fwrite($fp, $body);
             fclose($fp);
