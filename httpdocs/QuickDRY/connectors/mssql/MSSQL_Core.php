@@ -595,7 +595,7 @@ class MSSQL_Core extends SQL_Base
         }
 
         $sql_where = '1=1';
-        if (is_array($where)) {
+        if (is_array($where) && sizeof($where)) {
             $t = [];
             foreach ($where as $c => $v) {
                 $cv = self::_parse_col_val($c, $v);
