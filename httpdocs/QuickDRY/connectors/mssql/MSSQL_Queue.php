@@ -1,13 +1,18 @@
 <?php
+
 class MSSQL_Queue
 {
     private $_sql = [];
     private $strlen = 0;
     private $MSSQL_CLASS;
+    private $exit_on_error;
+    private $queue_limit;
 
-    public function __construct($MSSQL_CLASS = 'MSSQL_A')
+    public function __construct($MSSQL_CLASS = 'MSSQL_A', $exit_on_error = true, $queue_limit = 500)
     {
         $this->MSSQL_CLASS = $MSSQL_CLASS;
+        $this->exit_on_error = $exit_on_error;
+        $this->queue_limit = $queue_limit;
     }
 
     /**
@@ -23,21 +28,21 @@ class MSSQL_Queue
      */
     public function Flush()
     {
-        if(!$this->Count()) {
+        if (!$this->Count()) {
             return null;
         }
 
         Metrics::Toggle('MSSQL_Queue::Flush');
-        $sql = implode(PHP_EOL . ';' . PHP_EOL, $this->_sql);
-        $sql = '
-        		SET QUOTED_IDENTIFIER ON
-        		;
-        		' . $sql . ' ;';
+        $sql = implode(';' . "\n", $this->_sql);
+        $sql = trim('
+SET QUOTED_IDENTIFIER ON
+;
+        		' . $sql . ' ;');
 
         $class = $this->MSSQL_CLASS;
         $res = $class::Execute($sql, null, true);
         Metrics::Toggle('MSSQL_Queue::Flush');
-        if ($res['error']) {
+        if ($res['error'] && $this->exit_on_error) {
             Log::Insert($res, true);
             echo $res['query'];
             exit(1);
@@ -59,8 +64,9 @@ class MSSQL_Queue
         $this->_sql[] = $t;
         $this->strlen += strlen($t);
 
-        if ($this->strlen > 1024 * 1024 * 50 || $this->Count() > 500) {
-            $this->Flush();
+        if ($this->strlen > 1024 * 1024 * 50 || $this->Count() >= $this->queue_limit) {
+            return $this->Flush();
         }
+        return ['error' => '', 'query' => ''];
     }
 }

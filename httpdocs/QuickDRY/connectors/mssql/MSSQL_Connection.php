@@ -438,15 +438,15 @@ class MSSQL_Connection
                 if (!is_dir('sql')) {
                     mkdir('sql');
                 }
-                $fname = 'sql/' . time() . '.' . rand(0, 10000) . '.mssql.txt';
+                $fname = 'sql\\' . time() . '.' . rand(0, 10000) . '.mssql.sql';
 
                 $fp = fopen($fname, 'w');
                 while (!$fp) {
                     sleep(1);
-                    $fname = 'sql/' . time() . '.' . rand(0, 1000000) . '.mssql.txt';
+                    $fname = 'sql\\' . time() . '.' . rand(0, 1000000) . '.mssql.sql';
                     $fp = fopen($fname, 'w');
                 }
-                fwrite($fp, $query);
+                fwrite($fp, str_replace("\r\n","\n",$query));
                 fclose($fp);
                 $output = [];
                 // -x turns off variable interpretation - must be set
@@ -461,6 +461,7 @@ class MSSQL_Connection
                 $opts[] = '-l 0';
                 $opts[] = '-a 32767';
                 $opts[] = '-x';
+//                $opts[] = '-E';
                 $opts[] = '-U"' . $this->DB_USER . '"';
                 $opts[] = '-P"' . $this->DB_PASS . '"';
                 $opts[] = '-S"' . $this->DB_HOST . '"';
@@ -485,7 +486,12 @@ class MSSQL_Connection
                     unlink($fname);
                 } else {
                     if (stristr($returnval['exec'], 'Timeout expired') !== false) {
-                        rename($fname, 'sql/timeout.' . str_replace('sql/', '', $fname));
+                        $newname = 'sql/timeout.' . str_replace('sql\\', '', $fname) . '.txt';
+                        rename($fname, $newname);
+                        $returnval['error'] = 'timeout';
+                        $returnval['query'] = $query;
+                    } else {
+                        rename($fname, $fname . '.txt');
                     }
                 }
             } else {
