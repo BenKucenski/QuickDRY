@@ -406,23 +406,30 @@ class SQL_Base
         $new_val = static::StrongType($name, $value);
 
         $changed = false;
+        $change_reason = '';
         if (is_null($old_val) && !is_null($new_val)) {
             $changed = true;
+            $change_reason = 'old = null, new not null';
         } else {
             if (!is_null($old_val) && is_null($new_val)) {
                 $changed = true;
+                $change_reason = 'old not null, new null';
             } else {
-                if (is_numeric($old_val) && is_numeric($new_val) && abs($new_val - $old_val) > 0.000000001) {
+                if (is_numeric($old_val) && is_numeric($new_val)) {
 
-                    /**
-                    [new] => 5270.6709775679 -- PHP thinks these two numbers are different, so we need to compare to a very small number, not equal
-                    [old] => 5270.6709775679
-                     * // from PHP's manual "never trust floating number results to the last digit, and do not compare floating point numbers directly for equality" - https://www.php.net/manual/en/language.types.float.php
-                     */
-                    $changed = true;
+                    if(abs($new_val - $old_val) > 0.000000001) {
+                        /**
+                         * [new] => 5270.6709775679 -- PHP thinks these two numbers are different, so we need to compare to a very small number, not equal
+                         * [old] => 5270.6709775679
+                         * // from PHP's manual "never trust floating number results to the last digit, and do not compare floating point numbers directly for equality" - https://www.php.net/manual/en/language.types.float.php
+                         */
+                        $changed = true;
+                        $change_reason = 'diff = ' . abs($new_val - $old_val);
+                    }
                 } else {
                     if (strcmp($new_val, $old_val) != 0) {
                         $changed = true;
+                        $change_reason = '"' . $new_val . '" "' . $old_val . '" ' . strlen($new_val) . ' ' . strlen($old_val) . ': strcmp = ' . strcmp($new_val, $old_val);
                     }
                 }
             }
@@ -434,7 +441,7 @@ class SQL_Base
             if (is_null($old_val)) {
                 $old_val = 'null';
             }
-            $this->_change_log[$name] = ['new' => $new_val, 'old' => $old_val];
+            $this->_change_log[$name] = ['new' => $new_val, 'old' => $old_val, 'reason' => $change_reason];
             $this->HasChanges = true;
         }
         $this->props[$name] = $value;
