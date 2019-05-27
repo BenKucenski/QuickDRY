@@ -174,7 +174,9 @@ class Debug extends SafeClass
 
         // Remove first item from backtrace as it's this function which
         // is redundant.
-        $trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '', $trace, 1);
+        if(strlen($trace) < 1024 * 64) {
+            $trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '', $trace, 1);
+        }
 
 
         return $trace;
