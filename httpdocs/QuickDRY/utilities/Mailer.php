@@ -13,6 +13,8 @@ class Mailer extends SafeClass
     public $sent_at;
     public $log;
     public $headers;
+    public $from_email;
+    public $from_name;
 
     /**
      * @param $name
@@ -39,11 +41,13 @@ class Mailer extends SafeClass
      */
 
 
-    public static function Queue($to_email, $to_name, $subject, $message, $attachments = null)
+    public static function Queue($to_email, $to_name, $subject, $message, $attachments = null, $from_email = null, $from_name = null)
     {
         $t = new self();
         $t->to_email = $to_email;
         $t->to_name = $to_name;
+        $t->from_email = $from_email;
+        $t->from_name = $from_name;
         $t->subject = $subject;
         $t->message = $message;
         $t->headers = serialize($attachments);
@@ -82,8 +86,8 @@ class Mailer extends SafeClass
             $mail = new PHPMailer();
 
             $mail->Host = SMTP_HOST;
-            $mail->From = SMTP_FROM_EMAIL;
-            $mail->FromName = SMTP_FROM_NAME;
+            $mail->From = $this->from_email ? $this->from_email : SMTP_FROM_EMAIL;
+            $mail->FromName = $this->from_name ? $this->from_name : SMTP_FROM_NAME;
             $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
 
             if (defined('SMTP_USER') && defined('SMTP_PASS')) {

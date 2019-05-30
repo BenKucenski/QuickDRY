@@ -85,7 +85,7 @@ class Strings extends SafeClass
                 $row[] = ''; // fill in missing fields with emptry strings
             }
             if (sizeof($row) != $n) {
-                Halt([$header, $row]);
+                continue;
             }
             $csv[] = array_combine($header, $row);
         }

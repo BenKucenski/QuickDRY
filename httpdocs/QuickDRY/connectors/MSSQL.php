@@ -101,6 +101,9 @@ class MSSQL extends SafeClass
                 }
 
                 if (isset($params[$result[1]])) {
+                    if(Strings::EndsWith($result[1],'_NQ')) {
+                        return $params[$result[1]];
+                    }
                     return MSSQL::EscapeString($params[$result[1]]);
                 }
 

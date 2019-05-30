@@ -94,7 +94,7 @@ class MSSQL_CodeGen extends SQLCodeGen
 
         \';
         /* @var $rows ' . $sp_class . '[] */
-        $rows = ' . $DatabaseClass . '::Query($sql, [' . implode(', ', $params) . '], null, function ($row) {
+        $rows = ' . $DatabaseClass . '::QueryMap($sql, [' . implode(', ', $params) . '], function ($row) {
             return new ' . $sp_class . '($row);
         });
 
@@ -102,6 +102,22 @@ class MSSQL_CodeGen extends SQLCodeGen
             Halt($rows);
         }
         return $rows;
+    }
+
+    public static function Exec(' . implode(', ', $func_params) . ')
+    {
+        $sql = \'
+        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
+        ' . implode(", ", $sql_params) . '
+
+        \';
+        /* @var $rows ' . $sp_class . '[] */
+        $res = ' . $DatabaseClass . '::Execute($sql, [' . implode(', ', $params) . ']);
+
+        if ($res[\'error\']) {
+            Halt($res);
+        }
+        return $res;
     }
 }
 
