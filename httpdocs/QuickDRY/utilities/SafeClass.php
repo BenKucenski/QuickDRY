@@ -90,12 +90,16 @@ class SafeClass
     /**
      * @param $row
      */
-    public function FromRow($row)
+    public function FromRow($row, $convert_objects = false)
     {
         if (!is_array($row)) {
             Halt($row);
         }
         foreach ($row as $k => $v) {
+            if($convert_objects && is_object($v)) {
+                $v = Dates::Timestamp($v);
+            }
+
             $a = preg_replace('/[^a-z0-9_]/si','', $k);
             if($a != $k) {
                 $this->_Aliases['_' . $a] = $k;
