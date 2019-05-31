@@ -64,8 +64,10 @@ class MSSQL_CodeGen extends SQLCodeGen
             $params = [];
             $sql_params = [];
             $func_params = [];
+            $clean_params = [];
             foreach ($sp_params as $param) {
                 $clean_param = str_replace('#', '_', str_replace('@', '$', $param->Parameter_name));
+                $clean_params[] = $clean_param;
                 $sql_param = str_replace('$', '@', $clean_param);
                 $func_params[] = $clean_param;
                 $sql_params[] = $sql_param;
@@ -74,7 +76,7 @@ class MSSQL_CodeGen extends SQLCodeGen
 
             $sp_code = explode("\n", $sp->SOURCE_CODE);
             foreach($sp_code as $i => $line) {
-                $sp_code[$i] = "//        " . trim($line);
+                $sp_code[$i] = "        " . trim($line);
             }
             $code = '<?php
 
@@ -84,6 +86,7 @@ class MSSQL_CodeGen extends SQLCodeGen
  class db_' . $sp_class . ' extends SafeClass
 {
     /**
+     * @param  ' . implode(PHP_EOL . '     * @param  ', $clean_params) . '
      * @return ' . $sp_class . '[]
      */
     public static function GetReport(' . implode(', ', $func_params) . ')
@@ -104,6 +107,10 @@ class MSSQL_CodeGen extends SQLCodeGen
         return $rows;
     }
 
+    /**
+     * @param  ' . implode(PHP_EOL . '     * @param  ', $clean_params) . '
+     * @return array
+     */
     public static function Exec(' . implode(', ', $func_params) . ')
     {
         $sql = \'
@@ -121,9 +128,10 @@ class MSSQL_CodeGen extends SQLCodeGen
     }
 }
 
-' . implode("\n", $sp_code) . '
+//' . implode("\n//", $sp_code) . '
         ';
-
+            // NOTE: can't use /**/ with this because some stored proceedures use that in the query itself which
+            // breaks the comment block in PHP
             $file = $this->CommonClassSPDBFolder . '/db_' . $sp_class . '.php';
             $fp = fopen($file, 'w');
             fwrite($fp, $code);
