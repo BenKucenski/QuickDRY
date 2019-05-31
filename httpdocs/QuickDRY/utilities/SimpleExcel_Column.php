@@ -20,4 +20,12 @@ class SimpleExcel_Column extends SafeClass
         $this->Property = $Property;
         $this->PropertyType = $PropertyType;
     }
+
+    /**
+     * @param $PropertyType
+     */
+    public function SetPropertyType($PropertyType)
+    {
+        $this->PropertyType = $PropertyType;
+    }
 }

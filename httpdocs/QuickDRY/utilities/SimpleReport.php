@@ -20,4 +20,22 @@ class SimpleReport extends SafeClass
             $this->HaltOnError(true);
         }
     }
+
+    /**
+     * @param SimpleReport[] $items
+     * @return SimpleExcel
+     */
+    public static function ToExcel(&$items)
+    {
+        $class = get_called_class();
+        $cols = array_keys(get_class_vars($class));
+        $se = new SimpleExcel();
+        $se->Report = $items;
+        $se->Title = $class;
+        $se->Columns = [];
+        foreach($cols as $col) {
+            $se->Columns[$col] = new SimpleExcel_Column(null, $col);
+        }
+        return $se;
+    }
 }
