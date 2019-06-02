@@ -96,7 +96,7 @@ class Strings extends SafeClass
      * @param $tsv
      * @return array
      */
-    public static function TSVToArrayMap(&$tsv, $mapping_function = null, $filename = null, $class = null)
+    public static function TSVToArrayMap(&$tsv, $mapping_function = null, $filename = null, $class = null, $ignore_errors = false)
     {
         $tsv = trim($tsv); // remove trailing whitespace
         // https://stackoverflow.com/questions/4801895/csv-to-associative-array
@@ -114,7 +114,9 @@ class Strings extends SafeClass
                 $row[] = ''; // fill in missing fields with emptry strings
             }
             if (sizeof($row) != $n) {
-                Halt([$header, $row]);
+                if(!$ignore_errors) {
+                    Halt([$header, $row]);
+                }
             }
             if ($mapping_function) {
                 call_user_func($mapping_function, array_combine($header, $row), $filename, $class);
