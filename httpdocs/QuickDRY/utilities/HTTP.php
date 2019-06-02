@@ -136,6 +136,24 @@ class HTTP extends SafeClass
     }
 
     /**
+     * @param $json
+     * @param int $HTTP_STATUS
+     */
+    public static function ExitFile($content, $filename, $HTTP_STATUS = HTTP_STATUS_OK)
+    {
+        if($HTTP_STATUS) {
+            header('HTTP/1.1 ' . $HTTP_STATUS . ': ' . HTTPStatus::GetDescription($HTTP_STATUS));
+        }
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT');
+        header(
+            'Access-Control-Allow-Headers: X-User-Email, X-User-Token, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+        );
+        exit($content);
+    }
+    /**
      * @param $header
      */
     public static function AltHeader($header) {
