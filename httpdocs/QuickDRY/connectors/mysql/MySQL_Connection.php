@@ -183,7 +183,7 @@ host = ' . $this->DB_HOST . '
 
                 $output = [];
                 // -x turns off variable interpretation - must be set
-                $cmd = 'mysql --defaults-extra-file="' . $file . '" -P' . MYSQLA_PORT . ' < ' . $fname;
+                $cmd = 'mysql --defaults-extra-file="' . $file . '" -P' . $this->DB_PORT . ' < ' . $fname;
                 $res = exec($cmd, $output);
 
                 $exec = $cmd . PHP_EOL . PHP_EOL . $res . PHP_EOL . PHP_EOL . implode(PHP_EOL, $output);
@@ -264,6 +264,17 @@ host = ' . $this->DB_HOST . '
 
         if ($params) {
             $sql = MySQL::EscapeQuery($this->db, $sql, $params);
+        }
+
+        if(!$this->current_db) {
+            $pattern = '/FROM\s+(.*?)\./si';
+            $matches = [];
+            preg_match_all($pattern, $sql, $matches);
+            if (isset($matches[1][0])) {
+                self::SetDatabase($matches[1][0]);
+            } else {
+                Halt(['QuickDRY Error' => 'Database not set and database could not be determined from query', 'sql' => $sql]);
+            }
         }
 
         $start = microtime(true);
