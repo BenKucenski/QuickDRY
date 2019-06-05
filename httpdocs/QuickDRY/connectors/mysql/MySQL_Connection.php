@@ -174,9 +174,9 @@ class MySQL_Connection
                 fwrite(
                     $fp, '
 [client]
-user = ' . MYSQLA_USER . '
-password = ' . MYSQLA_PASS . '
-host = ' . MYSQLA_HOST . '
+user = ' . $this->DB_USER . '
+password = ' . $this->DB_PASS . '
+host = ' . $this->DB_HOST . '
             '
                 );
                 fclose($fp);
@@ -352,7 +352,7 @@ host = ' . MYSQLA_HOST . '
         $this->_connect();
         if (is_array($values)) {
             foreach ($values as $key => $value) {
-                $values[$key] = MySQL_A::Escape($value, $quotes);
+                $values[$key] = $this->Escape($value, $quotes);
             }
         } else if ($values === null) {
             $values = 'NULL';
@@ -536,11 +536,11 @@ host = ' . MYSQLA_HOST . '
 
             $sql = '
 SHOW INDEXES FROM
-`' . $table_name . '`
+`' . $this->current_db . '`.`' . $table_name . '`
 
         ';
 
-            $res = MySQL_A::Query($sql);
+            $res = $this->Query($sql);
             if ($res['error']) {
                 Halt($res);
             }
@@ -589,11 +589,11 @@ SHOW INDEXES FROM
 
             $sql = '
 SHOW INDEXES FROM
-`' . $table_name . '`
+`' . $this->current_db . '`.`' . $table_name . '`
 
         ';
 
-            $res = MySQL_A::Query($sql);
+            $res = $this->Query($sql);
             if ($res['error']) {
                 Halt($res);
             }
