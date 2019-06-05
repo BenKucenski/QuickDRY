@@ -86,7 +86,8 @@ if (file_exists($Web->ControllerFile)) {
                         $PageModel::DoExportToXLS();
                         exit;
                     case REQUEST_EXPORT_JSON:
-                        $PageModel::DoExportToJSON();
+                        $json = $PageModel::DoExportToJSON();
+                        HTTP::ExitJSON($json);
                         exit;
                     case REQUEST_EXPORT_DOCX:
                         $PageModel::DoExportToDOCX();
