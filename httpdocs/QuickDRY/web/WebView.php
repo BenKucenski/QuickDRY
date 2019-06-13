@@ -246,6 +246,11 @@ if ($Web->RenderDOCX) {
 if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
     require_once 'masterpages/' . $Web->MasterPage . '.php';
 } else {
+    $ext = explode('.',$Web->CurrentPageName);
+    $ext = strtolower($ext[sizeof($ext) - 1]);
+    if(!in_array($ext,['html','json'])) {
+        exit($Web->CurrentPageName . ' not found');
+    }
     Debug::Halt($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile);
 }
 
