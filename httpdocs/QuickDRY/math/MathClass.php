@@ -14,15 +14,16 @@ class MathClass
      * @param $arr
      * @return float|int
      */
-    public static function Median($arr) {
+    public static function Median($arr)
+    {
         $count = count($arr); //total numbers in array
-        $middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
-        if($count % 2) { // odd number, middle is the median
+        $middleval = floor(($count - 1) / 2); // find the middle value, or the lowest middle value
+        if ($count % 2) { // odd number, middle is the median
             $median = $arr[$middleval];
         } else { // even number, calculate avg of 2 medians
             $low = $arr[$middleval];
-            $high = $arr[$middleval+1];
-            $median = (($low+$high)/2);
+            $high = $arr[$middleval + 1];
+            $median = (($low + $high) / 2);
         }
         return $median;
     }
@@ -34,8 +35,8 @@ class MathClass
     public static function Mode($arr)
     {
         $summary = [];
-        foreach($arr as $val) {
-            if(!isset($summary[$val])) {
+        foreach ($arr as $val) {
+            if (!isset($summary[$val])) {
                 $summary[$val] = 0;
             }
             $summary[$val]++;
@@ -397,19 +398,19 @@ class MathClass
 
     public static function APY($current_time, $current_price, $start_time, $start_price)
     {
-        if($start_price == 0) {
+        if ($start_price == 0) {
             return 0;
         }
 
-        if(!is_numeric($current_time)) {
+        if (!is_numeric($current_time)) {
             $current_time = strtotime($current_time);
         }
 
-        if(!is_numeric($start_time)) {
+        if (!is_numeric($start_time)) {
             $start_time = strtotime($start_time);
         }
 
-        if($start_time == $current_time) {
+        if ($start_time == $current_time) {
             return 0;
         }
 
@@ -440,7 +441,7 @@ class MathClass
         $rk = $interest_rate / $payments_per_year;
 
         $x = $rk * $future_value + $payment;
-        if($present_value * $rk + $payment == 0) {
+        if ($present_value * $rk + $payment == 0) {
             return 0;
         }
         $x /= $present_value * $rk + $payment;
@@ -459,7 +460,7 @@ class MathClass
         $pmt = -$present_value * $interest_rate / (exp(-$months * log(1.0 + $interest_rate)) - 1);
         $extra_payment = $pmt - $current_payment;
 
-        $N = -(log(1 - (($present_value * $interest_rate) / $pmt) ) / log(1 + $interest_rate));
+        $N = -(log(1 - (($present_value * $interest_rate) / $pmt)) / log(1 + $interest_rate));
         // $N should equal $months
 
         return $extra_payment;
