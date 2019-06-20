@@ -110,6 +110,7 @@ var QuickDRY = {
             var elem = $('#' + elem_id + '_' + i);
             var elem_cur = $('#' + elem_id + '_' + i + '_cur');
             var elem_hidden = $('#' + elem_id + '_' + i + '_hidden');
+
             if (typeof (elem) == 'object') {
                 if (elem.prop("type") == 'checkbox') {
                     if (data.data[i] == 1) {
@@ -121,8 +122,6 @@ var QuickDRY = {
                         elem_hidden.val(data.data[i]);
                     }
 
-
-
                     if (typeof (elem_cur) == 'object') {
                         if (data.data[i] == 1) {
                             elem_cur.html('Yes');
@@ -131,17 +130,22 @@ var QuickDRY = {
                         }
                     }
                 } else {
-                    if (elem.hasClass('date-picker')) {
+                    if (elem.hasClass('date-picker') || elem.attr('type') === 'date') {
                         if (data.data[i])
                             if (data.data[i].length > 7) {
                                 var t = data.data[i];
                                 t = t.split(' ');
                                 t = t[0];
                                 t = t.split('-');
-                                if (t[1] == undefined)
+                                if (t[1] == undefined) {
                                     elem.val(t);
-                                else
-                                    elem.val(t[1] + '/' + t[2] + '/' + t[0]);
+                                } else {
+                                    if(elem.attr('type') !== 'date') { // date-picker user mm/dd/yyyy
+                                        elem.val(t[1] + '/' + t[2] + '/' + t[0]);
+                                    } else { // date form type uses yyyy-mm-dd
+                                        elem.val(data.data[i]);
+                                    }
+                                }
                                 if (typeof ($('#' + elem_id + '_' + i + '_cur')) == 'object') {
                                     elem_cur.html(t[1] + '/' + t[2] + '/' + t[0]);
                                 }
