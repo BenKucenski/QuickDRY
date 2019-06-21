@@ -16,7 +16,7 @@ class Navigation
     public function Combine($_ADD)
     {
         foreach ($_ADD as $link) {
-            if(!in_array($link, $this->_PERMISSIONS)) {
+            if (!in_array($link, $this->_PERMISSIONS)) {
                 $this->_PERMISSIONS[] = $link;
             }
         }
@@ -40,16 +40,16 @@ class Navigation
         if ($_CUR_PAGE == '/' || $_CUR_PAGE == '' || $_CUR_PAGE == '/')
             return true;
 
-        if(is_array($_CUR_PAGE)) {
+        if (is_array($_CUR_PAGE)) {
             Halt($_CUR_PAGE);
         }
 
         $t = explode('/', $_CUR_PAGE);
-        if (stristr($t[sizeof($t) - 1],'json') !== FALSE) {
+        if (stristr($t[sizeof($t) - 1], 'json') !== FALSE) {
             return true;
         }
 
-        if(in_array($_CUR_PAGE, $this->_PERMISSIONS)) {
+        if (in_array($_CUR_PAGE, $this->_PERMISSIONS)) {
             return true;
         }
 
@@ -65,13 +65,13 @@ class Navigation
      */
     public function RenderBootstrap($_MENU = null)
     {
-        if($_MENU) {
+        if ($_MENU) {
             $this->_MENU = $_MENU;
         }
 
         $_MENU_HTML = '';
         foreach ($this->_MENU AS $name => $values) {
-            if(isset($values['link']) && !$this->CheckPermissions($values['link'], true)) {
+            if (isset($values['link']) && !$this->CheckPermissions($values['link'], true)) {
                 continue;
             }
 
@@ -82,8 +82,8 @@ class Navigation
                         continue;
                     }
 
-                    if(!isset($url['link'])) {
-                        if(!$this->CheckPermissions($url, true)) {
+                    if (!isset($url['link'])) {
+                        if (!$this->CheckPermissions($url, true)) {
                             continue;
                         }
                     } else {
@@ -104,7 +104,7 @@ class Navigation
                 $_MENU_HTML .= '<ul class="dropdown-menu">';
                 foreach ($values['links'] as $link_name => $url) {
                     if (!is_array($url)) {
-                        if(!$this->CheckPermissions($url, true)) {
+                        if (!$this->CheckPermissions($url, true)) {
                             continue;
                         }
                         $_MENU_HTML .= '<li><a href="' . $url . '">' . $link_name . '</a></li>' . PHP_EOL;
@@ -118,7 +118,7 @@ class Navigation
                             $_MENU_HTML .= '<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">' . $name . '<span class="caret"></span></a>';
                             $_MENU_HTML .= '<ul class="dropdown-menu">' . PHP_EOL;
                             foreach ($url['links'] as $sub_name => $sub_url) {
-                                if($this->CheckPermissions($sub_url, true)) {
+                                if ($this->CheckPermissions($sub_url, true)) {
                                     $_MENU_HTML .= '<li><a href="' . $sub_url . '">' . $sub_name . '</a></li>' . PHP_EOL;
                                 }
                             }
@@ -160,13 +160,13 @@ class Navigation
      */
     public function RenderBootstrap4($_MENU = null)
     {
-        if($_MENU) {
+        if ($_MENU) {
             $this->_MENU = $_MENU;
         }
 
         $_MENU_HTML = '';
         foreach ($this->_MENU AS $name => $values) {
-            if(isset($values['link']) && !$this->CheckPermissions($values['link'], true)) {
+            if (isset($values['link']) && !$this->CheckPermissions($values['link'], true)) {
                 continue;
             }
 
@@ -177,8 +177,8 @@ class Navigation
                         continue;
                     }
 
-                    if(!isset($url['link'])) {
-                        if(!$this->CheckPermissions($url, true)) {
+                    if (!isset($url['link'])) {
+                        if (!$this->CheckPermissions($url, true)) {
                             continue;
                         }
                     } else {
@@ -199,7 +199,7 @@ class Navigation
                 $_MENU_HTML .= '<ul class="dropdown-menu">';
                 foreach ($values['links'] as $link_name => $url) {
                     if (!is_array($url)) {
-                        if(!$this->CheckPermissions($url, true)) {
+                        if (!$this->CheckPermissions($url, true)) {
                             continue;
                         }
                         $_MENU_HTML .= '<li class="dropdown nav-item"><a class="nav-link" href="' . $url . '">' . $link_name . '</a></li>' . PHP_EOL;
@@ -213,7 +213,7 @@ class Navigation
                             $_MENU_HTML .= '<li class="dropdown nav-item"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">' . $name . '<span class="caret"></span></a>';
                             $_MENU_HTML .= '<ul class="dropdown-menu">' . PHP_EOL;
                             foreach ($url['links'] as $sub_name => $sub_url) {
-                                if($this->CheckPermissions($sub_url, true)) {
+                                if ($this->CheckPermissions($sub_url, true)) {
                                     $_MENU_HTML .= '<li><a href="' . $sub_url . '">' . $sub_name . '</a></li>' . PHP_EOL;
                                 }
                             }
@@ -251,14 +251,15 @@ class Navigation
 
     /**
      * @param $count
-     * @param string $params
+     * @param null $params
      * @param null $_SORT_BY
      * @param null $_SORT_DIR
      * @param null $_PER_PAGE
      * @param null $_URL
+     * @param bool $ShowViewAll
      * @return string
      */
-    public static function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
+    public static function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null, $ShowViewAll = true)
     {
         if ($params == null) {
             $params = [];
@@ -295,8 +296,8 @@ class Navigation
 
             $html = '<ul class="pagination">';
             if (PAGE > 10) {
-                $html .= '<li class="first"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (0) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;&lt;</a></li>';
-                $html .= '<li class="previous"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE - 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;</a></li>';
+                $html .= '<li class="page-item first"><a class="page-link" href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (0) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;&lt;</a></li>';
+                $html .= '<li class="page-item previous"><a class="page-link" href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE - 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&lt;</a></li>';
             }
 
             for ($j = $start_page; $j <= $end_page; $j++) {
@@ -306,16 +307,19 @@ class Navigation
                     $html .= '<li class="page-item active"><a class="page-link" href="#">' . ($j + 1) . '</a></li>';
             }
             if (PAGE < $num_pages - 10 && $num_pages > 10) {
-                $html .= '<li class="next"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
-                $html .= '<li class="last"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . ($num_pages - 1) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;&gt;</a></li>';
+                $html .= '<li class="page-item next"><a class="page-link" href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . (PAGE + 10) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;</a></li>';
+                $html .= '<li class="page-item last"><a class="page-link" href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . ($num_pages - 1) . '&per_page=' . $_PER_PAGE . '&' . $params . '">&gt;&gt;</a></li>';
             }
 
-            $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=0&' . $params . '">View All</a></li>';
-
+            if ($ShowViewAll) {
+                $html .= '<li class="page-item  view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=' . $j . '&per_page=0&' . $params . '">View All</a></li>';
+            }
             return $html . '</ul>';
         }
         $html = '<br/><ul class="pagination">';
-        $html .= '<li class="view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=0&' . $params . '">View Paginated</a></li>';
+        if ($ShowViewAll) {
+            $html .= '<li class="page-item view_all"><a href="' . $_URL . '?sort_by=' . $_SORT_BY . '&dir=' . $_SORT_DIR . '&page=0&' . $params . '">View Paginated</a></li>';
+        }
         return $html . '</ul>';
     }
 

@@ -147,9 +147,9 @@ function getTinyUrl($url)
  * @param null $_URL
  * @return string
  */
-function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null)
+function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null, $ShowViewAll = true)
 {
-    return Navigation::BootstrapPaginationLinks($count, $params, $_SORT_BY, $_SORT_DIR, $_PER_PAGE, $_URL);
+    return Navigation::BootstrapPaginationLinks($count, $params, $_SORT_BY, $_SORT_DIR, $_PER_PAGE, $_URL, $ShowViewAll);
 }
 
 // debug functions
