@@ -117,7 +117,7 @@ class Debug extends SafeClass
             if(defined('PRETTY_ERROR')) {
                 exit(PRETTY_ERROR);
             }
-            exit('An Error Occured.  Please Try Again Later.');
+            exit('An Error Occurred.  Please Try Again Later.');
         }
         if ($print !== false) {
             echo $finalMsg;
