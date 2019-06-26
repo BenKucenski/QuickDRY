@@ -6,6 +6,7 @@
 class MySQL_Core extends SQL_Base
 {
     protected static $DB_HOST;
+
     /**
      * @return array
      */
@@ -112,8 +113,8 @@ class MySQL_Core extends SQL_Base
      */
     public static function QueryMap($sql, $params = null, $map_function = null)
     {
-        $res =  self::Query($sql, $params, false, $map_function);
-        if(isset($res['error'])) {
+        $res = self::Query($sql, $params, false, $map_function);
+        if (isset($res['error'])) {
             Halt($res);
         }
         return $res;
@@ -232,68 +233,73 @@ class MySQL_Core extends SQL_Base
         }
         // adding a space to ensure that "in_" is not mistaken for an IN query
         // and the parameter must START with the special SQL command
-        if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
-            $col = 'DATE(' . $col . ') = {{}}';
-            $val = trim(Strings::RemoveFromStart('{DATE}', $val));
+        if (substr($val, 0, strlen('{BETWEEN} ')) === '{BETWEEN} ') {
+            $val = trim(Strings::RemoveFromStart('{BETWEEN}', $val));
+            $val = explode(',', $val);
+            $col = $col . ' BETWEEN {{}} AND {{}}';
         } else
-        if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
-            $col = 'YEAR(' . $col . ') = {{}}';
-            $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
-        } else
-        if (substr($val, 0, 3) === 'IN ') {
-            $val = explode(',', trim(Strings::RemoveFromStart('IN', $val)));
-            if (($key = array_search('null', $val)) !== false) {
-                $col = '(' . $col . ' IS NULL OR ' . $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val) - 1) . '))';
-                unset($val[$key]);
-            } else {
-                $col = $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val)) . ')';
-            }
-        } else
-            if (substr($val, 0, 6) === 'NLIKE ') {
-                $col = $col . ' NOT LIKE {{}} ';
-                $val = trim(Strings::RemoveFromStart('NLIKE', $val));
+            if (substr($val, 0, strlen('{DATE} ')) === '{DATE} ') {
+                $col = 'DATE(' . $col . ') = {{}}';
+                $val = trim(Strings::RemoveFromStart('{DATE}', $val));
             } else
-                if (substr($val, 0, 7) === 'NILIKE ') {
-                    $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
-                    $val = strtolower(trim(Strings::RemoveFromStart('NILIKE', $val)));
+                if (substr($val, 0, strlen('{YEAR} ')) === '{YEAR} ') {
+                    $col = 'YEAR(' . $col . ') = {{}}';
+                    $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
                 } else
-                    if (substr($val, 0, 6) === 'ILIKE ') {
-                        $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
-                        $val = strtolower(trim(Strings::RemoveFromStart('ILIKE', $val)));
+                    if (substr($val, 0, 3) === 'IN ') {
+                        $val = explode(',', trim(Strings::RemoveFromStart('IN', $val)));
+                        if (($key = array_search('null', $val)) !== false) {
+                            $col = '(' . $col . ' IS NULL OR ' . $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val) - 1) . '))';
+                            unset($val[$key]);
+                        } else {
+                            $col = $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val)) . ')';
+                        }
                     } else
-                        if (substr($val, 0, 5) === 'LIKE ') {
-                            $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
-                            $val = trim(Strings::RemoveFromStart('LIKE', $val));
+                        if (substr($val, 0, 6) === 'NLIKE ') {
+                            $col = $col . ' NOT LIKE {{}} ';
+                            $val = trim(Strings::RemoveFromStart('NLIKE', $val));
                         } else
-                            if (stristr($val, '<=') !== false) {
-                                $col = $col . ' <= {{}} ';
-                                $val = trim(Strings::RemoveFromStart('<=', $val));
+                            if (substr($val, 0, 7) === 'NILIKE ') {
+                                $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
+                                $val = strtolower(trim(Strings::RemoveFromStart('NILIKE', $val)));
                             } else
-                                if (stristr($val, '>=') !== false) {
-                                    $col = $col . ' >= {{}} ';
-                                    $val = trim(Strings::RemoveFromStart('>=', $val));
+                                if (substr($val, 0, 6) === 'ILIKE ') {
+                                    $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
+                                    $val = strtolower(trim(Strings::RemoveFromStart('ILIKE', $val)));
                                 } else
-                                    if (stristr($val, '<>') !== false) {
-                                        $val = trim(Strings::RemoveFromStart('<>', $val));
-                                        if ($val !== 'null')
-                                            $col = $col . ' <> {{}} ';
-                                        else
-                                            $col = $col . ' IS NOT NULL';
+                                    if (substr($val, 0, 5) === 'LIKE ') {
+                                        $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
+                                        $val = trim(Strings::RemoveFromStart('LIKE', $val));
                                     } else
-                                        if (stristr($val, '<') !== false) {
-                                            $col = $col . ' < {{}} ';
-                                            $val = trim(Strings::RemoveFromStart('<', $val));
+                                        if (stristr($val, '<=') !== false) {
+                                            $col = $col . ' <= {{}} ';
+                                            $val = trim(Strings::RemoveFromStart('<=', $val));
                                         } else
-                                            if (stristr($val, '>') !== false) {
-                                                $col = $col . ' > {{}} ';
-                                                $val = trim(Strings::RemoveFromStart('>', $val));
-                                            } else {
-                                                if (strtolower($val) !== 'null') {
-                                                    $col = $col . ' = {{}} ';
-                                                } else {
-                                                    $col = $col . ' IS NULL ';
-                                                }
-                                            }
+                                            if (stristr($val, '>=') !== false) {
+                                                $col = $col . ' >= {{}} ';
+                                                $val = trim(Strings::RemoveFromStart('>=', $val));
+                                            } else
+                                                if (stristr($val, '<>') !== false) {
+                                                    $val = trim(Strings::RemoveFromStart('<>', $val));
+                                                    if ($val !== 'null')
+                                                        $col = $col . ' <> {{}} ';
+                                                    else
+                                                        $col = $col . ' IS NOT NULL';
+                                                } else
+                                                    if (stristr($val, '<') !== false) {
+                                                        $col = $col . ' < {{}} ';
+                                                        $val = trim(Strings::RemoveFromStart('<', $val));
+                                                    } else
+                                                        if (stristr($val, '>') !== false) {
+                                                            $col = $col . ' > {{}} ';
+                                                            $val = trim(Strings::RemoveFromStart('>', $val));
+                                                        } else {
+                                                            if (strtolower($val) !== 'null') {
+                                                                $col = $col . ' = {{}} ';
+                                                            } else {
+                                                                $col = $col . ' IS NULL ';
+                                                            }
+                                                        }
 
         return ['col' => $col, 'val' => $val];
     }
@@ -468,7 +474,7 @@ class MySQL_Core extends SQL_Base
         $sql_order = '';
         if (is_array($order_by) && sizeof($order_by)) {
             foreach ($order_by as $col => $dir) {
-                if(stristr($col, '.') !== false) {
+                if (stristr($col, '.') !== false) {
                     $col = explode('.', $col);
                     $sql_order[] .= '`' . trim($col[0]) . '`.`' . trim($col[1]) . '` ' . $dir;
                 } else {
@@ -695,19 +701,19 @@ class MySQL_Core extends SQL_Base
             }
 
             /**
-            if (!is_null($CurrentUser)) {
-                if (static::$prop_definitions[$name]['type'] === 'datetime') {
-                    if ($value) {
-                        // this is where we can auto adjust time entries in the database
-                        //$value = Timestamp(strtotime(Timestamp($value)) - $CurrentUser->hours_diff * 3600);
-                    }
-                }
-            }
-            **/
+             * if (!is_null($CurrentUser)) {
+             * if (static::$prop_definitions[$name]['type'] === 'datetime') {
+             * if ($value) {
+             * // this is where we can auto adjust time entries in the database
+             * //$value = Timestamp(strtotime(Timestamp($value)) - $CurrentUser->hours_diff * 3600);
+             * }
+             * }
+             * }
+             **/
 
             try {
                 $st_value = static::StrongType($name, $value);
-            } catch(Exception $ex) {
+            } catch (Exception $ex) {
                 Halt($ex);
             }
 
