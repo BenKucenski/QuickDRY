@@ -9,7 +9,7 @@ abstract class CoreClass {
      * @param bool $save
      * @return mixed
      */
-    abstract public function FromRequest(&$req, $save = true, $overwrite = false);
+    abstract public function FromRequest(&$req, $save = true, $keep_existing_values = false);
 
 
     /**

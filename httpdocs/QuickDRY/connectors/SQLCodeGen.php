@@ -483,16 +483,16 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     {
         return $this->_Update($return_query);
     }
-    
+
     /**
      * @param $req
      * @param bool $save
-     * @param bool $overwrite
+     * @param bool $keep_existing_values
      * @return bool
      */
-    public function FromRequest(&$req, $save = true, $overwrite = false)
+    public function FromRequest(&$req, $save = true, $keep_existing_values = false)
     {
-        return parent::FromRequest($req, $save, $overwrite);
+        return parent::FromRequest($req, $save, $keep_existing_values);
     }
 
     /**
@@ -668,12 +668,12 @@ class ' . $c_name . ' extends db_' . $c_name . '
     /**
      * @param $req
      * @param bool $save
-     * @param bool $overwrite
+     * @param bool $keep_existing_values
      * @return bool
      */
-    public function FromRequest(&$req, $save = true, $overwrite = false)
+    public function FromRequest(&$req, $save = true, $keep_existing_values = false)
     {
-        return parent::FromRequest($req, $save, $overwrite);
+        return parent::FromRequest($req, $save, $keep_existing_values);
     }
 }
 
@@ -1584,7 +1584,7 @@ var ' . $c_name . 'History = {
                         \'</tr>\';
                     $(\'#' . $c_name . '_history_table > tbody:last-child\').append(html);
                 }
-                
+
                 QuickDRY.ShowModal(\'' . $c_name . '_history_dialog\', \'' . Strings::CapsToSpaces(str_replace('Class', '', $c_name)) . ' History\');
             }
         });

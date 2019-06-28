@@ -808,10 +808,10 @@ class SQL_Base
      *
      * @return bool
      */
-    public function FromRequest(&$req, $save = true, $trigger_change_log = true)
+    public function FromRequest(&$req, $save = true, $keep_existing_values = true)
     {
         foreach ($this->props as $name => $value) {
-            $this->$name = isset($req[$name]) ? $req[$name] : (!$trigger_change_log ? null : $this->props[$name]);
+            $this->$name = isset($req[$name]) ? $req[$name] : (!$keep_existing_values ? null : $this->props[$name]);
         }
 
         if ($save) {
