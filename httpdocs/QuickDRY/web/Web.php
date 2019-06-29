@@ -23,6 +23,7 @@
  * @property string PDFPageOrientation
  * @property string PDFPageSize
  * @property string PDFFileName
+ * @property PDFMargins PDFMargins
  * @property string PDFHeader
  * @property string PDFFooter
  * @property string PDFPostRedirect
@@ -62,6 +63,7 @@ class Web
     public $PDFHeader;
     public $PDFFooter;
     public $PDFSimplePageNumbers;
+    public $PDFMargins;
 
     public $RenderDOCX;
     public $DOCXPageOrientation;

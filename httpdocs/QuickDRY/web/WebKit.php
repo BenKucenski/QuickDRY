@@ -40,6 +40,9 @@ if(defined('PDF_API')) {
     $params[] = '--disable-smart-shrinking';
     $params[] = '--no-stop-slow-scripts';
     $params[] = '--page-size ' . ($Web->PDFPageSize ? $Web->PDFPageSize : PDF_PAGE_SIZE_LETTER);
+    if($Web->PDFMargins) {
+        $params[] = '-L ' . $Web->PDFMargins->Left . $Web->PDFMargins->Units . ' -R ' . $Web->PDFMargins->Right . $Web->PDFMargins->Units . ' -T ' . $Web->PDFMargins->Top . $Web->PDFMargins->Units . ' -B ' . $Web->PDFMargins->Bottom . $Web->PDFMargins->Units;
+    }
 
 // $params[] = '--debug-javascript';
     $params[] = '-O ' . $Web->PDFPageOrientation;

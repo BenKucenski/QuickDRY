@@ -14,6 +14,9 @@ class BasePage extends SafeClass
     /* @var string $PDFFileName */
     public static $PDFFileName;
 
+    /* @var PDFMargins $PDFMargins */
+    public static $PDFMargins;
+
     /* @var string $DOCXPageOrientation */
     public static $DOCXPageOrientation;
 
@@ -57,6 +60,9 @@ class BasePage extends SafeClass
     public function __get($name)
     {
         switch ($name) {
+            case 'PDFMargins':
+                return self::$PDFMargins;
+
             case 'PDFPageOrientation':
                 return self::$PDFPageOrientation;
 
@@ -104,6 +110,10 @@ class BasePage extends SafeClass
     public function __set($name, $value)
     {
         switch ($name) {
+            case 'PDFMargins':
+                self::$PDFMargins = $value;
+                break;
+
             case 'PDFPageOrientation':
                 self::$PDFPageOrientation = $value;
                 break;
