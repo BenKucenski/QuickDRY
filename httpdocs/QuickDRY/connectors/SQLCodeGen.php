@@ -664,17 +664,6 @@ class ' . $c_name . ' extends db_' . $c_name . '
 ' : '') . '
         return $this->_Save();
     }
-
-    /**
-     * @param $req
-     * @param bool $save
-     * @param bool $keep_existing_values
-     * @return bool
-     */
-    public function FromRequest(&$req, $save = true, $keep_existing_values = false)
-    {
-        return parent::FromRequest($req, $save, $keep_existing_values);
-    }
 }
 
 ';
