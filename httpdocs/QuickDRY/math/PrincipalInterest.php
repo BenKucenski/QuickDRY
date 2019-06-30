@@ -11,4 +11,6 @@ class PrincipalInterest extends SafeClass
     public $principal_payment;
     public $interest_payment;
     public $rollover;
+
+    public $table;
 }

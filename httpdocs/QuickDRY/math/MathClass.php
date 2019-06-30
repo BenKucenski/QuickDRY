@@ -75,17 +75,30 @@ class MathClass
     public static function MonthsToRepay($rate, $principal, $payment)
     {
         $res = new PrincipalInterest();
+        $res->table = [];
+        $res->principal = $principal;
+        $res->principal_payment = $payment;
         $r = $rate / 12.0 / 100.0;
-        if (round($r * $principal, 2) >= $payment)
+        if (round($r * $principal, 2) >= $payment) {
             return null;
-        while ($principal > 0) {
-            $interest_paid = round($r * $principal, 2);
-            $p = $payment - $interest_paid;
+        }
+        while ($res->principal > 0) {
+            $interest_paid = round($r * $res->principal, 2);
+            $p = $res->principal_payment - $interest_paid;
             $res->interest += $interest_paid;
-            if ($principal < $p)
-                $p = $principal;
-            $principal -= $p;
+            if ($res->principal < $p) {
+                $p = $res->principal;
+            }
+            $res->principal -= $p;
             $res->month++;
+            $res->table[] = [
+                'month' => $res->month,
+                'payment' => $payment,
+                'principal' => $p,
+                'interest' => $interest_paid,
+                'total_interest' => $res->interest,
+                'balance' => $res->principal
+            ];
         }
         return $res;
     }
