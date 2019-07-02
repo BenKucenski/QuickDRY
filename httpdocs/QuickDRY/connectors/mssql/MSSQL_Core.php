@@ -783,7 +783,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
 
             case 'timestamp':
             case 'datetime':
-                return $value ? Dates::Timestamp($value) : null;
+                return $value ? Dates::SQLDateTimeToString($value) : null;
         }
         return $value;
     }

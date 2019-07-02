@@ -349,6 +349,22 @@ class Dates extends SafeClass
     }
 
     /**
+     * @param DateTime $dateTime
+     * @return string
+     */
+    public static function SQLDateTimeToString($dateTime)
+    {
+        if(!is_object($dateTime)) {
+            try {
+                $dateTime = new DateTime($dateTime);
+            } catch(Exception $ex) {
+                Halt($ex);
+            }
+        }
+        $t = $dateTime->format('Y-m-d H:i:s.u');
+        return substr($t, 0, strlen($t) - 3);
+    }
+    /**
      * @param int $time
      *
      * @return bool|string
