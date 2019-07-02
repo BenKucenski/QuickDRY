@@ -18,6 +18,6 @@ class YesNoClass extends FormClass
      */
     public static function Select($selected, $name = 'yesno')
 	{
-		return self::SelectItems(self::$_options, $selected, $name);
+		return self::SelectItems(self::$_options, $selected, $name, 'form-control');
 	}	
 }

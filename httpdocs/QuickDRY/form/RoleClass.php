@@ -18,6 +18,6 @@ class RoleClass extends FormClass
      */
     public static function Select($selected, $name = 'role')
     {
-        return self::SelectItems(self::$_options, $selected, $name);
+        return self::SelectItems(self::$_options, $selected, $name, 'form-control');
     }
 }

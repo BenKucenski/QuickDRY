@@ -3,7 +3,7 @@
 /**
  * Class MonthClass
  */
-class MonthClass
+class MonthClass extends FormClass
 {
 	protected static $_options = [
 		'null' => 'Not Set',
@@ -39,16 +39,7 @@ class MonthClass
      */
     public static function Select($selected, $id= ['name'=>'month','id'=>'month'])
 	{
-		$res = '<select id="' . $id['id'] . '" name="' . $id['name'] . '">';
-		foreach(self::$_options as $id => $disp)
-		{
-			if(strcasecmp($id,$selected) == 0)
-				$res .= '<option selected value="' . $id . '">' . $disp . '</input>';
-			else
-				$res .= '<option value="' . $id . '">' . $disp . '</input>';
-		}
-		$res .= '</select>';
-		return $res;
+		return self::SelectItems(self::$_options, $selected, $id, 'form-control');
 		
 	}	
 }

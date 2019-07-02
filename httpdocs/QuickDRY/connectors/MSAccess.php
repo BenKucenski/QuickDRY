@@ -12,19 +12,39 @@ class MSAccess
      * @param string $user
      * @param string $pass
      */
-    public function __construct($file, $user = '', $pass = '')
-	{
-		$str = [];
-		$str[] = 'odbc:Driver={Microsoft Access Driver (*.mdb)}';
-		$str[] = 'Dbq=' . $file;
-		if($user)
-			$str[] = 'Uid=' . $user;
-		
-		if($pass)
-			$str[] = 'PWD=' . $pass;
-		
-		$this->conn = new PDO(implode(';', $str));
-	}
+    public function __construct($file, $user = '', $pass = '', $is_dsn = false)
+    {
+        if(!defined('MS_ACCESS_DRIVER')) {
+            define('MS_ACCESS_DRIVER', 'odbc:Driver={Microsoft Access Driver (*.mdb)}');
+        }
+		// define('MS_ACCESS_DRIVER','odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)}');
+
+        // https://www.freethinkingdesign.co.uk/blog/accessing-access-db-file-accdb-windows-64bit-via-php-using-odbc/ -- read this on 64 bit php
+        // https://www.microsoft.com/en-us/download/details.aspx?id=23734 -- install this if you have 64 bit php
+
+        // https://support.microsoft.com/en-us/help/295297/prb-error-message-0x80004005-general-error-unable-to-open-registry-key
+        $str = [];
+        if(!$is_dsn) {
+            $str[] = MS_ACCESS_DRIVER;
+            $str[] = 'Dbq=' . $file;
+        } else {
+            $str[] = $file;
+        }
+
+        if($user) {
+            $str[] = 'Uid=' . $user;
+        }
+
+        if($pass) {
+            $str[] = 'PWD=' . $pass;
+        }
+
+	try {
+        $this->conn = new PDO(implode(';', $str));
+        } catch(Exception $ex) {
+        	Halt($ex);
+        }
+    }
 
 	function Disconnect()
 	{

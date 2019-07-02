@@ -18,6 +18,6 @@ class GenderClass extends FormClass
      */
     public static function Select($selected, $id= ['name'=>'sex','id'=>'sex'])
 	{
-		return self::SelectItems(self::$_options, $selected, $id);
+		return self::SelectItems(self::$_options, $selected, $id, 'form-control');
 	}	
 }
