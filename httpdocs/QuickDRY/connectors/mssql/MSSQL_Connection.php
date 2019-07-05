@@ -478,6 +478,12 @@ class MSSQL_Connection
                     Log::Insert($output, true);
                 }
 
+                foreach($output as $i => $line) {
+                    if(preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
+                        CleanHalt([$output[$i],$output[$i + 1], $fname]);
+                    }
+                }
+
                 $returnval['exec'] = $res . PHP_EOL . PHP_EOL . implode(
                         PHP_EOL, $output
                     );

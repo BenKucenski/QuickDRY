@@ -123,7 +123,7 @@ class APIRequest
      */
     private function _Request($path, $data = null, $headers = null, $post = true)
     {
-        if (self::$CacheTimeoutSeconds > -1) {
+        if (self::$CacheTimeoutSeconds) {
             $hash = md5(serialize([$path, $data, $headers, $post]));
             $dir = DOC_ROOT_PATH . '/logs/cache';
             if (!is_dir($dir)) {
@@ -224,7 +224,7 @@ class APIRequest
         }
 
 
-        if (self::$CacheTimeoutSeconds > -1) {
+        if (self::$CacheTimeoutSeconds) {
 
             if (file_exists($file)) {
                 unlink($file); // delete the old file so the created time updates
