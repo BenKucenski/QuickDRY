@@ -190,6 +190,7 @@ require_once 'connectors/MySQL.php';
 require_once 'connectors/MSSQL.php';
 require_once 'connectors/MSAccess.php';
 require_once 'connectors/elastic.php';
+require_once 'connectors/twilio.php';
 
 Metrics::StartGlobal();
 BrowserOS::Configure();
