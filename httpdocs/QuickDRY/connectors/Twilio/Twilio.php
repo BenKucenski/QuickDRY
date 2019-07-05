@@ -1,6 +1,9 @@
 <?php
-Define('TWILIO_MODE_TEST', 0);
-Define('TWILIO_MODE_LIVE', 1);
+
+use Twilio\Rest\Client;
+
+define('TWILIO_MODE_TEST', 0);
+define('TWILIO_MODE_LIVE', 1);
 
 class Twilio extends SafeClass
 {
@@ -20,7 +23,7 @@ class Twilio extends SafeClass
         $tl->twilio_mode_id = self::$mode;
         $tl->created_at = Dates::Timestamp();
 
-        switch(get_class($response)) {
+        switch (get_class($response)) {
             case 'Services_Twilio_Rest_SmsMessage':
                 /* @var $response Services_Twilio_Rest_SmsMessage */
                 $tl->sid = $response->sid;
@@ -43,17 +46,19 @@ class Twilio extends SafeClass
                 /* @var $response Services_Twilio_RestException */
                 $tl->response = $response->getMessage();
                 break;
+            case 'Twilio\Rest\Api\V2010\Account\CallInstance':
+                break;
             default:
                 CleanHalt($response);
 
         }
 
-        $tl->Save();
+        return $tl;
     }
 
     public static function SetMode($mode)
     {
-        switch($mode) {
+        switch ($mode) {
             case TWILIO_MODE_LIVE:
                 self::$sid = TWILIO_SID;
                 self::$token = TWILIO_TOKEN;
@@ -62,7 +67,7 @@ class Twilio extends SafeClass
             case TWILIO_MODE_TEST:
                 self::$sid = TWILIO_TEST_SID;
                 self::$token = TWILIO_TEST_TOKEN;
-                self::$from_number = TWILIO_FROM_TEST_NUMBER;
+                self::$from_number = TWILIO_TEST_FROM_NUMBER;
                 break;
             default:
                 Halt('QuickDRY Error: invalid twilio mode');
@@ -71,44 +76,59 @@ class Twilio extends SafeClass
     }
 
 
-
+    /**
+     * @param $mobile_number
+     * @param $text
+     * @param bool $allow
+     * @return TwilioLog|null
+     * @throws \Twilio\Exceptions\ConfigurationException
+     */
     public static function SendSMS($mobile_number, $text, $allow = false)
     {
-        if($allow || TwilioDNC::CheckNumber($mobile_number)) {
-
-            $client = new Services_Twilio(self::$sid, self::$token);
-
-            try {
-                /* @var $res Services_Twilio_Rest_SmsMessage */
-                $res = $client->account->sms_messages->create(
-                    self::$from_number, $mobile_number, $text
-                );
-                $res->client->ClearCreds();
-
-                self::Log($mobile_number, 'SendSMS', [$mobile_number, $text], $res, true);
-
-                return $res->sid;
-            } catch (Exception $e) {
-                self::Log($mobile_number, 'SendSMS', [$mobile_number, $text], $e, false);
-            }
-            return true;
+        if (!$allow && !TwilioDNC::CheckNumber($mobile_number)) {
+            return null;
         }
-        return false;
-    }
-
-    public static function TestTwilio()
-    {
-        $client = new Services_Twilio(self::$sid, self::$token);
 
         try {
-            $number = $client->account->incoming_phone_numbers->create(array(
-                "VoiceUrl" => "http://demo.twilio.com/docs/voice.xml",
-                "PhoneNumber" => "+15005550006"
-            ));
-            return $number->sid;
-        } catch(Exception $e) {
-            Halt($e);
+            $client = new Client(self::$sid, self::$token);
+
+            /* @var $res Services_Twilio_Rest_SmsMessage */
+            $res = $client->account->sms_messages->create(
+                self::$from_number, $mobile_number, $text
+            );
+            $res->client->ClearCreds();
+
+            return self::Log($mobile_number, 'SendSMS', [$mobile_number, $text], $res, true);
+
+        } catch (Exception $e) {
+            return self::Log($mobile_number, 'SendSMS', [$mobile_number, $text], $e, false);
         }
-        return null;
+    }
+
+    /**
+     * @param $to_number
+     * @param $xml_url
+     * @return TwilioLog
+     */
+    public static function CallNumber($to_number, $xml_url, $allow = false)
+    {
+        if (!$allow && !TwilioDNC::CheckNumber($to_number)) {
+            return null;
+        }
+
+        try {
+            //  demo url: http://demo.twilio.com/docs/voice.xml
+            $client = new Client(self::$sid, self::$token);
+            $res = $client->account->calls->create(
+                $to_number,
+                self::$from_number,
+                [
+                    "url" => $xml_url
+                ]
+            );
+            return self::Log($to_number, 'CallNumber', [$to_number, $xml_url], $res, true);
+        } catch (Exception $e) {
+            return self::Log($to_number, 'CallNumber', [$to_number, $xml_url], $e, false);
+        }
     }
 }

@@ -401,6 +401,10 @@ class Strings extends SafeClass
      */
     public static function Currency($val, $dollar_sign = true, $sig_figs = 2)
     {
+        if(!is_numeric($val)) {
+            return '--';
+        }
+
         if ($val * 1.0 == 0) {
             return '--';
         }

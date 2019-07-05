@@ -1,4 +1,8 @@
 <?php
+// composer require twilio/sdk
+// https://support.twilio.com/hc/en-us/articles/235279367-Twilio-PHP-helper-library-SSL-certificate-problem-on-Windows
+
+
 function autoloader_QuickDRY_Twilio($class)
 {
     $class_map = [
@@ -27,8 +31,6 @@ function autoloader_QuickDRY_Twilio($class)
 
 spl_autoload_register('autoloader_QuickDRY_Twilio');
 
-
-require 'twilio/vendor/Twilio.php';
 
 
 
