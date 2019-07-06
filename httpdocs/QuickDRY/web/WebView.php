@@ -210,7 +210,7 @@ Metrics::Stop('View');
 
 $Web->HTML = ob_get_clean();
 
-if ($Web->RenderPDF) {
+if ($Web->RenderPDF && !$Web->Request->show_html) {
 
     ob_start();
     if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
