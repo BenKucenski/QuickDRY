@@ -138,6 +138,7 @@ function autoloader_QuickDRY($class)
         'Meta' => 'web/Meta.php',
         'HTTPStatus' => 'web/HTTPStatus.php',
         'Web' => 'web/Web.php',
+        'PDFMargins' => 'web/PDFMargins.php',
 
         'FormClass' => 'form/FormClass.php',
         'GenderClass' => 'form/GenderClass.php',
