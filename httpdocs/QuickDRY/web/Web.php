@@ -26,13 +26,16 @@
  * @property PDFMargins PDFMargins
  * @property string PDFHeader
  * @property string PDFFooter
+ * @property string PDFHash
  * @property string PDFPostRedirect
+ * @property string PDFPostFunction
+ * @property string PDFRootDir
  * @property string DOCXPageOrientation
  * @property string DOCXFileName
  * @property UserClass CurrentUser
  * @property string DefaultURL
  */
-class Web
+class Web extends SafeClass
 {
     public $ControllerFile;
     public $ViewFile;
@@ -64,6 +67,11 @@ class Web
     public $PDFFooter;
     public $PDFSimplePageNumbers;
     public $PDFMargins;
+    public $PDFPostFunction;
+    public $PDFHash;
+    public $PDFRootDir;
+
+    public $HTML;
 
     public $RenderDOCX;
     public $DOCXPageOrientation;

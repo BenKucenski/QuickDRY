@@ -14,13 +14,17 @@ $Web->HTML = str_replace('href="/', 'href="' . BASE_URL . '/', $Web->HTML);
 $Web->HTML = str_replace('src=\'/', 'src=\'' . BASE_URL . '/', $Web->HTML);
 $Web->HTML = str_replace('href=\'/', 'href=\'' . BASE_URL . '/', $Web->HTML);
 
-$hash = md5($Web->HTML);
+$Web->PDFHash = md5($Web->HTML);
 
-if (!is_dir(DOC_ROOT_PATH . '/temp/')) {
-    mkdir(DOC_ROOT_PATH . '/temp/');
+if(!$Web->PDFRootDir) {
+    $Web->PDFRootDir = DOC_ROOT_PATH . '/temp';
 }
 
-$html_file = DOC_ROOT_PATH . '/temp/' . $hash . '.html';
+if (!is_dir($Web->PDFRootDir)) {
+    mkdir($Web->PDFRootDir);
+}
+
+$html_file = $Web->PDFRootDir . '/' . $Web->PDFHash . '.html';
 $FileName = $html_file . '.pdf';
 
 if(defined('PDF_API')) {
@@ -85,6 +89,10 @@ if(defined('PDF_API')) {
 
     if (!file_exists($FileName)) {
         Debug::Halt(['file not created', 'file' => $FileName, 'cmd' => $cmd, 'output' => $output]);
+    }
+
+    if($Web->PDFPostFunction) {
+        call_user_func($Web->PDFPostFunction);
     }
 
     if ($Web->PDFPostRedirect) {

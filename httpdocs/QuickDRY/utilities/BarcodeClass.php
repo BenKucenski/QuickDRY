@@ -9,44 +9,45 @@ class BarcodeClass
      * @param $width
      * @param $height
      * @param $code
-     *
+     * @param $font_size
      * @return resource
      */
-    public static function Generate($width, $height, $code)
-	{
-		global $Web;
-
-		$root = DOC_ROOT_PATH;
-		if(substr($root,-8) !== 'barcode/')
-			$root .= 'barcode/';
-
-		$number = strtoupper(base64_decode($code));
-
-		$barcode_font = $root . 'FREE3OF9.TTF';
-
-		if($Web->Request->d) {
-            Halt($barcode_font);
+    public static function Generate($width, $height, $code, $font_size = null, $debug = false)
+    {
+        $root = BASEDIR;
+        if (substr($root, -8) !== 'barcode/') {
+            $root .= 'barcode/';
         }
 
-		if(!is_dir($root . $width))
-			mkdir($root . $width);
+        $number = strtoupper(base64_decode($code));
 
-		if(!is_dir($root . $width . '/' . $height))
-			mkdir($root . $width . '/' . $height);
+        $barcode_font = $root . 'FREE3OF9.TTF';
 
-		$font_size = $width / (strlen($number)/1.9);
+        if ($debug) {
+            exit($barcode_font);
+        }
 
-		$img = imagecreate($width, $height);
+        if (!is_dir($root . $width)) {
+            mkdir($root . $width);
+        }
 
-		// First call to imagecolorallocate is the background color
-		//$white = imagecolorallocate($img, 255, 255, 255);
-		$black = imagecolorallocate($img, 0, 0, 0);
+        if (!is_dir($root . $width . '/' . $height)) {
+            mkdir($root . $width . '/' . $height);
+        }
 
-		// Reference for the imagettftext() function
-		// imagettftext($img, $fontsize, $angle, $xpos, $ypos, $color, $fontfile, $text);
-		imagettftext($img, $font_size, 0, 0, $font_size, $black, $barcode_font, $number);
+        $font_size = $font_size ? $font_size : $width / (strlen($number) / 1.9);
 
-		imagepng($img, $root . $width . '/' . $height . '/' . $code . '.png');
-		return $img;
-	}
+        $img = imagecreate($width, $height);
+        // First call to imagecolorallocate is the background color
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $black = imagecolorallocate($img, 0, 0, 0);
+        imagefill($img, 0, 0, $white);
+
+        // Reference for the imagettftext() function
+        // imagettftext($img, $fontsize, $angle, $xpos, $ypos, $color, $fontfile, $text);
+        imagettftext($img, $font_size, 0, 0, $font_size, $black, $barcode_font, $number);
+
+        imagepng($img, $root . $width . '/' . $height . '/' . $code . '.png');
+        return $img;
+    }
 }

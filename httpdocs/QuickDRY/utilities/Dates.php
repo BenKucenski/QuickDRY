@@ -33,7 +33,7 @@ class Dates extends SafeClass
         $min_date = strtotime(Dates::Datestamp($min_date));
         $max_date = strtotime(Dates::Datestamp($max_date));
 
-        if($max_date < $min_date) {
+        if ($max_date < $min_date) {
             $a = $min_date;
             $min_date = $max_date;
             $max_date = $a;
@@ -285,7 +285,7 @@ class Dates extends SafeClass
         if (!$time) $time = time();
 
         if (!is_numeric($time)) $time = strtotime($time);
-        if($offset < 0) {
+        if ($offset < 0) {
             $time = strtotime($offset . ' hour', $time);
         } else {
             $time = strtotime('+' . $offset . ' hour', $time);
@@ -354,16 +354,17 @@ class Dates extends SafeClass
      */
     public static function SQLDateTimeToString($dateTime)
     {
-        if(!is_object($dateTime)) {
+        if (!is_object($dateTime)) {
             try {
                 $dateTime = new DateTime($dateTime);
-            } catch(Exception $ex) {
+            } catch (Exception $ex) {
                 Halt($ex);
             }
         }
         $t = $dateTime->format('Y-m-d H:i:s.u');
         return substr($t, 0, strlen($t) - 3);
     }
+
     /**
      * @param int $time
      *
@@ -371,7 +372,7 @@ class Dates extends SafeClass
      */
     public static function Timestamp($date = null, $null = null, $format = 'Y-m-d H:i:s')
     {
-        if(!$format) {
+        if (!$format) {
             $format = 'Y-m-d H:i:s';
         }
         return self::Datestamp($date, $null, $format);
@@ -464,15 +465,15 @@ class Dates extends SafeClass
      */
     public static function Datestamp($date = null, $null = null, $format = 'Y-m-d', $offset = null)
     {
-        if(!$format) {
+        if (!$format) {
             $format = 'Y-m-d';
         }
 
-        if(is_null($null) && is_null($date)) {
+        if (is_null($null) && is_null($date)) {
             $date = time();
         }
         $date = self::DateToInt($date, $null);
-        if($date === $null) {
+        if ($date === $null) {
             return $null;
         }
 
@@ -480,7 +481,7 @@ class Dates extends SafeClass
             return $null;
         }
 
-        if($offset) {
+        if ($offset) {
             $date += $offset * 3600;
         }
         return date($format, $date);
@@ -569,6 +570,14 @@ class Dates extends SafeClass
 
         $res = $dt->format('Y-m-d H:i:s');
         return $res;
+    }
+
+    public static function IsWeekend($date)
+    {
+        if (!is_numeric($date)) {
+            $date = strtotime($date);
+        }
+        return date('N', $date) >= 6;
     }
 }
 

@@ -1,4 +1,8 @@
 <?php
+function IsCLI()
+{
+    return (php_sapi_name() === 'cli');
+}
 
 /**
  * @param $arr
