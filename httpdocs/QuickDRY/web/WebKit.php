@@ -39,7 +39,18 @@ if(defined('PDF_API')) {
     $params[] = '--enable-javascript';
     $params[] = '--disable-smart-shrinking';
     $params[] = '--no-stop-slow-scripts';
-    $params[] = '--page-size ' . ($Web->PDFPageSize ? $Web->PDFPageSize : PDF_PAGE_SIZE_LETTER);
+
+    switch($Web->PDFPageSize) {
+        case 'brotherql570':
+            $params[] = ' --page-width 3.5in --page-height 1.13in --margin-bottom 0 --margin-top 0 --margin-left 0 --margin-right 0';
+            break;
+        case 'wl-600':
+            $params[] = ' --page-width 8.5in --page-height 11.0in --margin-bottom 0.5in --margin-top 0.5in --margin-left 0.18in --margin-right 0.18in';
+            break;
+        default:
+            $params[] = '--page-size ' . ($Web->PDFPageSize ? $Web->PDFPageSize : PDF_PAGE_SIZE_LETTER);
+    }
+
     if($Web->PDFMargins) {
         $params[] = '-L ' . $Web->PDFMargins->Left . $Web->PDFMargins->Units . ' -R ' . $Web->PDFMargins->Right . $Web->PDFMargins->Units . ' -T ' . $Web->PDFMargins->Top . $Web->PDFMargins->Units . ' -B ' . $Web->PDFMargins->Bottom . $Web->PDFMargins->Units;
     }
