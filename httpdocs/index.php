@@ -5,13 +5,8 @@ if (isset($_HOST)) {
 
 require_once 'settings.php';
 
-require_once 'QuickDRYInstance/Defines.php';
-
+require_once 'QuickDRYInstance/QuickDRYInstance.php';
 require_once 'QuickDRY/QuickDRY.php';
-
-
-require_once 'QuickDRYInstance/ChangeLogHandler.php';
-require_once 'QuickDRYInstance/UserManager.php';
 
 require_once 'common_modules.php';
 
