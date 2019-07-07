@@ -133,20 +133,12 @@ function autoloader_QuickDRY($class)
         'Request' => 'web/Request.php',
         'Server' => 'web/Server.php',
         'BrowserOS' => 'web/BrowserOS.php',
-        //'FileClass' => 'web/FileClass.php',
-        // 'UserClass' => 'web/UserClass.php',
         'Meta' => 'web/Meta.php',
         'HTTPStatus' => 'web/HTTPStatus.php',
         'Web' => 'web/Web.php',
         'PDFMargins' => 'web/PDFMargins.php',
 
-        'FormClass' => 'form/FormClass.php',
-        'GenderClass' => 'form/GenderClass.php',
-        'MonthClass' => 'form/MonthClass.php',
-        'PerPageClass' => 'form/PerPageClass.php',
-        //'RoleClass' => 'form/RoleClass.php',
-        'StatesClass' => 'form/StatesClass.php',
-        'YesNoClass' => 'form/YesNoClass.php',
+        'FormClass' => 'web/FormClass.php',
 
         'Debt' => 'math/Debt.php',
         'PrincipalInterest' => 'math/PrincipalInterest.php',
@@ -187,9 +179,16 @@ require_once 'utilities/helpers.php';
 require_once 'utilities/FineDiff.php';
 require_once 'utilities/phpmailer.php';
 
-// require_once 'connectors/MySQL.php';
-require_once 'connectors/MSSQL.php';
-require_once 'connectors/MSAccess.php';
+if(!class_exists('MySQL')) {
+    require_once 'connectors/MySQL.php';
+}
+if(!class_exists('MSSQL')) {
+    require_once 'connectors/MSSQL.php';
+}
+if(!class_exists('MSAccess')) {
+    require_once 'connectors/MSAccess.php';
+}
+
 require_once 'connectors/elastic.php';
 require_once 'connectors/twilio.php';
 
