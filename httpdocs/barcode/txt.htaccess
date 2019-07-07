@@ -1,0 +1,7 @@
+AddDefaultCharset UTF-8
+
+php_value upload_max_filesize 8M
+
+RewriteEngine on
+RewriteBase /barcode
+RewriteRule (\d+)/(\d+)/(.+)\.png$ index.php?w=$1&h=$2&c=$3 [NC]
