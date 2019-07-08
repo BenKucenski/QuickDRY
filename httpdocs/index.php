@@ -28,9 +28,6 @@ if (defined('ROUTE_REQUESTS') && ROUTE_REQUESTS) {
 
 if ($Web->Server->REQUEST_URI) {
 
-    require_once 'QuickDRYInstance/Menu.php';
-    require_once 'QuickDRYInstance/MenuAccess.php';
-
     $Web->InitMenu();
 
     require_once 'QuickDRY/web/WebView.php';
