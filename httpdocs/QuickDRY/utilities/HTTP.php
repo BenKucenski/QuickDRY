@@ -50,9 +50,17 @@ class HTTP extends SafeClass
     /**
      * @param $err
      */
-    public static function Redirect($url)
+    public static function Redirect($url = null)
     {
-        header('location: ' . $url);
+        if (is_null($url)) {
+            if (isset($_SERVER['HTTP_REFERER'])) {
+                header('location: ' . $_SERVER['HTTP_REFERER']);
+            } else {
+                header('location: /');
+            }
+        } else {
+            header('location: ' . $url);
+        }
         exit();
     }
 
