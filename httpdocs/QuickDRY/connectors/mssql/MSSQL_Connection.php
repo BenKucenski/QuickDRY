@@ -264,7 +264,11 @@ class MSSQL_Connection
                 while (sqlsrv_next_result($result)) {
                     $more[$i] = [];
                     while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-                        $more[$i][] = is_null($map_function) ? $r : call_user_func($map_function, $r);
+                        if(is_null($map_function)) {
+                            $more[$i][] = $r;
+                        } else {
+                            $list[] = call_user_func($map_function, $r);
+                        }
                     }
                     $i++;
                 }
