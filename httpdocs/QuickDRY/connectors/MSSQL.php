@@ -105,9 +105,12 @@ class MSSQL extends SafeClass
                         return $params[$result[1]];
                     }
                     return MSSQL::EscapeString($params[$result[1]]);
+                } else {
+                    // in order to allow more advanced queries that Declare Variables, we just need to ignore @Var if it's not in the passed in parameters
+                    // SQL Server will return an error if there really is one
+                    return '@' . $result[1];
                 }
-
-                throw new Exception(print_r([json_encode($params, JSON_PRETTY_PRINT), $count, $result, $sql], true) . ' does not have a matching parameter (ms_escape_query).');
+                //throw new Exception(print_r([json_encode($params, JSON_PRETTY_PRINT), $count, $result, $sql], true) . ' does not have a matching parameter (ms_escape_query).');
             }
             return '';
         }, $sql);
