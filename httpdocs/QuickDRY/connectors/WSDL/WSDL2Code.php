@@ -95,8 +95,7 @@ class ' . $ClassName . 'Base extends APIRequest
 
     private function GetFunctions($URL)
     {
-        $res = CURL::Get($URL);
-        $xml = $res->Body;
+        $xml = file_get_contents($URL);
 
         $services =  Strings::XMLtoArray($xml);
 

@@ -190,6 +190,7 @@ if(!class_exists('MSAccess')) {
 }
 
 require_once 'connectors/elastic.php';
+require_once 'connectors/WSDL.php';
 require_once 'connectors/twilio.php';
 
 Metrics::StartGlobal();

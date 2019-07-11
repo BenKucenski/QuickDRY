@@ -5,7 +5,7 @@ class MSSQL_Queue
     private $_sql = [];
     private $strlen = 0;
     private $MSSQL_CLASS;
-    private $exit_on_error;
+    public $exit_on_error;
     private $queue_limit;
 
     public function __construct($MSSQL_CLASS = 'MSSQL_A', $exit_on_error = true, $queue_limit = 500)
@@ -43,8 +43,7 @@ SET QUOTED_IDENTIFIER ON
         $res = $class::Execute($sql, null, true);
         Metrics::Toggle('MSSQL_Queue::Flush');
         if ($res['error'] && $this->exit_on_error) {
-            Log::Insert($res, true);
-            echo $res['query'];
+            Log::Insert($res['error'], true);
             exit(1);
         }
 

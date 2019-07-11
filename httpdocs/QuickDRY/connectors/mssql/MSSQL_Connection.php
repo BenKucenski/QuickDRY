@@ -484,7 +484,7 @@ class MSSQL_Connection
 
                 foreach($output as $i => $line) {
                     if(preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
-                        CleanHalt([$output[$i],$output[$i + 1], $fname]);
+                        $returnval['error'][$i] = [$output[$i],$output[$i + 1], $fname];
                     }
                 }
 
