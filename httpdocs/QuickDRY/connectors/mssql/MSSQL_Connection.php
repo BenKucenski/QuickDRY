@@ -482,9 +482,10 @@ class MSSQL_Connection
                     Log::Insert($output, true);
                 }
 
+                $returnval['error'] = [];
                 foreach($output as $i => $line) {
-                    if(preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
-                        $returnval['error'][$i] = [$output[$i],$output[$i + 1], $fname];
+                    if (preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
+                        $returnval['error'][$i] = [$output[$i], $output[$i + 1], $fname];
                     }
                 }
 
