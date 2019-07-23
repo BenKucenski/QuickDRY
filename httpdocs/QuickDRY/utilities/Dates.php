@@ -110,6 +110,7 @@ class Dates extends SafeClass
     {
         // http://webdesign.anmari.com/1956/calculate-date-from-day-of-year-in-php/
 
+        $DayInYear = floor($DayInYear);
         $d = new DateTime($year . '-01-01');
         date_modify($d, '+' . ($DayInYear - 1) . ' days');
         return self::Datestamp($d->getTimestamp());
