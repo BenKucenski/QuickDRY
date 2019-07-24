@@ -404,26 +404,25 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
 {
     public static $_primary = [\'' . implode('\',\'', $primary) . '\'];
     public static $_unique = [
-    ';
+';
 
         foreach ($unique as $key => $columns) {
-            $code .= '        [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+            $code .= '          [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
         }
 
 
-        $code .= '
-        ];
+            $code .= '
+    ];
 
     public static $_indexes = [
-    ';
+';
 
-        foreach ($indexes as $key => $columns) {
-            $code .= '        [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
-        }
+            foreach ($indexes as $key => $columns) {
+                $code .= '        \'' . $key . '\' => [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+            }
 
-
-        $code .= '
-        ];
+            $code .= '
+    ];
 
     protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
     protected static $table = \'' . $table_name . '\';
