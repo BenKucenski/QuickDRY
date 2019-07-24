@@ -145,4 +145,21 @@ class Mailer extends SafeClass
 
         return 1;
     }
+
+    public static function Template($filename, $values)
+    {
+        if(!file_exists($filename)) {
+            Halt(['error'=>'File does not exist', $filename]);
+        }
+        $html = file_get_contents($filename);
+        foreach($values as $key => $value) {
+            $html = str_ireplace('##' . $key . '##',$value, $html);
+        }
+        $matches = [];
+        preg_match_all('/\#\#(.*?)\#\#/si', $html, $matches);
+        if(sizeof($matches[1])) {
+            CleanHalt(['Error'=>'HTML still contains variables', $matches[1], $html]);
+        }
+        return $html;
+    }
 }
