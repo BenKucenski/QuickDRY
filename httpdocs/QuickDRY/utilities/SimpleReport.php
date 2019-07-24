@@ -11,10 +11,10 @@ class SimpleReport extends SafeClass
      */
     public function __construct($row = null)
     {
-        if($row) {
+        if ($row) {
             $this->HaltOnError(false);
             $this->FromRow($row);
-            if($this->HasMissingProperties()) {
+            if ($this->HasMissingProperties()) {
                 Halt($this->GetMissingPropeties());
             }
             $this->HaltOnError(true);
@@ -33,7 +33,7 @@ class SimpleReport extends SafeClass
         $se->Report = $items;
         $se->Title = $class;
         $se->Columns = [];
-        foreach($cols as $col) {
+        foreach ($cols as $col) {
             $se->Columns[$col] = new SimpleExcel_Column(null, $col);
         }
         return $se;
@@ -43,33 +43,42 @@ class SimpleReport extends SafeClass
      * @param SimpleReport[] $items
      * @return string
      */
-    public static function ToHTML(&$items)
+    public static function ToHTML(&$items, $class = '', $style = '', $numbered = false, $limit = 0)
     {
-        $class = get_called_class();
-        $cols = array_keys(get_class_vars($class));
+        $obj_class = get_called_class();
+        $cols = array_keys(get_class_vars($obj_class));
         $se = new SimpleExcel();
         $se->Report = $items;
-        $se->Title = $class;
+        $se->Title = $obj_class;
         $se->Columns = [];
-        foreach($cols as $col) {
+        foreach ($cols as $col) {
             $se->Columns[$col] = new SimpleExcel_Column(null, $col);
         }
 
-        $html = '<table><thead><tr>';
-        foreach($se->Columns as $col => $settings) {
-            $html .='<th>' . $col . '</th>';
+        $html = '<table class="' . $class . '" style="' . $style . '"><thead><tr>';
+        if ($numbered) {
+            $html .= '<th></th>';
         }
-        $html .='</tr></thead><tbody>';
-        foreach($se->Report as $item) {
-            $html .='<tr>';
-            foreach($se->Columns as $col => $settings) {
-                if(is_object($item->$col)) {
+        foreach ($se->Columns as $col => $settings) {
+            $html .= '<th>' . $col . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        foreach ($se->Report as $i => $item) {
+            if($limit && $i >= $limit) {
+                break;
+            }
+            $html .= '<tr>';
+            if ($numbered) {
+                $html .= '<td>' . ($i + 1) . '</td>';
+            }
+            foreach ($se->Columns as $col => $settings) {
+                if (is_object($item->$col)) {
                     $html .= '<td>' . Dates::Datestamp($item->$col) . '</td>';
                 } else {
                     $html .= '<td>' . ($item->$col) . '</td>';
                 }
             }
-            $html .='</tr>';
+            $html .= '</tr>';
         }
 
         return $html . '</tbody></table>';
