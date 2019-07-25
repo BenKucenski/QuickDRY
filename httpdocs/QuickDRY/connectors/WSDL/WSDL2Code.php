@@ -63,7 +63,7 @@ class WSDL2Code extends SafeClass
 
         $res->Post();
         $xml = $res->raw;
-        $a = Strings::XMLtoArray($xml);
+        $a = Strings::SimpleXMLToArray($xml);
         return [
             ' . implode(",\r\n            ", $result_array) . '
         ];
@@ -97,7 +97,7 @@ class ' . $ClassName . 'Base extends APIRequest
     {
         $xml = file_get_contents($URL);
 
-        $services =  Strings::XMLtoArray($xml);
+        $services =  Strings::SimpleXMLToArray($xml);
 
         $this->TargetNamespace = $services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['TARGETNAMESPACE'];
         $this->Functions = [];

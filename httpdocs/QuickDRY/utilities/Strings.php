@@ -155,6 +155,7 @@ class Strings extends SafeClass
      */
     public static function XMLtoArray($XML)
     {
+        Halt('Deprecated');
         $xml_array = '';
         $multi_key2 = [];
         $xml_parser = xml_parser_create();
