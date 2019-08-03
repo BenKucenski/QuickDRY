@@ -5,87 +5,100 @@
  */
 class MSAccess
 {
-	private $conn = null;
-
     /**
-     * @param $file
-     * @param string $user
-     * @param string $pass
+     * @param $data
+     *
+     * @return string
      */
-    public function __construct($file, $user = '', $pass = '', $is_dsn = false)
+    public static function EscapeString($data)
     {
-        if(!defined('MS_ACCESS_DRIVER')) {
-            define('MS_ACCESS_DRIVER', 'odbc:Driver={Microsoft Access Driver (*.mdb)}');
+        if (is_array($data)) {
+            Halt($data);
         }
-		// define('MS_ACCESS_DRIVER','odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)}');
+        if (is_numeric($data)) return "'" . $data . "'";
 
-        // https://www.freethinkingdesign.co.uk/blog/accessing-access-db-file-accdb-windows-64bit-via-php-using-odbc/ -- read this on 64 bit php
-        // https://www.microsoft.com/en-us/download/details.aspx?id=23734 -- install this if you have 64 bit php
-
-        // https://support.microsoft.com/en-us/help/295297/prb-error-message-0x80004005-general-error-unable-to-open-registry-key
-        $str = [];
-        if(!$is_dsn) {
-            $str[] = MS_ACCESS_DRIVER;
-            $str[] = 'Dbq=' . $file;
-        } else {
-            $str[] = $file;
+        if ($data instanceof DateTime) {
+            $data = Dates::Timestamp($data);
         }
 
-        if($user) {
-            $str[] = 'Uid=' . $user;
+        $non_displayables = [
+            '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
+            '/%1[0-9a-f]/',             // url encoded 16-31
+            '/[\x00-\x08]/',            // 00-08
+            '/\x0b/',                   // 11
+            '/\x0c/',                   // 12
+            '/[\x0e-\x1f]/'             // 14-31
+        ];
+        foreach ($non_displayables as $regex) {
+            $data = preg_replace($regex, '', $data);
+        }
+        $data = str_replace("'", "''", $data);
+        if (strcasecmp($data, 'null') == 0) {
+            return 'null';
         }
 
-        if($pass) {
-            $str[] = 'PWD=' . $pass;
-        }
+        $data = str_replace('{{{', '', $data);
+        $data = str_replace('}}}', '', $data);
 
-	try {
-        $this->conn = new PDO(implode(';', $str));
-        } catch(Exception $ex) {
-        	Halt($ex);
-        }
+        return "'" . $data . "'";
     }
-
-	function Disconnect()
-	{
-		if(!is_null($this->conn))
-		{
-			$this->conn = null;
-		}
-	}
 
     /**
      * @param $sql
-     * @param array $params
-     * @return array
+     * @param $params
+     *
+     * @return mixed
      */
-    function Query($sql, $params = [])
-	{
-		$returnval = ['error' => false, 'numrows' => 0, 'data' => []];
-		$returnval['sql'] = $sql;
-		$returnval['params'] = $params;
-		
-		try {
-			if(!$this->conn)
-				exit('database failure');
-			$stmt = $this->conn->prepare($sql);
-			if(!is_object($stmt)) {
-				throw new exception('Failure to Query');
-			}
-			$stmt->execute($params);
-		}
-		catch (Exception $e) {
-			Debug::Halt($e);
-		}
-		$returnval['data'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		$returnval['numrows'] = count($returnval['data']);
-		
-		$stmt->closeCursor();
-		$stmt = null;
-		
-		
-		return $returnval;
-	}
+    public static function EscapeQuery($sql, $params, $test =  false)
+    {
+        $pattern = '/@([\w\d]*)?/si';
+        if($test) {
+            $matches = [];
+            preg_match_all($pattern, $sql, $matches);
+            CleanHalt($matches);
+        }
+        $count = 0;
+        return preg_replace_callback($pattern, function ($result)
+        use ($params, &$count, $sql) {
+            if (isset($result[1])) {
+                if (isset($params[$count])) {
+                    $count++;
+                    switch ($result[1]) {
+                        case 'nullstring':
+                            if (!$params[$count - 1] || $params[$count - 1] === 'null') {
+                                return 'null';
+                            }
+                            return self::EscapeString($params[$count - 1]);
+
+                        case 'nullnumeric':
+                            if (!$params[$count - 1] || $params[$count - 1] === 'null') {
+                                return 'null';
+                            }
+                            return $params[$count - 1] * 1.0;
+
+                        case 'nq':
+                            return $params[$count - 1];
+
+                        default:
+                            return self::EscapeString($params[$count - 1]);
+                    }
+                }
+
+                if (isset($params[$result[1]])) {
+                    if(Strings::EndsWith($result[1],'_NQ')) {
+                        return $params[$result[1]];
+                    }
+                    return self::EscapeString($params[$result[1]]);
+                } else {
+                    // in order to allow more advanced queries that Declare Variables, we just need to ignore @Var if it's not in the passed in parameters
+                    // SQL Server will return an error if there really is one
+                    return '@' . $result[1];
+                }
+                //throw new Exception(print_r([json_encode($params, JSON_PRETTY_PRINT), $count, $result, $sql], true) . ' does not have a matching parameter (ms_escape_query).');
+            }
+            return '';
+        }, $sql);
+    }
 }
 
 function autoloader_QuickDRY_ACCESS($class)
@@ -94,6 +107,7 @@ function autoloader_QuickDRY_ACCESS($class)
         'ACCESS_Connection' => 'access/ACCESS_Connection.php',
         'ACCESS_A' => 'access/ACCESS_A.php',
         'ACCESS_B' => 'access/ACCESS_B.php',
+        'ACCESS_X' => 'access/ACCESS_X.php',
         'ACCESS_CodeGen' => 'access/ACCESS_CodeGen.php',
         'ACCESS_Core' => 'access/ACCESS_Core.php',
         'ACCESS_TableColumn' => 'access/ACCESS_TableColumn.php',

@@ -7,6 +7,82 @@ class MSSQL_Core extends SQL_Base
     protected $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
     /**
+     * @param $database
+     * @param $table_name
+     * @return MSSQL_TableColumn[]
+     */
+    public static function _GetTableColumns($database, $table_name)
+    {
+        $sql = '
+			SELECT
+				*
+			FROM
+				['  . $database . '].INFORMATION_SCHEMA.COLUMNS
+			WHERE
+				TABLE_NAME=@
+		';
+        $res = static::Query($sql, [$table_name]);
+        /* @var $list MSSQL_TableColumn[] */
+        $list = [];
+        foreach($res['data'] as $row)
+        {
+            $t = new MSSQL_TableColumn();
+            $t->FromRow($row);
+            $list[] = $t;
+        }
+        return $list;
+    }
+
+    public static function _GetTables($database)
+    {
+        $sql = 'SELECT * FROM ['  . $database . '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
+        $res = static::Query($sql);
+        $list = [];
+        if($res['error']) {
+            return [];
+        }
+        if(!sizeof($res['data'])) {
+            return [];
+        }
+        foreach($res['data'] as $row)
+        {
+            $t = $row['TABLE_NAME'];
+            if(substr($t,0,strlen('TEMP')) === 'TEMP') {
+                continue;
+            }
+
+            $list[] = $t;
+        }
+        return $list;
+    }
+
+    public static function _GetDatabases($exclude = null)
+    {
+        $sql = '
+          SELECT name FROM sys.databases
+        ';
+        $res = static::Query($sql);
+        if($res['error']) {
+            Halt($res);
+        }
+        $list = [];
+        foreach($res['data'] as $row) {
+            if(stristr($row['name'],'$') !== false) {
+                continue;
+            }
+            if($exclude) {
+                foreach($exclude as $ex) {
+                    if (strcasecmp($row['name'], $ex) == 0) {
+                        continue;
+                    }
+                }
+            }
+            $list[] = $row['name'];
+        }
+        return $list;
+    }
+
+    /**
      * @return array
      */
     public static function GetTables()
@@ -121,6 +197,12 @@ class MSSQL_Core extends SQL_Base
         return null;
     }
 
+    /**
+     * @param $sql
+     * @param $params
+     * @param $map_function
+     * @return mixed
+     */
     public static function QueryMap($sql, $params, $map_function)
     {
         static::_connect();

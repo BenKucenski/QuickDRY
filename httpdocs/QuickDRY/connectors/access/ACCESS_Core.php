@@ -7,6 +7,35 @@ class ACCESS_Core extends SQL_Base
     protected $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
     /**
+     * @param $database
+     * @param $table_name
+     * @return ACCESS_TableColumn[]
+     */
+    public static function _GetTableColumns($table_name)
+    {
+        //there is no SQL solution for this, so just grab the first row and get the column names from that
+        $sql = '
+			SELECT
+				TOP 1
+				*
+			FROM
+				[' . $table_name . ']
+		';
+        $res = static::Query($sql, [$table_name]);
+        /* @var $list ACCESS_TableColumn[] */
+        $list = [];
+        foreach ($res['data'] as $row) {
+            foreach ($row as $k => $v) {
+                $col = ['COLUMN_NAME' => $k];
+                $t = new ACCESS_TableColumn();
+                $t->FromRow($col);
+                $list[] = $t;
+            }
+        }
+        return $list;
+    }
+
+    /**
      * @return array
      */
     public static function GetTables()
@@ -113,6 +142,23 @@ class ACCESS_Core extends SQL_Base
             Debug::Halt($ex);
         }
         return null;
+    }
+
+    /**
+     * @param $sql
+     * @param $params
+     * @param $map_function
+     * @return mixed
+     */
+    public static function QueryMap($sql, $params, $map_function)
+    {
+        static::_connect();
+
+        if (isset(static::$database)) {
+            static::$connection->SetDatabase(static::$database);
+        }
+
+        return static::$connection->Query($sql, $params, $map_function);
     }
 
     /**

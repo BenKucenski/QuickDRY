@@ -16,7 +16,6 @@ class ACCESS_TableColumn
      */
     public function FromRow(&$row)
     {
-        Halt($row);
         foreach($row as $key => $value)
         {
             switch($key)

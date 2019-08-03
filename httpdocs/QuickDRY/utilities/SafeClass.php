@@ -42,7 +42,7 @@ class SafeClass
         if ($this->_HaltOnError) {
             Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
         } else {
-            $this->_MissingProperties[] = 'public $' . $name . ';';
+            $this->_MissingProperties[$name] = 'public $' . $name . ';';
         }
         return null;
     }
@@ -57,7 +57,7 @@ class SafeClass
         if ($this->_HaltOnError) {
             Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
         } else {
-            $this->_MissingProperties[] = 'public $' . $name . ';';
+            $this->_MissingProperties[$name] = 'public $' . $name . ';';
         }
         return $value;
     }

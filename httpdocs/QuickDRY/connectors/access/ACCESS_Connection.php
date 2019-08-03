@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Class ACCESS_Connection
  */
 class ACCESS_Connection
 {
     private $conn = null;
+
 
     /**
      * @param $file
@@ -66,13 +68,14 @@ class ACCESS_Connection
      */
     function Query($sql, $params = [], $map_function = null)
     {
-        $returnval = ['numrows' => 0, 'data' => []];
+        $returnval = ['numrows' => 0, 'data' => [], 'error' => ''];
         $returnval['sql'] = $sql;
         $returnval['params'] = $params;
 
         try {
-            if (!$this->conn)
+            if (!$this->conn) {
                 exit('database failure');
+            }
             $stmt = $this->conn->prepare($sql);
             if (!is_object($stmt)) {
                 throw new exception('Failure to Query');
@@ -82,14 +85,51 @@ class ACCESS_Connection
             Debug::Halt($e);
         }
         $returnval['data'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if($map_function) {
-            $list =[];
-            foreach($returnval['data'] as $r) {
-                 $list[] = call_user_func($map_function, $r);
+        if ($map_function) {
+            $list = [];
+            foreach ($returnval['data'] as $r) {
+                $list[] = call_user_func($map_function, $r);
             }
             return $list;
         }
         $returnval['numrows'] = count($returnval['data']);
+        if($stmt->errorCode() != '00000') {
+            $returnval['error'] = $stmt->errorCode() . ': ' . implode(', ', $stmt->errorInfo());
+        }
+
+        $stmt->closeCursor();
+        $stmt = null;
+
+
+        return $returnval;
+    }
+
+    /**
+     * @param $sql
+     * @param array $params
+     * @return array
+     */
+    function Execute($sql, $params = [], $map_function = null)
+    {
+        $returnval = ['numrows' => 0, 'data' => [], 'error' => ''];
+        $returnval['sql'] = $sql;
+        $returnval['params'] = $params;
+
+        try {
+            if (!$this->conn) {
+                exit('database failure');
+            }
+            $stmt = $this->conn->prepare($sql);
+            if (!is_object($stmt)) {
+                throw new exception('Failure to Query');
+            }
+            $stmt->execute($params);
+        } catch (Exception $e) {
+            Debug::Halt($e);
+        }
+        if($stmt->errorCode() && $stmt->errorCode() != '00000') {
+            $returnval['error'] = $stmt->errorCode() . ': ' . implode(', ', $stmt->errorInfo());
+        }
 
         $stmt->closeCursor();
         $stmt = null;
@@ -120,10 +160,9 @@ order by MSysObjects.Name
         ';
         $res = $this->Query($sql);
         $list = [];
-        foreach($res['data'] as $row)
-        {
+        foreach ($res['data'] as $row) {
             $t = $row['TABLE_NAME'];
-            if(substr($t,0,strlen('TEMP')) === 'TEMP')
+            if (substr($t, 0, strlen('TEMP')) === 'TEMP')
                 continue;
 
             $list[] = $t;
