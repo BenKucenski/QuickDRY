@@ -865,7 +865,7 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
 
         $req = self::$Request->ToArray();
-        $res = self::$Item->FromRequest($req);
+        $res = self::$Item->FromRequest($req, true, true);
         if ($res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
         }
@@ -881,9 +881,14 @@ class ' . $table_nice_name . 'Base extends BasePage
             HTTP::ExitJSON([\'error\' => \'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
         }
 
-        self::$Item = new ' . $c_name . '();
+        if (' . $missing_params . ') {
+            self::$Item = new ' . $c_name . '();
+        } else {
+            self::$Item = ' . $c_name . '::Get([' . $get_params . ']);
+        }
+
         $req = self::$Request->ToArray();
-        $res = self::$Item->FromRequest($req, false);
+        $res = self::$Item->FromRequest($req, false, true);
 
         if ($res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
