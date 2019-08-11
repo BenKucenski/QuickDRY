@@ -761,4 +761,105 @@ class MySQL_Core extends SQL_Base
         $this->_from_db = true;
         return $res;
     }
+
+    /**
+     * @param bool $return_query
+     *
+     * @return array|SQL_Query
+     */
+    protected function _Insert($return_query = false)
+    {
+        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+
+        $sql = '
+INSERT INTO
+    `' . static::$database . '`.`' . static::$table . '`
+';
+        $props = [];
+        $params = [];
+        $qs = [];
+        foreach ($this->props as $name => $value) {
+            if (strcmp($name, $primary) == 0 && !$this->$primary) {
+                continue;
+            }
+
+            $props[] = $name;
+
+            $st_value = static::StrongType($name, $value);
+
+
+            if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                $qs[] = 'NULL #' . $name . PHP_EOL;
+            } else {
+                $qs[] = '{{}} #' . $name . PHP_EOL;
+                $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+            }
+
+        }
+        $sql .= '(`' . implode('`,`', $props) . '`) VALUES (' . implode(',', $qs) . ')';
+
+
+        if ($return_query) {
+            return new SQL_Query($sql, $params);
+        }
+        $res = static::Execute($sql, $params);
+
+        return $res;
+    }
+
+    /**
+     * @param bool $force_insert
+     *
+     * @return array|SQL_Query
+     */
+    protected function _Update($return_query)
+    {
+        if(!sizeof($this->_change_log)) {
+            return null;
+        }
+
+        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+
+        $sql = '
+UPDATE
+    `' . static::$database . '`.`' . static::$table . '`
+SET
+';
+        $props = [];
+        $params = [];
+        foreach ($this->props as $name => $value) {
+            if(!isset($this->_change_log[$name])) {
+                continue;
+            }
+            if (strcmp($name, $primary) == 0) continue;
+
+            $st_value = static::StrongType($name, $value);
+
+
+            if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
+                $props[] = '`' . $name . '` = NULL # ' . $name . PHP_EOL;
+            } else {
+                $props[] = '`' . $name . '` = {{}} #' . $name . PHP_EOL;
+                $params[] = $st_value;
+            }
+        }
+        $sql .= implode(',', $props);
+
+        $sql .= '
+WHERE
+    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+';
+
+        if ($return_query) {
+            return new SQL_Query($sql, $params);
+        }
+
+
+        $res = static::Execute($sql, $params);
+
+        if (!$this->$primary)
+            $this->$primary = static::LastID();
+
+        return $res;
+    }
 }

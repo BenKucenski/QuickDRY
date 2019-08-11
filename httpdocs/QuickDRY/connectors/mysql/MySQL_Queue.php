@@ -1,5 +1,5 @@
 <?php
-class MYSQL_Queue
+class MySQL_Queue
 {
     private $_sql = [];
     private $_params = [];
