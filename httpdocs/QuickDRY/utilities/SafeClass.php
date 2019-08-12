@@ -69,18 +69,19 @@ class SafeClass
     public function ToArray($ignore_empty = false)
     {
         $res = get_object_vars($this);
-        if ($ignore_empty) {
-            foreach ($res as $key => $val) {
+        foreach ($res as $key => $val) {
+            if ($ignore_empty) {
                 if (!$val) {
                     unset($res[$key]);
                 }
-                if ($key[0] == '_') {
-                    unset($res[$key]);
-                }
+            }
+            if ($key[0] == '_') {
+                unset($res[$key]);
             }
         }
-        foreach($res as $key => $val) {
-            if($val instanceof DateTime) {
+
+        foreach ($res as $key => $val) {
+            if ($val instanceof DateTime) {
                 $res[$key] = Dates::Timestamp($val);
             }
         }

@@ -121,7 +121,7 @@ class APIRequest
      * @param bool $post
      * @return bool|mixed|string
      */
-    private function _Request($path, $data = null, $headers = null, $post = true)
+    private function _Request($path, $data = null, $headers = null, $post = true, $put = false)
     {
         if (self::$CacheTimeoutSeconds) {
             $hash = md5(serialize([$path, $data, $headers, $post]));
@@ -173,6 +173,10 @@ class APIRequest
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_HEADER, true);
+
+        if($put) {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        }
 
         curl_setopt($ch, CURLOPT_POST, $post);
         if ($data) {
@@ -237,6 +241,18 @@ class APIRequest
 
         return $body;
     }
+
+    /**
+     * @param $path
+     * @param null $data
+     * @param null $headers
+     * @return bool|mixed|string
+     */
+    protected function _Put($path, $data = null, $headers = null)
+    {
+        return $this->_Request($path, $data, $headers, true, true);
+    }
+
 
     /**
      * @param $path
@@ -319,6 +335,21 @@ class APIRequest
         }
 
         $this->_Log('Post');
+    }
+
+    /**
+     * @param null $headers
+     */
+    public function Put($headers = null)
+    {
+        $res = $this->_Put($this->path, $this->data, $headers);
+        $this->_raw = $res;
+        $this->res = json_decode($res);
+        if (isset($this->res->error)) {
+            $this->error = $this->res->error;
+        }
+
+        $this->_Log('Put');
     }
 
     /**
