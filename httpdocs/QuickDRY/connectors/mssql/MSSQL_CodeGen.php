@@ -118,7 +118,6 @@ class MSSQL_CodeGen extends SQLCodeGen
         ' . implode(", ", $sql_params) . '
 
         \';
-        /* @var $rows ' . $sp_class . '[] */
         $res = ' . $DatabaseClass . '::Execute($sql, [' . implode(', ', $params) . ']);
 
         if ($res[\'error\']) {
