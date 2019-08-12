@@ -2,6 +2,16 @@
 
 class HTTP extends SafeClass
 {
+    public static function CheckURL($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_exec($ch);
+        $retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $retcode;
+    }
+
     public static function RemoveParameters($query_str, $params)
     {
         parse_str($query_str, $get);

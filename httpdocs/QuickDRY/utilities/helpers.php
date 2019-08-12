@@ -521,3 +521,27 @@ function PostFromSerialized($serialized)
     return HTTP::PostFromSerialized($serialized);
 }
 
+function GetFolderFilesRecursive($path)
+{
+    $directory = new RecursiveDirectoryIterator($path, FilesystemIterator::FOLLOW_SYMLINKS);
+    $filter = new MyRecursiveFilterIterator($directory);
+    $iterator = new RecursiveIteratorIterator($filter);
+    $files = [];
+    foreach ($iterator as $info) {
+        $files[] = $info->getPathname();
+    }
+    return $files;
+}
+
+class MyRecursiveFilterIterator extends RecursiveFilterIterator
+{
+    public function accept()
+    {
+        $filename = $this->current()->getFilename();
+        // Skip hidden files and directories.
+        if ($filename[0] === '.') {
+            return false;
+        }
+        return true;
+    }
+}
