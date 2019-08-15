@@ -87,6 +87,10 @@ class Web extends SafeClass
     public $DefaultPage;
     public $DefaultUserPage;
 
+    public $MetaTitle;
+    public $MetaDescription;
+    public $MetaKeywords;
+
     /**
      * @param string[] $MasterPages
      */
