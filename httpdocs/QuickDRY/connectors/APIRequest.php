@@ -4,7 +4,10 @@
  *
  * @author ben
  * @property string path
+ * @property string raw
+ * @property string error
  * @property array data
+ * @property string raw_post_data
  * @property stdClass[] res
  */
 class APIRequest
@@ -121,7 +124,7 @@ class APIRequest
      * @param bool $post
      * @return bool|mixed|string
      */
-    private function _Request($path, $data = null, $headers = null, $post = true, $put = false)
+    private function _Request($path, $data = null, $headers = null, $post = true, $custom_method = null)
     {
         if (self::$CacheTimeoutSeconds) {
             $hash = md5(serialize([$path, $data, $headers, $post]));
@@ -167,6 +170,25 @@ class APIRequest
         $headers[] = "Host: $host";
         $headers[] = "Accept: */*";
         $headers[] = "Accept-Language: en-us";
+
+        if ($data) {
+            if ($post) {
+                if (isset($data['raw_post_data'])) {
+                    $headers[] = "Content-length: " . strlen($data['raw_post_data']);
+                } else {
+                    if (isset($data['json'])) {
+                        $headers[] = "Content-length: " . strlen(json_encode($data['json']));
+                    } else {
+                        $headers[] = "Content-length: " . strlen(http_build_query($data));
+                    }
+                }
+            } else {
+                $headers[] = "Content-length: 0";
+            }
+        } else {
+            $headers[] = "Content-length: 0";
+        }
+
         $headers[] = "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)";
 
         $this->headers = $headers;
@@ -174,8 +196,8 @@ class APIRequest
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_HEADER, true);
 
-        if($put) {
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        if($custom_method) {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $custom_method);
         }
 
         curl_setopt($ch, CURLOPT_POST, $post);
@@ -250,9 +272,19 @@ class APIRequest
      */
     protected function _Put($path, $data = null, $headers = null)
     {
-        return $this->_Request($path, $data, $headers, true, true);
+        return $this->_Request($path, $data, $headers, true, 'PUT');
     }
 
+    /**
+     * @param $path
+     * @param null $data
+     * @param null $headers
+     * @return bool|mixed|string
+     */
+    protected function _Delete($path, $data = null, $headers = null)
+    {
+        return $this->_Request($path, $data, $headers, true, 'DELETE');
+    }
 
     /**
      * @param $path
@@ -350,6 +382,21 @@ class APIRequest
         }
 
         $this->_Log('Put');
+    }
+
+    /**
+     * @param null $headers
+     */
+    public function Delete($headers = null)
+    {
+        $res = $this->_Delete($this->path, $this->data, $headers);
+        $this->_raw = $res;
+        $this->res = json_decode($res);
+        if (isset($this->res->error)) {
+            $this->error = $this->res->error;
+        }
+
+        $this->_Log('Delete');
     }
 
     /**
