@@ -45,8 +45,13 @@ class SimpleReport extends SafeClass
      */
     public static function ToHTML(&$items, $class = '', $style = '', $numbered = false, $limit = 0)
     {
+        if(!sizeof($items)) {
+            return '';
+        }
+
         $obj_class = get_called_class();
-        $cols = array_keys(get_class_vars($obj_class));
+        $cols = array_keys(get_object_vars($items[0]));
+
         $se = new SimpleExcel();
         $se->Report = $items;
         $se->Title = $obj_class;
