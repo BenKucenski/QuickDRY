@@ -792,7 +792,7 @@ INSERT INTO
                 $qs[] = 'NULL #' . $name . PHP_EOL;
             } else {
                 $qs[] = '{{}} #' . $name . PHP_EOL;
-                $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
+                $params[] = $st_value;
             }
 
         }
