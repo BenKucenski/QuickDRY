@@ -679,13 +679,13 @@ class MySQL_Core extends SQL_Base
         $changed_only = false;
         if (!$primary || !$this->$primary || $force_insert) {
             $sql = "
-				INSERT IGNORE INTO
+				INSERT INTO
 			";
         } else {
             $changed_only = true;
             // ignore cases where the unique key isn't sufficient to avoid duplicate inserts
             $sql = "
-				UPDATE IGNORE
+				UPDATE
 			";
         }
 
@@ -792,7 +792,7 @@ INSERT INTO
                 $qs[] = 'NULL #' . $name . PHP_EOL;
             } else {
                 $qs[] = '{{}} #' . $name . PHP_EOL;
-                $params[] = $st_value;
+                $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
             }
 
         }
