@@ -27,8 +27,11 @@ class SimpleReport extends SafeClass
      */
     public static function ToExcel(&$items)
     {
+        if(!sizeof($items)) {
+            return null;
+        }
         $class = get_called_class();
-        $cols = array_keys(get_class_vars($class));
+        $cols = array_keys(get_object_vars($items[0]));
         $se = new SimpleExcel();
         $se->Report = $items;
         $se->Title = $class;

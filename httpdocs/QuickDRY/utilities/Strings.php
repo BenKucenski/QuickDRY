@@ -648,7 +648,11 @@ class Strings extends SafeClass
                         if ($json[$i] instanceof SafeClass) {
                             $json[$i] = $json[$i]->ToArray();
                         } else {
-                            Halt(['error' => 'fix_json unknown object', $json[$i]]);
+                            if($json[$i] instanceof stdClass) {
+                                $json[$i] = json_decode(json_encode($json[$i]), true);
+                            } else {
+                                Halt(['error' => 'fix_json unknown object', $json[$i]]);
+                            }
                         }
                     }
                 }
