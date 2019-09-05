@@ -876,126 +876,47 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
      */
     protected function _GetSaveQuery($force_insert = false)
     {
-        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
-
-        if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
-
-            foreach (static::$_unique as $cols) {
-                $params = [];
-                $unique_set = 0;
-
-                foreach ($cols as $col) {
-                    if (is_null($this->$col))
-                        $params[$col] = 'null';
-                    else {
-                        $params[$col] = $this->$col;
-                        $unique_set++;
-                    }
-                }
-                if ($unique_set && !$this->$primary) {
-                    $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
-                    $t = $type::Get($params);
-
-                    if (!is_null($t)) {
-                        if ($t->$primary)
-                            $this->$primary = $t->$primary;
-                        $vars = $t->ToArray();
-                        foreach ($vars as $k => $v)
-                            if (isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
-                                $this->$k = $v;
-                        break; // only find the first match with unique key definition
-                    }
-                }
-            }
-        }
-
-        if (!$this->$primary || $force_insert) {
-            $sql = "
-				INSERT INTO
-					[" . static::$database . "].dbo.[" . static::$table . "]
-				";
-            $props = [];
-            $params = [];
-            $qs = [];
-            foreach ($this->props as $name => $value) {
-                if (strcmp($name, $primary) == 0 && !$this->$primary) continue;
-
-                $props[] = $name;
-
-                $st_value = static::StrongType($name, $value);
-
-
-                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
-                    $qs[] = 'NULL --' . $name . PHP_EOL;
-                } else {
-                    $qs[] = '@ --' . $name . PHP_EOL;
-                    $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
-                }
-
-            }
-            $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
-
-            if ($this->$primary && !$force_insert)
-                $sql .= '
-WHERE
-    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-';
-
-            $res = new SQL_Query($sql, $params);
-        } else {
-            $sql = '
-UPDATE
-    [' . static::$database . '].dbo.[' . static::$table . ']
-SET
-				';
-            $props = [];
-            $params = [];
-            foreach ($this->props as $name => $value) {
-                if(!isset($this->_change_log[$name])) {
-                    continue;
-                }
-                if (strcmp($name, $primary) == 0) {
-                    continue;
-                }
-
-                $st_value = static::StrongType($name, $value);
-
-
-                if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
-                    $props[] = '[' . $name . '] = NULL -- ' . $name . PHP_EOL;
-                } else {
-                    $props[] = '[' . $name . '] = @ --' . $name . PHP_EOL;
-                    $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
-                }
-            }
-            if(!sizeof($props)) {
-                return null;
-            }
-
-            $sql .= implode(',', $props);
-
-            if ($this->$primary && !$force_insert)
-                $sql .= '
-WHERE
-    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
-';
-
-            $res = new SQL_Query($sql, $params);
-        }
-        return $res;
+        return $this->_Save($force_insert, true);
     }
 
     /**
      * @param bool $force_insert
      *
-     * @return array
+     * @return SQL_Query|array
      */
-    protected function _Save($force_insert = false)
+    protected function _Save($force_insert = false, $return_query = false)
     {
         /* @var $Web Web */
         global $Web;
 
-        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+        /* @var $primary string[] */
+        $primary = isset(static::$_primary) ? static::$_primary : [];
+
+        $primary_set = true;
+        $primary_sql = [];
+        foreach($primary as $col) {
+            if(!$this->$col) {
+                $primary_set = false;
+                break;
+            }
+            $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
+        }
+
+        if($primary_set) {
+            foreach ($primary as $col) {
+                if (is_null($this->$col))
+                    $params[$col] = 'null';
+                else {
+                    $params[$col] = $this->$col;
+                }
+            }
+
+            $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+            $t = $type::Get($params);
+            if(!$t) {
+                $force_insert = true;
+            }
+        }
 
         if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
 
@@ -1011,24 +932,31 @@ WHERE
                         $unique_set++;
                     }
                 }
-                if ($unique_set && !$this->$primary) {
+                if ($unique_set && !$primary_set) {
                     $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                     $t = $type::Get($params);
 
                     if (!is_null($t)) {
-                        if ($t->$primary)
-                            $this->$primary = $t->$primary;
+                        foreach($primary as $col) {
+                            if ($t->$col) {
+                                $this->$col = $t->$col;
+                            }
+                        }
                         $vars = $t->ToArray();
-                        foreach ($vars as $k => $v)
-                            if (isset($this->$k) && is_null($this->$k)) // if the current object value is null, fill it in with the existing object's info
+                        foreach ($vars as $k => $v) {
+                            if (isset($this->$k) && is_null($this->$k)) {
+                                // if the current object value is null, fill it in with the existing object's info
                                 $this->$k = $v;
+                            }
+                        }
                         break; // only find the first match with unique key definition
                     }
                 }
             }
         }
 
-        if (!$this->$primary || $force_insert) {
+
+        if (!$primary_set || $force_insert) {
             $sql = "
 				INSERT INTO
 					[" . static::$database . "].dbo.[" . static::$table . "]
@@ -1037,7 +965,9 @@ WHERE
             $params = [];
             $qs = [];
             foreach ($this->props as $name => $value) {
-                if (strcmp($name, $primary) == 0 && !$this->$primary) continue;
+                if (in_array($name, $primary) && is_null($this->$name)) {
+                    continue;
+                }
 
                 $props[] = $name;
 
@@ -1054,13 +984,27 @@ WHERE
             }
             $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
 
-            if ($this->$primary && !$force_insert)
+            if ($primary_set && !$force_insert) {
                 $sql .= '
 WHERE
-    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+    ' . implode(' AND ', $primary_sql) . '
 ';
+            }
 
+            if($return_query) {
+                return new SQL_Query($sql, $params);
+            }
             $res = static::Execute($sql, $params);
+
+            if (!$primary_set) {
+                // there can only be one auto incrementing column per table
+                foreach ($primary as $col) {
+                    if (is_null($this->$col)) {
+                        $this->$col = static::LastID();
+                        break;
+                    }
+                }
+            }
         } else {
             $sql = '
 UPDATE
@@ -1073,12 +1017,11 @@ SET
                 if(!isset($this->_change_log[$name])) {
                     continue;
                 }
-                if (strcmp($name, $primary) == 0) {
+                if (in_array($name, $primary)) {
                     continue;
                 }
 
                 $st_value = static::StrongType($name, $value);
-
 
                 if (!is_object($value) && (is_null($st_value) || strtolower(trim($value)) === 'null') && (self::IsNumeric($name) || (!self::IsNumeric($name) && !$this->PRESERVE_NULL_STRINGS))) {
                     $props[] = '[' . $name . '] = NULL -- ' . $name . ' / ' . static::$prop_definitions[$name]['type'] . PHP_EOL;
@@ -1093,18 +1036,18 @@ SET
 
             $sql .= implode(',', $props);
 
-            if ($this->$primary && !$force_insert) {
+            if ($primary_set && !$force_insert) {
                 $sql .= '
 WHERE
-    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+    ' . implode(' AND ', $primary_sql) . '
 ';
             }
 
+            if($return_query) {
+                return new SQL_Query($sql, $params);
+            }
             $res = static::Execute($sql, $params);
         }
-
-        if (!$this->$primary)
-            $this->$primary = static::LastID();
 
         if ($this->HasChangeLog()) {
             $uuid = $this->GetUUID();
@@ -1132,7 +1075,16 @@ WHERE
      */
     protected function _Insert($return_query = false)
     {
-        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+        $primary = isset(static::$_primary) ? static::$_primary : [];
+        $primary_set = true;
+        $primary_sql = [];
+        foreach($primary as $col) {
+            if(is_null($this->$col)) {
+                $primary_set = false;
+            } else {
+                $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
+            }
+        }
 
         $sql = '
 INSERT INTO
@@ -1142,7 +1094,7 @@ INSERT INTO
         $params = [];
         $qs = [];
         foreach ($this->props as $name => $value) {
-            if (strcmp($name, $primary) == 0 && !$this->$primary) {
+            if (in_array($name, $primary) && is_null($this->$name)) {
                 continue;
             }
 
@@ -1167,6 +1119,16 @@ INSERT INTO
         }
         $res = static::Execute($sql, $params);
 
+        if (!$primary_set) {
+            // there can only be one auto incrementing column per table
+            foreach ($primary as $col) {
+                if (is_null($this->$col)) {
+                    $this->$col = static::LastID();
+                    break;
+                }
+            }
+        }
+
         return $res;
     }
 
@@ -1181,7 +1143,17 @@ INSERT INTO
             return null;
         }
 
-        $primary = isset(static::$_primary[0]) ? static::$_primary[0] : 'id';
+        $primary = static::$_primary ? static::$_primary: [];
+
+        $primary_set = true;
+        $primary_sql = [];
+        foreach($primary as $col) {
+            if(!$this->$col) {
+                $primary_set = false;
+                break;
+            }
+            $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
+        }
 
         $sql = '
 UPDATE
@@ -1194,7 +1166,9 @@ SET
             if(!isset($this->_change_log[$name])) {
                 continue;
             }
-            if (strcmp($name, $primary) == 0) continue;
+            if (in_array($name, $primary)) {
+                continue;
+            }
 
             $st_value = static::StrongType($name, $value);
 
@@ -1208,10 +1182,12 @@ SET
         }
         $sql .= implode(',', $props);
 
-        $sql .= '
+        if ($primary_set) {
+            $sql .= '
 WHERE
-    ' . $primary . ' = ' . MSSQL::EscapeString($this->$primary) . '
+    ' . implode(' AND ', $primary_sql) . '
 ';
+        }
 
         if ($return_query) {
             return new SQL_Query($sql, $params);
@@ -1219,9 +1195,6 @@ WHERE
         
 
         $res = static::Execute($sql, $params);
-
-        if (!$this->$primary)
-            $this->$primary = static::LastID();
 
         return $res;
     }
