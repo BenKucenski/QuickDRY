@@ -415,21 +415,26 @@ class SQL_Base
                 $changed = true;
                 $change_reason = 'old not null, new null';
             } else {
-                if (is_numeric($old_val) && is_numeric($new_val)) {
-
-                    if(abs($new_val - $old_val) > 0.000000001) {
-                        /**
-                         * [new] => 5270.6709775679 -- PHP thinks these two numbers are different, so we need to compare to a very small number, not equal
-                         * [old] => 5270.6709775679
-                         * // from PHP's manual "never trust floating number results to the last digit, and do not compare floating point numbers directly for equality" - https://www.php.net/manual/en/language.types.float.php
-                         */
-                        $changed = true;
-                        $change_reason = 'diff = ' . abs($new_val - $old_val);
-                    }
+                if(strlen($old_val) != strlen($new_val)) {
+                    $changed = true;
+                    $change_reason = '"' . $new_val . '" "' . $old_val . '" ' . strlen($new_val) . ' ' . strlen($old_val) . ': strcmp = ' . strcmp($new_val, $old_val);
                 } else {
-                    if (strcmp($new_val, $old_val) != 0) {
-                        $changed = true;
-                        $change_reason = '"' . $new_val . '" "' . $old_val . '" ' . strlen($new_val) . ' ' . strlen($old_val) . ': strcmp = ' . strcmp($new_val, $old_val);
+                    if (is_numeric($old_val) && is_numeric($new_val)) {
+
+                        if (abs($new_val - $old_val) > 0.000000001) {
+                            /**
+                             * [new] => 5270.6709775679 -- PHP thinks these two numbers are different, so we need to compare to a very small number, not equal
+                             * [old] => 5270.6709775679
+                             * // from PHP's manual "never trust floating number results to the last digit, and do not compare floating point numbers directly for equality" - https://www.php.net/manual/en/language.types.float.php
+                             */
+                            $changed = true;
+                            $change_reason = 'diff = ' . abs($new_val - $old_val);
+                        }
+                    } else {
+                        if (strcmp($new_val, $old_val) != 0) {
+                            $changed = true;
+                            $change_reason = '"' . $new_val . '" "' . $old_val . '" ' . strlen($new_val) . ' ' . strlen($old_val) . ': strcmp = ' . strcmp($new_val, $old_val);
+                        }
                     }
                 }
             }
