@@ -402,7 +402,7 @@ spl_autoload_register(\'' . $autoloader_class . '\');
 
 class db_' . $c_name . ' extends ' . $DatabaseClass . '
 {
-    public static $_primary = [\'' . implode('\',\'', $primary) . '\'];
+    public static $_primary = ' . (sizeof($primary) ? '[\'' . implode('\',\'', $primary) . '\']' : '[]') . ';
     public static $_unique = [
 ';
 

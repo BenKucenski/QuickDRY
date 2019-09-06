@@ -892,8 +892,9 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
         /* @var $primary string[] */
         $primary = isset(static::$_primary) ? static::$_primary : [];
 
-        $primary_set = true;
+        $primary_set = sizeof($primary) ? true : false;
         $primary_sql = [];
+        $params = [];
         foreach($primary as $col) {
             if(!$this->$col) {
                 $primary_set = false;
@@ -920,7 +921,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
 
         $unique_set = false;
 
-        if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
+        if (!$primary_set && sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
 
             foreach (static::$_unique as $cols) {
                 $params = [];
@@ -933,13 +934,13 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
                         $unique_set = true;
                     }
                 }
-                if ($unique_set && !$primary_set) {
+                if ($unique_set) {
                     $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
                     $t = $type::Get($params);
 
                     if (!is_null($t)) {
                         $primary_set = true;
-                        foreach($primary as $col) {
+                        foreach($cols as $col) {
                             if ($t->$col) {
                                 $this->$col = $t->$col;
                                 $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
@@ -959,7 +960,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
         }
 
 
-        if (!$unique_set && (!$primary_set || $force_insert)) {
+        if (($unique_set && !sizeof($primary) && !$primary_set) || !$primary_set || $force_insert) {
             $sql = "
 				INSERT INTO
 					[" . static::$database . "].dbo.[" . static::$table . "]
