@@ -918,18 +918,19 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
             }
         }
 
+        $unique_set = false;
+
         if (sizeof(static::$_unique)) { // if we have a unique key defined then check it and load the object if it exists
 
             foreach (static::$_unique as $cols) {
                 $params = [];
-                $unique_set = 0;
 
                 foreach ($cols as $col) {
                     if (is_null($this->$col))
                         $params[$col] = 'null';
                     else {
                         $params[$col] = $this->$col;
-                        $unique_set++;
+                        $unique_set = true;
                     }
                 }
                 if ($unique_set && !$primary_set) {
@@ -937,9 +938,11 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
                     $t = $type::Get($params);
 
                     if (!is_null($t)) {
+                        $primary_set = true;
                         foreach($primary as $col) {
                             if ($t->$col) {
                                 $this->$col = $t->$col;
+                                $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
                             }
                         }
                         $vars = $t->ToArray();
@@ -956,7 +959,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
         }
 
 
-        if (!$primary_set || $force_insert) {
+        if (!$unique_set && (!$primary_set || $force_insert)) {
             $sql = "
 				INSERT INTO
 					[" . static::$database . "].dbo.[" . static::$table . "]
