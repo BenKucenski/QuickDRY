@@ -84,6 +84,11 @@ class MySQL_Core extends SQL_Base
         return static::$connection->GetStoredProcs();
     }
 
+    public static function EscapeQuery($sql, $params)
+    {
+        return static::$connection->EscapeQuery($sql, $params);
+    }
+
     /**
      * @param      $sql
      * @param null $params

@@ -51,6 +51,16 @@ class MySQL_Connection
     }
 
     /**
+     * @param $sql
+     * @param $params
+     * @return mixed
+     */
+    protected function EscapeQuery($sql, $params)
+    {
+        return MySQL::EscapeQuery($this->db, $sql, $params);
+    }
+
+    /**
      * @param $db_base
      */
     public function SetDatabase($db_base)
