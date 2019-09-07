@@ -10,6 +10,13 @@ class MathClass
         return $km * 0.621371;
     }
 
+    public static function Mean($arr)
+    {
+        if(!sizeof($arr)) {
+            return 0;
+        }
+        return array_sum($arr) / sizeof($arr);
+    }
     /**
      * @param $arr
      * @return float|int

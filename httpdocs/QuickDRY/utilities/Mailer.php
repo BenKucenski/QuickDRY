@@ -116,7 +116,7 @@ class Mailer extends SafeClass
                     }
                     if (!file_exists($path)) {
                         Log::Insert(['error' => 'invalid attachment', $name => $path]);
-                        continue;
+                        Halt(['error'=>'Missing Attachment File',$this]);
                     }
                     try {
                         $mail->AddAttachment($path, $name);

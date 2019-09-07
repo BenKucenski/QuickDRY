@@ -612,6 +612,9 @@ class MySQL_Core extends SQL_Base
                 return $value ? Dates::Datestamp($value) : null;
 
             case 'tinyint(1)':
+                if(is_null($value)) {
+                    return null;
+                }
                 return $value ? 1 : 0;
 
             case 'decimal(18,2)':
@@ -683,7 +686,7 @@ class MySQL_Core extends SQL_Base
 			";
         } else {
             $changed_only = true;
-            // ignore cases where the unique key isn't sufficient to avoid duplicate inserts
+            // ignore cases where the unique key isn't sufficient to avoid duplicate inserts -- removed 8/30/2019 - handle the error in code
             $sql = "
 				UPDATE
 			";
