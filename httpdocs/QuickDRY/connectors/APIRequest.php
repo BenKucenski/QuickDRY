@@ -97,6 +97,10 @@ class APIRequest
                 $this->_cache_file = $value;
                 break;
 
+            case 'raw':
+                $this->_raw = $value;
+                break;
+
             case 'error':
                 $this->_error = $value;
                 break;

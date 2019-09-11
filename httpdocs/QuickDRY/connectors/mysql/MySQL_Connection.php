@@ -55,7 +55,7 @@ class MySQL_Connection
      * @param $params
      * @return mixed
      */
-    protected function EscapeQuery($sql, $params)
+    public function EscapeQuery($sql, $params)
     {
         return MySQL::EscapeQuery($this->db, $sql, $params);
     }
