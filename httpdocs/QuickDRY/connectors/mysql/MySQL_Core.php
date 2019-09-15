@@ -623,6 +623,7 @@ class MySQL_Core extends SQL_Base
                 return $value ? 1 : 0;
 
             case 'decimal(18,2)':
+            case 'double':
             case 'int(10)':
                 return $value * 1.0;
 
@@ -725,7 +726,9 @@ class MySQL_Core extends SQL_Base
                 Halt($ex);
             }
 
-            if (strcmp($name, $primary) == 0 && $this->$primary && !$force_insert) continue;
+            if (strcmp($name, $primary) == 0 && !$this->$primary && !$force_insert) {
+                continue;
+            }
 
             if (is_null($st_value) || strtolower(trim($st_value)) === 'null')
                 $sql .= '`' . $name . '` = NULL,';
