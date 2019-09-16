@@ -969,7 +969,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
             $params = [];
             $qs = [];
             foreach ($this->props as $name => $value) {
-                if (in_array($name, $primary) && is_null($this->$name)) {
+                if (in_array($name, $primary) && (is_null($this->$name) || !$this->$name)) {
                     continue;
                 }
 
