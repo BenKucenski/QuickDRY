@@ -505,6 +505,12 @@ class SQL_Base
         $arrow = $dir == 'asc' ? '&uarr;' : '&darr;';
 
         $columns = [];
+        if(!$add) {
+            $add = [];
+        }
+        if(!$ignore) {
+            $ignore = [];
+        }
 
         foreach ($props as $name => $info)
             if (!in_array($name, $ignore))
