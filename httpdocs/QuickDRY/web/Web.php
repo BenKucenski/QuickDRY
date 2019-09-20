@@ -28,6 +28,7 @@
  * @property string PDFFooter
  * @property string PDFHash
  * @property string PDFPostRedirect
+ * @property bool PDFShrinkToFit
  * @property string PDFPostFunction
  * @property string PDFRootDir
  * @property string DOCXPageOrientation
@@ -70,6 +71,7 @@ class Web extends SafeClass
     public $PDFPostFunction;
     public $PDFHash;
     public $PDFRootDir;
+    public $PDFShrinkToFit;
 
     public $HTML;
 

@@ -41,7 +41,9 @@ if(defined('PDF_API')) {
     $params = [];
     $params[] = '--javascript-delay 5000';
     $params[] = '--enable-javascript';
-    $params[] = '--disable-smart-shrinking';
+    if(!$Web->PDFShrinkToFit) {
+        $params[] = '--disable-smart-shrinking';
+    }
     $params[] = '--no-stop-slow-scripts';
 
     switch($Web->PDFPageSize) {

@@ -102,6 +102,7 @@ if (file_exists($Web->ControllerFile)) {
                         $Web->RenderPDF = true;
                         $Web->PDFMargins = $PageModel::$PDFMargins;
                         $Web->PDFPageSize = $PageModel::$PDFPageSize;
+                        $Web->PDFShrinkToFit = $PageModel::$PDFShrinkToFit;
                         $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
                         $Web->PDFFileName = $PageModel::$PDFFileName;
                         $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
@@ -169,6 +170,7 @@ if (file_exists($Web->ControllerFile)) {
                         $Web->PDFPageSize = $PageModel->PDFPageSize;
                         $Web->PDFPageOrientation = $PageModel->PDFPageOrientation;
                         $Web->PDFFileName = $PageModel->PDFFileName;
+                        $Web->PDFShrinkToFit = $PageModel->PDFShrinkToFit;
                         $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
                         $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
                         break;

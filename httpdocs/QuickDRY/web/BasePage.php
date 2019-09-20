@@ -11,6 +11,9 @@ class BasePage extends SafeClass
     /* @var string $PDFPageSize */
     public static $PDFPageSize;
 
+    /* @var bool $PDFShrinkToFit */
+    public static $PDFShrinkToFit;
+
     /* @var string $PDFFileName */
     public static $PDFFileName;
 
@@ -69,6 +72,9 @@ class BasePage extends SafeClass
             case 'PDFPageSize':
                 return self::$PDFPageSize;
 
+            case 'PDFShrinkToFit':
+                return self::$PDFPageSize;
+
             case 'PDFFileName':
                 return self::$PDFFileName;
 
@@ -120,6 +126,10 @@ class BasePage extends SafeClass
 
             case 'PDFPageSize':
                 self::$PDFPageSize = $value;
+                break;
+
+            case 'PDFShrinkToFit':
+                self::$PDFShrinkToFit = $value;
                 break;
 
             case 'PDFFileName':
