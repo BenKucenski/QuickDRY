@@ -38,8 +38,8 @@ class MSSQL extends SafeClass
         }
 
         $non_displayables = [
-            '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
-            '/%1[0-9a-f]/',             // url encoded 16-31
+//            '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15 // this breaks LIKE '%001' for example
+//            '/%1[0-9a-f]/',             // url encoded 16-31
             '/[\x00-\x08]/',            // 00-08
             '/\x0b/',                   // 11
             '/\x0c/',                   // 12

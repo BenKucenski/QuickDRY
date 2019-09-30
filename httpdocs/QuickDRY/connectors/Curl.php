@@ -31,6 +31,7 @@ class Curl
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         //curl_setopt($curl, CURLOPT_USERAGENT, get_user_agent_string());
 
         $data = curl_exec($curl);
