@@ -83,8 +83,9 @@ class MSSQL_CodeGen extends SQLCodeGen
 /**
  * Class db_' . $sp_class . '
  */
- class db_' . $sp_class . ' extends SafeClass
+class db_' . $sp_class . ' extends SafeClass
 {
+    public static $HaltSPOnError = true;
     /**
      * @param  ' . implode(PHP_EOL . '     * @param  ', $clean_params) . '
      * @return ' . $sp_class . '[]
@@ -101,7 +102,7 @@ class MSSQL_CodeGen extends SQLCodeGen
             return new ' . $sp_class . '($row);
         });
 
-        if (isset($rows[\'error\'])) {
+        if (self::$HaltSPOnError && isset($rows[\'error\'])) {
             Halt($rows);
         }
         return $rows;
@@ -120,7 +121,7 @@ class MSSQL_CodeGen extends SQLCodeGen
         \';
         $res = ' . $DatabaseClass . '::Execute($sql, [' . implode(', ', $params) . ']);
 
-        if ($res[\'error\']) {
+        if (self::$HaltSPOnError && $res[\'error\']) {
             Halt($res);
         }
         return $res;
