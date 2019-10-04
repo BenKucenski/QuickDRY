@@ -20,6 +20,12 @@ class BasePage extends SafeClass
     /* @var PDFMargins $PDFMargins */
     public static $PDFMargins;
 
+    /* @var string $PDFHeader */
+    public static $PDFHeader;
+
+    /* @var string $PDFFooter */
+    public static $PDFFooter;
+
     /* @var string $DOCXPageOrientation */
     public static $DOCXPageOrientation;
 
@@ -81,6 +87,12 @@ class BasePage extends SafeClass
             case 'PDFPostRedirect':
                 return self::$PDFPostRedirect;
 
+            case 'PDFHeader':
+                return self::$PDFHeader;
+
+            case 'PDFFooter':
+                return self::$PDFFooter;
+
             case 'Request':
                 return static::$Request;
 
@@ -138,6 +150,14 @@ class BasePage extends SafeClass
 
             case 'PDFPostRedirect':
                 self::$PDFPostRedirect = $value;
+                break;
+
+            case 'PDFHeader':
+                self::$PDFHeader = $value;
+                break;
+
+            case 'PDFFooter':
+                self::$PDFFooter = $value;
                 break;
 
             case 'Request':
