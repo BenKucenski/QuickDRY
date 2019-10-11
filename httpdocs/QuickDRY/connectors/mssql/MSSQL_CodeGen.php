@@ -70,7 +70,7 @@ class MSSQL_CodeGen extends SQLCodeGen
                 $clean_params[] = $clean_param;
                 $sql_param = str_replace('$', '@', $clean_param);
                 $func_params[] = $clean_param;
-                $sql_params[] = $sql_param;
+                $sql_params[] = $sql_param . ' -- ' . str_replace('$', '' , $clean_param);
                 $params[] = '\'' . str_replace('@', '', $sql_param) . '\' => ' . $clean_param;
             }
 
@@ -94,7 +94,7 @@ class db_' . $sp_class . ' extends SafeClass
     {
         $sql = \'
         EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
-        ' . implode(", ", $sql_params) . '
+        ' . implode("\n         ,", $sql_params) . '
 
         \';
         /* @var $rows ' . $sp_class . '[] */
@@ -116,7 +116,7 @@ class db_' . $sp_class . ' extends SafeClass
     {
         $sql = \'
         EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
-        ' . implode(", ", $sql_params) . '
+        ' . implode("\n         ,", $sql_params) . '
 
         \';
         $res = ' . $DatabaseClass . '::Execute($sql, [' . implode(', ', $params) . ']);
