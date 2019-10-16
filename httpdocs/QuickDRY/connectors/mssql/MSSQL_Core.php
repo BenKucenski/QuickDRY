@@ -147,6 +147,16 @@ class MSSQL_Core extends SQL_Base
     }
 
     /**
+     * @return MSSQL_Trigger[]
+     */
+    public static function GetTriggers()
+    {
+        static::_connect();
+
+        return static::$connection->GetTriggers();
+    }
+
+    /**
      * @return MSSQL_StoredProc[]
      */
     public static function GetStoredProcs()

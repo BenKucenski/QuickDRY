@@ -944,6 +944,36 @@ ORDER BY obj.name, fkc.referenced_column_id
     }
 
     /**
+     * @return MSSQL_Trigger[]
+     */
+    public function GetTriggers()
+    {
+        $sql = '
+select * from [' . $this->current_db . '].sys.triggers ORDER BY name        
+        ';
+
+        /* @var $res MSSQL_Trigger[] */
+        $res = $this->Query($sql, null, function ($row) {
+            $t = new MSSQL_Trigger($row);
+            $sql = 'SELECT 
+    definition   
+FROM 
+    [' . $this->current_db . '].sys.sql_modules  
+WHERE 
+    object_id = @object_id
+    ';
+            $def = $this->Query($sql, ['object_id' => $t->object_id]);
+
+            $t->definition = isset($def['data'][0]['definition']) ? $def['data'][0]['definition'] : '';
+
+            return $t;
+        });
+        if (isset($res['error'])) {
+            CleanHalt($res);
+        }
+        return $res;
+    }
+    /**
      * @return MSSQL_StoredProc[]
      */
     public function GetStoredProcs()
