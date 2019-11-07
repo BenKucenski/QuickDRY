@@ -47,39 +47,71 @@ define('PDF_PAGE_SIZE_TABLOID', 'Tabloid');
 
 
 // HTTPStatus
+
+define('HTTP_STATUS_CONTINUE', 100);
+define('HTTP_STATUS_SWITCHING_PROTOCOLS', 101);
 define('HTTP_STATUS_OK', 200);
+define('HTTP_STATUS_CREATED', 201);
+define('HTTP_STATUS_ACCEPTED', 202);
+define('HTTP_STATUS_NON_AUTHORITATIVE_INFORMATION', 203);
+define('HTTP_STATUS_NO_CONTENT', 204);
+define('HTTP_STATUS_RESET_CONTENT', 205);
+define('HTTP_STATUS_PARTIAL_CONTENT', 206);
+define('HTTP_STATUS_MULTIPLE_CHOICES', 300);
+define('HTTP_STATUS_MOVED_PERMANENTLY', 301);
+define('HTTP_STATUS_FOUND', 302);
+define('HTTP_STATUS_SEE_OTHER', 303);
 define('HTTP_STATUS_NOT_MODIFIED', 304);
+define('HTTP_STATUS_USE_PROXY', 305);
+define('HTTP_STATUS_TEMPORARY_REDIRECT', 307);
 define('HTTP_STATUS_BAD_REQUEST', 400);
 define('HTTP_STATUS_UNAUTHORIZED', 401);
+define('HTTP_STATUS_PAYMENT_REQUIRED', 402);
 define('HTTP_STATUS_FORBIDDEN', 403);
 define('HTTP_STATUS_NOT_FOUND', 404);
+define('HTTP_STATUS_METHOD_NOT_ALLOWED', 405);
 define('HTTP_STATUS_NOT_ACCEPTABLE', 406);
+define('HTTP_STATUS_PROXY_AUTHENTICATION_REQUIRED', 407);
+define('HTTP_STATUS_REQUEST_TIMEOUT', 408);
+define('HTTP_STATUS_CONFLICT', 409);
 define('HTTP_STATUS_GONE', 410);
-define('HTTP_STATUS_CALM_DOWN', 420);
-define('HTTP_STATUS_UNPROCESSABLE_ENTITY', 422);
-define('HTTP_STATUS_TOO_MANY_REQUESTS', 429);
+define('HTTP_STATUS_LENGTH_REQUIRED', 411);
+define('HTTP_STATUS_PRECONDITION_FAILED', 412);
+define('HTTP_STATUS_PAYLOAD_TOO_LARGE', 413);
+define('HTTP_STATUS_URI_TOO_LONG', 414);
+define('HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE', 415);
+define('HTTP_STATUS_RANGE_NOT_SATISFIABLE', 416);
+define('HTTP_STATUS_EXPECTATION_FAILED', 417);
+define('HTTP_STATUS_UPGRADE_REQUIRED', 426);
 define('HTTP_STATUS_INTERNAL_SERVER_ERROR', 500);
+define('HTTP_STATUS_NOT_IMPLEMENTED', 501);
 define('HTTP_STATUS_BAD_GATEWAY', 502);
 define('HTTP_STATUS_SERVICE_UNAVAILABLE', 503);
 define('HTTP_STATUS_GATEWAY_TIMEOUT', 504);
+define('HTTP_STATUS_HTTP_VERSION_NOT_SUPPORTED', 505);
+
+// extra
+define('HTTP_STATUS_CALM_DOWN', 420);
+define('HTTP_STATUS_UNPROCESSABLE_ENTITY', 422);
+define('HTTP_STATUS_TOO_MANY_REQUESTS', 429);
 
 // Web
 define('QUICKDRY_MODE_STATIC', 1);
 define('QUICKDRY_MODE_INSTANCE', 2);
 define('QUICKDRY_MODE_BASIC', 3);
 
-define('REQUEST_VERB_GET','GET');
-define('REQUEST_VERB_POST','POST');
-define('REQUEST_VERB_PUT','PUT');
-define('REQUEST_VERB_DELETE','DELETE');
-define('REQUEST_VERB_HISTORY','HISTORY');
-define('REQUEST_VERB_FIND','FIND');
+define('REQUEST_VERB_GET', 'GET');
+define('REQUEST_VERB_POST', 'POST');
+define('REQUEST_VERB_PUT', 'PUT');
+define('REQUEST_VERB_DELETE', 'DELETE');
+define('REQUEST_VERB_HISTORY', 'HISTORY');
+define('REQUEST_VERB_FIND', 'FIND');
 
-define('REQUEST_EXPORT_CSV','CSV');
-define('REQUEST_EXPORT_PDF','PDF');
-define('REQUEST_EXPORT_JSON','JSON');
-define('REQUEST_EXPORT_DOCX','DOCX');
-define('REQUEST_EXPORT_XLS','XLS');
+define('REQUEST_EXPORT_CSV', 'CSV');
+define('REQUEST_EXPORT_PDF', 'PDF');
+define('REQUEST_EXPORT_JSON', 'JSON');
+define('REQUEST_EXPORT_DOCX', 'DOCX');
+define('REQUEST_EXPORT_XLS', 'XLS');
 
 // YesNo
 define('SELECT_NO', 1);
@@ -140,6 +172,9 @@ function autoloader_QuickDRY($class)
 
         'FormClass' => 'web/FormClass.php',
 
+        'JsonResult' => 'JSON/JsonResult.php',
+        'JsonStatusResult' => 'JSON/JsonStatusResult.php',
+
         'Debt' => 'math/Debt.php',
         'PrincipalInterest' => 'math/PrincipalInterest.php',
         'MathClass' => 'math/MathClass.php',
@@ -149,7 +184,7 @@ function autoloader_QuickDRY($class)
 
     ];
 
-    if(!isset($class_map[$class])) {
+    if (!isset($class_map[$class])) {
         return;
     }
 
@@ -179,13 +214,13 @@ require_once 'utilities/helpers.php';
 require_once 'utilities/FineDiff.php';
 require_once 'utilities/phpmailer.php';
 
-if(!class_exists('MySQL')) {
+if (!class_exists('MySQL')) {
     require_once 'connectors/MySQL.php';
 }
-if(!class_exists('MSSQL')) {
+if (!class_exists('MSSQL')) {
     require_once 'connectors/MSSQL.php';
 }
-if(!class_exists('MSAccess')) {
+if (!class_exists('MSAccess')) {
     require_once 'connectors/MSAccess.php';
 }
 

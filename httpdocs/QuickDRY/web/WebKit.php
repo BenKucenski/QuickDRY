@@ -43,6 +43,8 @@ if(defined('PDF_API')) {
     $params[] = '--enable-javascript';
     if(!$Web->PDFShrinkToFit) {
         $params[] = '--disable-smart-shrinking';
+    } else {
+        $params[] = '--enable-smart-shrinking';
     }
     $params[] = '--no-stop-slow-scripts';
 

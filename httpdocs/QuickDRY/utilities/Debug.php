@@ -124,7 +124,7 @@ class Debug extends SafeClass
         }
 
         if ($exit) {
-            exit();
+            exit(1);
         }
     }
 
@@ -155,7 +155,7 @@ class Debug extends SafeClass
         }
 
         if ($exit)
-            exit();
+            exit(1);
 
         if (!$print) {
             trigger_error($res);
