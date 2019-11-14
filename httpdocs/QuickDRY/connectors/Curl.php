@@ -2,12 +2,19 @@
 
 /**
  * Class Curl
+ * @property CurlHeader Header
+ * @property string Body
+ * @property string[] HeaderHash
+ * @property string HeaderRaw
+ * @property int StatusCode
  */
 class Curl
 {
     public $Body;
     public $HeaderHash;
+    public $HeaderRaw;
     public $Header;
+    public $StatusCode;
 
     /**
      * Returns the size of a file without downloading it, or -1 if the file
@@ -120,6 +127,7 @@ class Curl
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $header = substr($content, 0, $header_size);
         $body = substr($content, $header_size);
+        $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
 
 
@@ -134,8 +142,10 @@ class Curl
 
         $res = new Curl();
         $res->Body = $body;
-        $res->Header = $header;
+        $res->HeaderRaw = $header;
+        $res->Header = new CurlHeader($head_hash);
         $res->HeaderHash = $head_hash;
+        $res->StatusCode = $status;
         return $res;
     }
 
@@ -201,8 +211,8 @@ class Curl
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $header = substr($content, 0, $header_size);
         $body = substr($content, $header_size);
+        $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
-
 
         $head = explode("\n", $header);
         $head_hash = [];
@@ -216,7 +226,10 @@ class Curl
         $res = new Curl();
         $res->Body = $body;
         $res->Header = $header;
+        $res->HeaderRaw = $header;
+        $res->Header = new CurlHeader($head_hash);
         $res->HeaderHash = $head_hash;
+        $res->StatusCode = $status;
         return $res;
     }
 

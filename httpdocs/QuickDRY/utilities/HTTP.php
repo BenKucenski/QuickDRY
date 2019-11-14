@@ -1,7 +1,14 @@
 <?php
 
+/**
+ * Class HTTP
+ */
 class HTTP extends SafeClass
 {
+    /**
+     * @param $url
+     * @return mixed
+     */
     public static function CheckURL($url)
     {
         $ch = curl_init($url);
@@ -12,6 +19,11 @@ class HTTP extends SafeClass
         return $retcode;
     }
 
+    /**
+     * @param $query_str
+     * @param $params
+     * @return string
+     */
     public static function RemoveParameters($query_str, $params)
     {
         parse_str($query_str, $get);
@@ -22,6 +34,16 @@ class HTTP extends SafeClass
             unset($get[$param]);
         }
         return http_build_query($get);
+    }
+
+    /**
+     * @param JsonStatusResult $result
+     */
+    public static function ExitJSONResult(JsonStatusResult &$result)
+    {
+        $json = json_decode(json_encode($result), true);
+
+        self::ExitJSON($json, $result->status);
     }
 
     /**

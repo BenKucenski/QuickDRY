@@ -2,6 +2,8 @@
 
 /**
  * Class SQL_Base
+ * @property bool HasChanges
+ * @property array Changes
  */
 class SQL_Base
 {
@@ -188,6 +190,9 @@ class SQL_Base
     public function __get($name)
     {
         switch ($name) {
+            case 'Changes':
+                return $this->_change_log;
+
             case 'history':
                 if (is_null($this->_history)) {
                     $this->_history = $this->_history();

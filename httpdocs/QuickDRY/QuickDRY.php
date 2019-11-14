@@ -151,6 +151,7 @@ function autoloader_QuickDRY($class)
         'SQL_Base' => 'connectors/SQL_Base.php',
         'SQL_Query' => 'connectors/SQL_Query.php',
         'SQL_Log' => 'connectors/SQL_Log.php',
+        'CurlHeader' => 'connectors/CurlHeader.php',
         'Curl' => 'connectors/Curl.php',
         'WSDL' => 'connectors/WSDL.php',
         'adLDAP' => 'connectors/adLDAP.php',
