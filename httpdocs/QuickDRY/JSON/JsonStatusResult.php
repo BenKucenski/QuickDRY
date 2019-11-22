@@ -23,6 +23,7 @@ class JsonStatusResult extends SafeClass
     public $status;
     public $traceId;
     public $detail;
+    public $errors;
 
     /**
      * @param $value
@@ -63,7 +64,42 @@ class JsonStatusResult extends SafeClass
         $error->status = $HTTP_RESPONSE_CODE;
         $error->detail = $Detail;
         $error->traceId = $traceId;
+        self::SetResponseCode($HTTP_RESPONSE_CODE, $error);
+        return $error;
+    }
 
+    /**
+     * @param $HTTP_RESPONSE_CODE
+     * @param $Detail
+     * @param null $traceId
+     * @return JsonStatusResult
+     */
+    public static function CreateError($HTTP_RESPONSE_CODE, $Errors, $traceId = null)
+    {
+        /********************************************************************************
+         *
+         * 1xx Informational – the request was received, continuing process
+         * 2xx Successful – the request was successfully received, understood and accepted
+         * 3xx Redirection – further action needs to be taken in order to complete the request
+         * 4xx Client Error – the request contains bad syntax or cannot be fulfilled
+         * 5xx Server Error – the server failed to fulfill an apparently valid request
+         **********************************************************************************/
+
+        $error = new self();
+        $error->status = $HTTP_RESPONSE_CODE;
+        $error->errors = $Errors;
+        $error->traceId = $traceId;
+        self::SetResponseCode($HTTP_RESPONSE_CODE, $error);
+        return $error;
+    }
+
+
+    /**
+     * @param $HTTP_RESPONSE_CODE
+     * @param JsonStatusResult $error
+     */
+    public static function SetResponseCode($HTTP_RESPONSE_CODE, self &$error)
+    {
         switch ($HTTP_RESPONSE_CODE) {
             case HTTP_STATUS_CONTINUE:
             {
@@ -322,6 +358,5 @@ class JsonStatusResult extends SafeClass
             }
 
         }
-        return $error;
     }
 }

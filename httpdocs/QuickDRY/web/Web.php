@@ -266,6 +266,12 @@ class Web extends SafeClass
                     $this->ControllerFile = $this->ViewFile;
                     $this->ViewFile = null;
                     $this->IsJSON = true;
+                } else {
+                    if (stristr($this->CurrentPageName, '.xlsx') !== false) {
+                        $this->ControllerFile = $this->ViewFile;
+                        $this->ViewFile = null;
+                        $this->IsJSON = true;
+                    }
                 }
             }
         }

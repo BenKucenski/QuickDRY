@@ -41,7 +41,8 @@ class HTTP extends SafeClass
      */
     public static function ExitJSONResult(JsonStatusResult &$result)
     {
-        $json = json_decode(json_encode($result), true);
+        $res = $result->ToArray(true);
+        $json = json_decode(json_encode($res), true);
 
         self::ExitJSON($json, $result->status);
     }
