@@ -442,7 +442,7 @@ class Strings extends SafeClass
      */
     public static function MakeUTF($desc)
     {
-        $desc = UTF8_encode($desc);
+        $desc = utf8_encode($desc);
         $desc = stripslashes($desc);
         return ($desc);
     }

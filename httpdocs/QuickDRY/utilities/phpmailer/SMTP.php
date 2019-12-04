@@ -164,7 +164,7 @@ class SMTP
         $this->error = null;
 
         // make sure we are __not__ connected
-        if ($this->connected()) {
+        if ($this->Connected()) {
             // already connected, generate error
             $this->error = ["error" => "Already connected to a server"];
             return false;
@@ -224,7 +224,7 @@ class SMTP
     {
         $this->error = null; # to avoid confusion
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = ["error" => "Called StartTLS() without being connected"];
             return false;
         }
@@ -491,7 +491,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Data() without being connected"];
             return false;
@@ -629,7 +629,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Hello() without being connected"];
             return false;
@@ -704,7 +704,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Mail() without being connected"];
             return false;
@@ -749,7 +749,7 @@ class SMTP
     {
         $this->error = null; // so there is no confusion
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Quit() without being connected"];
             return false;
@@ -804,7 +804,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Recipient() without being connected"];
             return false;
@@ -848,7 +848,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called Reset() without being connected"];
             return false;
@@ -898,7 +898,7 @@ class SMTP
     {
         $this->error = null; // so no confusion is caused
 
-        if (!$this->connected()) {
+        if (!$this->Connected()) {
             $this->error = [
                 "error" => "Called SendAndMail() without being connected"];
             return false;

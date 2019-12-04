@@ -78,7 +78,7 @@ class MSSQL_CodeGen extends SQLCodeGen
         }
         $sp_require = [];
         foreach ($stored_procs as $sp) {
-            $sp_class = SQL_Base::TableToClass($this->DatabasePrefix, $sp->SPECIFIC_NAME, true, $this->DatabaseTypePrefix . '_sp');
+            $sp_class = SQL_Base::StoredProcToClass($this->DatabasePrefix, $sp->SPECIFIC_NAME, true, $this->DatabaseTypePrefix . '_sp');
 
             Log::Insert('Stored Proc: ' . $sp_class, true);
 

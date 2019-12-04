@@ -5,7 +5,7 @@
  */
 class SnowballMath extends SafeClass
 {
-	private $debts = array();
+	private $debts = [];
 	private $_last_id = 0;
 
     /**
@@ -41,7 +41,7 @@ class SnowballMath extends SafeClass
      */
 	public function SortByInterest($desc = true)
 	{
-		$list = array();
+		$list = [];
 		foreach($this->debts as $debt)
 			$list[$debt->interest_rate][] = $debt;
 
@@ -50,7 +50,7 @@ class SnowballMath extends SafeClass
 		else
 			ksort($list);
 
-		$this->debts = array();
+		$this->debts = [];
 		foreach($list as $items)
 			foreach($items as $debt)
 				$this->debts[] = $debt;
@@ -63,14 +63,14 @@ class SnowballMath extends SafeClass
 	public function DoSnowball($apply_rollover = true)
 	{
 		$debts = $this->debts;
-		$points = array();
+		$points = [];
 		$point = new PrincipalInterest();
-		$history = array();
+		$history = [];
 		$cur_month = 0;
 		$in_debt = true;
 		$base_rollover = 0.0;
 
-		$h = array();
+		$h = [];
 
 		for ($j = 0; $j < sizeof($debts); $j++)
 		{
@@ -78,7 +78,7 @@ class SnowballMath extends SafeClass
 				$base_rollover += $debts[$j]->payment;
                 unset($debts[$j]);
 			} else {
-				$d = new debt();
+				$d = new Debt();
 				$d->interest_rate = $debts[$j]->interest_rate;
 				$d->payment = 0;
 				$d->principal = $debts[$j]->principal;
@@ -95,7 +95,7 @@ class SnowballMath extends SafeClass
 			$point->interest_payment = 0;
 			$point->principal_payment = 0;
 
-			$h = array();
+			$h = [];
             $rollover = $base_rollover;
 
 			foreach ($debts as $j => $debt)
@@ -123,7 +123,7 @@ class SnowballMath extends SafeClass
 					$point->principal_payment += $payment - $interest;
 				}
 
-				$d = new debt();
+				$d = new Debt();
 				$d->interest_rate = $debts[$j]->interest_rate;
 				$d->payment = $payment;
 				$d->principal = $debts[$j]->principal;

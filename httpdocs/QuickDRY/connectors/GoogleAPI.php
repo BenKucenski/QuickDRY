@@ -92,7 +92,7 @@ class GoogleAPI {
 
         try {
             $xml = new SimpleXMLElement($result);
-        } catch(exception $ex) {
+        } catch(Exception $ex) {
             return $res;
         }
 

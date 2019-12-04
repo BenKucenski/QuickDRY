@@ -53,6 +53,36 @@ class SQL_Base
      * @param $database_type_prefix
      * @return string
      */
+    public static function StoredProcToClass($database_prefix, $table, $lowercase_table, $database_type_prefix)
+    {
+        // note: we need to leave underscores in
+        // underscores are valid PHP and a naming choice for developers
+        if ($lowercase_table) {
+            $table = strtolower($table);
+        }
+
+        $database_prefix = strtolower($database_prefix);
+        $t = explode('_', $database_prefix . '_' . $table);
+
+        $type = [];
+        foreach ($t as $w) {
+            $type [] = preg_replace('/[^a-z0-9]/si', '', ucfirst($w));
+        }
+        $type = implode('_', $type);
+        $type .= 'Class';
+        if (is_numeric($type[0])) {
+            $type = 'i' . $type;
+        }
+        return $database_type_prefix . '_' . $type;
+    }
+
+    /**
+     * @param $database_prefix
+     * @param $table
+     * @param $lowercase_table
+     * @param $database_type_prefix
+     * @return string
+     */
     public static function TableToNiceName($table, $lowercase_table)
     {
         if ($lowercase_table) {
@@ -129,7 +159,7 @@ class SQL_Base
         $object = new ReflectionObject($o);
         $method = $object->getMethod('__get');
         $declaringClass = $method->getDeclaringClass();
-        $filename = $declaringClass->getFilename();
+        $filename = $declaringClass->getFileName();
 
         $props = [];
 

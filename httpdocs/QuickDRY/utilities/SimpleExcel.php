@@ -252,7 +252,7 @@ class SimpleExcel extends SafeClass
 
         try {
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
-            $writer->SetDelimiter($delimiter);
+            $writer->setDelimiter($delimiter);
             if (isset($_SERVER['HTTP_HOST'])) {
                 header('Content-Type: text/csv');
                 header('Content-Disposition: attachment;filename="' . $se->Filename . '"');
