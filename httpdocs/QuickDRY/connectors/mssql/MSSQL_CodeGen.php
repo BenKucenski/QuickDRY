@@ -93,11 +93,11 @@ class MSSQL_CodeGen extends SQLCodeGen
             $func_params = [];
             $clean_params = [];
             foreach ($sp_params as $param) {
-                $clean_param = str_replace('#', '_', str_replace('@', '$', $param->Parameter_name));
+                $clean_param = str_replace('$$', '$', str_replace('#', '_', str_replace('@', '$', $param->Parameter_name)));
                 $clean_params[] = $clean_param;
                 $sql_param = str_replace('$', '@', $clean_param);
                 $func_params[] = $clean_param;
-                $sql_params[] = $sql_param . ' -- ' . str_replace('$', '' , $clean_param);
+                $sql_params[] = $sql_param . ' -- ' . str_replace('$', '', $clean_param);
                 $params[] = '\'' . str_replace('@', '', $sql_param) . '\' => ' . $clean_param;
             }
 
