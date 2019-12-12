@@ -80,19 +80,40 @@ class MySQL_Connection
 
         if (!isset($this->db_conns[$db_base]) || is_null($this->db_conns[$db_base])) {
             try {
-                $this->db_conns[$db_base] = mysqli_connect(
-                    $this->DB_HOST,
-                    $this->DB_USER,
-                    $this->DB_PASS,
-                    $db_base,
-                    $this->DB_PORT
-                );
+                if(defined('MYSQLA_SSL') && MYSQLA_SSL) {
+                    $con = mysqli_init();
+                    mysqli_options ($con, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+                    mysqli_ssl_set($con
+                        ,NULL
+                        ,NULL
+                        ,NULL
+                        ,NULL
+                        ,NULL
+                    );
+                    mysqli_real_connect(
+                        $con,
+                        $this->DB_HOST,
+                        $this->DB_USER,
+                        $this->DB_PASS,
+                        $db_base,
+                        $this->DB_PORT
+                    );
+                    $this->db_conns[$db_base] = $con;
+                } else {
+                    $this->db_conns[$db_base] = mysqli_connect(
+                        $this->DB_HOST,
+                        $this->DB_USER,
+                        $this->DB_PASS,
+                        $db_base,
+                        $this->DB_PORT
+                    );
+                }
                 if (!$this->db_conns[$db_base]) {
                     Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
                 }
 
-            } catch (\Exception $e) {
-                die('Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error() . PHP_EOL . print_r([$e, $this->DB_HOST, $this->DB_USER, md5($this->DB_PASS), $db_base], true));
+            } catch (Exception $e) {
+                die('Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error() . PHP_EOL . print_r([$e->getMessage(), $this->DB_HOST, $this->DB_USER, md5($this->DB_PASS), $db_base], true));
             }
         }
 

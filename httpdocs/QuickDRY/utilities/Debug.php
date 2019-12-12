@@ -85,7 +85,18 @@ class Debug extends SafeClass
             $finalMsg .= '<h3>' . $msg . '</h3>';
         }
         $finalMsg .= '<pre>';
-        $finalMsg .= print_r($var, true);
+        if(is_object($var)) {
+            switch (get_class($var)) {
+                case 'Exception':
+                    /* @var $var Exception */
+                    $finalMsg .= print_r($var->getMessage(), true);
+                    break;
+                default:
+                    $finalMsg .= print_r($var, true);
+            }
+        } else {
+            $finalMsg .= print_r($var, true);
+        }
         $finalMsg .= "\r\n\r\n";
         if ($backtrace) {
             $finalMsg .= print_r($_SERVER, true);
