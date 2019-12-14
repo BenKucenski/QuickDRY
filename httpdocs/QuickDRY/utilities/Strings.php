@@ -800,9 +800,9 @@ class Strings extends SafeClass
      *
      * @return mixed
      */
-    public static function ToSearchable($text)
+    public static function ToSearchable($text, $replacement = '')
     {
-        return preg_replace('/[^a-z0-9]/si', '', strtolower($text));
+        return preg_replace('/[^a-z0-9]/si', $replacement, strtolower($text));
     }
 
     /**
