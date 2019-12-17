@@ -119,16 +119,21 @@ class Dates extends SafeClass
 
     /**
      * @param $date
-     *
+     * @param string $last
+     * @param string $next
      * @return array
      */
-    public static function GetWeekRange($date)
+    public static function GetWeekRange($date, $last = 'sunday', $next = 'saturday')
     {
-        $ts = strtotime($date);
-        $start = (date('w', $ts) == 0) ? $ts : strtotime('last sunday', $ts);
+        if(!is_numeric($date)) {
+            $ts = strtotime(Dates::Datestamp($date));
+        } else {
+            $ts = $date;
+        }
+        $start = (date('w', $ts) == 0) ? $ts : strtotime('last ' . $last, $ts);
         return [
             date('Y-m-d', $start),
-            date('Y-m-d', strtotime('next saturday', $start))
+            date('Y-m-d', strtotime('next ' . $next, $start))
         ];
     }
 

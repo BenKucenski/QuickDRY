@@ -101,6 +101,8 @@ class SQLCodeGen extends SafeClass
             case 'keyword':
             case 'text':
             case 'nvarchar':
+            case 'image':
+            case 'uniqueidentifier':
                 return 'string';
 
             case 'tinyint unsigned':
@@ -113,6 +115,7 @@ class SQLCodeGen extends SafeClass
             case 'smallint':
             case 'bigint':
             case 'bit':
+            case 'long':
                 return 'int';
 
             case 'money':
