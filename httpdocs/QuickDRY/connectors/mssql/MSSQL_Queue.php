@@ -54,6 +54,15 @@ SET QUOTED_IDENTIFIER ON
     }
 
     /**
+     * @param SQL_Query $sp
+     * @return array|null
+     */
+    public function QueueSP(SQL_Query &$sp)
+    {
+        return $this->Queue($sp->SQL, $sp->Params);
+    }
+
+    /**
      * @param $sql
      * @param array $params
      */
