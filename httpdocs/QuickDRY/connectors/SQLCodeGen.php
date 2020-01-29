@@ -159,12 +159,7 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
     }
 }
 ';
-        $file = $this->CommonClassSPFolder . '/' . $sp_class . '.php';
-        if(!file_exists($file)) { // do not overwrite existing files, user edited
-            $fp = fopen($file, 'w');
-            fwrite($fp, $code);
-            fclose($fp);
-        }
+        self::SaveFile($this->CommonClassSPFolder, $sp_class, $code);
     }
 
     public function GenerateClasses()
@@ -670,14 +665,49 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
 ';
 
-        $file = $this->CommonClassFolder . '/' . $c_name . '.php';
-        if(!file_exists($file)) {
-            $fp = fopen($file, 'w');
-            fwrite($fp, $code);
-            fclose($fp);
-        }
+        self::SaveFile($this->CommonClassFolder, $c_name, $code);
 
         return $c_name;
+    }
+
+    public static $CacheFileLists;
+
+    /**
+     * @param $base_folder
+     * @param $file_name
+     * @param $data
+     */
+    public static function SaveFile($base_folder, $file_name, $data, $force = false)
+    {
+        $file = $base_folder . '/' . $file_name . '.php';
+        if(!$force) {
+            if (!isset(self::$CacheFileLists[$base_folder])) {
+                self::$CacheFileLists[$base_folder] = scandir($base_folder);
+            }
+            $files = self::$CacheFileLists[$base_folder];
+            $file_exists = false;
+            foreach ($files as $fname) {
+                if (strcasecmp($fname, $file_name . '.php') == 0) {
+                    $file_exists = true;
+                    if (strcmp($fname, $file_name . '.php') == 0) {
+                    } else {
+                        rename($base_folder . '/' . $file_name . '.php', $file);
+                    }
+                    break;
+                }
+            }
+
+
+            if (!$file_exists) {
+                $fp = fopen($file, 'w');
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+        } else {
+            $fp = fopen($file, 'w');
+            fwrite($fp, $data);
+            fclose($fp);
+        }
     }
 
     public function GenerateJSON()
@@ -785,12 +815,7 @@ if(!' . $table_nice_name . '::$Item) {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_BAD_REQUEST);
 }
         ';
-        $file = $this->PagesJSONFolder . '/' . $table_nice_name . '.php';
-        if (!file_exists($file)) {
-            $fp = fopen($file, 'w');
-            fwrite($fp, $code);
-            fclose($fp);
-        }
+        self::SaveFile($this->PagesJSONFolder, $table_nice_name, $code);
 
         $code = '<?php
 require_once \'base/' . $table_nice_name . 'Base.php\';
@@ -800,12 +825,7 @@ class ' . $table_nice_name . ' extends ' . $table_nice_name . 'Base
 
 }
         ';
-        $file = $this->PagesJSONFolder . '/' . $table_nice_name . '.code.php';
-        if (!file_exists($file)) {
-            $fp = fopen($file, 'w');
-            fwrite($fp, $code);
-            fclose($fp);
-        }
+        self::SaveFile($this->PagesJSONFolder, $table_nice_name . '.code', $code);
 
         $code = '<?php
 
@@ -994,10 +1014,7 @@ class ' . $table_nice_name . 'Base extends BasePage
     }
 }
         ';
-        $file = $this->PagesJSONFolder . '/base/' . $table_nice_name . 'Base.php';
-        $fp = fopen($file, 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+        self::SaveFile($this->PagesJSONFolder . '/base', $table_nice_name . 'Base', $code, true);
     }
 
     protected function SaveJSON($c_name, $primary)

@@ -579,12 +579,45 @@ class Dates extends SafeClass
         return $res;
     }
 
+    /**
+     * @param $date
+     * @return bool
+     */
     public static function IsWeekend($date)
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
         }
         return date('N', $date) >= 6;
+    }
+
+    /**
+     * @param $start
+     * @param $end
+     * @return false|string|null
+     */
+    public static function DateRange($start, $end)
+    {
+        if(!$end) {
+            return self::StandardDate($start, '');
+        }
+
+        $year_month_start = self::Datestamp($start,null,'Ym');
+        $year_month_end = self::Datestamp($end,null,'Ym');
+
+        if(self::Datestamp($start) == self::Datestamp($end)) {
+            if(self::Timestamp($start) == self::Timestamp($end)) {
+                return self::Datestamp($start);
+            }
+
+            return self::Datestamp($start, null, 'F jS g:ia') . ' - ' . self::Datestamp($end, null, 'g:ia');
+        }
+
+        if(strcasecmp($year_month_end, $year_month_start) == 0) {
+            return Dates::Datestamp($start, null, 'F jS') . ' - ' . self::Datestamp($end, null,'jS, Y');
+        }
+        return Dates::StandardDate($start, '--') . ' - ' . Dates::StandardDate($end, '--');
+
     }
 }
 
