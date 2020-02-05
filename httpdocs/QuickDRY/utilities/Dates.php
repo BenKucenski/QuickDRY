@@ -55,7 +55,11 @@ class Dates extends SafeClass
     public static function AddMonthToDate($timeStamp, $totalMonths = 1)
     {
         if (!is_numeric($timeStamp)) {
-            $timeStamp = strtotime($timeStamp);
+            $timeStamp = strtotime(self::Timestamp($timeStamp));
+        }
+
+        if(!is_numeric($totalMonths)) {
+            $totalMonths = 0;
         }
 
         // You can add as many months as you want. mktime will accumulate to the next year.

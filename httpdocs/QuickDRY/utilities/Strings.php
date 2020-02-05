@@ -220,8 +220,16 @@ class Strings extends SafeClass
                     eval($php_stmt_main);
                 }
                 foreach ($xml_elem['attributes'] as $key => $value) {
-                    $php_stmt_att = $php_stmt . '[$x_tag]' . $add . '[$key] = $value;';
-                    eval($php_stmt_att);
+                    try {
+                        if (!is_array($xml_array)) {
+                            $xml_array = [];
+                        }
+
+                        $php_stmt_att = $php_stmt . '[$x_tag]' . $add . '[$key] = $value;';
+                        eval($php_stmt_att);
+                    } catch(Exception $ex) {
+                        CleanHalt([$xml_array, $ex]);
+                    }
                 }
             }
         }

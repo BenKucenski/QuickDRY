@@ -86,6 +86,8 @@ class MathClass
         $res->principal = $principal;
         $res->principal_payment = $payment;
         $r = $rate / 12.0 / 100.0;
+
+        // if the first month has more interest than the payment, there's a problem
         if (round($r * $principal, 2) >= $payment) {
             return null;
         }
