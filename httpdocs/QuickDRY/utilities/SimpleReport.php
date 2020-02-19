@@ -80,6 +80,9 @@ class SimpleReport extends SafeClass
                 $html .= '<td>' . ($i + 1) . '</td>';
             }
             foreach ($se->Columns as $col => $settings) {
+                if(is_array($item->$col)) {
+                    continue;
+                }
                 if (is_object($item->$col)) {
                     $html .= '<td>' . Dates::Datestamp($item->$col) . '</td>';
                 } else {

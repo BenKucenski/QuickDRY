@@ -184,7 +184,8 @@ class SimpleExcel extends SafeClass
             }
             $sheet_row++;
             if ($report->Report && is_array($report->Report)) {
-                foreach ($report->Report as $item) {
+                $m = sizeof($report->Report);
+                foreach ($report->Report as $i => $item) {
                     if (!is_object($item)) {
                         Halt($item);
                     }
@@ -194,6 +195,9 @@ class SimpleExcel extends SafeClass
                             $value = $item->{$column->Property};
                         } catch (Exception $ex) {
                             $value = '';
+                        }
+                        if(!is_object($value)) {
+                            $value = Strings::KeyboardOnly($value);
                         }
                         self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
                         $sheet_column++;
@@ -278,13 +282,17 @@ class SimpleExcel extends SafeClass
      */
     private static function _SetSpreadsheetCellValue(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet &$sheet, $sheet_column, $sheet_row, $value, $property_type = '')
     {
+        if(!$value) {
+            return;
+        }
+
         if (is_object($value)) {
             if ($value instanceof DateTime) {
                 $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Dates::Datestamp($value, '') : Dates::Timestamp($value, '');
             }
         }
 
-        if ($property_type === SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {
+        if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {
             $sheet->setCellValueExplicit($sheet_column . $sheet_row, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         } else {
             if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE) {
