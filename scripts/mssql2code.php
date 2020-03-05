@@ -10,6 +10,7 @@ $opts .= 'l::';
 $opts .= 'f::';
 $opts .= 'o::';
 $opts .= 'j::';
+$opts .= 's::';
 
 $options = getopt($opts);
 
@@ -24,6 +25,7 @@ $_LOWERCASE_TABLE = isset($options['l']) ? $options['l'] : '';
 $_USE_FK_COLUMN_NAME = isset($options['f']) ? $options['f'] : '';
 $_DATABASE_CLASS = isset($options['o']) ? $options['o'] : null;
 $_GENERATE_JSON = isset($options['j']) ? $options['j'] : true;
+$_SCHEMA_ONLY = isset($options['s']) ? $options['s'] : false;
 
 if(!$_HOST || !$_DATABASE) {
     exit(basename(__FILE__) . ' usage: -h<host> -d<database> -c<database constant optional> -u<user class> -v<user variable> -i<user id column>' . PHP_EOL);
@@ -33,5 +35,9 @@ include '../httpdocs/index.php';
 
 $CodeGen = new MSSQL_CodeGen();
 $CodeGen->Init($_DATABASE, $_DATABASE_CONSTANT, $_USER_CLASS, $_USER_VAR, $_USER_ID_COLUMN, $_MASTERPAGE, $_LOWERCASE_TABLE, $_USE_FK_COLUMN_NAME, $_DATABASE_CLASS, $_GENERATE_JSON);
-$CodeGen->GenerateClasses();
-$CodeGen->GenerateJSON();
+if($_SCHEMA_ONLY) {
+	$CodeGen->DumpSchema();
+} else {
+	$CodeGen->GenerateClasses();
+	$CodeGen->GenerateJSON();
+}

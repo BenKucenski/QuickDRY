@@ -36,6 +36,36 @@ class MSSQL_CodeGen extends SQLCodeGen
         $this->CreateDirectories();
     }
 
+    public function DumpSchema()
+    {
+        $DatabaseClass = $this->DatabaseClass;
+
+        if(!is_dir('_Schema')) {
+            mkdir('_Schema');
+        }
+
+        $BaseFolder = '_Schema/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
+        if(!is_dir($BaseFolder)) {
+            mkdir($BaseFolder);
+        }
+
+        /* @var $definitions MSSQL_Definition[] */
+        $definitions = $DatabaseClass::GetDefinitions();
+        if($definitions) {
+            foreach($definitions as $definition) {
+                Log::Insert('Definition: ' . $definition->object_name, true);
+                $dest = $BaseFolder . '/_' . $definition->type_desc;
+                if (!is_dir($dest)) {
+                    mkdir($dest);
+                }
+                $fp =  fopen($dest . '/' . $definition->object_name . '.txt','w');
+                fwrite($fp, $definition->definition);
+                fclose($fp);
+
+            }
+        }
+    }
 
     /**
      * @return array
@@ -46,8 +76,8 @@ class MSSQL_CodeGen extends SQLCodeGen
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
 
         /* @var $triggers MSSQL_Trigger[] */
+        /* // hold off on this
         $triggers = $DatabaseClass::GetTriggers();
-
 
         $dest = $this->CommonClassFolder . '/triggers';
         if (!is_dir($dest)) {
@@ -58,17 +88,16 @@ class MSSQL_CodeGen extends SQLCodeGen
 
             $temp = $trigger->definition;
             $trigger->definition = ''; // clear out for the JSON file
-            $fp = fopen($dest . '/' . $trigger->name . '.json','w');
+            $fp = fopen($dest . '/' . $trigger->name . '.json', 'w');
             fwrite($fp, json_encode($trigger->ToArray(true), JSON_PRETTY_PRINT));
             fclose($fp);
 
-
             $trigger->definition = $temp; // store it as given in a txt file
-            $fp = fopen($dest . '/' . $trigger->name . '.txt','w');
+            $fp = fopen($dest . '/' . $trigger->name . '.txt', 'w');
             fwrite($fp, $trigger->definition);
             fclose($fp);
-
         }
+        */
 
         /* @var $stored_procs MSSQL_StoredProc[] */
         $stored_procs = $DatabaseClass::GetStoredProcs();
@@ -116,7 +145,7 @@ class db_' . $sp_class . ' extends SafeClass
     public static function GetReport(' . implode(', ', $func_params) . ')
     {
         $sql = \'
-        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
+        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' . $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
         ' . implode("\n         ,", $sql_params) . '
 
         \';
@@ -138,7 +167,7 @@ class db_' . $sp_class . ' extends SafeClass
     public static function Exec(' . implode(', ', $func_params) . ')
     {
         $sql = \'
-        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' .  $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
+        EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' . $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
         ' . implode("\n         ,", $sql_params) . '
 
         \';
@@ -156,11 +185,13 @@ class db_' . $sp_class . ' extends SafeClass
             fwrite($fp, $code);
             fclose($fp);
 
-            // put the SQL of the Stored Proc in a text file as given
+            /**
+            // put the SQL of the Stored Proc in a text file as given - no longer required, using separate folders for all types of definitions
             $file = $this->CommonClassSPDBFolder . '/db_' . $sp_class . '.txt';
             $fp = fopen($file, 'w');
             fwrite($fp, $sp->SOURCE_CODE);
             fclose($fp);
+             * */
         }
 
         return $sp_require;

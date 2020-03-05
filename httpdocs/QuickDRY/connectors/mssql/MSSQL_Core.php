@@ -167,6 +167,16 @@ class MSSQL_Core extends SQL_Base
     }
 
     /**
+     * @return MSSQL_Definition[]
+     */
+    public static function GetDefinitions()
+    {
+        static::_connect();
+
+        return static::$connection->GetDefinitions();
+    }
+
+    /**
      * @param $stored_proc
      * @return MSSQL_StoredProcParam[]
      */

@@ -132,6 +132,7 @@ function autoloader_QuickDRY_MSSQL($class)
         'MSSQL_StoredProc' => 'mssql/MSSQL_StoredProc.php',
         'MSSQL_CodeGen' => 'mssql/MSSQL_CodeGen.php',
         'MSSQL_Trigger' => 'mssql/MSSQL_Trigger.php',
+        'MSSQL_Definition' => 'mssql/MSSQL_Definition.php',
     ];
 
 
