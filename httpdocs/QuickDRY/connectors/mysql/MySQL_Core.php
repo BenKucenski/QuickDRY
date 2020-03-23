@@ -476,13 +476,16 @@ class MySQL_Core extends SQL_Base
     {
         $params = [];
 
-        $sql_order = '';
+        $sql_order = [];
         if (is_array($order_by) && sizeof($order_by)) {
             foreach ($order_by as $col => $dir) {
                 if (stristr($col, '.') !== false) {
                     $col = explode('.', $col);
                     $sql_order[] .= '`' . trim($col[0]) . '`.`' . trim($col[1]) . '` ' . $dir;
                 } else {
+                    if(is_array($col)) {
+                        Halt(['QuickDRY Error' => '$col cannot be array', $col]);
+                    }
                     $sql_order[] .= '`' . trim($col) . '` ' . $dir;
                 }
             }
