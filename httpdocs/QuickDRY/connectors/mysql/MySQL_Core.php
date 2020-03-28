@@ -623,11 +623,17 @@ class MySQL_Core extends SQL_Base
                 if(is_null($value)) {
                     return null;
                 }
+                if(!is_numeric($value)) {
+                    $value = 0;
+                }
                 return $value ? 1 : 0;
 
             case 'decimal(18,2)':
             case 'double':
             case 'int(10)':
+                if(!is_numeric($value)) {
+                    $value = 0;
+                }
                 return $value * 1.0;
 
             case 'timestamp':
