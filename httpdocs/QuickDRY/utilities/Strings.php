@@ -860,10 +860,16 @@ class Strings extends SafeClass
      *
      * @return string
      */
-    public static function StringToHTML($text)
+    public static function StringToHTML($text, $convert_urls = false)
     {
         $text = str_replace("\r", '', $text);
         $text = preg_replace('/\n+/si', "\n", $text);
+
+        if($convert_urls) {
+            // https://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
+            $url = '@(http)?(s)?(://)?(([a-zA-Z])([-\w]+\.)+([^\s\.]+[^\s]*)+[^,.\s])@';
+            $text = preg_replace($url, '<a href="http$2://$4" target="_blank" title="$0">$0</a>', $text);
+        }
         $t = explode("\n", $text);
         return '<p>' . implode("</p><p>", $t) . '</p>';
     }

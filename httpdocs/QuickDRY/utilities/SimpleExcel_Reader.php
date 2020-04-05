@@ -20,9 +20,12 @@ class SimpleExcel_Reader extends SafeClass
         }
         try {
             if ($debug) {
-                Log::Insert('Getting file type', true);
+                Log::Insert('Loading', true);
             }
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+            if ($debug) {
+                Log::Insert('Done Loading', true);
+            }
 
 
             return self::ToReport($spreadsheet, $process_cells, $debug, $row_limit);
