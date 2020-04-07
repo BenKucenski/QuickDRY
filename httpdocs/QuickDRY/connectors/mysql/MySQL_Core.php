@@ -252,7 +252,7 @@ class MySQL_Core extends SQL_Base
                     $val = trim(Strings::RemoveFromStart('{YEAR}', $val));
                 } else
                     if (substr($val, 0, strlen('{IN} ')) === '{IN} ') {
-                        $val = explode(',', trim(Strings::RemoveFromStart('IN', $val)));
+                        $val = explode(',', trim(Strings::RemoveFromStart('{IN} ', $val)));
                         if (($key = array_search('null', $val)) !== false) {
                             $col = '(' . $col . ' IS NULL OR ' . $col . 'IN (' . StringRepeatCS('{{}}', sizeof($val) - 1) . '))';
                             unset($val[$key]);
@@ -262,19 +262,19 @@ class MySQL_Core extends SQL_Base
                     } else
                         if (substr($val, 0, strlen('{NLIKE} ')) === '{NLIKE} ') {
                             $col = $col . ' NOT LIKE {{}} ';
-                            $val = trim(Strings::RemoveFromStart('{NLIKE}', $val));
+                            $val = trim(Strings::RemoveFromStart('{NLIKE} ', $val));
                         } else
-                            if (substr($val, 0, strlen('{IN} ')) === 'NILIKE ') {
+                            if (substr($val, 0, strlen('{NILIKE} ')) === 'NILIKE ') {
                                 $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
-                                $val = strtolower(trim(Strings::RemoveFromStart('NILIKE', $val)));
+                                $val = strtolower(trim(Strings::RemoveFromStart('NILIKE ', $val)));
                             } else
                                 if (substr($val, 0, strlen('{ILIKE} ')) === 'ILIKE ') {
                                     $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
-                                    $val = strtolower(trim(Strings::RemoveFromStart('ILIKE', $val)));
+                                    $val = strtolower(trim(Strings::RemoveFromStart('ILIKE ', $val)));
                                 } else
                                     if (substr($val, 0, strlen('{LIKE} ')) === 'LIKE ') {
                                         $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
-                                        $val = trim(Strings::RemoveFromStart('LIKE', $val));
+                                        $val = trim(Strings::RemoveFromStart('LIKE ', $val));
                                     } else
                                         if (stristr($val, '<=') !== false) {
                                             $col = $col . ' <= {{}} ';
