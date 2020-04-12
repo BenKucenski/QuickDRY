@@ -407,7 +407,7 @@ class MSSQL_Core extends SQL_Base
                                             } else
                                                 if (substr($val, 0, strlen('<> ')) === '<> ') {
                                                     $val = trim(Strings::RemoveFromStart('<>', $val));
-                                                    if ($val !== 'null') {
+                                                    if (strtolower($val) !== 'null') {
                                                         $col = $col . ' <> @ ';
                                                     } else {
                                                         $col = $col . ' IS NOT NULL';

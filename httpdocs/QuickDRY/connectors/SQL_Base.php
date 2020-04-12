@@ -820,7 +820,7 @@ class SQL_Base
 
             if (!isset(static::$prop_definitions[$name])) {
                 if ($strict) {
-                    $missing[] = $name;
+                    $missing[$name] = $value;
                 }
                 continue;
             }
@@ -843,7 +843,7 @@ class SQL_Base
             }
         }
         if ($strict && sizeof($missing)) {
-            Halt(['error' => 'QuickDRY Error: Missing Columns', 'Columns' => $missing, 'Values' => $row]);
+            Halt(['error' => 'QuickDRY Error: Missing Columns', 'Object' => get_class($this), 'Columns' => $missing, 'Values' => $row]);
         }
     }
 
