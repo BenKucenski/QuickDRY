@@ -264,17 +264,17 @@ class MySQL_Core extends SQL_Base
                             $col = $col . ' NOT LIKE {{}} ';
                             $val = trim(Strings::RemoveFromStart('{NLIKE} ', $val));
                         } else
-                            if (substr($val, 0, strlen('{NILIKE} ')) === 'NILIKE ') {
+                            if (substr($val, 0, strlen('{NILIKE} ')) === '{NILIKE} ') {
                                 $col = 'LOWER(' . $col . ')' . ' NOT ILIKE {{}} ';
-                                $val = strtolower(trim(Strings::RemoveFromStart('NILIKE ', $val)));
+                                $val = strtolower(trim(Strings::RemoveFromStart('{NILIKE} ', $val)));
                             } else
-                                if (substr($val, 0, strlen('{ILIKE} ')) === 'ILIKE ') {
+                                if (substr($val, 0, strlen('{ILIKE} ')) === '{ILIKE} ') {
                                     $col = 'LOWER(' . $col . ')' . ' ILIKE {{}} ';
-                                    $val = strtolower(trim(Strings::RemoveFromStart('ILIKE ', $val)));
+                                    $val = strtolower(trim(Strings::RemoveFromStart('{ILIKE} ', $val)));
                                 } else
-                                    if (substr($val, 0, strlen('{LIKE} ')) === 'LIKE ') {
+                                    if (substr($val, 0, strlen('{LIKE} ')) === '{LIKE} ') {
                                         $col = 'LOWER(' . $col . ')' . ' LIKE LOWER({{}}) ';
-                                        $val = trim(Strings::RemoveFromStart('LIKE ', $val));
+                                        $val = trim(Strings::RemoveFromStart('{LIKE} ', $val));
                                     } else
                                         if (stristr($val, '<=') !== false) {
                                             $col = $col . ' <= {{}} ';
