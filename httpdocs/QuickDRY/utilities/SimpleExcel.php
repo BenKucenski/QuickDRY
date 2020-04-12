@@ -143,9 +143,9 @@ class SimpleExcel extends SafeClass
 
     /**
      * @param $filename
-     * @param SimpleExcel[] $se
+     * @param SimpleExcel[] $ses
      */
-    public static function ExportSpreadsheets($filename, &$ses)
+    public static function ExportSpreadsheets($filename, &$ses, $exit_on_error = true)
     {
         $spreadsheet = new Spreadsheet();
 
@@ -220,7 +220,10 @@ class SimpleExcel extends SafeClass
                 $writer->save($filename);
             }
         } catch (Exception $ex) {
-            Debug::Halt($ex);
+            if($exit_on_error) {
+                Debug::Halt($ex);
+            }
+            throw new Exception($ex);
         }
 
     }
