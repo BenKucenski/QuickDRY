@@ -363,6 +363,9 @@ class MSSQL_Core extends SQL_Base
         // extra + symbols allow us to do AND on the same column
         $col = str_replace('+', '', $col);
 
+        if(is_object($val)) {
+            Halt(['QuickDRY Error'=>'$val is object', $val]);
+        }
         if (substr($val, 0, strlen('{BETWEEN} ')) === '{BETWEEN} ') {
             $val = trim(Strings::RemoveFromStart('{BETWEEN}', $val));
             $val = explode(',', $val);
@@ -1169,14 +1172,25 @@ INSERT INTO
 
         $primary = static::$_primary ? static::$_primary: [];
 
-        $primary_set = true;
+        $primary_set = false;
         $primary_sql = [];
         foreach($primary as $col) {
+            $primary_set = true;
             if(!$this->$col) {
                 $primary_set = false;
                 break;
             }
             $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
+        }
+        if(!$primary_set && isset(static::$_unique[0])) {
+            foreach(static::$_unique[0] as $col) {
+                $primary_set = true;
+                if(!$this->$col) {
+                    $primary_set = false;
+                    break;
+                }
+                $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
+            }
         }
 
         $sql = '
