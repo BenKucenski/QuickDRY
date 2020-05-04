@@ -17,7 +17,7 @@ class SimpleExcel_Column extends SafeClass
     public function __construct($Header, $Property, $PropertyType = SIMPLE_EXCEL_PROPERTY_TYPE_CALCULATED)
     {
         $this->Header = is_null($Header) ? $Property : $Header;
-        $this->Property = $Property;
+        $this->Property = is_null($Property) ? $Header : $Property;
         $this->PropertyType = $PropertyType;
     }
 
