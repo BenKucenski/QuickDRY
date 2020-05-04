@@ -252,9 +252,10 @@ class MSSQL_Connection
             $result = sqlsrv_query($this->db, $query);
 
             if (!$result) {
-                $returnval = ['error' => static::SQLErrorsToString(), 'query' => $query, 'params' => $params];
-                if ($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR)
+                $returnval = ['error_type'=>'No Result Set', 'error' => static::SQLErrorsToString(), 'query' => $query, 'params' => $params];
+                if ($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR) {
                     Halt($returnval);
+                }
             } else {
                 while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
                     $list[] = is_null($map_function) ? $r : call_user_func($map_function, $r);
@@ -264,7 +265,7 @@ class MSSQL_Connection
                 while (sqlsrv_next_result($result)) {
                     $more[$i] = [];
                     while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-                        if(is_null($map_function)) {
+                        if (is_null($map_function)) {
                             $more[$i][] = $r;
                         } else {
                             $list[] = call_user_func($map_function, $r);
@@ -287,7 +288,8 @@ class MSSQL_Connection
             }
         } catch (Exception $e) {
 
-            $returnval['error'] = 'Exception: ' . $e->getMessage();
+            $returnval['error_type'] = 'Exception';
+            $returnval['error'] = $e->getMessage();
             $returnval['sql'] = print_r([$sql, $params], true);
 
             Metrics::Stop('MSSQL');
@@ -302,11 +304,14 @@ class MSSQL_Connection
         $this->Log($sql, $params, $t, $returnval['error']);
 
         if ($returnval['error']) {
-            if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
-                Halt($returnval);
+            if ($map_function) {
+                if(defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR) {
+                    Halt($returnval);
+                }
+                return $returnval;
             }
         }
-        if (!$map_function || $returnval['error']) {
+        if (!$map_function) {
             return $returnval;
         }
         return $returnval['data'];
@@ -450,7 +455,7 @@ class MSSQL_Connection
                     $fname = 'sql\\' . time() . '.' . rand(0, 1000000) . '.mssql.sql';
                     $fp = fopen($fname, 'w');
                 }
-                fwrite($fp, str_replace("\r\n","\n",$query));
+                fwrite($fp, str_replace("\r\n", "\n", $query));
                 fclose($fp);
                 $output = [];
                 // -x turns off variable interpretation - must be set
@@ -483,7 +488,7 @@ class MSSQL_Connection
                 }
 
                 $returnval['error'] = [];
-                foreach($output as $i => $line) {
+                foreach ($output as $i => $line) {
                     if (preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
                         $returnval['error'][$i] = [$output[$i], $output[$i + 1], $fname];
                     }

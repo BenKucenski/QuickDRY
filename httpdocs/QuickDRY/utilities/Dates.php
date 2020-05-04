@@ -77,8 +77,7 @@ class Dates extends SafeClass
      */
     public static function AddDayToDate($timeStamp, $totalDays = 1)
     {
-        if (!is_numeric($timeStamp))
-            $timeStamp = strtotime($timeStamp);
+        $timeStamp = strtotime(self::Datestamp($timeStamp));
 
         // You can add as many days as you want. mktime will accumulate to the next month / year.
         $thePHPDate = getdate($timeStamp);

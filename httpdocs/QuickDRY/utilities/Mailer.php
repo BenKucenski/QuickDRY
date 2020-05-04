@@ -90,6 +90,9 @@ class Mailer extends SafeClass
             $mail->FromName = $this->from_name ? $this->from_name : SMTP_FROM_NAME;
             $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
 
+            $this->from_email = $mail->From;
+            $this->from_name = $mail->FromName;
+
             if (defined('SMTP_USER') && defined('SMTP_PASS')) {
                 if (SMTP_USER && SMTP_PASS) {
                     $mail->Password = SMTP_PASS;

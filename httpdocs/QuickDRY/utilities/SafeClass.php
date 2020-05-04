@@ -93,6 +93,9 @@ class SafeClass
      */
     public function FromRow($row, $convert_objects = false)
     {
+        $halt_on_error = $this->_HaltOnError;
+
+        $this->HaltOnError(false);
         if (!is_array($row)) {
             Halt($row);
         }
@@ -108,6 +111,12 @@ class SafeClass
             }
             $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
         }
+        if($this->HasMissingProperties()) {
+            if($halt_on_error) {
+                Halt($this->GetMissingPropeties());
+            }
+        }
+        $this->HaltOnError($halt_on_error);
     }
 
     /**
@@ -134,5 +143,58 @@ class SafeClass
         }
         fclose($output) or die("Can't close php://output");
         exit;
+    }
+
+    /**
+     * @param SafeClass[] $items
+     * @return string
+     */
+    public static function ToHTML(&$items, $class = '', $style = '', $numbered = false, $limit = 0)
+    {
+        if(!sizeof($items)) {
+            return '';
+        }
+
+        $obj_class = get_called_class();
+        $cols = array_keys(get_object_vars($items[0]));
+
+        $se = new SimpleExcel();
+        $se->Report = $items;
+        $se->Title = $obj_class;
+        $se->Columns = [];
+        foreach ($cols as $col) {
+            $se->Columns[$col] = new SimpleExcel_Column(null, $col);
+        }
+
+        $html = '<table class="' . $class . '" style="' . $style . '"><thead><tr>';
+        if ($numbered) {
+            $html .= '<th></th>';
+        }
+        foreach ($se->Columns as $col => $settings) {
+            $html .= '<th>' . $col . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        foreach ($se->Report as $i => $item) {
+            if($limit && $i >= $limit) {
+                break;
+            }
+            $html .= '<tr>';
+            if ($numbered) {
+                $html .= '<td>' . ($i + 1) . '</td>';
+            }
+            foreach ($se->Columns as $col => $settings) {
+                if(is_array($item->$col)) {
+                    continue;
+                }
+                if (is_object($item->$col)) {
+                    $html .= '<td>' . Dates::Datestamp($item->$col) . '</td>';
+                } else {
+                    $html .= '<td>' . ($item->$col) . '</td>';
+                }
+            }
+            $html .= '</tr>';
+        }
+
+        return $html . '</tbody></table>';
     }
 }

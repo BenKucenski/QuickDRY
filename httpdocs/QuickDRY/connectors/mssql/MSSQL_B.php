@@ -14,4 +14,12 @@ class MSSQL_B extends MSSQL_Core
             static::$connection = new MSSQL_Connection(MSSQLB_HOST, MSSQLB_USER, MSSQLB_PASS);
         }
     }
+
+    /**
+     * @return string|null
+     */
+    public static function _Table()
+    {
+        return static::$table;
+    }
 }
