@@ -75,6 +75,7 @@ class Mailer extends SafeClass
         if (defined('SMTP_DEBUG') && SMTP_DEBUG) {
             if (defined('SMTP_DEBUG_EMAIL')) {
                 $this->to_email = SMTP_DEBUG_EMAIL;
+                $this->subject = 'TEST EMAIL: ' . $this->subject;
             } else {
                 return -2;
             }
