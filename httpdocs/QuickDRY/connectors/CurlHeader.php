@@ -16,6 +16,7 @@ class CurlHeader extends SimpleReport
     public $AccessControlAllowHeaders;
     public $Date;
     public $ContentLength;
+    public $Location;
 
     /**
      * CurlHeader constructor.
@@ -60,6 +61,9 @@ class CurlHeader extends SimpleReport
                     break;
                 case 'Cache-Control':
                     $this->CacheControl = $v;
+                    break;
+                case 'Location':
+                    $this->Location = $v;
                     break;
                 default:
                     continue;

@@ -16,6 +16,12 @@ class Curl
     public $Header;
     public $StatusCode;
 
+    public $URL;
+    public $Params;
+    public $SentHeader;
+
+    public static $FollowLocation = true;
+
     /**
      * Returns the size of a file without downloading it, or -1 if the file
      * size could not be determined.
@@ -116,7 +122,7 @@ class Curl
 
         curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, self::$FollowLocation);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_ENCODING, "");
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -132,27 +138,32 @@ class Curl
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $header = substr($content, 0, $header_size);
+        $response_header = substr($content, 0, $header_size);
         $body = substr($content, $header_size);
         $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
 
 
-        $head = explode("\n", $header);
+        $head = explode("\n", $response_header);
         $head_hash = [];
         foreach ($head as $val) {
             $val = explode(": ", $val);
             if (isset($val[1])) {
-                $head_hash[$val[0]] = $val[1];
+                $head_hash[$val[0]] = trim($val[1]);
             }
         }
 
         $res = new Curl();
         $res->Body = $body;
-        $res->HeaderRaw = $header;
+        $res->HeaderRaw = $response_header;
         $res->Header = new CurlHeader($head_hash);
         $res->HeaderHash = $head_hash;
         $res->StatusCode = $status;
+
+        $res->URL = $path;
+        $res->Params = $params;
+        $res->SentHeader = $header;
+
         return $res;
     }
 
@@ -198,7 +209,7 @@ class Curl
 
         curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
         curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, self::$FollowLocation);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_ENCODING, "");
         curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -222,27 +233,31 @@ class Curl
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $header = substr($content, 0, $header_size);
+        $response_header = substr($content, 0, $header_size);
         $body = substr($content, $header_size);
         $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
 
-        $head = explode("\n", $header);
+        $head = explode("\n", $response_header);
         $head_hash = [];
         foreach ($head as $val) {
             $val = explode(": ", $val);
             if (isset($val[1])) {
-                $head_hash[$val[0]] = $val[1];
+                $head_hash[$val[0]] = trim($val[1]);
             }
         }
 
         $res = new Curl();
         $res->Body = $body;
-        $res->Header = $header;
-        $res->HeaderRaw = $header;
+        $res->HeaderRaw = $response_header;
         $res->Header = new CurlHeader($head_hash);
         $res->HeaderHash = $head_hash;
         $res->StatusCode = $status;
+
+        $res->URL = $path;
+        $res->Params = $params;
+        $res->SentHeader = $header;
+
         return $res;
     }
 

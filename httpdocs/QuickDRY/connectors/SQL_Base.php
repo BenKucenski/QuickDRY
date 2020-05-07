@@ -275,8 +275,9 @@ class SQL_Base
     public static function GetColumns()
     {
         $cols = [];
-        foreach (static::$prop_definitions as $name => $def)
+        foreach (static::$prop_definitions as $name => $def) {
             $cols[] = $name;
+        }
         return $cols;
     }
 
