@@ -490,14 +490,18 @@ class MSSQL_Connection
                 $returnval['error'] = [];
                 foreach ($output as $i => $line) {
                     if (preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
-                        $returnval['error'][$i] = [$output[$i], $output[$i + 1], $fname];
+                        $returnval['error'][$i] = implode(', ', [$output[$i], $output[$i + 1], $fname]);
                     }
+                }
+                if(sizeof($returnval['error'])) {
+                    $returnval['error'] = trim(implode("\r\n", $returnval['error']));
+                } else {
+                    $returnval['error'] = '';
                 }
 
                 $returnval['exec'] = $res . PHP_EOL . PHP_EOL . implode(
                         PHP_EOL, $output
                     );
-                $returnval['error'] = '';
                 if (!self::$keep_files) {
                     unlink($fname);
                 } else {

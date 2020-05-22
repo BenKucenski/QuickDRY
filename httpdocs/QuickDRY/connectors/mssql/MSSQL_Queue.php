@@ -1,6 +1,6 @@
 <?php
 
-class MSSQL_Queue
+class MSSQL_Queue extends SafeClass
 {
     private $_sql = [];
     private $strlen = 0;
@@ -42,8 +42,8 @@ SET QUOTED_IDENTIFIER ON
         $class = $this->MSSQL_CLASS;
         $res = $class::Execute($sql, null, true);
         Metrics::Toggle('MSSQL_Queue::Flush');
-        if ($res['error'] && $this->exit_on_error) {
-            Log::Insert($res['error'], true);
+        if (isset($res['error']) && $res['error'] && $this->exit_on_error) {
+            Log::Insert(['MSSQL_Queue Error' => $res['error']], true);
             exit(1);
         }
 
