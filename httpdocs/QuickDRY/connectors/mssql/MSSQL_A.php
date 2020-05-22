@@ -14,4 +14,21 @@ class MSSQL_A extends MSSQL_Core
             static::$connection = new MSSQL_Connection(MSSQL_HOST, MSSQL_USER, MSSQL_PASS);
         }
     }
+
+    /**
+     * @param bool $val
+     */
+    public static function SetIgnoreDuplicateError($val)
+    {
+        self::_connect();
+        self::$connection->IgnoreDuplicateError = $val;
+    }
+
+    /**
+     * @return string|null
+     */
+    public static function _Table()
+    {
+        return static::$table;
+    }
 }

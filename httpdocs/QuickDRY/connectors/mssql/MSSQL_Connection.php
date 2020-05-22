@@ -3,11 +3,12 @@
 /**
  * Class MSSQL_Connection
  */
-class MSSQL_Connection
+class MSSQL_Connection extends SafeClass
 {
     public static $log = [];
     public static $use_log = false;
     public static $keep_files = false;
+    public $IgnoreDuplicateError = false;
     public $query_time = 0;
     public $query_count = 0;
 
@@ -490,7 +491,11 @@ class MSSQL_Connection
                 $returnval['error'] = [];
                 foreach ($output as $i => $line) {
                     if (preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
-                        $returnval['error'][$i] = implode(', ', [$output[$i], $output[$i + 1], $fname]);
+                        $error = implode(', ', [$output[$i], $output[$i + 1], $fname]);
+                        if($this->IgnoreDuplicateError && stristr($error, 'The duplicate key value is') !== false) {
+                            continue;
+                        }
+                        $returnval['error'][$i] = $error;
                     }
                 }
                 if(sizeof($returnval['error'])) {

@@ -16,6 +16,15 @@ class MSSQL_B extends MSSQL_Core
     }
 
     /**
+     * @param bool $val
+     */
+    public static function SetIgnoreDuplicateError($val)
+    {
+        self::_connect();
+        self::$connection->IgnoreDuplicateError = $val;
+    }
+
+    /**
      * @return string|null
      */
     public static function _Table()

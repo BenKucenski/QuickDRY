@@ -5,14 +5,16 @@ class MSSQL_Queue extends SafeClass
     private $_sql = [];
     private $strlen = 0;
     private $MSSQL_CLASS;
-    public $exit_on_error;
-    private $queue_limit;
+    public $LogClass = 'Log';
+    public $HaltOnError;
+    public $IgnoreDuplicateError = false;
+    private $QueueLimit;
 
-    public function __construct($MSSQL_CLASS = 'MSSQL_A', $exit_on_error = true, $queue_limit = 500)
+    public function __construct($MSSQL_CLASS = 'MSSQL_A', $HaltOnError = true, $QueueLimit = 500)
     {
         $this->MSSQL_CLASS = $MSSQL_CLASS;
-        $this->exit_on_error = $exit_on_error;
-        $this->queue_limit = $queue_limit;
+        $this->HaltOnError = $HaltOnError;
+        $this->QueueLimit = $QueueLimit;
     }
 
     /**
@@ -40,10 +42,14 @@ SET QUOTED_IDENTIFIER ON
         		' . $sql . ' ;');
 
         $class = $this->MSSQL_CLASS;
+        $class::SetIgnoreDuplicateError($this->IgnoreDuplicateError);
+
         $res = $class::Execute($sql, null, true);
+
         Metrics::Toggle('MSSQL_Queue::Flush');
-        if (isset($res['error']) && $res['error'] && $this->exit_on_error) {
-            Log::Insert(['MSSQL_Queue Error' => $res['error']], true);
+        if (isset($res['error']) && $res['error'] && $this->HaltOnError) {
+            $LogClass = $this->LogClass;
+            $LogClass::Insert(['MSSQL_Queue Error' => $res['error']], true);
             exit(1);
         }
 
@@ -72,7 +78,7 @@ SET QUOTED_IDENTIFIER ON
         $this->_sql[] = $t;
         $this->strlen += strlen($t);
 
-        if ($this->strlen > 1024 * 1024 * 50 || $this->Count() >= $this->queue_limit) {
+        if ($this->strlen > 1024 * 1024 * 50 || $this->Count() >= $this->QueueLimit) {
             return $this->Flush();
         }
         return ['error' => '', 'query' => ''];
