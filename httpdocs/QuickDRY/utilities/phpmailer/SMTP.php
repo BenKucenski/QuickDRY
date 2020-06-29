@@ -585,10 +585,16 @@ class SMTP
                         $line_out = "." . $line_out;
                     }
                 }
+                if ($this->do_debug >= 2) {
+                    $this->edebug("SMTP -> LINE OUT:" . $line_out . $this->CRLF . '<br />');
+                }
                 fputs($this->smtp_conn, $line_out . $this->CRLF);
             }
         }
 
+        if ($this->do_debug >= 2) {
+            $this->edebug("SMTP -> LINE OUT:" . $this->CRLF . "." . $this->CRLF . '<br />');
+        }
         // message data has been sent
         fputs($this->smtp_conn, $this->CRLF . "." . $this->CRLF);
 

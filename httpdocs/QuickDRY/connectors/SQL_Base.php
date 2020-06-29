@@ -719,6 +719,17 @@ class SQL_Base
     {
         $res = '<tr>';
         $columns = [];
+        if(is_null($swap)) {
+            $swap = [];
+        }
+
+        if(is_null($add)) {
+            $add = [];
+        }
+
+        if(is_null($ignore)) {
+            $ignore = [];
+        }
 
         foreach ($this->props as $name => $value)
             if (!in_array($name, $ignore)) {

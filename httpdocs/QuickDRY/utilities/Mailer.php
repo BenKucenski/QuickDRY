@@ -16,6 +16,8 @@ class Mailer extends SafeClass
     public $from_email;
     public $from_name;
 
+    public $mail;
+
     /**
      * @param $name
      * @return array|int|mixed|null
@@ -59,7 +61,7 @@ class Mailer extends SafeClass
      * @param bool $debug
      * @return int
      */
-    public function Send($debug = false)
+    public function Send($debug = false, $smtp_output = false)
     {
 
         if (defined('SMTP_ON')) {
@@ -93,6 +95,7 @@ class Mailer extends SafeClass
 
             $this->from_email = $mail->From;
             $this->from_name = $mail->FromName;
+            $mail->SMTPDebug = $smtp_output;
 
             if (defined('SMTP_USER') && defined('SMTP_PASS')) {
                 if (SMTP_USER && SMTP_PASS) {
@@ -100,9 +103,7 @@ class Mailer extends SafeClass
                     $mail->Username = SMTP_USER;
                     $mail->AuthType = SMTP_AUTH;
                     $mail->SMTPAuth = true;
-                    if(SMTP_AUTH !== 'PLAIN') {
-                        $mail->SMTPSecure = 'tls';
-                    }
+                    $mail->SMTPSecure = defined('SMTP_SECURE') ? SMTP_SECURE : '';
                 }
             }
             $mail->Mailer = 'smtp';
@@ -137,6 +138,7 @@ class Mailer extends SafeClass
                         Halt([$mail->ErrorInfo, $mail]);
                     }
                     $this->log = $mail->ErrorInfo;
+                    $this->mail = $mail;
                     return 0;
                 }
             } catch(Exception $e) {
