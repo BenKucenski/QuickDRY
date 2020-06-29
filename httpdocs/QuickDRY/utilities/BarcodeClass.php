@@ -19,6 +19,12 @@ class BarcodeClass
             $root .= 'barcode/';
         }
 
+        $filename = $root . $width . '/' . $height . '/' . $code . '.png';
+
+		if(file_exists($filename)) {
+			return;
+		}
+
         $number = strtoupper(base64_decode($code));
 
         $barcode_font = $root . 'FREE3OF9.TTF';
@@ -47,7 +53,7 @@ class BarcodeClass
         // imagettftext($img, $fontsize, $angle, $xpos, $ypos, $color, $fontfile, $text);
         imagettftext($img, $font_size, 0, 0, $font_size, $black, $barcode_font, $number);
 
-        imagepng($img, $root . $width . '/' . $height . '/' . $code . '.png');
+        imagepng($img, $filename);
         return $img;
     }
 }

@@ -54,11 +54,17 @@ class Elastic_Base extends SafeClass
                     break;
                 case 'integer':
                 case 'long':
-                    $value = (int)($value * 1.0);
+                    if(!is_numeric($value)) {
+                        $value = 0;
+                    }                    
+					$value = (int)($value * 1.0);
                     break;
                 case 'float':
                 case 'double':
-                    $value *= 1.0;
+                    if(!is_numeric($value)) {
+                        $value = 0;
+                    }                    
+					$value *= 1.0;
                     break;
                 case 'geo_point': // double, double
                     break;

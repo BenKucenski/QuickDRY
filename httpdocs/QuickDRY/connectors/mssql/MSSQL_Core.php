@@ -1172,9 +1172,10 @@ INSERT INTO
 
         $primary = static::$_primary ? static::$_primary: [];
 
-        $primary_set = true;
+        $primary_set = false;
         $primary_sql = [];
         foreach($primary as $col) {
+			$primary_set = true;
             if(!$this->$col) {
                 $primary_set = false;
                 break;

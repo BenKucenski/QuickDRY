@@ -54,7 +54,7 @@ class Navigation
         }
 
         if (!$test) {
-            HTTP::RedirectError('You do not have permission to view that page');
+            HTTP::RedirectError('You do not have permission to view that page: ' . $_CUR_PAGE);
         }
         return false;
     }

@@ -32,8 +32,12 @@ class MySQL extends SafeClass
                     }
                 }
 
-                if (isset($params[$result[1]]))
+                if (isset($params[$result[1]])) {
+                    if(is_array($params[$result[1]])) {
+                        Halt(['QuickDRY Error: Parameter cannot be array', $params]);
+                    }
                     return '"' . mysqli_escape_string($conn, $params[$result[1]]) . '"';
+				}
 
                 Halt(array($sql, $params), $result[0] . ' does not having a matching parameter (mysql_escape_query).');
             }
