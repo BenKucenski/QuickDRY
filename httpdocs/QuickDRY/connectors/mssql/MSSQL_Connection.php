@@ -480,12 +480,12 @@ class MSSQL_Connection extends SafeClass
                 $cmd = 'sqlcmd ' . implode(' ', $opts);
 
                 if (self::$keep_files) {
-                    Log::Insert($cmd, true);
+                    Log::Insert('ExecuteWindows: cmd ' . $cmd, true);
                 }
 
                 $res = exec($cmd, $output);
                 if (self::$keep_files) {
-                    Log::Insert($output, true);
+                    Log::Insert(['ExecuteWindows: output' => $output], true);
                 }
 
                 $returnval['error'] = [];
@@ -495,7 +495,10 @@ class MSSQL_Connection extends SafeClass
                         if($this->IgnoreDuplicateError && stristr($error, 'The duplicate key value is') !== false) {
                             continue;
                         }
-                        $returnval['error'][$i] = $error;
+                        if($this->IgnoreDuplicateError && stristr($error, 'Cannot insert duplicate key row') !== false) {
+                            continue;
+                        }
+                        $returnval['error'][$i] = 'IgnoreDuplicateError - ' . $this->IgnoreDuplicateError . ': ' . $error;
                     }
                 }
                 if(sizeof($returnval['error'])) {

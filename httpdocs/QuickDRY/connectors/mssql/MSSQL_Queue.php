@@ -49,7 +49,7 @@ SET QUOTED_IDENTIFIER ON
         Metrics::Toggle('MSSQL_Queue::Flush');
         if (isset($res['error']) && $res['error'] && $this->HaltOnError) {
             $LogClass = $this->LogClass;
-            $LogClass::Insert(['MSSQL_Queue Error' => $res['error']], true);
+            $LogClass::Insert(['MSSQL_Queue Error' => $res['error'], 'SQL' => $sql], true);
             exit(1);
         }
 
