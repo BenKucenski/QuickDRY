@@ -109,10 +109,21 @@ class SimpleExcel extends SafeClass
             if (!is_object($item)) {
                 Halt($item);
             }
+
+            $is_std = get_class($item) === 'stdClass';
+
             $sheet_column = 'A';
             foreach ($se->Columns as $column) {
                 try { // need to use try catch so that magic __get columns are accessible
-                    $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+                    if(!$is_std) { // if the class type is not a stdClass, then let the class type handle errors
+                        $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+                    } else {
+                        if(isset($item->{$column->Property})) { // otherwise, check to see if properties exist or set the value to an empty string
+                            $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+                        } else {
+                            $value = '';
+                        }
+                    }
                 } catch (Exception $ex) {
                     $value = '';
                 }
@@ -145,7 +156,7 @@ class SimpleExcel extends SafeClass
      * @param $filename
      * @param SimpleExcel[] $ses
      */
-    public static function ExportSpreadsheets($filename, &$ses, $exit_on_error = true)
+    public static function ExportSpreadsheets($filename, &$ses, $exit_on_error = true, $SafeMode = false)
     {
         $spreadsheet = new Spreadsheet();
 
@@ -189,14 +200,21 @@ class SimpleExcel extends SafeClass
                     if (!is_object($item)) {
                         Halt($item);
                     }
+
+                    $is_std = get_class($item) === 'stdClass';
+
                     $sheet_column = 'A';
                     foreach ($report->Columns as $column) {
                         try { // need to use try catch so that magic __get columns are accessible
-                            $value = $item->{$column->Property};
+                            if(!$is_std) { // if we're not using a stdClass, then let the class type handle errors
+                                $value = $item->{$column->Property};
+                            } else { // otherwise, use an empty string for non-existent properties
+                                $value = isset($item->{$column->Property}) ? $item->{$column->Property} : '';
+                            }
                         } catch (Exception $ex) {
                             $value = '';
                         }
-                        if(!is_object($value)) {
+                        if(!is_object($value) && $SafeMode) {
                             $value = Strings::KeyboardOnly($value);
                         }
                         self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
