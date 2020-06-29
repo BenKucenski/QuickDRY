@@ -103,6 +103,8 @@ class Debug extends SafeClass
             $finalMsg .= "\r\n\r\n";
             $finalMsg .= print_r($Web, true);
             $finalMsg .= "\r\n\r\n";
+            $finalMsg .= print_r($_REQUEST, true);
+            $finalMsg .= "\r\n\r\n";
             $finalMsg .= static::_debug_string_backtrace();
         }
         $finalMsg .= '</pre>' . PHP_EOL;
