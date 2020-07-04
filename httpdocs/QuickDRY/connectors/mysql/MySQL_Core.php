@@ -6,6 +6,7 @@
 class MySQL_Core extends SQL_Base
 {
     protected static $DB_HOST;
+    protected $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
     /**
      * @return array
