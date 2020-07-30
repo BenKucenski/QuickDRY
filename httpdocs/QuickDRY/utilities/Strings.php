@@ -875,6 +875,27 @@ class Strings extends SafeClass
     }
 
     /**
+     * @param $html
+     * @return mixed
+     */
+    public static function HTMLToString($html)
+    {
+        $html = trim(strip_tags($html,'<p><br>'));
+        $html = str_replace("\r",' ', $html);
+        $html = str_replace("\n",' ', $html);
+        $html = str_ireplace('&nbsp;', ' ', $html);
+        $html = preg_replace('/\s+/', ' ', $html);
+
+        $html = str_ireplace('<p>', '', $html);
+        $html = str_ireplace('</p>', "\r\n", $html);
+        $html = str_ireplace('<br>', "\r\n", $html);
+        $html = str_ireplace('<br/>', "\r\n", $html);
+
+        $html = preg_replace('/\ +/', ' ', $html);
+        return $html;
+    }
+
+    /**
      * @param $text
      *
      * @return string

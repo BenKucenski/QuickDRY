@@ -92,6 +92,13 @@ class Mailer extends SafeClass
             $mail->From = $this->from_email ? $this->from_email : SMTP_FROM_EMAIL;
             $mail->FromName = $this->from_name ? $this->from_name : SMTP_FROM_NAME;
             $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
+            $mail->SMTPOptions = array(
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                )
+            );
 
             $this->from_email = $mail->From;
             $this->from_name = $mail->FromName;
