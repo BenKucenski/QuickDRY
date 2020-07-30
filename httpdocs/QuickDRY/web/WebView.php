@@ -257,7 +257,7 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
     $m = sizeof($ext);
     if($m > 1) {
         $ext = strtolower($ext[$m - 1]);
-        if (!in_array($ext, ['html', 'json', 'xlsx'])) {
+        if (!in_array($ext, ['html', 'json', 'xlsx', 'pdf'])) {
             if(defined('IMAGE_HANDLER') && IMAGE_HANDLER) {
                 $handler = IMAGE_HANDLER;
                 $handler::Handle($Web->CurrentPage, $Web->CurrentPageName);

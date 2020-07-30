@@ -271,6 +271,12 @@ class Web extends SafeClass
                         $this->ControllerFile = $this->ViewFile;
                         $this->ViewFile = null;
                         $this->IsJSON = true;
+                    } else {
+                        if (stristr($this->CurrentPageName, '.pdf') !== false) {
+                            $this->ControllerFile = $this->ViewFile;
+                            $this->ViewFile = null;
+                            $this->IsJSON = true;
+                        }
                     }
                 }
             }
