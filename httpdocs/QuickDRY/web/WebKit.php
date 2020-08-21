@@ -39,7 +39,7 @@ if(defined('PDF_API')) {
     fclose($fp);
 
     $params = [];
-    $params[] = '--javascript-delay 5000';
+    $params[] = '--javascript-delay 1000';
     $params[] = '--enable-javascript';
     if(!$Web->PDFShrinkToFit) {
         $params[] = '--disable-smart-shrinking';

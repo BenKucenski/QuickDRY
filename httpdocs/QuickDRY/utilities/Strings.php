@@ -5,6 +5,53 @@
  */
 class Strings extends SafeClass
 {
+    // https://stackoverflow.com/questions/2021624/string-sanitizer-for-filename
+    public static function BeautifyFilename($filename)
+    {
+        // reduce consecutive characters
+        $filename = preg_replace(array(
+            // "file   name.zip" becomes "file-name.zip"
+            '/ +/',
+            // "file___name.zip" becomes "file-name.zip"
+            '/_+/',
+            // "file---name.zip" becomes "file-name.zip"
+            '/-+/'
+        ), '-', $filename);
+        $filename = preg_replace(array(
+            // "file--.--.-.--name.zip" becomes "file.name.zip"
+            '/-*\.-*/',
+            // "file...name..zip" becomes "file.name.zip"
+            '/\.{2,}/'
+        ), '.', $filename);
+        // lowercase for windows/unix interoperability http://support.microsoft.com/kb/100625
+        $filename = mb_strtolower($filename, mb_detect_encoding($filename));
+        // ".file-name.-" becomes "file-name"
+        $filename = trim($filename, '.-');
+        return $filename;
+    }
+
+    public static function FilterFilename($filename, $beautify = true)
+    {
+        // sanitize filename
+        $filename = preg_replace(
+            '~
+        [<>:"/\\|?*]|            # file system reserved https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+        [\x00-\x1F]|             # control characters http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
+        [\x7F\xA0\xAD]|          # non-printing characters DEL, NO-BREAK SPACE, SOFT HYPHEN
+        [#\[\]@!$&\'()+,;=]|     # URI reserved https://tools.ietf.org/html/rfc3986#section-2.2
+        [{}^\~`]                 # URL unsafe characters https://www.ietf.org/rfc/rfc1738.txt
+        ~x',
+            '-', $filename);
+        // avoids ".", ".." or ".hiddenFiles"
+        $filename = ltrim($filename, '.-');
+        // optional beautification
+        if ($beautify) $filename = self::BeautifyFilename($filename);
+        // maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');
+        return $filename;
+    }
+
     public static function ExcelTitleOnly($str)
     {
         return self::Truncate(preg_replace('/\s+/si', ' ', preg_replace('/[^a-z0-9\s]/si', ' ', trim($str))), 31, false, false);
@@ -118,7 +165,7 @@ class Strings extends SafeClass
                 $row[] = ''; // fill in missing fields with emptry strings
             }
             if (sizeof($row) != $n) {
-                if(!$ignore_errors) {
+                if (!$ignore_errors) {
                     Halt([$header, $row]);
                 }
             }
@@ -227,7 +274,7 @@ class Strings extends SafeClass
 
                         $php_stmt_att = $php_stmt . '[$x_tag]' . $add . '[$key] = $value;';
                         eval($php_stmt_att);
-                    } catch(Exception $ex) {
+                    } catch (Exception $ex) {
                         CleanHalt([$xml_array, $ex]);
                     }
                 }
@@ -413,7 +460,7 @@ class Strings extends SafeClass
      */
     public static function Currency($val, $dollar_sign = true, $sig_figs = 2)
     {
-        if(!is_numeric($val)) {
+        if (!is_numeric($val)) {
             return '--';
         }
 
@@ -499,7 +546,7 @@ class Strings extends SafeClass
         }
         // handle basic numbers
         $val = preg_replace('/[^0-9\.-]/si', '', $val);
-        if(is_numeric($val)) {
+        if (is_numeric($val)) {
             $res = trim($val * 1.0);
             if ($res) {
                 return $res;
@@ -659,7 +706,7 @@ class Strings extends SafeClass
                         if ($json[$i] instanceof SafeClass) {
                             $json[$i] = $json[$i]->ToArray();
                         } else {
-                            if($json[$i] instanceof stdClass) {
+                            if ($json[$i] instanceof stdClass) {
                                 $json[$i] = json_decode(json_encode($json[$i]), true);
                             } else {
                                 Halt(['error' => 'fix_json unknown object', $json[$i]]);
@@ -865,7 +912,7 @@ class Strings extends SafeClass
         $text = str_replace("\r", '', $text);
         $text = preg_replace('/\n+/si', "\n", $text);
 
-        if($convert_urls) {
+        if ($convert_urls) {
             // https://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
             $url = '@(http)?(s)?(://)?(([a-zA-Z])([-\w]+\.)+([^\s\.]+[^\s]*)+[^,.\s])@';
             $text = preg_replace($url, '<a href="http$2://$4" target="_blank" title="$0">$0</a>', $text);
@@ -880,9 +927,9 @@ class Strings extends SafeClass
      */
     public static function HTMLToString($html)
     {
-        $html = trim(strip_tags($html,'<p><br>'));
-        $html = str_replace("\r",' ', $html);
-        $html = str_replace("\n",' ', $html);
+        $html = trim(strip_tags($html, '<p><br>'));
+        $html = str_replace("\r", ' ', $html);
+        $html = str_replace("\n", ' ', $html);
         $html = str_ireplace('&nbsp;', ' ', $html);
         $html = preg_replace('/\s+/', ' ', $html);
 
