@@ -49,7 +49,13 @@ var HTTP = {
                     eval(modalClass + '._active = true;');
                 }
 
-                var json = JSON.parse(XMLHttpRequest.responseText);
+                try {
+                    var json = JSON.parse(XMLHttpRequest.responseText);
+                } catch(e) {
+                    console.log(e);
+                    return;
+                }
+
                 if (typeof(error_callback) === "function") {
                     error_callback(data);
                 } else {

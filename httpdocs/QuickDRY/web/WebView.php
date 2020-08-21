@@ -263,10 +263,10 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
                 $handler::Handle($Web->CurrentPage, $Web->CurrentPageName);
                 exit;
             }
-            exit($Web->CurrentPageName . ' not found');
+            HTTP::ExitJSON($Web->CurrentPageName . ' not found', HTTP_STATUS_NOT_FOUND);
         }
     }
-    Debug::Halt($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile);
+    HTTP::ExitJSON($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile, HTTP_STATUS_NOT_FOUND);
 }
 
 if(defined('IS_PRODUCTION') && !IS_PRODUCTION) {
