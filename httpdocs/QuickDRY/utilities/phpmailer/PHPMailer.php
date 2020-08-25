@@ -820,6 +820,7 @@ class PHPMailer
     public function PreSend()
     {
         try {
+
             $this->mailHeader = "";
             if ((count($this->to) + count($this->cc) + count($this->bcc)) < 1) {
                 throw new phpmailerException($this->Lang('provide_address'), self::STOP_CRITICAL);
@@ -879,6 +880,9 @@ class PHPMailer
      */
     public function PostSend()
     {
+        if ($this->SMTPDebug) {
+            $this->edebug('PostSend(): Mailer = ' . $this->Mailer . '<br />');
+        }
         try {
             // Choose the mailer and send through it
             switch ($this->Mailer) {
@@ -1089,6 +1093,7 @@ class PHPMailer
     {
         if (is_null($this->smtp)) {
             $this->smtp = new SMTP;
+            $this->smtp->SMTP_PORT = $this->Port;
         }
 
         $this->smtp->Timeout = $this->Timeout;

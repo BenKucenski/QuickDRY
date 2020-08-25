@@ -174,12 +174,30 @@ class SMTP
             $port = $this->SMTP_PORT;
         }
 
+        // https://stackoverflow.com/questions/41934329/how-to-make-fsockopen-to-ignore-certificates-when-using-tls
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ]);
+        $this->smtp_conn = stream_socket_client(
+            $host . ':' . $port,
+            $errno,
+            $errstr,
+            ini_get("default_socket_timeout"),
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
+
+        /*
         // connect to the smtp server
         $this->smtp_conn = @fsockopen($host,    // the host of the server
             $port,    // the port to use
             $errno,   // error number if any
             $errstr,  // error message if any
             $tval);   // give up after ? secs
+        */
         // verify we connected properly
         if (empty($this->smtp_conn)) {
             $this->error = ["error" => "Failed to connect to server",
@@ -229,7 +247,7 @@ class SMTP
             return false;
         }
 
-        fputs($this->smtp_conn, "STARTTLS" . $this->CRLF);
+        $this->send_lines("STARTTLS");
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -277,7 +295,7 @@ class SMTP
         switch ($authtype) {
             case 'PLAIN':
                 // Start authentication
-                fputs($this->smtp_conn, "AUTH PLAIN" . $this->CRLF);
+                $this->send_lines("AUTH PLAIN");
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -293,7 +311,7 @@ class SMTP
                     return false;
                 }
                 // Send encoded username and password
-                fputs($this->smtp_conn, base64_encode("\0" . $username . "\0" . $password) . $this->CRLF);
+                $this->send_lines(base64_encode("\0" . $username . "\0" . $password));
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -311,7 +329,7 @@ class SMTP
                 break;
             case 'LOGIN':
                 // Start authentication
-                fputs($this->smtp_conn, "AUTH LOGIN" . $this->CRLF);
+                $this->send_lines("AUTH LOGIN");
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -328,7 +346,7 @@ class SMTP
                 }
 
                 // Send encoded username
-                fputs($this->smtp_conn, base64_encode($username) . $this->CRLF);
+                $this->send_lines(base64_encode($username));
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -345,7 +363,7 @@ class SMTP
                 }
 
                 // Send encoded password
-                fputs($this->smtp_conn, base64_encode($password) . $this->CRLF);
+                $this->send_lines(base64_encode($password));
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -381,7 +399,7 @@ class SMTP
                 }
                 $msg1 = $ntlm_client->TypeMsg1($realm, $workstation);//msg1
 
-                fputs($this->smtp_conn, "AUTH NTLM " . base64_encode($msg1) . $this->CRLF);
+                $this->send_lines("AUTH NTLM " . base64_encode($msg1));
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -403,7 +421,7 @@ class SMTP
                 $ntlm_res = $ntlm_client->NTLMResponse(substr($challange, 24, 8), $password);
                 $msg3 = $ntlm_client->TypeMsg3($ntlm_res, $username, $realm, $workstation);//msg3
                 // Send encoded username
-                fputs($this->smtp_conn, base64_encode($msg3) . $this->CRLF);
+                $this->send_lines(base64_encode($msg3));
 
                 $rply = $this->get_lines();
                 $code = substr($rply, 0, 3);
@@ -497,7 +515,7 @@ class SMTP
             return false;
         }
 
-        fputs($this->smtp_conn, "DATA" . $this->CRLF);
+        $this->send_lines("DATA");
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -585,10 +603,7 @@ class SMTP
                         $line_out = "." . $line_out;
                     }
                 }
-                if ($this->do_debug >= 2) {
-                    $this->edebug("SMTP -> LINE OUT:" . $line_out . $this->CRLF . '<br />');
-                }
-                fputs($this->smtp_conn, $line_out . $this->CRLF);
+                $this->send_lines($line_out);
             }
         }
 
@@ -596,7 +611,7 @@ class SMTP
             $this->edebug("SMTP -> LINE OUT:" . $this->CRLF . "." . $this->CRLF . '<br />');
         }
         // message data has been sent
-        fputs($this->smtp_conn, $this->CRLF . "." . $this->CRLF);
+        $this->send_lines($this->CRLF . "." );
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -666,7 +681,7 @@ class SMTP
      */
     private function SendHello($hello, $host)
     {
-        fputs($this->smtp_conn, $hello . " " . $host . $this->CRLF);
+        $this->send_lines($hello . " " . $host);
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -717,7 +732,7 @@ class SMTP
         }
 
         $useVerp = ($this->do_verp ? " XVERP" : "");
-        fputs($this->smtp_conn, "MAIL FROM:<" . $from . ">" . $useVerp . $this->CRLF);
+        $this->send_lines("MAIL FROM:<" . $from . ">" . $useVerp);
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -762,7 +777,7 @@ class SMTP
         }
 
         // send the quit command to the server
-        fputs($this->smtp_conn, "quit" . $this->CRLF);
+        $this->send_lines("quit");
 
         // get any good-bye messages
         $byemsg = $this->get_lines();
@@ -816,7 +831,7 @@ class SMTP
             return false;
         }
 
-        fputs($this->smtp_conn, "RCPT TO:<" . $to . ">" . $this->CRLF);
+        $this->send_lines("RCPT TO:<" . $to . ">");
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -860,7 +875,7 @@ class SMTP
             return false;
         }
 
-        fputs($this->smtp_conn, "RSET" . $this->CRLF);
+        $this->send_lines("RSET");
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
@@ -881,6 +896,14 @@ class SMTP
         }
 
         return true;
+    }
+
+    public function send_lines($str)
+    {
+        if ($this->do_debug >= 4) {
+            $this->edebug("SMTP -> send_lines(): \$str is \"$str\"" . $this->CRLF . '<br />');
+        }
+        fwrite($this->smtp_conn, $str . $this->CRLF);
     }
 
     /**
@@ -910,7 +933,7 @@ class SMTP
             return false;
         }
 
-        fputs($this->smtp_conn, "SAML FROM:" . $from . $this->CRLF);
+        $this->send_lines("SAML FROM:" . $from);
 
         $rply = $this->get_lines();
         $code = substr($rply, 0, 3);
