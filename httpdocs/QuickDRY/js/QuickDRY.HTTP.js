@@ -90,6 +90,33 @@ var HTTP = {
             }
         });
     },
+    PostNoJSON: function (url, vars, callback, error_callback, dialog, method) {
+
+        if (!method) {
+            method = "POST";
+        }
+
+        $.ajax({
+            method: method,
+            url: url,
+            data: vars,
+            dataType: "json",
+            async: true,
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                var data = XMLHttpRequest.responseText;
+                if (typeof (callback) === "function") {
+                    callback(data);
+                }
+            },
+            success: function (data) {
+
+                if (typeof (callback) === "function") {
+                    callback(data);
+                }
+            }
+        });
+    },
     getUrlParams: function () {
         var params = {};
         window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (str, key, value) {
