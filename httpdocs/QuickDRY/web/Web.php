@@ -144,7 +144,8 @@ class Web extends SafeClass
         }
 
         if (defined('HTTP_HOST')) {
-            $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
+            // allow non-standard ports
+            $this->SettingsFile = 'settings.' . str_replace(':','.',HTTP_HOST) . '.php';
         }
 
         if (defined('MYSQL_LOG') && MYSQL_LOG) {
