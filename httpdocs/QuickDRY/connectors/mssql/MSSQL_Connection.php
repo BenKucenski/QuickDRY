@@ -1001,8 +1001,10 @@ select
    OBJECT_NAME(sm.object_id) AS object_name   
    ,o.type_desc
    ,sm.definition
+   ,p.name AS table_name
   from [' . $this->current_db . '].sys.sql_modules AS sm  
   INNER JOIN [' . $this->current_db . '].sys.objects o ON sm.object_id = o.object_id  
+  LEFT JOIN [' . $this->current_db . '].sys.objects AS p ON p.object_id = o.parent_object_id
 ORDER BY type_desc, OBJECT_NAME(sm.object_id)
         ';
         /* @var $res MSSQL_Definition[] */
