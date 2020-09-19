@@ -50,6 +50,7 @@ class MSSQL_CodeGen extends SQLCodeGen
             mkdir($BaseFolder);
         }
 
+        // this is everything, views, triggers, stored procs, etc
         /* @var $definitions MSSQL_Definition[] */
         $definitions = $DatabaseClass::GetDefinitions();
         if($definitions) {
@@ -59,10 +60,14 @@ class MSSQL_CodeGen extends SQLCodeGen
                 if (!is_dir($dest)) {
                     mkdir($dest);
                 }
-                $fp =  fopen($dest . '/' . $definition->object_name . '.txt','w');
+                if($definition->table_name) {
+                    $fp =  fopen($dest . '/' . $definition->table_name . '.' . $definition->object_name . '.txt','w');
+                }
+                else {
+                    $fp =  fopen($dest . '/' . $definition->object_name . '.txt','w');
+                }
                 fwrite($fp, $definition->definition);
                 fclose($fp);
-
             }
         }
     }
@@ -74,30 +79,6 @@ class MSSQL_CodeGen extends SQLCodeGen
     {
         $DatabaseClass = $this->DatabaseClass;
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-
-        /* @var $triggers MSSQL_Trigger[] */
-        /* // hold off on this
-        $triggers = $DatabaseClass::GetTriggers();
-
-        $dest = $this->CommonClassFolder . '/triggers';
-        if (!is_dir($dest)) {
-            mkdir($dest);
-        }
-        foreach ($triggers as $trigger) {
-            Log::Insert('Trigger: ' . $trigger->name, true);
-
-            $temp = $trigger->definition;
-            $trigger->definition = ''; // clear out for the JSON file
-            $fp = fopen($dest . '/' . $trigger->name . '.json', 'w');
-            fwrite($fp, json_encode($trigger->ToArray(true), JSON_PRETTY_PRINT));
-            fclose($fp);
-
-            $trigger->definition = $temp; // store it as given in a txt file
-            $fp = fopen($dest . '/' . $trigger->name . '.txt', 'w');
-            fwrite($fp, $trigger->definition);
-            fclose($fp);
-        }
-        */
 
         /* @var $stored_procs MSSQL_StoredProc[] */
         $stored_procs = $DatabaseClass::GetStoredProcs();

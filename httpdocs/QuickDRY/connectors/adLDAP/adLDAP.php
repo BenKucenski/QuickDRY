@@ -731,7 +731,10 @@ class adLDAP
         } // Use the default option if they haven't set it
         // Search the directory for the members of a group
         $info = $this->group_info($group, ["member", "cn"]);
-        $users = $info[0]["member"];
+        if($info['count'] == 0) {
+            return null;
+        }
+        $users = isset($info[0]["member"]) ? $info[0]["member"] : $info[0]["cn"];
         if (!is_array($users)) {
             return null;
         }
@@ -761,6 +764,9 @@ class adLDAP
                 continue;
             }
 
+            if($entries['count'] == 0) {
+                continue;
+            }
             if ($entries[0]['samaccountname'][0] === NULL && $entries[0]['distinguishedname'][0] !== NULL) {
                 $user_array[] = $entries[0]['distinguishedname'][0];
             } elseif ($entries[0]['samaccountname'][0] !== NULL) {
