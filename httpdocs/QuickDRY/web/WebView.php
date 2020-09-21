@@ -266,7 +266,7 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
             HTTP::ExitJSON($Web->CurrentPageName . ' not found', HTTP_STATUS_NOT_FOUND);
         }
     }
-    HTTP::ExitJSON($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile, HTTP_STATUS_NOT_FOUND);
+    HTTP::ExitJSON([$Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile, $Web], HTTP_STATUS_NOT_FOUND);
 }
 
 if(defined('IS_PRODUCTION') && !IS_PRODUCTION) {
