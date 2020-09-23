@@ -8,6 +8,8 @@ class MSSQL_Connection extends SafeClass
     public static $log = [];
     public static $use_log = false;
     public static $keep_files = false;
+    public static $PacketSize = 32767;
+
     public $IgnoreDuplicateError = false;
     public $query_time = 0;
     public $query_count = 0;
@@ -469,7 +471,7 @@ class MSSQL_Connection extends SafeClass
                 }
                 $opts[] = '-j';
                 $opts[] = '-l 0';
-                $opts[] = '-a 32767';
+                $opts[] = '-a ' . self::$PacketSize;
                 $opts[] = '-x';
 //                $opts[] = '-E';
                 $opts[] = '-U"' . $this->DB_USER . '"';
