@@ -9,6 +9,10 @@ var Strings = {
         return date.toLocaleString('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'});
     },
 
+    Datestamp: function (date) {
+        return date.toLocaleString('fr-CA', {year: 'numeric', month: '2-digit', day: '2-digit'});
+    },
+
     // https://stackoverflow.com/questions/5619202/converting-string-to-date-in-js
     stringToDate: function (_date, _format, _delimiter) {
         //stringToDate("17/9/2014","dd/MM/yyyy","/");
