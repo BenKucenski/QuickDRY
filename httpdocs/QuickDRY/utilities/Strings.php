@@ -5,7 +5,33 @@
  */
 class Strings extends SafeClass
 {
+    /**
+     * @param $bin
+     * @return false|string
+     */
+    public static function NVarChar($bin)
+    {
+        // you must also CAST([Column] AS VARBINARY(MAX)) AS Column
+        //Binary to hexadecimal
+        $hex = bin2hex($bin);
+
+        //And then from hex to string
+        $str = "";
+        for ($i = 0; $i < strlen($hex) - 1; $i += 2) {
+            $str .= chr(hexdec($hex[$i] . $hex[$i + 1]));
+        }
+
+        //And then from UCS-2LE/SQL_Latin1_General_CP1_CI_AS (that's the column format in the DB) to UTF-8
+        $str = iconv('UCS-2LE', 'UTF-8', $str);
+        return $str;
+    }
+
     // https://stackoverflow.com/questions/2021624/string-sanitizer-for-filename
+
+    /**
+     * @param $filename
+     * @return string
+     */
     public static function BeautifyFilename($filename)
     {
         // reduce consecutive characters
@@ -30,6 +56,11 @@ class Strings extends SafeClass
         return $filename;
     }
 
+    /**
+     * @param $filename
+     * @param bool $beautify
+     * @return string
+     */
     public static function FilterFilename($filename, $beautify = true)
     {
         // sanitize filename
@@ -52,12 +83,21 @@ class Strings extends SafeClass
         return $filename;
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
     public static function ExcelTitleOnly($str)
     {
         return self::Truncate(preg_replace('/\s+/si', ' ', preg_replace('/[^a-z0-9\s]/si', ' ', trim($str))), 31, false, false);
     }
 
     // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
+
+    /**
+     * @param $number
+     * @return string
+     */
     public static function Ordinal($number)
     {
         $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
@@ -1036,6 +1076,17 @@ class Strings extends SafeClass
             return '#000';
         }
         return '#fff';
+    }
+
+    public static function StrToHex($string)
+    { // https://stackoverflow.com/questions/14674834/php-convert-string-to-hex-and-hex-to-string
+        $hex = '';
+        for ($i = 0; $i < strlen($string); $i++) {
+            $ord = ord($string[$i]);
+            $hexCode = dechex($ord);
+            $hex .= ' ' . substr('0' . $hexCode, -2);
+        }
+        return trim(strtoupper($hex));
     }
 
     /**

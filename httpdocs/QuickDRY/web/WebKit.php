@@ -27,6 +27,10 @@ if (!is_dir($Web->PDFRootDir)) {
 $html_file = $Web->PDFRootDir . '/' . $Web->PDFHash . '.html';
 $FileName = $html_file . '.pdf';
 
+if($Web->Request->ShowHTML) {
+    exit($Web->HTML);
+}
+
 if(defined('PDF_API')) {
     $res = Curl::Post(PDF_API, 'html=' . urlencode($Web->HTML));
     $fp = fopen($FileName, 'w');
