@@ -1,6 +1,9 @@
 <?php
 namespace QuickDRY\Utilities;
 
+use DateTime;
+use stdClass;
+
 /**
  * Class SafeClass
  */
