@@ -1,0 +1,9 @@
+<?php
+namespace pages\[[namespace]];
+
+require_once 'base/[[table_nice_name]]Base.php';
+
+class [[table_nice_name]] extends [[table_nice_name]]Base
+{
+
+}

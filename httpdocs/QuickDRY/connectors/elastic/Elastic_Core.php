@@ -1,11 +1,8 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
-use QuickDRY\Utilities\Debug;
-use QuickDRY\Utilities\Metrics;
-use QuickDRY\Utilities\Strings;
-use QuickDRY\Web\Web;
 
 /**
  * Class Elastic_Core
@@ -15,13 +12,12 @@ class Elastic_Core extends Elastic_Base
   // http://domain:9200/_cat/indices?v&pretty
   // http://domain:9200/index/type/_search?q=*:*&pretty
 
-  /* @var $client Elasticsearch\Client */
-  protected static $client = null;
+  protected static ?Elasticsearch\Client $client = null;
 
-  public static $use_log = false;
-  public static $log = [];
-  public static $query_count = 0;
-  public static $query_time = 0;
+  public static bool $use_log = false;
+  public static array $log = [];
+  public static int $query_count = 0;
+  public static float $query_time = 0;
 
   private static function LogQuery($query, $time)
   {
@@ -34,10 +30,10 @@ class Elastic_Core extends Elastic_Base
     self::$log[] = ['query' => $query, 'time' => $time];
   }
 
-  private static function _connect()
+  private static function _connect(): ?Client
   {
     if (!static::$ACTIVE_ELASTIC_URL) {
-      Debug::Halt('QuickDRY Error: $ACTIVE_ELASTIC_URL is not set');
+      Halt('QuickDRY Error: $ACTIVE_ELASTIC_URL is not set');
       return null;
     }
 
@@ -46,23 +42,23 @@ class Elastic_Core extends Elastic_Base
     }
 
     if (!static::$client) {
-      Debug::Halt('QuickDRY Error: Could Not Connect to Elastic Search Server ' . static::$ACTIVE_ELASTIC_URL);
+      Halt('QuickDRY Error: Could Not Connect to Elastic Search Server ' . static::$ACTIVE_ELASTIC_URL);
     }
 
     return static::$client;
   }
 
-  public function Save()
+  public function Save(): ?array
   {
     if (!static::$_index) {
-      Debug::Halt('QuickDRY Error: static::$_index not defined');
+      Halt('QuickDRY Error: static::$_index not defined');
     }
 
     if (!$this->_id) {
       $vars = [$this->ToArray(true)];
       $res = static::_Insert(static::$_index, static::$_type, $vars);
       if (!isset($res['items'][0]['index']['_id'])) {
-        Debug::Halt($res['items']);
+        CleanHalt($res['items']);
       }
       $this->_id = $res['items'][0]['index']['_id'];
     } else {
@@ -89,7 +85,7 @@ class Elastic_Core extends Elastic_Base
     return static::_DeleteIndexType($index, $type);
   }
 
-  public static function DeleteIndex($index)
+  public static function DeleteIndex($index): ?array
   {
     return static::_DeleteIndex($index);
   }
@@ -99,51 +95,51 @@ class Elastic_Core extends Elastic_Base
     return static::_Delete(static::$_index, static::$_type, $params);
   }
 
-  public static function Truncate()
+  public static function Truncate(): ?array
   {
     return static::_Truncate(static::$_index, static::$_type);
   }
 
-  public static function CreateIndex($index, $json)
+  public static function CreateIndex($index, $json): ?array
   {
     return static::_CreateIndex($index, $json);
   }
 
-  public static function UpdateIndex($index, $json)
+  public static function UpdateIndex($index, $json): ?array
   {
     return static::_UpdateIndex($index, $json);
   }
 
-  public static function CreateIndexType($index, $type, $json)
+  public static function CreateIndexType($index, $type, $json): ?array
   {
     return static::_CreateIndexType($index, $type, $json);
   }
 
-  public static function SearchQuery($query, $page = 0, $per_page = 20)
+  public static function SearchQuery(array $query, int $page = 0, int $per_page = 20): array
   {
     return static::_SearchQuery(static::$_index, static::$_type, $query, $page, $per_page);
   }
 
-  public static function Aggregation($query)
+  public static function Aggregation(array $query)
   {
     return static::_Aggregation(static::$_index, static::$_type, $query);
   }
 
-  public static function ScrollIndexType($index, $type, $where, $map_function = null)
+  public static function ScrollIndexType($index, $type, array $where, $map_function = null): array
   {
     return static::_ScrollIndexType($index, $type, $where, $map_function);
   }
 
   public static function SearchInIndexType(
     $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
-  )
+  ): array
   {
     return static::_Search($index, $type, $where, $page, $per_page, $order_by, $fields);
   }
 
   public static function Search(
     $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
-  )
+  ): array
   {
     return static::_Search(static::$_index, static::$_type, $where, $page, $per_page, $order_by, $fields);
   }
@@ -153,7 +149,7 @@ class Elastic_Core extends Elastic_Base
     return static::_Stats($index, $type, $query, $fields, $is_numeric);
   }
 
-  public static function Insert($index, $type, &$json)
+  public static function Insert($index, $type, &$json): array
   {
     $res = static::_Insert($index, $type, $json);
     if (isset($res['items'][0]['index']['error'])) {
@@ -165,7 +161,7 @@ class Elastic_Core extends Elastic_Base
     ];
   }
 
-  public static function GetAllForIndexType($index, $type, $where, $limit = 10000, $map_function = null)
+  public static function GetAllForIndexType($index, $type, $where, $limit = 10000, $map_function = null): array
   {
     $res = self::SearchInIndexType($index, $type, $where, 0, 0);
     $count = $res['count'];
@@ -210,13 +206,13 @@ class Elastic_Core extends Elastic_Base
     }
 
     // Set the index and type
-    $params['index'] = $index;
-    $params['type'] = $type;
+//    $params['index'] = $index;
+//    $params['type'] = $type;
 
-    return static::$client->indices()->deleteMapping($params);
+    // return static::$client->indices()->deleteMapping($params);
   }
 
-  protected static function _DeleteIndex($index)
+  protected static function _DeleteIndex($index): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -226,7 +222,7 @@ class Elastic_Core extends Elastic_Base
     return static::$client->indices()->delete($params);
   }
 
-  protected static function _CreateIndex($index, $json)
+  protected static function _CreateIndex($index, $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -237,7 +233,7 @@ class Elastic_Core extends Elastic_Base
     return static::$client->indices()->create($params);
   }
 
-  protected static function _UpdateIndex($index, $json)
+  protected static function _UpdateIndex($index, $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -274,7 +270,7 @@ class Elastic_Core extends Elastic_Base
     }
   }
 
-  protected static function _CreateIndexType($index, $type, $json)
+  protected static function _CreateIndexType($index, $type, $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -288,11 +284,11 @@ class Elastic_Core extends Elastic_Base
     return static::$client->indices()->putMapping($params);
   }
 
-  protected static function _Aggregation($index, $type, $query)
+  protected static function _Aggregation(string $index, string $type, $query)
   {
     global $Web;
     if (!static::_connect()) {
-      if ($Web && $Web->Request->query_log) {
+      if ($Web && $Web->Request->Get('query_log')) {
         exit('could not connect');
       }
       return null;
@@ -314,25 +310,21 @@ class Elastic_Core extends Elastic_Base
   }
 
   /**
-   * @param $index
-   * @param $type
-   * @param $query
+   * @param string $index
+   * @param string $type
+   * @param array $query
    * @param int $page
    * @param int $per_page
    * @return array
    */
-  protected static function _SearchQuery($index, $type, $query, $page = 0, $per_page = 20): array
+  protected static function _SearchQuery(string $index, string $type, array $query, int $page = 0, int $per_page = 20): array
   {
     if (!static::_connect()) {
-      Debug::Halt('QuickDRY Error: Could Not Connect to Elastic Search Server');
+      Halt('QuickDRY Error: Could Not Connect to Elastic Search Server');
     }
 
     $start_time = microtime(true);
     Metrics::Start('ELASTIC::_SearchQuery');
-
-    if (!is_array($query)) {
-      $query = json_decode($query, true);
-    }
 
     $query['from'] = $page * $per_page;
     $query['size'] = $per_page;
@@ -411,9 +403,8 @@ class Elastic_Core extends Elastic_Base
     return $array['_scroll_id'] ?? null;
   }
 
-  protected static function _ScrollIndexType($index, $type, $where, $map_function = null)
+  protected static function _ScrollIndexType($index, $type, $where, $map_function = null): array
   {
-
     $list = [];
     $list['data'] = [];
     $scroll_id = null;
@@ -426,7 +417,7 @@ class Elastic_Core extends Elastic_Base
 
   protected static function _Search(
     $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
-  )
+  ): array
   {
     $start_time = microtime(true);
     Metrics::Start('ELASTIC::_Search');
@@ -475,15 +466,14 @@ class Elastic_Core extends Elastic_Base
         if (!$fields) {
           $t = $row['_source'];
           $t['_id'] = $row['_id'];
-          $list['data'][] = $t;
         } else {
           $t = [];
           $t['_id'] = $row['_id'];
           foreach ($row['fields'] as $f => $data) {
             $t[$f] = $data[0];
           }
-          $list['data'][] = $t;
         }
+        $list['data'][] = $t;
       }
     }
     if ($where && sizeof($where)) {
@@ -500,14 +490,14 @@ class Elastic_Core extends Elastic_Base
   }
 
   /**
-   * @param $index
-   * @param $type
-   * @param $query
+   * @param string $index
+   * @param string $type
+   * @param array $query
    * @param null $fields
    * @param bool $is_numeric
    * @return null
    */
-  protected static function _Stats($index, $type, $query, $fields = null, $is_numeric = true)
+  protected static function _Stats(string $index, string $type, array $query, $fields = null, bool $is_numeric = true)
   {
     if (!static::_connect()) {
       return null;
@@ -539,12 +529,12 @@ class Elastic_Core extends Elastic_Base
   }
 
   /**
-   * @param $index
-   * @param $type
-   * @param $json
+   * @param string $index
+   * @param string $type
+   * @param array $json
    * @return array|null
    */
-  protected static function _InsertUpdate($index, $type, &$json)
+  protected static function _InsertUpdate(string $index, string $type, array &$json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -580,7 +570,7 @@ class Elastic_Core extends Elastic_Base
 
     if (isset($res['errors']) && $res['errors']) {
       $res['error_list'] = [];
-      foreach ($res['items'] as $i => $row) {
+      foreach ($res['items'] as $row) {
         if (isset($row['index']['error'])) {
           $res['error_list'] = $row;
         }
@@ -591,12 +581,12 @@ class Elastic_Core extends Elastic_Base
   }
 
   /**
-   * @param $index
-   * @param $type
-   * @param $json
+   * @param string $index
+   * @param string $type
+   * @param array $json
    * @return array|null
    */
-  protected static function _Insert($index, $type, &$json)
+  protected static function _Insert(string $index, string $type, array &$json): ?array
   { // single inserts only, use insertupdate for bulk inserts
     if (!static::_connect()) {
       return null;
@@ -609,7 +599,7 @@ class Elastic_Core extends Elastic_Base
     $params = [];
     $params['body'][]['index'] = ['_index' => $index, '_type' => $type];
 
-    foreach ($json as $key => $el) {
+    foreach ($json as $el) {
       $params['body'][] = $el;
     }
 
@@ -620,12 +610,12 @@ class Elastic_Core extends Elastic_Base
   }
 
   /**
-   * @param $index
-   * @param $type
-   * @param $params
-   * @return mixed|null
+   * @param string $index
+   * @param string $type
+   * @param array $params
+   * @return array|callable|null
    */
-  protected static function _Delete($index, $type, $params)
+  protected static function _Delete(string $index, string $type, array $params)
   {
     if (!static::_connect()) {
       return null;
@@ -692,11 +682,11 @@ class Elastic_Core extends Elastic_Base
             $res = static::$client->cluster()->reroute($json);
             break;
           default:
-            Debug::Halt('QuickDRY Error: unknown command ' . $command);
+            Halt('QuickDRY Error: unknown command ' . $command);
         }
         break;
       default:
-        Debug::Halt('QuickDRY Error: unknown path ' . $path);
+        Halt('QuickDRY Error: unknown path ' . $path);
     }
     Metrics::Stop('ELASTIC::Execute');
 

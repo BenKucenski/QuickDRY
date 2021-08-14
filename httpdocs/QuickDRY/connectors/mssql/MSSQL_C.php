@@ -6,13 +6,23 @@ namespace QuickDRY\Connectors;
  */
 class MSSQL_C extends MSSQL_Core
 {
-    protected static $connection =  null;
+  protected static ?MSSQL_Connection $connection = null;
 
-    protected static function _connect()
-    {
-        if(is_null(static::$connection)) {
-            static::$DB_HOST = MSSQLC_HOST;
-            static::$connection = new MSSQL_Connection(MSSQLC_HOST, MSSQLC_USER, MSSQLC_PASS);
-        }
+  protected static function _connect()
+  {
+    if (!defined('MSSQLC_HOST')) {
+      exit('MSSQLC_HOST');
     }
+    if (!defined('MSSQLC_USER')) {
+      exit('MSSQLC_USER');
+    }
+    if (!defined('MSSQLC_PASS')) {
+      exit('MSSQLC_PASS');
+    }
+
+    if (is_null(static::$connection)) {
+      static::$DB_HOST = MSSQLC_HOST;
+      static::$connection = new MSSQL_Connection(MSSQLC_HOST, MSSQLC_USER, MSSQLC_PASS);
+    }
+  }
 }

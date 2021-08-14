@@ -1,21 +1,23 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use QuickDRY\Utilities\SafeClass;
+
 class MSSQL_StoredProcParam extends SafeClass
 {
-    public $StoredProc;
-    public $Parameter_name;
-    public $Type;
-    public $Length;
-    public $Prec;
-    public $Scale;
-    public $Param_order;
-    public $Collation;
+  public string $StoredProc;
+  public string $Parameter_name;
+  public string $Type;
+  public string $Length;
+  public string $Prec;
+  public string $Scale;
+  public string $Param_order;
+  public string $Collation;
 
-    public function __construct($row = null)
-    {
-        if($row) {
-            $this->FromRow($row);
-        }
+  public function __construct($row = null)
+  {
+    if($row) {
+      $this->FromRow($row);
     }
+  }
 }

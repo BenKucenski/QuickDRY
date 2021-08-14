@@ -8,9 +8,14 @@ use QuickDRY\Web\Web;
 
 class ACCESS_Core extends SQL_Base
 {
-  protected static $DatabaseTypePrefix = 'access';
-  protected static $DB_HOST;
-  protected $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
+  protected static string $DatabasePrefix = '';
+  protected static bool $LowerCaseTable = false;
+  protected static string $DatabaseTypePrefix = 'access';
+  protected static string $DB_HOST;
+  protected bool $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
+  protected static array $prop_definitions = [];
+  protected static array $_primary = [];
+  protected static array $_unique = [];
 
   /**
    * @param $table_name
@@ -40,10 +45,18 @@ class ACCESS_Core extends SQL_Base
     return $list;
   }
 
+  public static function Close()
+  {
+    if (!static::$connection) {
+      return;
+    }
+    static::$connection = null;
+  }
+
   /**
    * @return array
    */
-  public static function GetTables()
+  public static function GetTables(): array
   {
     static::_connect();
     return static::$connection->GetTables();
@@ -101,7 +114,7 @@ class ACCESS_Core extends SQL_Base
   /**
    * @return MSSQL_StoredProc[]
    */
-  public static function GetStoredProcs()
+  public static function GetStoredProcs(): array
   {
     static::_connect();
 
@@ -112,7 +125,7 @@ class ACCESS_Core extends SQL_Base
    * @param $stored_proc
    * @return MSSQL_StoredProcParam[]
    */
-  public static function GetStoredProcParams($stored_proc)
+  public static function GetStoredProcParams($stored_proc): array
   {
     static::_connect();
 
@@ -128,12 +141,12 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $large
    * @return array
    */
-  public static function Execute(&$sql, $params = null, $large = false): ?array
+  public static function Execute(string &$sql, array $params = null, bool $large = false): ?array
   {
     static::_connect();
 
@@ -167,13 +180,13 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $objects_only
    * @param null $map_function
    * @return array
    */
-  public static function Query($sql, $params = null, bool $objects_only = false, $map_function = null): array
+  public static function Query(string $sql, array $params = null, bool $objects_only = false, $map_function = null): array
   {
     static::_connect();
 
@@ -204,7 +217,7 @@ class ACCESS_Core extends SQL_Base
 
     $res = static::$connection->Query($sql);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
     return $res['data'][0]['guid'];
   }
@@ -219,10 +232,16 @@ class ACCESS_Core extends SQL_Base
     return static::$connection->LastID();
   }
 
+  public function CanDelete(UserClass $user): bool
+  {
+    return false;
+  }
+
   /**
+   * @param UserClass $User
    * @return array|null
    */
-  public function Remove(UserClass &$User)
+  public function Remove(UserClass $User): ?array
   {
     if (!$this->CanDelete($User)) {
       return ['error' => 'No Permission'];
@@ -253,9 +272,10 @@ class ACCESS_Core extends SQL_Base
     }
 
 
+    $where = [];
+
     // rows are removed based on the columns which
     // make the row unique
-    $where = [];
     if (sizeof(static::$_primary) > 0) {
       foreach (static::$_primary as $column)
         $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
@@ -290,7 +310,7 @@ class ACCESS_Core extends SQL_Base
    *
    * @return array
    */
-  protected static function _parse_col_val($col, $val)
+  protected static function _parse_col_val($col, $val): array
   {
     // extra + symbols allow us to do AND on the same column
     $col = str_replace('+', '', $col);
@@ -369,7 +389,6 @@ class ACCESS_Core extends SQL_Base
   protected static function _Get($id, $col = null): ?array
   {
     $params = [];
-    $log = null;
     if (is_array($id)) {
       $t = [];
       foreach ($id as $c => $v) {
@@ -416,6 +435,7 @@ class ACCESS_Core extends SQL_Base
 			';
 
 
+    $log = null;
     if (self::$UseLog) {
       $log = new SQL_Log();
       $log->source = $type;
@@ -433,7 +453,7 @@ class ACCESS_Core extends SQL_Base
     }
 
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     if (isset($res['data'])) {
@@ -448,13 +468,13 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param array $where
-   * @param null $order_by
-   * @param null $limit
+   * @param array|null $where
+   * @param array|null $order_by
+   * @param int|null $limit
    *
    * @return array
    */
-  protected static function _GetAll($where = [], $order_by = null, $limit = null)
+  protected static function _GetAll(array $where = null, array $order_by = null, int $limit = null): array
   {
     $params = [];
 
@@ -504,6 +524,7 @@ class ACCESS_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
+    $log = null;
     if (self::$UseLog) {
       $log = new SQL_Log();
       $log->source = get_called_class();
@@ -515,7 +536,7 @@ class ACCESS_Core extends SQL_Base
     $res = static::Query($sql, $params, true);
 
     if (isset($res['error'])) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     if (self::$UseLog) {
@@ -528,10 +549,10 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param null $where
+   * @param array|null $where
    * @return int
    */
-  protected static function _GetCount($where = null): int
+  protected static function _GetCount(array $where = null): int
   {
     $sql_where = '1=1';
     $params = null;
@@ -562,6 +583,7 @@ class ACCESS_Core extends SQL_Base
 				' . $sql_where . '
 		';
 
+    $log = null;
     if (self::$UseLog) {
       $log = new SQL_Log();
       $log->source = get_called_class();
@@ -580,7 +602,7 @@ class ACCESS_Core extends SQL_Base
 
 
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     foreach ($res['data'] as $r) {
@@ -590,16 +612,22 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param null $where
-   * @param null $order_by
+   * @param array|null $where
+   * @param array|null $order_by
    * @param int $page
    * @param int $per_page
-   * @param int $left_join
+   * @param array|null $left_join
    * @param int $limit
    *
    * @return array
    */
-  protected static function _GetAllPaginated($where = null, $order_by = null, $page = 0, $per_page = 0, $left_join = 0, $limit = 0)
+  protected static function _GetAllPaginated(
+    array $where = null,
+    array $order_by = null,
+    int $page = 0,
+    int $per_page = 0,
+    array $left_join = null,
+    int $limit = 0): array
   {
     $type = get_called_class();
 
@@ -671,7 +699,7 @@ class ACCESS_Core extends SQL_Base
 
     $res = static::Query($sql, $params);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     $count = $res['data'][0]['num'] ?? 0;
@@ -696,7 +724,7 @@ class ACCESS_Core extends SQL_Base
       $res = static::Query($sql, $params);
 
       if ($res['error']) {
-        Debug::Halt($res);
+        Halt($res);
       }
 
       foreach ($res['data'] as $r) {
@@ -713,7 +741,7 @@ class ACCESS_Core extends SQL_Base
    *
    * @return bool
    */
-  protected static function IsNumeric($name)
+  protected static function IsNumeric($name): bool
   {
     switch (static::$prop_definitions[$name]['type']) {
       case 'tinyint(1)':
@@ -739,7 +767,7 @@ class ACCESS_Core extends SQL_Base
    * @param bool $just_checking
    * @return float|int|null
    */
-  protected static function StrongType($name, $value, $just_checking = false)
+  protected static function StrongType($name, $value, bool $just_checking = false)
   {
     if (is_array($value)) {
       return null;
@@ -786,7 +814,7 @@ class ACCESS_Core extends SQL_Base
    *
    * @return array
    */
-  protected function _Save(bool $force_insert = false)
+  protected function _Save(bool $force_insert = false): ?array
   {
     global $Web;
 
@@ -808,6 +836,10 @@ class ACCESS_Core extends SQL_Base
         }
         if ($unique_set && !$this->$primary) {
           $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+          if(!method_exists($type, 'Get')) {
+            exit("$type::Get");
+          }
+
           $t = $type::Get($params);
 
           if (!is_null($t)) {
@@ -823,14 +855,14 @@ class ACCESS_Core extends SQL_Base
       }
     }
 
+    $props = [];
+    $params = [];
+    $qs = [];
     if (!$this->$primary || $force_insert) {
       $sql = "
 				INSERT INTO
 					[" . static::$database . "].dbo.[" . static::$table . "]
 				";
-      $props = [];
-      $params = [];
-      $qs = [];
       foreach ($this->props as $name => $value) {
         if (strcmp($name, $primary) == 0 && !$this->$primary) continue;
 
@@ -849,21 +881,12 @@ class ACCESS_Core extends SQL_Base
       }
       $sql .= '([' . implode('],[', $props) . ']) VALUES (' . implode(',', $qs) . ')';
 
-      if ($this->$primary && !$force_insert)
-        $sql .= "
-				WHERE
-					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
-				";
-
-      $res = static::Execute($sql, $params);
     } else {
       $sql = "
 				UPDATE
 					[" . static::$database . "].dbo.[" . static::$table . "]
                 SET
 				";
-      $props = [];
-      $params = [];
       foreach ($this->props as $name => $value) {
         if (strcmp($name, $primary) == 0) continue;
 
@@ -877,16 +900,16 @@ class ACCESS_Core extends SQL_Base
           $params[] = '{{{' . $st_value . '}}}'; // necessary to get past the null check in EscapeString
         }
       }
-      $sql .= implode(',', $props);
+    }
+    $sql .= implode(',', $props);
 
-      if ($this->$primary && !$force_insert)
-        $sql .= "
+    if ($this->$primary && !$force_insert)
+      $sql .= "
 				WHERE
 					" . $primary . " = " . MSSQL::EscapeString($this->$primary) . "
 				";
 
-      $res = static::Execute($sql, $params);
-    }
+    $res = static::Execute($sql, $params);
 
     if (!$this->$primary)
       $this->$primary = static::LastID();

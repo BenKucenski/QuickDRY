@@ -8,7 +8,13 @@ use QuickDRY\Web\Web;
 
 class MSSQL_Core extends SQL_Base
 {
+  public static array $prop_definitions = [];
+  public static array $_primary = [];
+  public static array $_unique = [];
+
   protected static string $DatabaseTypePrefix = 'ms';
+  protected static string $DatabasePrefix = '';
+  protected static bool $LowerCaseTable = false;
   protected static string $DB_HOST;
   protected bool $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
@@ -38,7 +44,7 @@ class MSSQL_Core extends SQL_Base
     return $list;
   }
 
-  public static function _GetTables($database)
+  public static function _GetTables($database): array
   {
     $sql = 'SELECT * FROM [' . $database . '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
     $res = static::Query($sql);
@@ -67,7 +73,7 @@ class MSSQL_Core extends SQL_Base
         ';
     $res = static::Query($sql);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
     $list = [];
     foreach ($res['data'] as $row) {
@@ -89,7 +95,7 @@ class MSSQL_Core extends SQL_Base
   /**
    * @return array
    */
-  public static function GetTables()
+  public static function GetTables(): array
   {
     static::_connect();
     return static::$connection->GetTables();
@@ -153,7 +159,7 @@ class MSSQL_Core extends SQL_Base
   /**
    * @return MSSQL_Trigger[]
    */
-  public static function GetTriggers()
+  public static function GetTriggers(): array
   {
     static::_connect();
 
@@ -163,7 +169,7 @@ class MSSQL_Core extends SQL_Base
   /**
    * @return MSSQL_StoredProc[]
    */
-  public static function GetStoredProcs()
+  public static function GetStoredProcs(): array
   {
     static::_connect();
 
@@ -173,7 +179,7 @@ class MSSQL_Core extends SQL_Base
   /**
    * @return MSSQL_Definition[]
    */
-  public static function GetDefinitions()
+  public static function GetDefinitions(): array
   {
     static::_connect();
 
@@ -184,7 +190,7 @@ class MSSQL_Core extends SQL_Base
    * @param $stored_proc
    * @return MSSQL_StoredProcParam[]
    */
-  public static function GetStoredProcParams($stored_proc)
+  public static function GetStoredProcParams($stored_proc): array
   {
     static::_connect();
 
@@ -199,13 +205,13 @@ class MSSQL_Core extends SQL_Base
     return static::$connection->GetPrimaryKey($table_name);
   }
 
-    /**
-     * @param      $sql
-     * @param array|null $params
-     * @param bool $large
-     * @return array
-     */
-  public static function Execute(&$sql, array $params = null, bool $large = false): ?array
+  /**
+   * @param string $sql
+   * @param array|null $params
+   * @param bool $large
+   * @return array
+   */
+  public static function Execute(string &$sql, array $params = null, bool $large = false): ?array
   {
     static::_connect();
 
@@ -227,7 +233,7 @@ class MSSQL_Core extends SQL_Base
    * @param $map_function
    * @return mixed
    */
-  public static function QueryMap($sql, array $params = null, $map_function)
+  public static function QueryMap($sql, $params, $map_function)
   {
     static::_connect();
 
@@ -239,13 +245,13 @@ class MSSQL_Core extends SQL_Base
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $objects_only
    * @param null $map_function
    * @return array
    */
-  public static function Query($sql, array $params = null, bool $objects_only = false, $map_function = null): array
+  public static function Query(string $sql, array $params = null, bool $objects_only = false, $map_function = null): array
   {
     static::_connect();
 
@@ -276,7 +282,7 @@ class MSSQL_Core extends SQL_Base
 
     $res = static::$connection->Query($sql);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
     return $res['data'][0]['guid'];
   }
@@ -291,10 +297,16 @@ class MSSQL_Core extends SQL_Base
     return static::$connection->LastID();
   }
 
+  public function CanDelete(UserClass $user): bool
+  {
+    return false;
+  }
+
   /**
+   * @param UserClass $User
    * @return array|null
    */
-  public function Remove(UserClass &$User)
+  public function Remove(UserClass $User): ?array
   {
     if (!$this->CanDelete($User)) {
       return ['error' => 'No Permission'];
@@ -325,9 +337,9 @@ class MSSQL_Core extends SQL_Base
     }
 
 
-    $where = [];
     // rows are removed based on the columns which
     // make the row unique
+    $where = [];
     if (sizeof(static::$_primary) > 0) {
       foreach (static::$_primary as $column)
         $where[] = $column . ' = ' . MSSQL::EscapeString($this->{$column});
@@ -362,13 +374,13 @@ class MSSQL_Core extends SQL_Base
    *
    * @return array
    */
-  protected static function _parse_col_val($col, $val)
+  protected static function _parse_col_val($col, $val): array
   {
     // extra + symbols allow us to do AND on the same column
     $col = str_replace('+', '', $col);
 
     if (is_object($val)) {
-      Debug::Halt(['QuickDRY Error' => '$val is object', $val]);
+      Halt(['QuickDRY Error' => '$val is object', $val]);
     }
     if (substr($val, 0, strlen('{BETWEEN} ')) === '{BETWEEN} ') {
       $val = trim(Strings::RemoveFromStart('{BETWEEN}', $val));
@@ -439,9 +451,9 @@ class MSSQL_Core extends SQL_Base
    * @param      $id
    * @param null $col
    *
-   * @return mixed|null
+   * @return array|null
    */
-  protected static function _Get($id, $col = null)
+  protected static function _Get($id, $col = null): ?array
   {
     $params = [];
     if (is_array($id)) {
@@ -508,7 +520,7 @@ class MSSQL_Core extends SQL_Base
     }
 
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     if (isset($res['data'])) {
@@ -523,16 +535,15 @@ class MSSQL_Core extends SQL_Base
   }
 
   /**
-   * @param array $where
-   * @param null $order_by
-   * @param null $limit
+   * @param array|null $where
+   * @param array|null $order_by
+   * @param int|null $limit
    *
    * @return array
    */
-  protected static function _GetAll(array $where = [], $order_by = null, $limit = null): array
+  protected static function _GetAll(array $where = null, array $order_by = null, int $limit = null): array
   {
     $params = [];
-    $log = null;
 
     $sql_order = '';
     if (!is_null($order_by) && is_array($order_by)) {
@@ -580,6 +591,7 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_order . '
 		';
 
+    $log = null;
     if (self::$UseLog) {
       $log = new SQL_Log();
       $log->source = get_called_class();
@@ -591,7 +603,7 @@ class MSSQL_Core extends SQL_Base
     $res = static::Query($sql, $params, true);
 
     if (isset($res['error'])) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     if (self::$UseLog) {
@@ -644,6 +656,7 @@ class MSSQL_Core extends SQL_Base
 				' . $sql_where . '
 		';
 
+    $log = null;
     if (self::$UseLog) {
       $log = new SQL_Log();
       $log->source = get_called_class();
@@ -662,7 +675,7 @@ class MSSQL_Core extends SQL_Base
 
 
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     foreach ($res['data'] as $r) {
@@ -672,8 +685,8 @@ class MSSQL_Core extends SQL_Base
   }
 
   /**
-   * @param null $where
-   * @param null $order_by
+   * @param array|null $where
+   * @param array|null $order_by
    * @param int $page
    * @param int $per_page
    * @param array|null $left_join
@@ -681,7 +694,13 @@ class MSSQL_Core extends SQL_Base
    *
    * @return array
    */
-  protected static function _GetAllPaginated($where = null, $order_by = null, int $page = 0, int $per_page = 0, array $left_join = null, int $limit = 0): array
+  protected static function _GetAllPaginated(
+    array $where = null,
+    array $order_by = null,
+    int $page = 0,
+    int $per_page = 0,
+    array $left_join = null,
+    int $limit = 0): array
   {
     $type = get_called_class();
 
@@ -731,9 +750,8 @@ class MSSQL_Core extends SQL_Base
     $sql_left = '';
     if (is_array($left_join)) {
       $sql_left = '';
-      foreach ($left_join as $join) {
+      foreach ($left_join as $join)
         $sql_left .= 'LEFT JOIN  [' . $join['database'] . '].dbo.[' . $join['table'] . '] AS ' . $join['as'] . ' WITH (NOLOCK) ON ' . $join['on'] . "\r\n";
-      }
     }
 
 
@@ -762,7 +780,7 @@ FROM (
 
     $res = static::Query($sql, $params);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     $count = $res['data'][0]['num'] ?? 0;
@@ -787,7 +805,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
       $res = static::Query($sql, $params);
 
       if ($res['error']) {
-        Debug::Halt($res);
+        Halt($res);
       }
 
       foreach ($res['data'] as $r) {
@@ -804,7 +822,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
    *
    * @return bool
    */
-  protected static function IsNumeric($name)
+  protected static function IsNumeric($name): bool
   {
     switch (static::$prop_definitions[$name]['type']) {
 
@@ -831,7 +849,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
    * @param bool $just_checking
    * @return float|int|null
    */
-  protected static function StrongType($name, $value, $just_checking = false)
+  protected static function StrongType($name, $value, bool $just_checking = false)
   {
     if ($value === '#NULL!') { // Excel files may have this
       $value = null;
@@ -875,7 +893,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
           } else {
             $value = Strings::Numeric($value);
             if (!$value) {
-              Debug::Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
+              Halt(['name' => $name, 'value' => $value, 'type' => static::$prop_definitions[$name]['type'], 'error' => 'value must be ' . static::$prop_definitions[$name]['type']]);
             }
           }
         }
@@ -899,7 +917,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
    * @param bool $force_insert
    * @return SQL_Query|null
    */
-  protected function _GetSaveQuery($force_insert = false)
+  protected function _GetSaveQuery(bool $force_insert = false)
   {
     return $this->_Save($force_insert, true);
   }
@@ -937,6 +955,9 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
       }
 
       $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+      if(!method_exists($type, 'Get')) {
+        exit("$type::Get");
+      }
       $t = $type::Get($params);
       if (!$t) {
         $force_insert = true;
@@ -1064,7 +1085,7 @@ SET
 
       $sql .= implode(',', $props);
 
-      if ($primary_set && !$force_insert) {
+      if ($primary_set) {
         $sql .= '
 WHERE
     ' . implode(' AND ', $primary_sql) . '
@@ -1101,16 +1122,13 @@ WHERE
    *
    * @return array|SQL_Query
    */
-  protected function _Insert($return_query = false)
+  protected function _Insert(bool $return_query = false)
   {
     $primary = static::$_primary ?? [];
     $primary_set = true;
-    // $primary_sql = [];
     foreach ($primary as $col) {
       if (is_null($this->$col)) {
         $primary_set = false;
-      // } else {
-        // $primary_sql[] = '[' . $col . '] = ' . MSSQL::EscapeString($this->$col);
       }
     }
 
@@ -1164,13 +1182,13 @@ INSERT INTO
    * @param bool $return_query
    * @return array|SQL_Query
    */
-  protected function _Update(bool $return_query)
+  protected function _Update(bool $return_query = false)
   {
     if (!sizeof($this->_change_log)) {
       return null;
     }
 
-    $primary = static::$_primary ? static::$_primary : [];
+    $primary = static::$_primary ?? [];
 
     $primary_set = false;
     $primary_sql = [];

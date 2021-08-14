@@ -1,0 +1,35 @@
+<?php
+/**
+ * Class [[c_name]]
+ [[class_props]];
+ */
+class [[c_name]] extends db_[[c_name]]
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        switch($name)
+        {
+            default:
+                return parent::__get($name);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function Save()
+    {
+        [[HasUserLink]]
+
+        return $this->_Save();
+    }
+}

@@ -1,22 +1,24 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use Exception;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
-use QuickDRY\Connectors\ChangeLog;
+use UserClass;
 
 /**
  * Class MySQL_Core
  */
 class MySQL_Core extends SQL_Base
 {
-  protected static $DB_HOST;
+  protected static string $DB_HOST;
+  protected bool $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 
   /**
    * @return array
    */
-  public static function GetTables()
+  public static function GetTables(): array
   {
     static::_connect();
 
@@ -69,7 +71,7 @@ class MySQL_Core extends SQL_Base
    * @param $table
    * @return MySQL_ForeignKey[]
    */
-  public static function GetLinkedTables($table)
+  public static function GetLinkedTables($table): array
   {
     static::_connect();
 
@@ -90,18 +92,27 @@ class MySQL_Core extends SQL_Base
     return static::$connection->GetStoredProcs();
   }
 
+  public static function GetStoredProcParams(string $specific_name)
+  {
+    static::_connect();
+
+    return static::$connection->GetStoredProcParams($specific_name);
+  }
+
   public static function EscapeQuery($sql, $params)
   {
+    static::_connect();
+
     return static::$connection->EscapeQuery($sql, $params);
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $large
    * @return array
    */
-  public static function Execute($sql, $params = null, bool $large = false): ?array
+  public static function Execute(string $sql, array $params = null, bool $large = false): ?array
   {
     static::_connect();
 
@@ -117,28 +128,44 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param $sql
-   * @param null $params
+   * @param UserClass $user
+   * @return bool
+   */
+  public function CanDelete(UserClass $user): bool
+  {
+    return false;
+  }
+
+  /**
+   * @param string $sql
+   * @param array|null $params
    * @param null $map_function
    * @return array
    */
-  public static function QueryMap($sql, $params = null, $map_function = null): array
+  public static function QueryMap(
+    string $sql,
+    array $params = null,
+           $map_function = null): array
   {
     $res = self::Query($sql, $params, false, $map_function);
     if (isset($res['error'])) {
-      Debug::Halt($res);
+      Halt($res);
     }
     return $res;
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $objects_only
    * @param null $map_function
    * @return array
    */
-  public static function Query($sql, $params = null, bool $objects_only = false, $map_function = null): array
+  public static function Query(
+    string $sql,
+    array $params = null,
+    bool $objects_only = false,
+           $map_function = null): array
   {
     static::_connect();
 
@@ -163,12 +190,14 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
+   * @param UserClass $User
    * @return array|null
    */
-  public function Remove(UserClass &$User): ?array
+  public function Remove(UserClass $User): ?array
   {
-    if (!$this->CanDelete($User))
+    if (!$this->CanDelete($User)) {
       return null;
+    }
 
     // if this instance wasn't loaded from the database
     // don't try to remove it
@@ -228,19 +257,19 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param $col
-   * @param string $val
+   * @param string $col
+   * @param string|null $val
    *
    * @return array
    */
-  protected static function _parse_col_val($col, $val): array
+  protected static function _parse_col_val(string $col, string $val = null): array
   {
     // extra + symbols allow us to do AND on the same column
     $col = str_replace('+', '', $col);
     $col = '`' . $col . '`';
 
     if (is_array($val)) {
-      Debug::Halt(['invalid value in query', $col, $val]);
+      Halt(['invalid value in query', $col, $val]);
     }
     // adding a space to ensure that "in_" is not mistaken for an IN query
     // and the parameter must START with the special SQL command
@@ -316,16 +345,12 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param array $where
+   * @param array|null $where
    *
    * @return array|null|object
    */
-  protected static function _Get(array $where)
+  protected static function _Get(array $where = null)
   {
-    if (!is_array($where)) {
-      Debug::Halt("$where must be an array");
-    }
-
     $params = [];
     $t = [];
     foreach ($where as $c => $v) {
@@ -363,12 +388,12 @@ class MySQL_Core extends SQL_Base
 
   /**
    * @param array|null $where
-   * @param null $order_by
-   * @param null $limit
+   * @param array|null $order_by
+   * @param int|null $limit
    *
    * @return array
    */
-  protected static function _GetAll(?array $where = [], $order_by = null, $limit = null): array
+  protected static function _GetAll(?array $where = null, array $order_by = null, int $limit = null): ?array
   {
     $params = [];
 
@@ -418,15 +443,14 @@ class MySQL_Core extends SQL_Base
       $sql .= ' LIMIT ' . ($limit * 1.0);
     }
 
-    $res = static::Query($sql, $params, true);
-    return $res;
+    return static::Query($sql, $params, true);
   }
 
   /**
-   * @param array|null $where
+   * @param array $where
    * @return int
    */
-  protected static function _GetCount(?array $where = []): int
+  protected static function _GetCount(array $where = []): int
   {
     $sql_where = '1=1';
     $params = [];
@@ -470,14 +494,20 @@ class MySQL_Core extends SQL_Base
   /**
    * @param array|null $where
    * @param array|null $order_by
-   * @param int $page
-   * @param int $per_page
+   * @param int|null $page
+   * @param int|null $per_page
    * @param array|null $left_join
    * @param int|null $limit
    *
    * @return array
    */
-  protected static function _GetAllPaginated(?array $where, ?array $order_by, int $page, int $per_page, array $left_join = null, int $limit = null): array
+  protected static function _GetAllPaginated(
+    array $where = null,
+    array $order_by = null,
+    int $page = null,
+    int $per_page = null,
+    array $left_join = null,
+    int $limit = null): array
   {
     $params = [];
 
@@ -489,7 +519,7 @@ class MySQL_Core extends SQL_Base
           $sql_order[] .= '`' . trim($col[0]) . '`.`' . trim($col[1]) . '` ' . $dir;
         } else {
           if (is_array($col)) {
-            Debug::Halt(['QuickDRY Error' => '$col cannot be array', $col]);
+            Halt(['QuickDRY Error' => '$col cannot be array', $col]);
           }
           $sql_order[] .= '`' . trim($col) . '` ' . $dir;
         }
@@ -519,7 +549,7 @@ class MySQL_Core extends SQL_Base
       $sql_left = '';
       foreach ($left_join as $join) {
         if (!isset($join['database'])) {
-          Debug::Halt($join, 'invalid join');
+          Halt($join, 'invalid join');
         }
         $sql_left .= 'LEFT JOIN  `' . $join['database'] . '`.`' . $join['table'] . '` AS ' . $join['as'] . ' ON ' . $join['on']
           . "\r\n";
@@ -573,11 +603,11 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param $name
+   * @param string $name
    *
    * @return bool
    */
-  protected static function IsNumeric($name)
+  protected static function IsNumeric(string $name): bool
   {
     switch (static::$prop_definitions[$name]['type']) {
       case 'tinyint(1)':
@@ -597,13 +627,13 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param $name
+   * @param string $name
    * @param $value
    *
-   * @return bool|int|null|string
+   * @return float|int|string|null
    * @throws Exception
    */
-  protected static function StrongType($name, $value)
+  protected static function StrongType(string $name, $value)
   {
     if (is_object($value) || is_array($value))
       return null;
@@ -676,6 +706,9 @@ class MySQL_Core extends SQL_Base
 
         if ($unique_set && !$this->$primary) {
           $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
+          if(!method_exists($type, 'Get')) {
+            exit($type . '::Get');
+          }
           $t = $type::Get($params);
 
           if (!is_null($t)) {
@@ -696,21 +729,21 @@ class MySQL_Core extends SQL_Base
 
     $changed_only = false;
     if (!$primary || !$this->$primary || $force_insert) {
-      $sql = "
+      $sql = '
 				INSERT INTO
-			";
+			';
     } else {
       $changed_only = true;
       // ignore cases where the unique key isn't sufficient to avoid duplicate inserts -- removed 8/30/2019 - handle the error in code
-      $sql = "
+      $sql = '
 				UPDATE
-			";
+			';
     }
 
-    $sql .= "
-					`" . static::$database . "`.`" . static::$table . "`
+    $sql .= '
+					`' . static::$database . '`.`' . static::$table . '`
 				SET
-				";
+				';
 
 
     foreach ($this->props as $name => $value) {
@@ -718,22 +751,11 @@ class MySQL_Core extends SQL_Base
         continue;
       }
 
-      /**
-       * if (!is_null($CurrentUser)) {
-       * if (static::$prop_definitions[$name]['type'] === 'datetime') {
-       * if ($value) {
-       * // this is where we can auto adjust time entries in the database
-       * //$value = Timestamp(strtotime(Timestamp($value)) - $CurrentUser->hours_diff * 3600);
-       * }
-       * }
-       * }
-       **/
-
       $st_value = null;
       try {
         $st_value = static::StrongType($name, $value);
       } catch (Exception $ex) {
-        Debug::Halt($ex);
+        Halt($ex);
       }
 
       if (strcmp($name, $primary) == 0 && !$this->$primary && !$force_insert) {
@@ -772,7 +794,7 @@ class MySQL_Core extends SQL_Base
         $cl->table = static::$table;
         $cl->uuid = $uuid;
         $cl->changes = json_encode($this->_change_log);
-        $cl->user_id = is_object($Web->CurrentUser) ? $Web->CurrentUser->GetUUID() : null;
+        $cl->user_id = is_object($Web->CurrentUser) ? (int)$Web->CurrentUser->GetUUID() : null;
         $cl->created_at = Dates::Timestamp();
         $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
         $cl->is_deleted = false;

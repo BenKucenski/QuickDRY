@@ -1,6 +1,8 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use Exception;
+use PDO;
 use QuickDRY\Utilities\Debug;
 
 /**
@@ -8,8 +10,7 @@ use QuickDRY\Utilities\Debug;
  */
 class ACCESS_Connection
 {
-  private $conn = null;
-
+  private ?PDO $conn = null;
 
   /**
    * @param string $file
@@ -17,7 +18,7 @@ class ACCESS_Connection
    * @param string $pass
    * @param bool $is_dsn
    */
-  public function __construct(string $file, string $user = '', string $pass = '', $is_dsn = false)
+  public function __construct(string $file, string $user = '', string $pass = '', bool $is_dsn = false)
   {
     // one of these should work depending on which version of ACCESS Driver you have installed
     // define('ACCESS_DRIVER','odbc:Driver={Microsoft Access Driver (*.mdb, *.accdb)}');
@@ -55,7 +56,7 @@ class ACCESS_Connection
 
       $this->conn = new PDO(implode(';', $str));
     } catch (Exception $ex) {
-      Debug::Halt($ex);
+      Halt($ex);
     }
   }
 
@@ -67,22 +68,22 @@ class ACCESS_Connection
   }
 
   /**
-   * @param $sql
-   * @param array $params
+   * @param string $sql
+   * @param array|null $params
    * @param null $map_function
    * @return array
    */
-  function Query($sql, array $params = [], $map_function = null)
+  function Query(string $sql, ?array $params = [], $map_function = null): array
   {
+    $params ??= [];
     $returnval = ['numrows' => 0, 'data' => [], 'error' => ''];
     $returnval['sql'] = $sql;
     $returnval['params'] = $params;
 
     $stmt = null;
-
     try {
       if (!$this->conn) {
-        exit('database failure');
+        exit('Query: database failure');
       }
       $stmt = $this->conn->prepare($sql);
       if (!is_object($stmt)) {
@@ -117,7 +118,7 @@ class ACCESS_Connection
    * @param array $params
    * @return array
    */
-  function Execute(string $sql, array $params = [])
+  function Execute(string $sql, array $params = []): array
   {
     $returnval = ['numrows' => 0, 'data' => [], 'error' => ''];
     $returnval['sql'] = $sql;
@@ -126,11 +127,11 @@ class ACCESS_Connection
     $stmt = null;
     try {
       if (!$this->conn) {
-        exit('database failure');
+        exit('Execute: database failure');
       }
       $stmt = $this->conn->prepare($sql);
       if (!is_object($stmt)) {
-        throw new exception('Failure to Query');
+        throw new Exception('Failure to Query');
       }
       $stmt->execute($params);
     } catch (Exception $e) {
@@ -147,7 +148,7 @@ class ACCESS_Connection
     return $returnval;
   }
 
-  public function SetDatabase($db_base)
+  public function SetDatabase()
   {
     return null;
   }
@@ -162,10 +163,10 @@ class ACCESS_Connection
     $sql = '
 SELECT MSysObjects.Name AS TABLE_NAME
 FROM MSysObjects
-WHERE (((Left([Name],1))<>"~") 
-        AND ((Left([Name],4))<>"MSys") 
+WHERE (((Left([Name],1))<>"~")
+        AND ((Left([Name],4))<>"MSys")
         AND ((MSysObjects.Type) In (1,4,6)))
-order by MSysObjects.Name         
+order by MSysObjects.Name
         ';
     $res = $this->Query($sql);
     $list = [];

@@ -1,0 +1,26 @@
+<?php
+/**
+ * @param string $class
+ */
+function [[autoloader_class]](string $class) {
+    $class_map = [
+        [[mod_map]]
+    ];
+
+    if(!isset($class_map[$class])) {
+        return;
+    }
+
+    if (file_exists($class_map[$class])) { // web
+        require_once $class_map[$class];
+    } else {
+        if (file_exists('../' . $class_map[$class])) { // cron folder
+            require_once '../' . $class_map[$class];
+        } else { // scripts folder
+           require_once '[[DestinationFolder]]/' . $class_map[$class];
+        }
+    }
+}
+
+
+spl_autoload_register('[[autoloader_class]]');

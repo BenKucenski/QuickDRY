@@ -1,63 +1,69 @@
 <?php
+namespace QuickDRY\Connectors;
+
+use QuickDRY\Utilities\SafeClass;
 
 class MySQL_StoredProc extends SafeClass
 {
-    public $SPECIFIC_CATALOG;
-    public $SPECIFIC_SCHEMA;
-    public $SPECIFIC_NAME;
-    public $ROUTINE_CATALOG;
-    public $ROUTINE_SCHEMA;
-    public $ROUTINE_NAME;
-    public $ROUTINE_TYPE;
-    public $MODULE_CATALOG;
-    public $MODULE_SCHEMA;
-    public $MODULE_NAME;
-    public $UDT_CATALOG;
-    public $UDT_SCHEMA;
-    public $UDT_NAME;
-    public $DATA_TYPE;
-    public $CHARACTER_MAXIMUM_LENGTH;
-    public $CHARACTER_OCTET_LENGTH;
-    public $COLLATION_CATALOG;
-    public $COLLATION_SCHEMA;
-    public $COLLATION_NAME;
-    public $CHARACTER_SET_CATALOG;
-    public $CHARACTER_SET_SCHEMA;
-    public $CHARACTER_SET_NAME;
-    public $NUMERIC_PRECISION;
-    public $NUMERIC_PRECISION_RADIX;
-    public $NUMERIC_SCALE;
-    public $DATETIME_PRECISION;
-    public $INTERVAL_TYPE;
-    public $INTERVAL_PRECISION;
-    public $TYPE_UDT_CATALOG;
-    public $TYPE_UDT_SCHEMA;
-    public $TYPE_UDT_NAME;
-    public $SCOPE_CATALOG;
-    public $SCOPE_SCHEMA;
-    public $SCOPE_NAME;
-    public $MAXIMUM_CARDINALITY;
-    public $DTD_IDENTIFIER;
-    public $ROUTINE_BODY;
-    public $ROUTINE_DEFINITION;
-    public $EXTERNAL_NAME;
-    public $EXTERNAL_LANGUAGE;
-    public $PARAMETER_STYLE;
-    public $IS_DETERMINISTIC;
-    public $SQL_DATA_ACCESS;
-    public $IS_NULL_CALL;
-    public $SQL_PATH;
-    public $SCHEMA_LEVEL_ROUTINE;
-    public $MAX_DYNAMIC_RESULT_SETS;
-    public $IS_USER_DEFINED_CAST;
-    public $IS_IMPLICITLY_INVOCABLE;
-    public $CREATED;
-    public $LAST_ALTERED;
+  public ?string $SPECIFIC_CATALOG;
+  public ?string $SPECIFIC_SCHEMA;
+  public ?string $SPECIFIC_NAME;
+  public ?string $ROUTINE_CATALOG;
+  public ?string $ROUTINE_SCHEMA;
+  public ?string $ROUTINE_NAME;
+  public ?string $ROUTINE_TYPE;
+  public ?string $MODULE_CATALOG;
+  public ?string $MODULE_SCHEMA;
+  public ?string $MODULE_NAME;
+  public ?string $UDT_CATALOG;
+  public ?string $UDT_SCHEMA;
+  public ?string $UDT_NAME;
+  public ?string $DATA_TYPE;
+  public ?string $CHARACTER_MAXIMUM_LENGTH;
+  public ?string $CHARACTER_OCTET_LENGTH;
+  public ?string $COLLATION_CATALOG;
+  public ?string $COLLATION_SCHEMA;
+  public ?string $COLLATION_NAME;
+  public ?string $CHARACTER_SET_CATALOG;
+  public ?string $CHARACTER_SET_SCHEMA;
+  public ?string $CHARACTER_SET_NAME;
+  public ?string $NUMERIC_PRECISION;
+  public ?string $NUMERIC_PRECISION_RADIX;
+  public ?string $NUMERIC_SCALE;
+  public ?string $DATETIME_PRECISION;
+  public ?string $INTERVAL_TYPE;
+  public ?string $INTERVAL_PRECISION;
+  public ?string $TYPE_UDT_CATALOG;
+  public ?string $TYPE_UDT_SCHEMA;
+  public ?string $TYPE_UDT_NAME;
+  public ?string $SCOPE_CATALOG;
+  public ?string $SCOPE_SCHEMA;
+  public ?string $SCOPE_NAME;
+  public ?string $MAXIMUM_CARDINALITY;
+  public ?string $DTD_IDENTIFIER;
+  public ?string $ROUTINE_BODY;
+  public ?string $ROUTINE_DEFINITION;
+  public ?string $EXTERNAL_NAME;
+  public ?string $EXTERNAL_LANGUAGE;
+  public ?string $PARAMETER_STYLE;
+  public ?string $IS_DETERMINISTIC;
+  public ?string $SQL_DATA_ACCESS;
+  public ?string $IS_NULL_CALL;
+  public ?string $SQL_PATH;
+  public ?string $SCHEMA_LEVEL_ROUTINE;
+  public ?string $MAX_DYNAMIC_RESULT_SETS;
+  public ?string $IS_USER_DEFINED_CAST;
+  public ?string $IS_IMPLICITLY_INVOCABLE;
+  public ?string $CREATED;
+  public ?string $LAST_ALTERED;
 
-    public function __construct($row = null)
-    {
-        if($row) {
-            $this->FromRow($row);
-        }
+  // extra
+  public ?string $PARAMETERS;
+
+  public function __construct($row = null)
+  {
+    if($row) {
+      $this->FromRow($row);
     }
+  }
 }

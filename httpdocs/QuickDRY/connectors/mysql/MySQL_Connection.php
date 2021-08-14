@@ -12,25 +12,26 @@ use QuickDRY\Utilities\Metrics;
  */
 class MySQL_Connection
 {
-  public static $use_log = false;
-  public static $log_queries_to_file = false;
-  public static $keep_files = false;
-  public static $log = [];
+  public static bool $use_log = false;
+  public static bool $log_queries_to_file = false;
+  public static bool $keep_files = false;
+  public static array $log = [];
 
-  protected $db_conns = [];
-  protected $db = null;
-  protected $current_db = null;
-  protected $DB_HOST;
-  protected $DB_USER;
-  protected $DB_PASS;
-  protected $DB_PORT;
+  protected array $db_conns = [];
+  protected ?mysqli $db = null;
+  protected ?string $current_db = null;
+  protected string $DB_HOST;
+  protected string $DB_USER;
+  protected string $DB_PASS;
+  protected int $DB_PORT;
 
   public function __construct($host, $user, $pass, $port = null)
   {
     $this->DB_HOST = $host;
     $this->DB_USER = $user;
     $this->DB_PASS = $pass;
-    $this->DB_PORT = $port ? $port : 3306;
+    $this->DB_PORT = $port ?: 3306;
+    $this->_connect();
   }
 
   private function _connect()
@@ -48,7 +49,7 @@ class MySQL_Connection
    *
    * @return bool
    */
-  public function CheckDatabase($db_base)
+  public function CheckDatabase($db_base): bool
   {
     $sql = 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = {{}}';
     $res = $this->Query($sql, [$db_base]);
@@ -59,7 +60,7 @@ class MySQL_Connection
   /**
    * @param $sql
    * @param $params
-   * @return mixed
+   * @return array|string|string[]|null
    */
   public function EscapeQuery($sql, $params)
   {
@@ -115,7 +116,7 @@ class MySQL_Connection
           );
         }
         if (!$this->db_conns[$db_base]) {
-          Debug::Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
+          Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
         }
 
       } catch (Exception $e) {
@@ -128,18 +129,18 @@ class MySQL_Connection
   }
 
   /**
-   * @param      $sql
+   * @param string $sql
    * @param int $time
-   * @param null $err
+   * @param string|null $err
    */
-  private function Log($sql, $time = 0, $err = null)
+  private function Log(string $sql, int $time = 0, string $err = null)
   {
     if (is_null($err)) {
       $err = mysqli_error($this->db);
     }
 
     if ($err && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR) {
-      Debug::Halt($err);
+      Halt($err);
     }
 
     //$this->log[] = $sql;
@@ -152,12 +153,12 @@ class MySQL_Connection
   }
 
   /**
-   * @param      $sql
-   * @param null $params
+   * @param string $sql
+   * @param array|null $params
    * @param bool $large
    * @return array
    */
-  public function Execute($sql, $params = null, bool $large = false): ?array
+  public function Execute(string $sql, array $params = null, bool $large = false): ?array
   {
     $query_hash = 'all';
     if (self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
@@ -173,7 +174,7 @@ class MySQL_Connection
       $this->_connect();
 
       if (!$this->db) {
-        Debug::Halt([$sql, $params, 'mysql went away']);
+        Halt([$sql, $params, 'mysql went away']);
       }
 
       $start = microtime(true);
@@ -203,7 +204,7 @@ class MySQL_Connection
           fwrite($fp, $sql);
           fclose($fp);
         } else {
-          Debug::Halt('QuickDRY Error: error writing mysql file');
+          Halt('QuickDRY Error: error writing mysql file');
         }
 
         $file = 'mysql_config.' . GUID . '.cnf';
@@ -229,6 +230,7 @@ host = ' . $this->DB_HOST . '
         if (!static::$keep_files) {
           unlink($fname);
         }
+        unlink($file);
 
         Metrics::Stop('MySQL: ' . $query_hash);
       } else {
@@ -266,19 +268,19 @@ host = ' . $this->DB_HOST . '
         'exec' => $exec,
       ];
     } catch (Exception $e) {
-      Debug::Halt($e);
+      Halt($e);
     }
     return null;
   }
 
   /**
-   * @param      $sql
-   * @param null $params
-   * @param null $return_type
+   * @param string $sql
+   * @param array|null $params
+   * @param string|null $return_type
    * @param null $map_function
    * @return array
    */
-  public function Query($sql, $params = null, $return_type = null, $map_function = null)
+  public function Query(string $sql, array $params = null, string $return_type = null, $map_function = null)
   {
     $query_hash = 'all';
     if (self::$log_queries_to_file) { // don't log as a single array because it makes the queries unreadable
@@ -309,7 +311,7 @@ host = ' . $this->DB_HOST . '
       if (isset($matches[1][0])) {
         self::SetDatabase($matches[1][0]);
       } else {
-        Debug::Halt(['QuickDRY Error' => 'Database not set and database could not be determined from query', 'sql' => $sql]);
+        Halt(['QuickDRY Error' => 'Database not set and database could not be determined from query', 'sql' => $sql]);
       }
     }
 
@@ -343,7 +345,7 @@ host = ' . $this->DB_HOST . '
           $list[] = !is_null($map_function) ? call_user_func($map_function, $r) : $r;
         } else {
           if (!class_exists($return_type)) {
-            Debug::Halt($return_type . ' does not exist');
+            Halt($return_type . ' does not exist');
           }
 
           $c = new $return_type();
@@ -394,7 +396,7 @@ host = ' . $this->DB_HOST . '
    *
    * @return array|int|string
    */
-  public function Escape($values, $quotes = true)
+  public function Escape($values, bool $quotes = true)
   {
     $this->_connect();
     if (is_array($values)) {
@@ -443,7 +445,7 @@ host = ' . $this->DB_HOST . '
     return $tables;
   }
 
-  public function GetTableColumns($table): array
+  public function GetTableColumns(string $table): array
   {
     $sql = '
 			SHOW COLUMNS FROM
@@ -451,7 +453,7 @@ host = ' . $this->DB_HOST . '
 		';
     $res = $this->Query($sql, [$table]);
     if ($res['error']) {
-      Debug::Halt($res);
+      Halt($res);
     }
 
     $list = [];
@@ -465,7 +467,7 @@ host = ' . $this->DB_HOST . '
 
   private static ?array $_LinkedTables = null;
 
-  public function GetLinkedTables($table_name)
+  public function GetLinkedTables(string $table_name)
   {
     if (!isset(self::$_LinkedTables[$this->current_db])) {
       $sql = '
@@ -476,7 +478,7 @@ host = ' . $this->DB_HOST . '
 				referenced_column_name AS column_name,
 				CONSTRAINT_NAME
 		FROM
-				information_schema.key_column_usage
+				info_schema.key_column_usage
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL
@@ -485,7 +487,7 @@ host = ' . $this->DB_HOST . '
 		';
       $res = $this->Query($sql);
       if ($res['error']) {
-        Debug::Halt($res);
+        Halt($res);
       }
 
       /* @var $fk MSSQL_ForeignKey */
@@ -514,7 +516,7 @@ host = ' . $this->DB_HOST . '
   }
 
 
-  private static $_ForeignKeys = null;
+  private static ?array $_ForeignKeys = null;
 
   public function GetForeignKeys($table_name)
   {
@@ -529,7 +531,7 @@ host = ' . $this->DB_HOST . '
 				referenced_column_name,
 				CONSTRAINT_NAME
 		FROM
-				information_schema.key_column_usage
+				info_schema.key_column_usage
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL
@@ -567,7 +569,7 @@ host = ' . $this->DB_HOST . '
     return self::$_ForeignKeys[$this->current_db][$table_name];
   }
 
-  private static $_PrimaryKey = null;
+  private static ?array $_PrimaryKey = null;
 
   /**
    * @param $table_name
@@ -575,7 +577,7 @@ host = ' . $this->DB_HOST . '
    * @return null
    */
 
-  public function GetPrimaryKey($table_name)
+  public function GetPrimaryKey($table_name): ?array
   {
     if (is_null(self::$_PrimaryKey) || !isset(self::$_PrimaryKey[$table_name])) {
 
@@ -587,7 +589,7 @@ SHOW INDEXES FROM
 
       $res = $this->Query($sql);
       if ($res['error']) {
-        Debug::Halt($res);
+        Halt($res);
       }
       foreach ($res['data'] as $row) {
         if (!$row['Non_unique'] && $row['Key_name'] === 'PRIMARY') {
@@ -604,15 +606,15 @@ SHOW INDEXES FROM
     return self::$_PrimaryKey[$table_name];
   }
 
-  private static $_UniqueKeys = null;
-  private static $_Indexes = null;
+  private static ?array $_UniqueKeys = null;
+  private static ?array $_Indexes = null;
 
   /**
-   * @param string $table_name
+   * @param $table_name
    *
    * @return array
    */
-  public function GetIndexes(string $table_name): array
+  public function GetIndexes($table_name): array
   {
     if (is_null(self::$_Indexes)) {
       $this->GetUniqueKeys($table_name);
@@ -629,7 +631,7 @@ SHOW INDEXES FROM
    * @return null
    */
 
-  public function GetUniqueKeys($table_name)
+  public function GetUniqueKeys($table_name): ?array
   {
     if (is_null(self::$_UniqueKeys) || !isset(self::$_UniqueKeys[$table_name])) {
 
@@ -641,7 +643,7 @@ SHOW INDEXES FROM
 
       $res = $this->Query($sql);
       if ($res['error']) {
-        Debug::Halt($res);
+        Halt($res);
       }
       foreach ($res['data'] as $row) {
         if ($row['Key_name'] === 'PRIMARY') {
@@ -670,17 +672,67 @@ SHOW INDEXES FROM
   public function GetStoredProcs()
   {
     $sql = '
-			SHOW PROCEDURE STATUS;
+SELECT
+  t100.ROUTINE_TYPE,
+  t100.ROUTINE_SCHEMA,
+  t100.SPECIFIC_NAME,
+  t100.ROUTINE_DEFINITION,
+  t110.PARAMETERS
+
+FROM information_schema.ROUTINES t100
+LEFT JOIN (
+SELECT SPECIFIC_SCHEMA, SPECIFIC_NAME, GROUP_CONCAT(DATA_TYPE,\':\', PARAMETER_NAME ORDER BY ORDINAL_POSITION) AS PARAMETERS
+FROM information_schema.parameters
+WHERE PARAMETER_MODE = \'IN\'
+GROUP BY SPECIFIC_SCHEMA, SPECIFIC_NAME
+) AS t110 ON t110.SPECIFIC_SCHEMA = t100.ROUTINE_SCHEMA AND t110.SPECIFIC_NAME = t100.SPECIFIC_NAME
+WHERE (t100.ROUTINE_TYPE IN(\'FUNCTION\',\'PROCEDURE\'))
+  AND t100.ROUTINE_SCHEMA = \'' . $this->current_db . '\'
+ORDER BY
+  t100.SPECIFIC_NAME;
 		';
-    $res = $this->Query($sql);
-    if ($res['error']) {
-      Debug::Halt($res);
+    $res = $this->Query($sql, null, 'MySQL_StoredProc');
+    if (isset($res['error'])) {
+      Halt($res);
     }
-    return null;
+    return $res;
+  }
+
+  public function GetStoredProcParams(string $specific_name)
+  {
+    $sql = '
+SELECT
+  t110.*
+
+FROM information_schema.ROUTINES t100
+LEFT JOIN information_schema.parameters t110  ON t110.SPECIFIC_SCHEMA = t100.ROUTINE_SCHEMA AND t110.SPECIFIC_NAME = t100.SPECIFIC_NAME
+WHERE t110.PARAMETER_MODE = \'IN\'
+AND (t100.ROUTINE_TYPE IN(\'FUNCTION\',\'PROCEDURE\'))
+  AND t100.ROUTINE_SCHEMA = \'' . $this->current_db . '\'
+  AND t100.SPECIFIC_NAME = \'' . $specific_name . '\'
+		';
+    $res = $this->Query($sql, null, 'MySQL_StoredProcParam');
+    if (isset($res['error'])) {
+      Halt($res);
+    }
+    return $res;
   }
 
   public function CopyInfoSchema()
   {
-    // don't do this, it's not reliable
+    // unreliable, don't do this
+//    $this->SetDatabase('INFORMATION_SCHEMA');
+//    $this->Execute("DROP DATABASE IF EXISTS `info_schema`;", null, true);
+//    $this->Execute("CREATE DATABASE  `info_schema` ;       ", null, true);
+//    $this->Execute("CREATE TABLE info_schema.key_column_usage LIKE INFORMATION_SCHEMA.key_column_usage;", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ENGINE = INNODB;", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_schema`);", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_table_name`);", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`referenced_column_name`);", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_schema`);", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`table_name`);", null, true);
+//    $this->Execute("ALTER TABLE info_schema.key_column_usage ADD INDEX (`column_name`);", null, true);
+//    $this->Execute("INSERT INTO info_schema.key_column_usage SELECT * FROM INFORMATION_SCHEMA.key_column_usage;", null, true);
+
   }
 }

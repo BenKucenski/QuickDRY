@@ -1,6 +1,7 @@
 <?php
 namespace QuickDRY\Connectors;
 
+
 use QuickDRY\Utilities\SafeClass;
 
 class TypeSubtype extends SafeClass

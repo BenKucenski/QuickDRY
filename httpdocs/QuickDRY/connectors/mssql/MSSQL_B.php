@@ -6,30 +6,40 @@ namespace QuickDRY\Connectors;
  */
 class MSSQL_B extends MSSQL_Core
 {
-    protected static $connection =  null;
+  protected static ?MSSQL_Connection $connection = null;
 
-    protected static function _connect()
-    {
-        if(is_null(static::$connection)) {
-            static::$DB_HOST = MSSQLB_HOST;
-            static::$connection = new MSSQL_Connection(MSSQLB_HOST, MSSQLB_USER, MSSQLB_PASS);
-        }
+  protected static function _connect()
+  {
+    if (!defined('MSSQLB_HOST')) {
+      exit('MSSQLB_HOST');
+    }
+    if (!defined('MSSQLB_USER')) {
+      exit('MSSQLB_USER');
+    }
+    if (!defined('MSSQLB_PASS')) {
+      exit('MSSQLB_PASS');
     }
 
-    /**
-     * @param bool $val
-     */
-    public static function SetIgnoreDuplicateError($val)
-    {
-        self::_connect();
-        self::$connection->IgnoreDuplicateError = $val;
+    if (is_null(static::$connection)) {
+      static::$DB_HOST = MSSQLB_HOST;
+      static::$connection = new MSSQL_Connection(MSSQLB_HOST, MSSQLB_USER, MSSQLB_PASS);
     }
+  }
 
-    /**
-     * @return string|null
-     */
-    public static function _Table()
-    {
-        return static::$table;
-    }
+  /**
+   * @param bool $val
+   */
+  public static function SetIgnoreDuplicateError(bool $val)
+  {
+    self::_connect();
+    self::$connection->IgnoreDuplicateError = $val;
+  }
+
+  /**
+   * @return string|null
+   */
+  public static function _Table(): ?string
+  {
+    return static::$table;
+  }
 }

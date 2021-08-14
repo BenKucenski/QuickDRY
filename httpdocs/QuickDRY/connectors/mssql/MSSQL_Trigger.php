@@ -5,23 +5,18 @@ use QuickDRY\Utilities\SimpleReport;
 
 class MSSQL_Trigger extends SimpleReport
 {
-    public $name;
-    public $object_id;
-    public $parent_class;
-    public $parent_class_desc;
-    public $parent_id;
-    public $type;
-    public $type_desc;
-    public $create_date;
-    public $modify_date;
-    public $is_ms_shipped;
-    public $is_disabled;
-    public $is_not_for_replication;
-    public $is_instead_of_trigger;
-    public $definition;
-
-    public function __construct($row = null)
-    {
-      parent::__construct($row);
-    }
+  public string $name;
+  public string $object_id;
+  public string $parent_class;
+  public string $parent_class_desc;
+  public string $parent_id;
+  public string $type;
+  public string $type_desc;
+  public string $create_date;
+  public string $modify_date;
+  public string $is_ms_shipped;
+  public string $is_disabled;
+  public string $is_not_for_replication;
+  public string $is_instead_of_trigger;
+  public string $definition;
 }
