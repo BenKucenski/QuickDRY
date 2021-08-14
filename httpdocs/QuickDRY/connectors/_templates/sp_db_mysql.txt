@@ -1,4 +1,6 @@
 <?php
+use QuickDRY\Utilities\SafeClass;
+use QuickDRY\Utilities\Debug;
 
 /**
  * Class db_[[sp_class]]
@@ -22,7 +24,7 @@
         });
 
         if (isset($rows['error']) && $rows['error']) {
-            Halt($rows);
+            Debug::Halt($rows);
         }
         return $rows;
     }
