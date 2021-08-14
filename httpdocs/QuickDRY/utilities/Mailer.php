@@ -1,10 +1,9 @@
 <?php
 namespace QuickDRY\Utilities;
 
-use QuickDRY\CronLog;
+use Exception;
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
 /**
  * Class Mailer
@@ -151,7 +150,7 @@ class Mailer extends SafeClass
             return 0;
           } else {
             if (is_object($path)) {
-              if (get_class($path) == EmailAttachment::class) {
+              if (get_class($path) == 'EmailAttachment') {
                 $name = $path->FileName;
                 $path = $path->FileLocation;
               } else {
@@ -164,7 +163,7 @@ class Mailer extends SafeClass
             $path = '../' . $path;
           }
           if (!file_exists($path)) {
-            CronLog::Insert(['error' => 'attachment missing', $name => $path]);
+            Log::Insert(['error' => 'attachment missing', $name => $path]);
             return 0;
           }
           try {

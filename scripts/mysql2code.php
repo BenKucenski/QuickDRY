@@ -1,4 +1,7 @@
 <?php
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Connectors\MySQL_CodeGen;
+
 $opts = 'h::';
 $opts .= 'd::';
 $opts .= 'c::';

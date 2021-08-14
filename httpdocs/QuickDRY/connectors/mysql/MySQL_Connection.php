@@ -3,6 +3,8 @@ namespace QuickDRY\Connectors;
 
 /** DO NOT USE THIS CLASS DIRECTLY **/
 
+use Exception;
+use mysqli;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Log;
 use QuickDRY\Utilities\Metrics;
@@ -345,7 +347,7 @@ host = ' . $this->DB_HOST . '
           $list[] = !is_null($map_function) ? call_user_func($map_function, $r) : $r;
         } else {
           if (!class_exists($return_type)) {
-            Halt($return_type . ' does not exist');
+            Debug::Halt($return_type . ' does not exist: MySQL_Connection::Query');
           }
 
           $c = new $return_type();
@@ -691,7 +693,7 @@ WHERE (t100.ROUTINE_TYPE IN(\'FUNCTION\',\'PROCEDURE\'))
 ORDER BY
   t100.SPECIFIC_NAME;
 		';
-    $res = $this->Query($sql, null, 'MySQL_StoredProc');
+    $res = $this->Query($sql, null, 'QuickDRY\Connectors\MySQL_StoredProc');
     if (isset($res['error'])) {
       Halt($res);
     }
@@ -711,7 +713,7 @@ AND (t100.ROUTINE_TYPE IN(\'FUNCTION\',\'PROCEDURE\'))
   AND t100.ROUTINE_SCHEMA = \'' . $this->current_db . '\'
   AND t100.SPECIFIC_NAME = \'' . $specific_name . '\'
 		';
-    $res = $this->Query($sql, null, 'MySQL_StoredProcParam');
+    $res = $this->Query($sql, null, 'QuickDRY\Connectors\MySQL_StoredProcParam');
     if (isset($res['error'])) {
       Halt($res);
     }

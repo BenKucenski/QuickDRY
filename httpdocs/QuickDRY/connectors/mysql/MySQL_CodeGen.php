@@ -13,7 +13,7 @@ class MySQL_CodeGen extends SQLCodeGen
     $this->DatabaseTypePrefix = 'my';
 
     if (!$DatabaseClass) {
-      $DatabaseClass = 'MySQL_A';
+      $DatabaseClass = 'QuickDRY\Connectors\MySQL_A';
     }
     if (!class_exists($DatabaseClass)) {
       exit($DatabaseClass . ' is invalid');

@@ -1,4 +1,9 @@
 <?php
+
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\Navigation;
+
 function IsCLI(): bool
 {
   return (php_sapi_name() === 'cli');
