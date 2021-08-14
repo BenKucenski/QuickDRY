@@ -1,65 +1,27 @@
 <?php
-
 namespace QuickDRY\Utilities;
 
-use DateTime;
-use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use stdClass;
 
 /**
  * Class SimpleExcel
  *
  * @property string Filename
  * @property string Title
- * @property stdClass Report
+ * @property SimpleReport[] Report
  * @property SimpleExcel_Column[] Columns
  */
 class SimpleExcel extends SafeClass
 {
-  public $Filename;
-  public $Report;
-  public $Columns;
-  public $Title;
-
-  /**
-   * @param string $filename
-   * @param SimpleExcel[] $reports
-   */
-  public static function MultiSheet($filename, $reports)
-  {
-    Debug::Halt('QuickDRY Error: Deprecated: Use ExportSpreadsheets');
-  }
-
-  /**
-   * @param string $filename
-   * @param SimpleExcel[] $reports
-   */
-  public static function MultiSheet2007($filename, $reports)
-  {
-    Debug::Halt('QuickDRY Error: Deprecated: Use ExportSpreadsheets');
-  }
-
-  /**
-   * @param SimpleExcel $report
-   */
-  public static function SingleSheet(SimpleExcel $report)
-  {
-    Debug::Halt('QuickDRY Error: Deprecated: use ExportSpreadsheet');
-  }
-
-  /**
-   * @param SimpleExcel $report
-   */
-  public static function SingleSheet2007(SimpleExcel $report)
-  {
-    Debug::Halt('QuickDRY Error: Deprecated: use ExportSpreadsheet');
-  }
+  public string $Filename;
+  public array $Report;
+  public array $Columns;
+  public string $Title;
 
   /**
    * @param Worksheet $sheet
@@ -91,7 +53,7 @@ class SimpleExcel extends SafeClass
   public static function ExportSpreadsheet(SimpleExcel $se, bool $SafeMode = false)
   {
     if (!$se->Filename) {
-      Debug::Halt('QuickDRY Error: Filename required');
+      Halt('QuickDRY Error: Filename required');
     }
     $se->Title = $se->Title ? substr($se->Title, 0, 31) : 'Sheet'; // max 31 characters
     $parts = pathinfo($se->Filename);
@@ -99,8 +61,8 @@ class SimpleExcel extends SafeClass
       $se->Filename .= '.xlsx';
     }
 
-    $spreadsheet = new Spreadsheet();
     $sheet = null;
+    $spreadsheet = new Spreadsheet();
     try {
       $sheet = $spreadsheet->getActiveSheet();
     } catch (Exception $ex) {
@@ -117,12 +79,23 @@ class SimpleExcel extends SafeClass
     $sheet_row++;
     foreach ($se->Report as $item) {
       if (!is_object($item)) {
-        Debug::Halt($item);
+        Halt($item);
       }
+
+      $is_std = get_class($item) === 'stdClass';
+
       $sheet_column = 'A';
       foreach ($se->Columns as $column) {
         try { // need to use try catch so that magic __get columns are accessible
-          $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+          if (!$is_std) { // if the class type is not a stdClass, then let the class type handle errors
+            $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+          } else {
+            if (isset($item->{$column->Property})) { // otherwise, check to see if properties exist or set the value to an empty string
+              $value = $SafeMode ? Strings::KeyboardOnly($item->{$column->Property}) : $item->{$column->Property};
+            } else {
+              $value = '';
+            }
+          }
         } catch (Exception $ex) {
           $value = '';
         }
@@ -152,17 +125,17 @@ class SimpleExcel extends SafeClass
   }
 
   /**
-   * @param $filename
+   * @param string $filename
    * @param SimpleExcel[] $ses
    * @param bool $exit_on_error
+   * @param bool $SafeMode
    * @throws Exception
    */
-  public static function ExportSpreadsheets($filename, array $ses, bool $exit_on_error = true)
+  public static function ExportSpreadsheets(string $filename, array $ses, bool $exit_on_error = true, bool $SafeMode = false)
   {
     $spreadsheet = new Spreadsheet();
 
     $total_sheets = sizeof($ses);
-    $xls_sheet = null;
 
     foreach ($ses as $sheet => $report) {
       if (!isset($_SERVER['HTTP_HOST'])) {
@@ -172,7 +145,7 @@ class SimpleExcel extends SafeClass
         try {
           $spreadsheet->createSheet($sheet);
         } catch (Exception $ex) {
-          Debug::Halt($ex);
+          Halt($ex);
         }
       }
       try {
@@ -180,11 +153,12 @@ class SimpleExcel extends SafeClass
       } catch (Exception $ex) {
         Debug::Halt($ex);
       }
+      $xls_sheet = null;
       try {
         $xls_sheet = $spreadsheet->getActiveSheet();
-        $xls_sheet->setTitle($report->Title ? $report->Title : 'Sheet ' . ($sheet + 1));
+        $xls_sheet->setTitle($report->Title ?: 'Sheet ' . ($sheet + 1));
       } catch (Exception $ex) {
-        Debug::Halt($ex);
+        Halt($ex);
       }
       self::SetDefaultSecurity($xls_sheet);
 
@@ -197,19 +171,26 @@ class SimpleExcel extends SafeClass
       }
       $sheet_row++;
       if ($report->Report && is_array($report->Report)) {
-        $m = sizeof($report->Report);
-        foreach ($report->Report as $i => $item) {
+        // $m = sizeof($report->Report);
+        foreach ($report->Report as $item) {
           if (!is_object($item)) {
-            Debug::Halt($item);
+            Halt($item);
           }
+
+          $is_std = get_class($item) === 'stdClass';
+
           $sheet_column = 'A';
           foreach ($report->Columns as $column) {
             try { // need to use try catch so that magic __get columns are accessible
-              $value = $item->{$column->Property};
+              if (!$is_std) { // if we're not using a stdClass, then let the class type handle errors
+                $value = $item->{$column->Property};
+              } else { // otherwise, use an empty string for non-existent properties
+                $value = $item->{$column->Property} ?? '';
+              }
             } catch (Exception $ex) {
               $value = '';
             }
-            if (!is_object($value)) {
+            if (!is_object($value) && $SafeMode) {
               $value = Strings::KeyboardOnly($value);
             }
             self::_SetSpreadsheetCellValue($xls_sheet, $sheet_column, $sheet_row, $value, $column->PropertyType);
@@ -296,9 +277,14 @@ class SimpleExcel extends SafeClass
    * @param $sheet_column
    * @param $sheet_row
    * @param $value
-   * @param string $property_type
+   * @param int $property_type
    */
-  private static function _SetSpreadsheetCellValue(Worksheet $sheet, $sheet_column, $sheet_row, $value, $property_type = '')
+  private static function _SetSpreadsheetCellValue(
+    Worksheet $sheet,
+    $sheet_column,
+    $sheet_row,
+    $value,
+    int $property_type = 0)
   {
     if (!$value) {
       return;
@@ -353,7 +339,7 @@ class SimpleExcel extends SafeClass
       try {
         $sheet->setCellValue($sheet_column . $sheet_row, $value);
       } catch (Exception $ex) {
-        Debug::Halt($ex);
+        Halt($ex);
       }
     }
   }

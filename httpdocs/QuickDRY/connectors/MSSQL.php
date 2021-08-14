@@ -1,6 +1,9 @@
 <?php
+namespace QuickDRY\Connectors;
+
 /** DO NOT USE THIS CLASS DIRECTLY **/
 
+use DateTime;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\SafeClass;
@@ -126,19 +129,19 @@ class MSSQL extends SafeClass
 function autoloader_QuickDRY_MSSQL($class)
 {
   $class_map = [
-    'MSSQL_Core' => 'mssql/MSSQL_Core.php',
-    'MSSQL_TableColumn' => 'mssql/MSSQL_TableColumn.php',
-    'MSSQL_ForeignKey' => 'mssql/MSSQL_ForeignKey.php',
-    'MSSQL_Connection' => 'mssql/MSSQL_Connection.php',
-    'MSSQL_A' => 'mssql/MSSQL_A.php',
-    'MSSQL_B' => 'mssql/MSSQL_B.php',
-    'MSSQL_C' => 'mssql/MSSQL_C.php',
-    'MSSQL_Queue' => 'mssql/MSSQL_Queue.php',
-    'MSSQL_StoredProcParam' => 'mssql/MSSQL_StoredProcParam.php',
-    'MSSQL_StoredProc' => 'mssql/MSSQL_StoredProc.php',
-    'MSSQL_CodeGen' => 'mssql/MSSQL_CodeGen.php',
-    'MSSQL_Trigger' => 'mssql/MSSQL_Trigger.php',
-    'MSSQL_Definition' => 'mssql/MSSQL_Definition.php',
+    'QuickDRY\Connectors\MSSQL_Core' => 'mssql/MSSQL_Core.php',
+    'QuickDRY\Connectors\MSSQL_TableColumn' => 'mssql/MSSQL_TableColumn.php',
+    'QuickDRY\Connectors\MSSQL_ForeignKey' => 'mssql/MSSQL_ForeignKey.php',
+    'QuickDRY\Connectors\MSSQL_Connection' => 'mssql/MSSQL_Connection.php',
+    'QuickDRY\Connectors\MSSQL_A' => 'mssql/MSSQL_A.php',
+    'QuickDRY\Connectors\MSSQL_B' => 'mssql/MSSQL_B.php',
+    'QuickDRY\Connectors\MSSQL_C' => 'mssql/MSSQL_C.php',
+    'QuickDRY\Connectors\MSSQL_Queue' => 'mssql/MSSQL_Queue.php',
+    'QuickDRY\Connectors\MSSQL_StoredProcParam' => 'mssql/MSSQL_StoredProcParam.php',
+    'QuickDRY\Connectors\MSSQL_StoredProc' => 'mssql/MSSQL_StoredProc.php',
+    'QuickDRY\Connectors\MSSQL_CodeGen' => 'mssql/MSSQL_CodeGen.php',
+    'QuickDRY\Connectors\MSSQL_Trigger' => 'mssql/MSSQL_Trigger.php',
+    'QuickDRY\Connectors\MSSQL_Definition' => 'mssql/MSSQL_Definition.php',
   ];
 
 
@@ -161,4 +164,4 @@ function autoloader_QuickDRY_MSSQL($class)
 }
 
 
-spl_autoload_register('autoloader_QuickDRY_MSSQL');
+spl_autoload_register('QuickDRY\Connectors\autoloader_QuickDRY_MSSQL');

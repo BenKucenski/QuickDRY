@@ -1,9 +1,10 @@
 <?php
-
 namespace QuickDRY\Utilities;
 
-use Exception;
+use QuickDRY\CronLog;
+
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 /**
  * Class Mailer
@@ -14,14 +15,14 @@ class Mailer extends SafeClass
   public string $subject;
   public string $to_email;
   public string $to_name;
-  public bool $is_sent;
-  public $sent_at;
-  public string $log;
+  public int $is_sent;
+  public ?string $sent_at = null;
+  public ?string $log = null;
   public string $headers;
   public ?string $from_email;
   public ?string $from_name;
 
-  public $mail;
+  public PHPMailer $mail;
 
   /**
    * @param $name
@@ -44,12 +45,7 @@ class Mailer extends SafeClass
    * @param string|null $from_name
    * @return Mailer
    */
-
-
-  public static function Queue(string $to_email, string $to_name,
-                               string $subject, string $message,
-                               array $attachments = null,
-                               string $from_email = null, string $from_name = null): Mailer
+  public static function Queue(string $to_email, string $to_name, string $subject, string $message, array $attachments = null, string $from_email = null, string $from_name = null): Mailer
   {
     $t = new self();
     $t->to_email = $to_email;
@@ -58,6 +54,7 @@ class Mailer extends SafeClass
     $t->from_name = $from_name;
     $t->subject = $subject;
     $t->message = $message;
+    $t->log = null;
     $t->headers = serialize($attachments);
 
     return $t;
@@ -67,9 +64,8 @@ class Mailer extends SafeClass
    * @param bool $debug
    * @param bool $smtp_output
    * @return int
-   * @throws \PHPMailer\PHPMailer\Exception
    */
-  public function Send(bool $debug = false, bool $smtp_output = false)
+  public function Send(bool $debug = false, bool $smtp_output = false): int
   {
 
     if (defined('SMTP_ON')) {
@@ -96,10 +92,24 @@ class Mailer extends SafeClass
 
       $mail = new PHPMailer();
 
+      if(!defined('SMTP_HOST')) {
+        exit('SMTP_HOST undefined');
+      }
       $mail->Host = SMTP_HOST;
-      $mail->From = $this->from_email ? $this->from_email : SMTP_FROM_EMAIL;
-      $mail->FromName = $this->from_name ? $this->from_name : SMTP_FROM_NAME;
       $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 25;
+
+      try {
+        $mail->setFrom($this->from_email ?? SMTP_FROM_EMAIL, $this->from_name ?? SMTP_FROM_NAME);
+      } catch (Exception $e) {
+        exit('Mailer 1');
+      }
+      $mail->SMTPOptions = array(
+        'ssl' => array(
+          'verify_peer' => false,
+          'verify_peer_name' => false,
+          'allow_self_signed' => true
+        )
+      );
 
       $this->from_email = $mail->From;
       $this->from_name = $mail->FromName;
@@ -107,6 +117,9 @@ class Mailer extends SafeClass
 
       if (defined('SMTP_USER') && defined('SMTP_PASS')) {
         if (SMTP_USER && SMTP_PASS) {
+          if(!defined('SMTP_AUTH')) {
+            exit('SMTP_AUTH undefined');
+          }
           $mail->Password = SMTP_PASS;
           $mail->Username = SMTP_USER;
           $mail->AuthType = SMTP_AUTH;
@@ -117,19 +130,42 @@ class Mailer extends SafeClass
       $mail->Mailer = 'smtp';
 
 
-      $mail->AddAddress($to, $this->to_name);
+      try {
+        $mail->AddAddress($to, $this->to_name);
+      } catch (Exception $e) {
+        exit('Mailer Add Address');
+      }
       $mail->Subject = $this->subject;
-      $mail->MsgHTML($this->message);
+      try {
+        $mail->MsgHTML($this->message);
+      } catch (Exception $e) {
+        exit('Mailer MsgHTML');
+      }
 
       $attachments = unserialize($this->headers);
       if (!is_null($attachments) && is_array($attachments)) {
         foreach ($attachments as $name => $path) {
+
+          if ($name === 'report_id') {
+            // don't handle this here, we need to update the email queue record
+            return 0;
+          } else {
+            if (is_object($path)) {
+              if (get_class($path) == EmailAttachment::class) {
+                $name = $path->FileName;
+                $path = $path->FileLocation;
+              } else {
+                return 0;
+              }
+            }
+          }
+
           if (!file_exists($path)) {
             $path = '../' . $path;
           }
           if (!file_exists($path)) {
-            Log::Insert(['error' => 'invalid attachment', $name => $path]);
-            Debug::Halt(['error' => 'Missing Attachment File', $this]);
+            CronLog::Insert(['error' => 'attachment missing', $name => $path]);
+            return 0;
           }
           try {
             $mail->AddAttachment($path, $name);
@@ -143,7 +179,7 @@ class Mailer extends SafeClass
       try {
         if (!$mail->Send()) {
           if ($debug) {
-            Debug::Halt([$mail->ErrorInfo, $mail]);
+            Halt([$mail->ErrorInfo, $mail]);
           }
           $this->log = $mail->ErrorInfo;
           $this->mail = $mail;
@@ -163,16 +199,16 @@ class Mailer extends SafeClass
   public static function Template($filename, $values)
   {
     if (!file_exists($filename)) {
-      Debug::Halt(['error' => 'File does not exist', $filename]);
+      Halt(['error' => 'File does not exist', $filename]);
     }
     $html = file_get_contents($filename);
     foreach ($values as $key => $value) {
       $html = str_ireplace('##' . $key . '##', $value, $html);
     }
     $matches = [];
-    preg_match_all('/\#\#(.*?)\#\#/si', $html, $matches);
+    preg_match_all('/##(.*?)##/si', $html, $matches);
     if (sizeof($matches[1])) {
-      Debug::Halt(['Error' => 'HTML still contains variables', $matches[1], $html]);
+      CleanHalt(['Error' => 'HTML still contains variables', $matches[1], $html]);
     }
     return $html;
   }

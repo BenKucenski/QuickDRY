@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRYInstance;
 
 /**
  * Class MenuAccess

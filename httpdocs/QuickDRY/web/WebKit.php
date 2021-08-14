@@ -1,11 +1,12 @@
 <?php
-namespace QuickDRY\Web;
-
-use Curl;
-use QuickDRY\Utilities\Debug;
-use QuickDRY\Utilities\Log;
 
 /* @var $Web Web */
+
+use QuickDRY\Connectors\Curl;
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\Log;
+use QuickDRY\Web\Web;
+
 if (!$Web->PDFPageOrientation) {
     $Web->PDFPageOrientation = 'Portrait';
 }
@@ -61,7 +62,7 @@ if(defined('PDF_API')) {
             $params[] = ' --page-width 8.5in --page-height 11.0in --margin-bottom 0.5in --margin-top 0.5in --margin-left 0.18in --margin-right 0.18in';
             break;
         default:
-            $params[] = '--page-size ' . ($Web->PDFPageSize ? $Web->PDFPageSize : PDF_PAGE_SIZE_LETTER);
+            $params[] = '--page-size ' . ($Web->PDFPageSize ?: PDF_PAGE_SIZE_LETTER);
     }
 
     if($Web->PDFMargins) {

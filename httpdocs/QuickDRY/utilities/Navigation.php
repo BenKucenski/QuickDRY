@@ -1,5 +1,4 @@
 <?php
-
 namespace QuickDRY\Utilities;
 
 /**
@@ -7,10 +6,10 @@ namespace QuickDRY\Utilities;
  */
 class Navigation
 {
-  private $_PERMISSIONS = [];
-  private $_MENU = [];
+  private array $_PERMISSIONS = [];
+  private array $_MENU = [];
 
-  public $Legend;
+  public ?array $Legend = null;
 
   /**
    * @param $_ADD
@@ -43,7 +42,7 @@ class Navigation
       return true;
 
     if (is_array($_CUR_PAGE)) {
-      Debug::Halt($_CUR_PAGE);
+      Halt($_CUR_PAGE);
     }
 
     $t = explode('/', $_CUR_PAGE);
@@ -79,7 +78,7 @@ class Navigation
 
       $has_visible = false;
       if (isset($values['links']) && sizeof($values['links'])) {
-        foreach ($values['links'] as $link_name => $url) {
+        foreach ($values['links'] as $url) {
           if (isset($url['link']) && strcasecmp($url['link'], $name) == 0) {
             continue;
           }
@@ -160,7 +159,7 @@ class Navigation
    * @param $_MENU
    * @return string
    */
-  public function RenderBootstrap4($_MENU = null)
+  public function RenderBootstrap4($_MENU = null): string
   {
     if ($_MENU) {
       $this->_MENU = $_MENU;
@@ -174,7 +173,7 @@ class Navigation
 
       $has_visible = false;
       if (isset($values['links']) && sizeof($values['links'])) {
-        foreach ($values['links'] as $link_name => $url) {
+        foreach ($values['links'] as $url) {
           if (isset($url['link']) && strcasecmp($url['link'], $name) == 0) {
             continue;
           }
@@ -252,16 +251,23 @@ class Navigation
   }
 
   /**
-   * @param $count
-   * @param null $params
-   * @param null $_SORT_BY
-   * @param null $_SORT_DIR
-   * @param null $_PER_PAGE
-   * @param null $_URL
+   * @param int $count
+   * @param string|null $params
+   * @param string|null $_SORT_BY
+   * @param string|null $_SORT_DIR
+   * @param int|null $_PER_PAGE
+   * @param string|null $_URL
    * @param bool $ShowViewAll
    * @return string
    */
-  public static function BootstrapPaginationLinks($count, $params = null, $_SORT_BY = null, $_SORT_DIR = null, $_PER_PAGE = null, $_URL = null, $ShowViewAll = true)
+  public static function BootstrapPaginationLinks(
+    int $count,
+    string $params = null,
+    string $_SORT_BY = null,
+    string $_SORT_DIR = null,
+    int $_PER_PAGE = null,
+    string $_URL = null,
+    bool $ShowViewAll = true): string
   {
     if ($params == null) {
       $params = [];
@@ -276,10 +282,10 @@ class Navigation
     }
 
 
-    $_SORT_BY = $_SORT_BY ? $_SORT_BY : SORT_BY;
-    $_SORT_DIR = $_SORT_DIR ? $_SORT_DIR : SORT_DIR;
-    $_PER_PAGE = $_PER_PAGE ? $_PER_PAGE : PER_PAGE;
-    $_URL = $_URL ? $_URL : CURRENT_PAGE;
+    $_SORT_BY = $_SORT_BY ?: SORT_BY;
+    $_SORT_DIR = $_SORT_DIR ?: SORT_DIR;
+    $_PER_PAGE = $_PER_PAGE ?: PER_PAGE;
+    $_URL = $_URL ?: CURRENT_PAGE;
 
     if ($_PER_PAGE > 0) {
       $num_pages = ceil($count / $_PER_PAGE);
@@ -329,7 +335,7 @@ class Navigation
    * @param $_MENU
    * @return string
    */
-  public function RenderTree($_MENU = null)
+  public function RenderTree($_MENU = null): string
   {
     if ($_MENU) {
       $this->_MENU = $_MENU;
@@ -340,14 +346,14 @@ class Navigation
 
       $has_visible = false;
       if (isset($values['links']) && sizeof($values['links'])) {
-        foreach ($values['links'] as $link_name => $url) {
+        foreach ($values['links'] as $url) {
           if (isset($url['link']) && strcasecmp($url['link'], $name) == 0) {
             continue;
           }
 
-          if (!isset($url['link'])) {
-          } else {
-          }
+//          if (!isset($url['link'])) {
+//          } else {
+//          }
 
           $has_visible = true;
           break;

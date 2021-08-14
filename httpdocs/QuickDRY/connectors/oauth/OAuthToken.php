@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Connectors;
+
 class OAuthToken {
     // access tokens and request tokens
     public $key;

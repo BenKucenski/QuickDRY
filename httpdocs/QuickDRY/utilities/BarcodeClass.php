@@ -1,5 +1,4 @@
 <?php
-
 namespace QuickDRY\Utilities;
 
 /**

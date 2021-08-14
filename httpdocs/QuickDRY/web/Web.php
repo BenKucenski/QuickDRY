@@ -1,15 +1,14 @@
 <?php
-
 namespace QuickDRY\Web;
 
+use QuickDRY\Connectors\MSSQL_Connection;
+use QuickDRY\Connectors\MySQL_Connection;
 use QuickDRY\Utilities\Debug;
-use Menu;
-use MenuAccess;
-use MSSQL_Connection;
-use MySQL_Connection;
 use QuickDRY\Utilities\HTTP;
 use QuickDRY\Utilities\Navigation;
 use QuickDRY\Utilities\SafeClass;
+use QuickDRYInstance\Menu;
+use QuickDRYInstance\MenuAccess;
 use UserClass;
 
 /**
@@ -45,33 +44,36 @@ use UserClass;
  * @property string PDFRootDir
  * @property string DOCXPageOrientation
  * @property string DOCXFileName
- * @property ?UserClass CurrentUser
+ * @property UserClass CurrentUser
  * @property string DefaultURL
+ * @property string url_export_xls
+ * @property string Namespace;
  */
 class Web extends SafeClass
 {
-  public ?string $ControllerFile;
-  public ?string $ViewFile;
-  public string $PageClass;
+  public ?string $Namespace = null;
+  public ?string $ControllerFile = null;
+  public ?string $ViewFile = null;
+  public ?string $PageClass = null;
   public bool $IsJSON;
 
   public Request $Request;
   public Session $Session;
   public Cookie $Cookie;
   public Server $Server;
-  public ?UserClass $CurrentUser;
-  public Navigation $Navigation;
-  public bool $AccessDenied;
+  public ?UserClass $CurrentUser = null;
+  public ?Navigation $Navigation = null;
+  public ?bool $AccessDenied = null;
   public ?string $MasterPage = null;
   public string $SettingsFile;
   public int $PageMode;
   public string $CurrentPage;
   public string $CurrentPageName;
-  public string $DefaultURL;
+  public ?string $DefaultURL = null;
 
-  private array $SecureMasterPages = [];
+  private ?array $SecureMasterPages = null;
 
-  public bool $RenderPDF = false;
+  public ?bool $RenderPDF = null;
   public ?string $PDFPageOrientation = null;
   public ?string $PDFPageSize = null;
   public ?string $PDFFileName = null;
@@ -80,16 +82,16 @@ class Web extends SafeClass
   public ?string $PDFFooter = null;
   public ?string $PDFSimplePageNumbers = null;
   public ?PDFMargins $PDFMargins = null;
-  public ?string $PDFPostFunction = null;
+  public $PDFPostFunction;
   public ?string $PDFHash = null;
   public ?string $PDFRootDir = null;
   public ?string $PDFShrinkToFit = null;
 
   public string $HTML;
 
-  public bool $RenderDOCX = false;
-  public string $DOCXPageOrientation;
-  public string $DOCXFileName;
+  public ?bool $RenderDOCX = null;
+  public ?string $DOCXPageOrientation = null;
+  public ?string $DOCXFileName = null;
 
   public ?string $StaticModel = null;
   public ?string $InstanceModel = null;
@@ -98,7 +100,7 @@ class Web extends SafeClass
   public int $StartTime;
   public int $InitTime;
 
-  public string $DefaultPage;
+  public ?string $DefaultPage = null;
   public string $DefaultUserPage;
 
   public string $MetaTitle;
@@ -125,9 +127,17 @@ class Web extends SafeClass
     return in_array($this->MasterPage, $this->SecureMasterPages);
   }
 
+  public function __get($name)
+  {
+    switch ($name) {
+      case 'url_export_xls':
+        return CURRENT_PAGE_URL . '?' . ($this->Server->QUERY_STRING ? $this->Server->QUERY_STRING . '&export=xls' : 'export=xls');
+    }
+    return parent::__get($name);
+  }
+
   public function __construct()
   {
-
     $this->StartTime = time();
     $this->RenderPDF = false;
 
@@ -138,10 +148,10 @@ class Web extends SafeClass
 
     $this->PageMode = QUICKDRY_MODE_STATIC; // default to static classes for pages
 
-    $this->CurrentUser = null;
 
-    if ($this->Session->user) {
-      $this->CurrentUser = $this->Session->user;
+    $this->CurrentUser = null;
+    if ($this->Session->Get('user')) {
+      $this->CurrentUser = $this->Session->Get('user');
     }
 
 
@@ -203,15 +213,15 @@ class Web extends SafeClass
     }
     define('DOC_ROOT_PATH', $t);
 
-    define('SORT_BY', (string)$this->Request->sort_by ?? null);
-    define('SORT_DIR', (string)$this->Request->sort_dir ?? 'asc');
+    define('SORT_BY', (string)$this->Request->Get('sort_by') ?? null);
+    define('SORT_DIR', (string)$this->Request->Get('sort_dir') ?? 'asc');
 
-    define('PAGE', $this->Request->page ?? 0);
-    define('PER_PAGE', $this->Request->per_page ?? 20);
+    define('PAGE', (int)$this->Request->Get('page') ?: 0);
+    define('PER_PAGE', (int)$this->Request->Get('per_page') ?: 20);
 
     $url = strtok($this->Server->REQUEST_URI, '?');
 
-    $this->Session->last_url = $url;
+    $this->Session->Set('last_url', $url);
 
     $qs = $this->Server->QUERY_STRING;
     $ru = $this->Server->REQUEST_URI;
@@ -287,6 +297,12 @@ class Web extends SafeClass
             $this->ControllerFile = $this->ViewFile;
             $this->ViewFile = null;
             $this->IsJSON = true;
+          } else {
+            if (stristr($this->CurrentPageName, '.pdf') !== false) {
+              $this->ControllerFile = $this->ViewFile;
+              $this->ViewFile = null;
+              $this->IsJSON = true;
+            }
           }
         }
       }
@@ -295,7 +311,7 @@ class Web extends SafeClass
     $temp = explode('.', $this->CurrentPageName);
     $this->PageClass = $temp[0];
 
-    $this->Verb = strtoupper($this->Request->verb ?: $this->Server->REQUEST_METHOD);
+    $this->Verb = strtoupper($this->Request->Get('verb') ?: $this->Server->REQUEST_METHOD);
   }
 
   public function SetURLs()
@@ -317,7 +333,7 @@ class Web extends SafeClass
           HTTP::Redirect('https://' . HTTP_HOST);
         }
       }
-      if (!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
+      if (!defined('BASE_URL')) { // allows the secure URL to be set in scheduled tasks
         define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
       }
     }
@@ -327,7 +343,7 @@ class Web extends SafeClass
   {
     $this->Navigation = new Navigation();
 
-    if (!$this->Session->user) {
+    if (!$this->Session->Get('user')) {
       $this->Navigation->Combine(MenuAccess::GetForRole(ROLE_ID_DEFAULT));
     } else {
       if (defined('ROLE_ID_DEFAULT_USER')) {

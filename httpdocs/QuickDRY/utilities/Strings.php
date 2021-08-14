@@ -1,34 +1,18 @@
 <?php
-
 namespace QuickDRY\Utilities;
-
-use DateTime;
-use Exception;
-use stdClass;
 
 /**
  * Class Strings
  */
 class Strings extends SafeClass
 {
-  public static function TextToUTF8(string $str): string
-  {
-    return utf8_encode($str);
-  }
-
-  public static function RemoveQuotes($str)
-  {
-    // https://stackoverflow.com/questions/9734758/remove-quotes-from-start-and-end-of-string-in-php
-    return preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $str);
-  }
-
-  public static function ExcelTitleOnly($str)
+  public static function ExcelTitleOnly($str): string
   {
     return self::Truncate(preg_replace('/\s+/si', ' ', preg_replace('/[^a-z0-9\s]/si', ' ', trim($str))), 31, false, false);
   }
 
   // https://stackoverflow.com/questions/3109978/display-numbers-with-ordinal-suffix-in-php
-  public static function Ordinal($number)
+  public static function Ordinal($number): string
   {
     $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
     if ((($number % 100) >= 11) && (($number % 100) <= 13)) {
@@ -44,7 +28,7 @@ class Strings extends SafeClass
    * @param bool $has_header
    * @return array
    */
-  public static function CSVToAssociativeArray($filename, $clean_header = false, $has_header = true): array
+  public static function CSVToAssociativeArray($filename, bool $clean_header = false, bool $has_header = true): array
   {
     return self::CSVArrayToAssociativeArray(file($filename), $clean_header, $has_header);
   }
@@ -55,7 +39,7 @@ class Strings extends SafeClass
    * @param bool $has_header
    * @return array
    */
-  public static function CSVArrayToAssociativeArray($array, $clean_header = false, $has_header = true): array
+  public static function CSVArrayToAssociativeArray($array, bool $clean_header = false, bool $has_header = true): array
   {
     if (!is_array($array)) {
       $array = explode("\n", trim($array));
@@ -90,9 +74,9 @@ class Strings extends SafeClass
    * @param $tsv
    * @return array
    */
-  public static $_SEPARATOR;
+  public static string $_SEPARATOR;
 
-  public static function TSVToArray($tsv, $separator = "\t"): array
+  public static function TSVToArray($tsv, string $separator = "\t"): array
   {
     self::$_SEPARATOR = $separator;
     // https://stackoverflow.com/questions/4801895/csv-to-associative-array
@@ -120,12 +104,12 @@ class Strings extends SafeClass
   /**
    * @param $tsv
    * @param null $mapping_function
-   * @param null $filename
-   * @param null $class
+   * @param string|null $filename
+   * @param string|null $class
    * @param bool $ignore_errors
    * @return array
    */
-  public static function TSVToArrayMap(&$tsv, $mapping_function = null, $filename = null, $class = null, bool $ignore_errors = false): array
+  public static function TSVToArrayMap(&$tsv, $mapping_function = null, string $filename = null, string $class = null, bool $ignore_errors = false): array
   {
     $tsv = trim($tsv); // remove trailing whitespace
     // https://stackoverflow.com/questions/4801895/csv-to-associative-array
@@ -144,7 +128,7 @@ class Strings extends SafeClass
       }
       if (sizeof($row) != $n) {
         if (!$ignore_errors) {
-          Debug::Halt([$header, $row]);
+          Halt([$header, $row]);
         }
       }
       if ($mapping_function) {
@@ -183,14 +167,15 @@ class Strings extends SafeClass
    */
   public static function XMLtoArray($XML)
   {
+    // https://stackoverflow.com/questions/3630866/php-parse-xml-string
+
     $xml_array = '';
-    $multi_key2 = [];
     $multi_key = [];
+    $multi_key2 = [];
     $level = [];
     $xml_parser = xml_parser_create();
     xml_parse_into_struct($xml_parser, $XML, $vals);
     xml_parser_free($xml_parser);
-    // wyznaczamy tablice z powtarzajacymi sie tagami na tym samym poziomie
     $_tmp = '';
     foreach ($vals as $xml_elem) {
       $x_tag = $xml_elem['tag'];
@@ -208,7 +193,7 @@ class Strings extends SafeClass
         $_tmp = $x_tag;
       }
     }
-    // jedziemy po tablicy
+
     foreach ($vals as $xml_elem) {
       $x_tag = $xml_elem['tag'];
       $x_level = $xml_elem['level'];
@@ -245,7 +230,7 @@ class Strings extends SafeClass
           $php_stmt_main = $php_stmt . '[$x_tag]' . $add . '[\'content\'] = $xml_elem[\'value\'];';
           eval($php_stmt_main);
         }
-        foreach ($xml_elem['attributes'] as $key => $value) {
+        foreach ($xml_elem['attributes'] as $value) {
           try {
             if (!is_array($xml_array)) {
               $xml_array = [];
@@ -254,7 +239,7 @@ class Strings extends SafeClass
             $php_stmt_att = $php_stmt . '[$x_tag]' . $add . '[$key] = $value;';
             eval($php_stmt_att);
           } catch (Exception $ex) {
-            Debug::Halt([$xml_array, $ex]);
+            CleanHalt([$xml_array, $ex]);
           }
         }
       }
@@ -375,7 +360,7 @@ class Strings extends SafeClass
    * @param string $thirdColorHex
    * @return string
    */
-  public static function PercentToColor($value, $brightness = 255, $max = 100, $min = 0, $thirdColorHex = '00'): string
+  public static function PercentToColor($value, int $brightness = 255, int $max = 100, int $min = 0, string $thirdColorHex = '00'): string
   {
     if ($value > $max) {
       $value = $max - ($value - $max);
@@ -455,11 +440,11 @@ class Strings extends SafeClass
   }
 
   /**
-   * @param string $str
+   * @param $str
    *
-   * @return string
+   * @return array|string|string[]
    */
-  public static function EscapeXml(string $str): string
+  public static function EscapeXml($str)
   {
     $str = str_replace("&", "&amp;", $str);
     $str = str_replace(">", "&gt;", $str);
@@ -557,10 +542,10 @@ class Strings extends SafeClass
   }
 
   /**
-   * @param $val
+   * @param string $val
    * @return string
    */
-  public static function PhoneNumber($val): string
+  public static function PhoneNumber(string $val): string
   {
     if (preg_match('/^\+?\d?(\d{3})(\d{3})(\d{4})$/', $val, $matches)) {
       return $matches[1] . '-' . $matches[2] . '-' . $matches[3];
@@ -573,7 +558,7 @@ class Strings extends SafeClass
    * @param string $str
    * @return string
    */
-  public static function GetPlaceholders($count, $str = '{{}}'): string
+  public static function GetPlaceholders($count, string $str = '{{}}'): string
   {
     return implode(',', array_fill(0, $count, $str));
   }
@@ -633,20 +618,20 @@ class Strings extends SafeClass
       $str .= $o[$c % $m];
       $c = $c / $m;
     }
-    $str .= $o[intval($c * $m)];
+    $str .= $o[$c * $m];
 
 
     return $str;
   }
 
   /**
-   * @param $str
-   * @param $length
+   * @param string $str
+   * @param int $length
    * @param bool $words
    * @param bool $dots
    * @return string
    */
-  public static function Truncate($str, $length, bool $words = false, bool $dots = true): string
+  public static function Truncate(string $str, int $length, bool $words = false, bool $dots = true): string
   {
     if (strlen($str) > $length) {
       if ($words) {
@@ -683,7 +668,7 @@ class Strings extends SafeClass
               if ($row instanceof stdClass) {
                 $json[$i] = json_decode(json_encode($row), true);
               } else {
-                Debug::Halt(['error' => 'fix_json unknown object', $row]);
+                Halt(['error' => 'fix_json unknown object', $row]);
               }
             }
           }
@@ -710,12 +695,12 @@ class Strings extends SafeClass
   }
 
   /**
-   * @param     $string
+   * @param string $string
    * @param int $length
    *
    * @return string
    */
-  public static function TrimString($string, $length = 150)
+  public static function TrimString(string $string, int $length = 150): string
   {
     $string = trim(preg_replace('/\s+/', ' ', $string));
     $string = strip_tags($string);
@@ -726,7 +711,7 @@ class Strings extends SafeClass
   }
 
 
-  public static function CleanCompanyName($company)
+  public static function CleanCompanyName($company): string
   {
     $company = strtolower($company);
     $company = preg_replace('/\s+/', ' ', $company);
@@ -816,7 +801,7 @@ class Strings extends SafeClass
   /**
    * @param $text
    * @param string $replacement
-   * @return mixed
+   * @return array|string|string[]|null
    */
   public static function ToSearchable($text, string $replacement = '')
   {
@@ -885,6 +870,26 @@ class Strings extends SafeClass
   }
 
   /**
+   * @param string $html
+   * @return array|string|string[]|null
+   */
+  public static function HTMLToString(string $html)
+  {
+    $html = trim(strip_tags($html, '<p><br>'));
+    $html = str_replace("\r", ' ', $html);
+    $html = str_replace("\n", ' ', $html);
+    $html = str_ireplace('&nbsp;', ' ', $html);
+    $html = preg_replace('/\s+/', ' ', $html);
+
+    $html = str_ireplace('<p>', '', $html);
+    $html = str_ireplace('</p>', "\r\n", $html);
+    $html = str_ireplace('<br>', "\r\n", $html);
+    $html = str_ireplace('<br/>', "\r\n", $html);
+
+    return preg_replace('/\ +/', ' ', $html);
+  }
+
+  /**
    * @param $text
    *
    * @return string
@@ -943,12 +948,12 @@ class Strings extends SafeClass
   }
 
   /**
-   * @param array $array
+   * @param $array
    * @param string $accessor
    * @param string $function
    * @return string
    */
-  public static function CreateQuickList(array $array, string $accessor = '$item', string $function = 'Show'): string
+  public static function CreateQuickList($array, string $accessor = '$item', string $function = 'Show'): string
   {
     $t = array_keys($array);
     $res = '';
@@ -992,7 +997,7 @@ class Strings extends SafeClass
     return implode(' ', $results[0]);
   }
 
-  public static function FlattenArray(&$array, $parents = null, &$dest = null)
+  public static function FlattenArray($array, $parents = null, &$dest = null)
   {
     foreach ($array as $k => $v) {
 

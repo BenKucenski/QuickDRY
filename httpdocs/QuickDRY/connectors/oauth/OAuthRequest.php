@@ -1,4 +1,7 @@
 <?php
+namespace QuickDRY\Connectors;
+
+use OAuthUtil;
 
 class OAuthRequest
 {

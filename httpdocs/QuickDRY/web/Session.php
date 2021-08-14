@@ -1,5 +1,4 @@
 <?php
-
 namespace QuickDRY\Web;
 
 /**
@@ -25,9 +24,6 @@ class Session
     return $vals;
   }
 
-  /**
-   *
-   */
   public static function ClearAll()
   {
     foreach ($_SESSION as $n => $v) {
@@ -37,11 +33,11 @@ class Session
   }
 
   /**
-   * @param $name
+   * @param string $name
    *
    * @return mixed|string
    */
-  public static function Get($name)
+  public function Get(string $name)
   {
     if (isset($_SESSION[$name])) {
       return unserialize($_SESSION[$name]);
@@ -60,7 +56,7 @@ class Session
    */
   public function __get($name)
   {
-    return static::Get($name);
+    return $this->Get($name);
   }
 
   /**
@@ -90,7 +86,7 @@ class Session
    * @param $value
    * @return mixed
    */
-  public static function Set($name, $value)
+  public function Set($name, $value)
   {
     $_SESSION[$name] = serialize($value);
     static::$_VALS[$name] = $_SESSION[$name];
@@ -98,13 +94,13 @@ class Session
   }
 
   /**
-   * @param string $name
+   * @param $name
    * @param $value
    * @return mixed
    */
-  public function __set(string $name, $value)
+  public function __set($name, $value)
   {
-    return static::Set($name, $value);
+    return $this->Set($name, $value);
   }
 
   /**

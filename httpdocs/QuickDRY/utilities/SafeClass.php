@@ -1,11 +1,5 @@
 <?php
-
 namespace QuickDRY\Utilities;
-
-use DateTime;
-use Exception;
-use ReflectionProperty;
-use stdClass;
 
 /**
  * Class SafeClass
@@ -38,11 +32,11 @@ class SafeClass
   }
 
   /**
-   * @param $true_or_false
+   * @param bool $true_or_false
    */
-  public function HaltOnError($true_or_false)
+  public function HaltOnError(bool $true_or_false)
   {
-    $this->_HaltOnError = (bool)$true_or_false;
+    $this->_HaltOnError = $true_or_false;
   }
 
   /**
@@ -52,7 +46,7 @@ class SafeClass
   public function __get($name)
   {
     if ($this->_HaltOnError) {
-      Debug::Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
+      Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
     } else {
       $this->_MissingProperties[$name] = 'public $' . $name . ';';
     }
@@ -67,7 +61,7 @@ class SafeClass
   public function __set($name, $value)
   {
     if ($this->_HaltOnError) {
-      Debug::Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
+      Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
     } else {
       $this->_MissingProperties[$name] = 'public $' . $name . ';';
     }
@@ -76,9 +70,10 @@ class SafeClass
 
   /**
    * @param bool $ignore_empty
+   * @param array|null $exclude
    * @return array
    */
-  public function ToArray(bool $ignore_empty = false): array
+  public function ToArray(bool $ignore_empty = false, array $exclude = null): array
   {
     $res = get_object_vars($this);
     foreach ($res as $key => $val) {
@@ -101,17 +96,16 @@ class SafeClass
   }
 
   /**
-   * @param $row
+   * @param array $row
    * @param bool $convert_objects
-   * @throws \ReflectionException
    */
-  public function FromRow($row, bool $convert_objects = false)
+  public function FromRow(array $row, bool $convert_objects = false)
   {
     $halt_on_error = $this->_HaltOnError;
 
     $this->HaltOnError(false);
     if (!is_array($row)) {
-      Debug::Halt($row);
+      Halt($row);
     }
     foreach ($row as $k => $v) {
       if ($convert_objects && is_object($v)) {
@@ -123,19 +117,18 @@ class SafeClass
         $this->_Aliases['_' . $a] = $k;
         $k = '_' . $a;
       }
-
-      $this->$k = (is_null($v) || is_array($v) || is_object($v)) ? $v : Strings::FixJSON($v);
+      $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
     }
     if ($this->HasMissingProperties()) {
       if ($halt_on_error) {
-        Debug::Halt($this->GetMissingProperties());
+        Halt($this->GetMissingProperties());
       }
     }
     $this->HaltOnError($halt_on_error);
   }
 
   /**
-   * @param stdClass[] $array
+   * @param StdClass[] $array
    * @param $filename
    *
    * pass in an array of SafeClass objects and the file name
@@ -143,10 +136,10 @@ class SafeClass
   public static function ToCSV(array $array, $filename, $headers = null)
   {
     if (!is_array($array) || !sizeof($array)) {
-      Debug::Halt('QuickDRY Error: Not an array or empty');
+      Halt('QuickDRY Error: Not an array or empty');
     }
 
-    $header = $headers ? $headers : array_keys(get_object_vars($array[0]));
+    $header = $headers ?: array_keys(get_object_vars($array[0]));
 
     $output = fopen("php://output", 'w') or die("Can't open php://output");
     header("Content-Type:application/csv");
@@ -169,7 +162,7 @@ class SafeClass
    * @param int $limit
    * @return string
    */
-  public static function ToHTML(array &$items, string $class = '', string $style = '', bool $numbered = false, $limit = 0): string
+  public static function ToHTML(array &$items, string $class = '', string $style = '', bool $numbered = false, int $limit = 0): string
   {
     if (!sizeof($items)) {
       return '';

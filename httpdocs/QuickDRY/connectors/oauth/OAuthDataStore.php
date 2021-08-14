@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Connectors;
+
 class OAuthDataStore {
     function lookup_consumer($consumer_key) {
         // implement me

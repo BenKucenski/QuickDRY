@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\SafeClass;
@@ -59,17 +60,17 @@ class MySQL extends SafeClass
 function autoloader_QuickDRY_MySQL($class)
 {
     $class_map = [
-        'MySQL_Core' => 'mysql/MySQL_Core.php',
-        'MySQL_TableColumn' => 'mysql/MySQL_TableColumn.php',
-        'MySQL_ForeignKey' => 'mysql/MySQL_ForeignKey.php',
-        'MySQL_Connection' => 'mysql/MySQL_Connection.php',
-        'MySQL_A' => 'mysql/MySQL_A.php',
-        'MySQL_B' => 'mysql/MySQL_B.php',
-        'MySQL_C' => 'mysql/MySQL_C.php',
-        'MySQL_Queue' => 'mysql/MySQL_Queue.php',
-        'MySQL_StoredProcParam' => 'mysql/MySQL_StoredProcParam.php',
-        'MySQL_StoredProc' => 'mysql/MySQL_StoredProc.php',
-        'MySQL_CodeGen' => 'mysql/MySQL_CodeGen.php',
+        'QuickDRY\Connectors\MySQL_Core' => 'mysql/MySQL_Core.php',
+        'QuickDRY\Connectors\MySQL_TableColumn' => 'mysql/MySQL_TableColumn.php',
+        'QuickDRY\Connectors\MySQL_ForeignKey' => 'mysql/MySQL_ForeignKey.php',
+        'QuickDRY\Connectors\MySQL_Connection' => 'mysql/MySQL_Connection.php',
+        'QuickDRY\Connectors\MySQL_A' => 'mysql/MySQL_A.php',
+        'QuickDRY\Connectors\MySQL_B' => 'mysql/MySQL_B.php',
+        'QuickDRY\Connectors\MySQL_C' => 'mysql/MySQL_C.php',
+        'QuickDRY\Connectors\MySQL_Queue' => 'mysql/MySQL_Queue.php',
+        'QuickDRY\Connectors\MySQL_StoredProcParam' => 'mysql/MySQL_StoredProcParam.php',
+        'QuickDRY\Connectors\MySQL_StoredProc' => 'mysql/MySQL_StoredProc.php',
+        'QuickDRY\Connectors\MySQL_CodeGen' => 'mysql/MySQL_CodeGen.php',
     ];
 
 
@@ -92,7 +93,7 @@ function autoloader_QuickDRY_MySQL($class)
 }
 
 
-spl_autoload_register('autoloader_QuickDRY_MySQL');
+spl_autoload_register('QuickDRY\Connectors\autoloader_QuickDRY_MySQL');
 
 
 

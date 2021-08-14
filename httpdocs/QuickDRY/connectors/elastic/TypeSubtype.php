@@ -1,5 +1,5 @@
 <?php
-namespace elastic;
+namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\SafeClass;
 

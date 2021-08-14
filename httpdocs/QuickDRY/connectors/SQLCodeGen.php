@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\Log;
 use QuickDRY\Utilities\SafeClass;

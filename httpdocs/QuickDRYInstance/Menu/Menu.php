@@ -1,4 +1,7 @@
 <?php
+namespace QuickDRYInstance;
+
+use QuickDRY\Utilities\SafeClass;
 
 /**
  * Class Menu

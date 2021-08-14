@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Connectors;
+
 class OAuthConsumer {
     public $key;
     public $secret;

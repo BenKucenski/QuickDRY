@@ -1,21 +1,24 @@
 <?php
 namespace QuickDRY\Utilities;
 
-class Chart
-{
-	var $width;
-	var $height;
-	var $im;
-	var $title;
-	var $cur_color;
-	var $cur_x;
-	var $cur_y;
-	var $cur_font;
 
-	var $chart_x;
-	var $chart_y;
-	var $chart_width;
-	var $chart_height;
+use SafeClass;
+
+class Chart extends SafeClass
+{
+	public float $width;
+	public float $height;
+	public string $im;
+	public string $title;
+	public string $cur_color;
+	public float $cur_x;
+	public float $cur_y;
+	public string $cur_font;
+
+	public float $chart_x;
+	public float $chart_y;
+	public float $chart_width;
+	public float $chart_height;
 
 	public function __construct($width, $height)
 	{
@@ -104,8 +107,8 @@ class Chart
 		return  imagecolorallocate($this->im, $r, $g, $b);
 	}
 
-	public function GetJpeg()
-	{
+	public function GetJpeg(): bool
+  {
 		imagestring($this->im, 5, 1, 1, strtoupper($this->title), $this->GetColor(0, 0, 0));
 
 		return imagejpeg($this->im);

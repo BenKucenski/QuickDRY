@@ -1,18 +1,15 @@
 <?php
-
 namespace QuickDRY\Utilities;
-
-use DateTime;
-use DateTimeZone;
-use Exception;
-use UserClass;
 
 /**
  * Class Dates
  */
 class Dates extends SafeClass
 {
-  public static function ConvertToUserDate($datetime, $timezone)
+  /**
+   * @throws Exception
+   */
+  public static function ConvertToUserDate($datetime, $timezone): string
   {
     $datetime = Dates::Timestamp($datetime);
     $tz = new DateTimeZone($timezone);
@@ -21,7 +18,10 @@ class Dates extends SafeClass
     return $date->format('Y-m-d H:i:s');
   }
 
-  public static function ConvertToServerDate($datetime, $timezone)
+  /**
+   * @throws Exception
+   */
+  public static function ConvertToServerDate($datetime, $timezone): string
   {
     $datetime = Dates::Timestamp($datetime);
     $tz = new DateTimeZone('GMT');
@@ -35,7 +35,7 @@ class Dates extends SafeClass
    * @param $max_date
    * @return int
    */
-  public static function MonthsBetweenDates($min_date, $max_date)
+  public static function MonthsBetweenDates($min_date, $max_date): int
   {
     $min_date = strtotime(Dates::Datestamp($min_date));
     $max_date = strtotime(Dates::Datestamp($max_date));
@@ -59,7 +59,7 @@ class Dates extends SafeClass
    *
    * @return int
    */
-  public static function AddMonthToDate($timeStamp, $totalMonths = 1)
+  public static function AddMonthToDate($timeStamp, int $totalMonths = 1): int
   {
     if (!is_numeric($timeStamp)) {
       $timeStamp = strtotime(self::Timestamp($timeStamp));
@@ -82,7 +82,7 @@ class Dates extends SafeClass
    *
    * @return int
    */
-  public static function AddDayToDate($timeStamp, $totalDays = 1)
+  public static function AddDayToDate($timeStamp, int $totalDays = 1): int
   {
     $timeStamp = strtotime(self::Datestamp($timeStamp));
 
@@ -98,7 +98,7 @@ class Dates extends SafeClass
    *
    * @return int
    */
-  public static function AddYearToDate($timeStamp, $totalYears = 1)
+  public static function AddYearToDate($timeStamp, int $totalYears = 1): int
   {
     if (!is_numeric($timeStamp))
       $timeStamp = strtotime($timeStamp);
@@ -113,10 +113,10 @@ class Dates extends SafeClass
    * @param $year
    * @param $DayInYear
    *
-   * @return bool|string
+   * @return string
    * @throws Exception
    */
-  public static function DayOfYearToDate($year, $DayInYear)
+  public static function DayOfYearToDate($year, $DayInYear): ?string
   {
     // http://webdesign.anmari.com/1956/calculate-date-from-day-of-year-in-php/
 
@@ -132,7 +132,7 @@ class Dates extends SafeClass
    * @param string $next
    * @return array
    */
-  public static function GetWeekRange($date, $last = 'sunday', $next = 'saturday'): array
+  public static function GetWeekRange($date, string $last = 'sunday', string $next = 'saturday'): array
   {
     if (!is_numeric($date)) {
       $ts = strtotime(Dates::Datestamp($date));
@@ -150,15 +150,15 @@ class Dates extends SafeClass
    * @param      $date
    * @param bool $debug
    *
-   * @return array
+   * @return DateCalcWeekDTO
    */
-  public static function CalcWeek($date, bool $debug = false): array
+  public static function CalcWeek($date, bool $debug = false): DateCalcWeekDTO
   {
     if (strtotime($date) == 0) {
-      return [null, null, null];
+      return new DateCalcWeekDTO(null, null, null);
     }
 
-    [$start_date, $end_date] = static::GetWeekRange($date);
+    list($start_date, $end_date) = static::GetWeekRange($date);
 
     $t = strtotime($date);
     $y = date('Y', $t);
@@ -174,7 +174,7 @@ class Dates extends SafeClass
     $w = date('W', strtotime($week_date));
 
     $week_year = $w . $y;
-    return [$week_date, $month_year, $week_year];
+    return new DateCalcWeekDTO($week_date, $month_year, $week_year);
   }
 
   /**
@@ -218,9 +218,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return bool|string
+   * @return string
    */
-  public static function FancyDateTime($date, $null = null)
+  public static function FancyDateTime($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'F jS, Y g:iA');
   }
@@ -228,9 +228,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return bool|string
+   * @return string
    */
-  public static function FancyDate($date, $null = null)
+  public static function FancyDate($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'F jS, Y');
   }
@@ -238,9 +238,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return bool|string
+   * @return string
    */
-  public static function FancyDateB($date, $null = null)
+  public static function FancyDateB($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'F j, Y');
   }
@@ -248,9 +248,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return bool|string
+   * @return string
    */
-  public static function ShortDate($date, $null = null)
+  public static function ShortDate($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'n/j/y');
   }
@@ -259,9 +259,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return false|string
+   * @return string
    */
-  public static function ShortDateYear($date, $null = null)
+  public static function ShortDateYear($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'M Y');
   }
@@ -269,9 +269,9 @@ class Dates extends SafeClass
   /**
    * @param $date
    * @param null $null
-   * @return false|string
+   * @return string
    */
-  public static function LongDateYear($date, $null = null)
+  public static function LongDateYear($date, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'F Y');
   }
@@ -282,7 +282,7 @@ class Dates extends SafeClass
    *
    * @return string
    */
-  public static function HourMinDiff($start_at, $end_at)
+  public static function HourMinDiff($start_at, $end_at): string
   {
     if (!is_numeric($start_at)) $start_at = strtotime($start_at);
     if (!is_numeric($end_at)) $end_at = strtotime($end_at);
@@ -293,11 +293,11 @@ class Dates extends SafeClass
   }
 
   /**
-   * @param int $time
-   *
-   * @return int
+   * @param mixed $time
+   * @param int $offset
+   * @return string|null
    */
-  public static function AdjustedTime($time = 0, $offset = 0)
+  public static function AdjustedTime($time = 0, int $offset = 0): ?string
   {
     if (!$time) $time = time();
 
@@ -308,15 +308,21 @@ class Dates extends SafeClass
       $time = strtotime('+' . $offset . ' hour', $time);
     }
 
+  global $CurrentUser;
+
+  if (!is_null($CurrentUser) && $CurrentUser->id) {
+    return strtotime(Dates::FromGMT($time, $CurrentUser->timezone_name));
+  }
+
     return $time;
   }
 
   /**
-   * @param int $date
+   * @param $date
    * @param null $null
    * @return false|null|string
    */
-  public static function StandardDate($date = null, $null = null)
+  public static function StandardDate($date = null, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'n/j/Y');
   }
@@ -327,7 +333,7 @@ class Dates extends SafeClass
    *
    * @return bool|null|string
    */
-  public static function DayMonthDate($date = null, $null = null)
+  public static function DayMonthDate($date = null, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'n-j');
   }
@@ -338,7 +344,7 @@ class Dates extends SafeClass
    * @param null $offset
    * @return bool|null|string
    */
-  public static function StandardDateTime($date = null, $null = null, $offset = null)
+  public static function StandardDateTime($date = null, $null = null, $offset = null): ?string
   {
     return self::Datestamp($date, $null, 'n/j/Y h:i A', $offset);
   }
@@ -348,7 +354,7 @@ class Dates extends SafeClass
    * @param null $null
    * @return false|null|string
    */
-  public static function StandardTime($date = null, $null = null)
+  public static function StandardTime($date = null, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'h:iA');
   }
@@ -356,9 +362,9 @@ class Dates extends SafeClass
   /**
    * @param $time
    * @param UserClass $User
-   * @return bool|string
+   * @return string
    */
-  public static function FromUserTimeToGMT($time, UserClass $User)
+  public static function FromUserTimeToGMT($time, UserClass $User): ?string
   {
     $time = self::DateToInt($time);
 
@@ -366,7 +372,7 @@ class Dates extends SafeClass
   }
 
   /**
-   * @param $dateTime
+   * @param DateTime|string $dateTime
    * @return string
    */
   public static function SQLDateTimeToString($dateTime): string
@@ -375,7 +381,7 @@ class Dates extends SafeClass
       try {
         $dateTime = new DateTime($dateTime);
       } catch (Exception $ex) {
-        Debug::Halt($ex);
+        Halt($ex);
       }
     }
     $t = $dateTime->format('Y-m-d H:i:s.u');
@@ -386,9 +392,9 @@ class Dates extends SafeClass
    * @param null $date
    * @param null $null
    * @param string $format
-   * @return bool|string
+   * @return string
    */
-  public static function Timestamp($date = null, $null = null, string $format = 'Y-m-d H:i:s')
+  public static function Timestamp($date = null, $null = null, string $format = 'Y-m-d H:i:s'): ?string
   {
     if (!$format) {
       $format = 'Y-m-d H:i:s';
@@ -400,9 +406,9 @@ class Dates extends SafeClass
    * @param null $date
    * @param null $null
    *
-   * @return bool|null|string
+   * @return string
    */
-  public static function TimeOnlystamp($date = null, $null = null)
+  public static function TimeOnlystamp($date = null, $null = null): ?string
   {
     return self::Datestamp($date, $null, 'H:i');
   }
@@ -454,7 +460,7 @@ class Dates extends SafeClass
    * @param $msg
    * @return string
    */
-  public static function TimeString($msg)
+  public static function TimeString($msg): string
   {
     return time() . ': ' . self::Timestamp() . ': ' . $msg . PHP_EOL;
   }
@@ -480,9 +486,9 @@ class Dates extends SafeClass
    * @param null $null
    * @param string $format
    * @param null $offset
-   * @return false|null|string
+   * @return ?string
    */
-  public static function Datestamp($date = null, $null = null, string $format = 'Y-m-d', $offset = null)
+  public static function Datestamp($date = null, $null = null, string $format = 'Y-m-d', $offset = null): ?string
   {
     if (!$format) {
       $format = 'Y-m-d';
@@ -508,9 +514,9 @@ class Dates extends SafeClass
 
   /**
    * @param $date
-   * @return bool|string
+   * @return string
    */
-  public static function SolrTime($date)
+  public static function SolrTime($date): string
   {
     return self::Datestamp($date, null, "Y-m-d\TH:i:s\Z");
   }
@@ -533,7 +539,7 @@ class Dates extends SafeClass
    * @param $time
    * @return string
    */
-  public static function Age($time)
+  public static function Age($time): string
   {
     if (!is_numeric($time)) {
       $time = strtotime($time);
@@ -551,9 +557,9 @@ class Dates extends SafeClass
   }
 
   /**
-   * @return int
+   * @return false|int
    */
-  public static function GMTtime(): int
+  public static function GMTtime()
   {
     return strtotime(gmdate('m/d/Y H:i:s'));
   }
@@ -562,14 +568,21 @@ class Dates extends SafeClass
    * @param $t
    * @param $timezone
    * @return string
-   * @throws Exception
    */
   public static function FromGMT($t, $timezone): string
   {
     $t = Dates::Timestamp($t);
 
-    $dt = new DateTime($t);
-    $dt->setTimezone(new DateTimeZone($timezone));
+    try {
+      $dt = new DateTime($t);
+    } catch (Exception $e) {
+      return $t;
+    }
+    try {
+      $dt->setTimezone(new DateTimeZone($timezone));
+    } catch (Exception $ex) {
+      return $dt->format('Y-m-d H:i:s');
+    }
 
     return $dt->format('Y-m-d H:i:s');
   }
@@ -578,16 +591,19 @@ class Dates extends SafeClass
    * @param $t
    * @param $timezone
    * @return string
-   * @throws Exception
    */
-  public static function ToGMT($t, $timezone)
+  public static function ToGMT($t, $timezone): string
   {
     $t = Dates::Timestamp($t);
 
-    $dt = new DateTime($t, new DateTimeZone($timezone));
-    $dt->setTimezone(new DateTimeZone('GMT'));
-
-    return $dt->format('Y-m-d H:i:s');
+    try {
+      $dt = new DateTime($t, new DateTimeZone($timezone));
+      $dt->setTimezone(new DateTimeZone('GMT'));
+      return $dt->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+      Halt('ToGMT');
+    }
+    return '';
   }
 
   /**

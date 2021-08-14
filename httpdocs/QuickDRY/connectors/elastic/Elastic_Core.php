@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 use Elasticsearch\ClientBuilder;
 use QuickDRY\Utilities\Debug;

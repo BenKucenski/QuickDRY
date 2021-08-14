@@ -1,10 +1,9 @@
 <?php
-namespace QuickDRY\Utilities;
-
 # PHP Calendar (version 2.3), written by Keith Devens
 # http://keithdevens.com/software/php_calendar
 #  see example at http://keithdevens.com/weblog
 # License: http://keithdevens.com/software/license
+namespace QuickDRY\Utilities;
 
 class HTMLCalendar
 {
@@ -21,7 +20,7 @@ class HTMLCalendar
      *
      * @return string
      */
-    public static function Generate($year, $month, $days = [], $pn = [], $day_name_length = 3, $month_href = NULL, $first_day = 0): string
+    public static function Generate($year, $month, array $days = [], array $pn = [], int $day_name_length = 3, $month_href = NULL, int $first_day = 0): string
     {
         $first_of_month = gmmktime(0, 0, 0, $month, 1, $year);
         #remember that mktime will automatically correct if invalid dates are entered

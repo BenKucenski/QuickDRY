@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Connectors;
+
 /**
  * Class MySQL_ForeignKey
  */

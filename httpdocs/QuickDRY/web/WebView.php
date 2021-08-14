@@ -1,15 +1,16 @@
 <?php
 
-namespace QuickDRY\Web;
-
 use QuickDRY\Utilities\Debug;
-use QuickDRY\Utilities\Metrics;
 use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Metrics;
 use QuickDRY\Utilities\SimpleWordDoc;
-use UserClass;
+use QuickDRY\Utilities\Strings;
+use QuickDRY\Web\BasePage;
 
-/* @var $Web Web */
-/* @var $CurrentUser UserClass */
+global $Web;
+
+$PageModel = null;
+$PageClass = null;
 
 if (defined('UNDER_MAINTENANCE') && UNDER_MAINTENANCE) {
   $Web->PageMode = QUICKDRY_MODE_BASIC;
@@ -20,6 +21,7 @@ if (defined('UNDER_MAINTENANCE') && UNDER_MAINTENANCE) {
 
 ob_start();
 
+
 Metrics::Start('Controller');
 if (file_exists($Web->ControllerFile)) {
   require_once $Web->ControllerFile;
@@ -27,38 +29,72 @@ if (file_exists($Web->ControllerFile)) {
   $PageMode = QUICKDRY_MODE_BASIC;
 
   if ($Web->PageMode === QUICKDRY_MODE_STATIC || $Web->StaticModel || defined('PAGE_MODEL_STATIC')) { // static class
-    $PageModel = $Web->StaticModel ? $Web->StaticModel : ($Web->PageClass ?: PAGE_MODEL_STATIC);
+    $PageModel = $Web->StaticModel ?: ($Web->PageClass ?: (defined('PAGE_MODEL_STATIC') ? PAGE_MODEL_STATIC : null));
 
+    if (!$PageModel) {
+      exit('PAGE_MODEL_STATIC not defined');
+    }
     if (is_numeric($PageModel[0])) {
       $PageModel = 'i' . $PageModel;
     }
+    if (!$Web->Namespace) {
+      $_ns = explode('/', $Web->ControllerFile);
+      unset($_ns[sizeof($_ns) - 1]);
+      $Web->Namespace = implode('\\', $_ns);
+    }
+    if ($Web->Namespace) {
+      if (!Strings::EndsWith($Web->ControllerFile, 'json.php')) {
+        $PageModel = $Web->Namespace;
+      } else {
+        $PageModel = $Web->Namespace . '\\' . $PageModel;
+      }
+    }
+
+    $PageModel = rtrim($PageModel, '\\');
+
+
     if (class_exists($PageModel)) {
       $PageMode = QUICKDRY_MODE_STATIC;
     }
   }
 
-  $class = null;
-
   if ($Web->PageMode === QUICKDRY_MODE_INSTANCE || $Web->InstanceModel || defined('PAGE_MODEL')) { // instance class
-    $class = $Web->InstanceModel ?: ($Web->PageClass ?: PAGE_MODEL);
+    $PageClass = $Web->InstanceModel ?: ($Web->PageClass ?: (defined('PAGE_MODEL') ? PAGE_MODEL : null));
 
-    if (is_numeric($class[0])) {
-      $class = 'i' . $class;
+    if (!$PageClass) {
+      exit('PAGE_MODEL not defined');
     }
-    if (class_exists($class)) {
+    if (is_numeric($PageClass[0])) {
+      $PageClass = 'i' . $PageClass;
+    }
+
+
+    if (!$Web->Namespace) {
+      $_ns = explode('/', $Web->ControllerFile);
+      unset($_ns[sizeof($_ns) - 1]);
+      $Web->Namespace = implode('\\', $_ns);
+    }
+    if ($Web->Namespace) {
+      $PageClass = $Web->Namespace;
+    }
+
+    $PageClass = rtrim($PageClass, '\\');
+
+    if (class_exists($PageClass)) {
       $PageMode = QUICKDRY_MODE_INSTANCE;
     }
   }
 
   switch ($PageMode) {
     case QUICKDRY_MODE_STATIC:
-      if (!isset($PageModel) || !class_exists($PageModel)) {
-        Debug::Halt('$PageModel Not Set');
-        exit;
+      if (!class_exists($PageModel)) {
+        exit($PageModel . ' PageModel does not exist');
       }
+
       $PageModel::Construct($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser, $Web->Server);
       $PageModel::DoInit();
       $Web->MasterPage = $PageModel::$MasterPage ?: null;
+
 
       if ($Web->IsSecureMasterPage()) {
         if ($Web->AccessDenied) {
@@ -91,8 +127,8 @@ if (file_exists($Web->ControllerFile)) {
           break;
       }
 
-      if ($Web->Request->export) {
-        switch (strtoupper((string)$Web->Request->export)) {
+      if ($Web->Request->Get('export')) {
+        switch (strtoupper((string)$Web->Request->Get('export'))) {
           case REQUEST_EXPORT_CSV:
             $PageModel::DoExportToCSV();
             exit;
@@ -109,7 +145,7 @@ if (file_exists($Web->ControllerFile)) {
             $Web->DOCXPageOrientation = $PageModel::$DOCXPageOrientation;
             $Web->DOCXFileName = $PageModel::$DOCXFileName;
             $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
-            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+            $Web->MasterPage = $PageModel::$MasterPage ?: null;
             break;
           case REQUEST_EXPORT_PDF:
             $PageModel::DoExportToPDF();
@@ -122,20 +158,17 @@ if (file_exists($Web->ControllerFile)) {
             $Web->PDFPageOrientation = $PageModel::$PDFPageOrientation;
             $Web->PDFFileName = $PageModel::$PDFFileName;
             $Web->PDFPostRedirect = $PageModel::$PDFPostRedirect;
-            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+            $Web->MasterPage = $PageModel::$MasterPage ?: null;
             break;
         }
       }
       break;
     case QUICKDRY_MODE_INSTANCE:
       /* @var $PageModel BasePage */
-      if(!isset($class)) {
-        Debug::Halt('$class not defined');
+      if (!class_exists($PageClass)) {
+        exit($PageClass . ' does not exist');
       }
-      if(!class_exists($class)) {
-        Debug::Halt($class . ' does not exist');
-      }
-      $PageModel = new $class($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser, $Web->Server);
+      $PageModel = new $PageClass($Web->Request, $Web->Session, $Web->Cookie, $Web->CurrentUser, $Web->Server);
       $PageModel->Init();
       $Web->MasterPage = $PageModel->MasterPage ?: null;
 
@@ -174,8 +207,8 @@ if (file_exists($Web->ControllerFile)) {
           break;
       }
 
-      if ($Web->Request->export) {
-        switch (strtoupper((string)$Web->Request->export)) {
+      if ($Web->Request->Get('export')) {
+        switch (strtoupper((string)$Web->Request->Get('export'))) {
           case REQUEST_EXPORT_CSV:
             $PageModel->ExportToCSV();
             exit;
@@ -196,14 +229,14 @@ if (file_exists($Web->ControllerFile)) {
             $Web->PDFFileName = $PageModel->PDFFileName;
             $Web->PDFShrinkToFit = $PageModel->PDFShrinkToFit;
             $Web->PDFPostRedirect = $PageModel->PDFPostRedirect;
-            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+            $Web->MasterPage = $PageModel::$MasterPage ?: null;
             break;
           case REQUEST_EXPORT_DOCX:
             $PageModel->ExportToDOCX();
             $Web->RenderDOCX = true;
             $Web->DOCXPageOrientation = $PageModel->PDFPageOrientation;
             $Web->DOCXFileName = $PageModel->PDFFileName;
-            $Web->MasterPage = $PageModel::$MasterPage ? $PageModel::$MasterPage : null;
+            $Web->MasterPage = $PageModel::$MasterPage ?: null;
             break;
         }
       }
@@ -236,7 +269,7 @@ Metrics::Stop('View');
 
 $Web->HTML = ob_get_clean();
 
-if ($Web->RenderPDF && !$Web->Request->show_html) {
+if ($Web->RenderPDF && !$Web->Request->Get('show_html')) {
 
   ob_start();
   if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
@@ -278,20 +311,21 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
   $m = sizeof($ext);
   if ($m > 1) {
     $ext = strtolower($ext[$m - 1]);
-    if (!in_array($ext, ['html', 'json', 'xlsx'])) {
+    if (!in_array($ext, ['html', 'json', 'xlsx', 'pdf'])) {
       if (defined('IMAGE_HANDLER') && IMAGE_HANDLER) {
         $handler = IMAGE_HANDLER;
         $handler::Handle($Web->CurrentPage, $Web->CurrentPageName);
         exit;
       }
-      exit($Web->CurrentPageName . ' not found');
+      CleanHalt([$Web, $_SERVER]);
+      exit($Web->CurrentPageName . ' not found - 2');
     }
   }
   Debug::Halt($Web->MasterPage . ' masterpage does not exist: ' . $Web->ViewFile);
 }
 
 if (defined('IS_PRODUCTION') && !IS_PRODUCTION) {
-  if ($Web->Request->debug) {
-    echo '<pre>' . Metrics::ToString(true) . '</pre>';
+  if ($Web->Request->Get('debug')) {
+    echo '<pre>' . Metrics::ToString() . '</pre>';
   }
 }

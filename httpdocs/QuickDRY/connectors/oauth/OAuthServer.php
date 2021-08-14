@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 class OAuthServer
 {

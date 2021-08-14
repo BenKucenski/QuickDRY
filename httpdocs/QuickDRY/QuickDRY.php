@@ -1,5 +1,4 @@
 <?php
-
 // SIMPLE_EXCEL
 use QuickDRY\Utilities\Metrics;
 use QuickDRY\Web\BrowserOS;
@@ -124,8 +123,6 @@ const SELECT_YES = 2;
 function autoloader_QuickDRY($class)
 {
   $class_map = [
-    'FPDF' => 'utilities/fpdf16/fpdf.php',
-
     'QuickDRY\Utilities\SafeClass' => 'utilities/SafeClass.php',
     'QuickDRY\Utilities\SimpleClass' => 'utilities/SimpleClass.php',
     'QuickDRY\Utilities\Metrics' => 'utilities/Metrics.php',
@@ -135,6 +132,7 @@ function autoloader_QuickDRY($class)
     'QuickDRY\Utilities\Log' => 'utilities/Log.php',
     'QuickDRY\Utilities\Debug' => 'utilities/Debug.php',
     'QuickDRY\Utilities\Dates' => 'utilities/Dates.php',
+    'QuickDRY\Utilities\DateCalcWeekDTO' => 'utilities/DateCalcWeekDTO.php',
     'QuickDRY\Utilities\HTTP' => 'utilities/HTTP.php',
     'QuickDRY\Utilities\Strings' => 'utilities/Strings.php',
     'QuickDRY\Utilities\BarcodeClass' => 'utilities/BarcodeClass.php',
@@ -149,23 +147,22 @@ function autoloader_QuickDRY($class)
     'QuickDRY\Utilities\SimpleExcel_Reader' => 'utilities/SimpleExcel_Reader.php',
     'QuickDRY\Utilities\ExceptionHandler' => 'utilities/ExceptionHandler.php',
     'QuickDRY\Utilities\SimpleWordDoc' => 'utilities/SimpleWordDoc.php',
-    'QuickDRY\Utilities\ChangeLog' => 'utilities/ChangeLog.php',
 
+    'QuickDRY\Connectors\SQLCodeGen' => 'connectors/SQLCodeGen.php',
     'QuickDRY\Connectors\ChangeLog' => 'connectors/ChangeLog.php',
+    'QuickDRY\Connectors\CoreClass' => 'connectors/CoreClass.php',
+    'QuickDRY\Connectors\SQL_Base' => 'connectors/SQL_Base.php',
+    'QuickDRY\Connectors\SQL_Query' => 'connectors/SQL_Query.php',
+    'QuickDRY\Connectors\SQL_Log' => 'connectors/SQL_Log.php',
+    'QuickDRY\Connectors\EasySQLite' => 'connectors/EasySQLite.php',
+    'QuickDRY\Connectors\CurlHeader' => 'connectors/CurlHeader.php',
+    'QuickDRY\Connectors\Curl' => 'connectors/Curl.php',
+    'QuickDRY\Connectors\WSDL' => 'connectors/WSDL.php',
+    'QuickDRY\Connectors\adLDAP' => 'connectors/adLDAP.php',
 
-    'SQLCodeGen' => 'connectors/SQLCodeGen.php',
-    'CoreClass' => 'connectors/CoreClass.php',
-    'SQL_Base' => 'connectors/SQL_Base.php',
-    'SQL_Query' => 'connectors/SQL_Query.php',
-    'SQL_Log' => 'connectors/SQL_Log.php',
-    'CurlHeader' => 'connectors/CurlHeader.php',
-    'Curl' => 'connectors/Curl.php',
-    'WSDL' => 'connectors/WSDL.php',
-    'adLDAP' => 'connectors/adLDAP.php',
-
-    'GoogleAPI' => 'connectors/GoogleAPI.php',
-    'USPSAPI' => 'connectors/USPSAPI.php',
-    'APIRequest' => 'connectors/APIRequest.php',
+    'QuickDRY\Connectors\GoogleAPI' => 'connectors/GoogleAPI.php',
+    'QuickDRY\Connectors\USPSAPI' => 'connectors/USPSAPI.php',
+    'QuickDRY\Connectors\APIRequest' => 'connectors/APIRequest.php',
 
     'QuickDRY\Web\BasePage' => 'web/BasePage.php',
     'QuickDRY\Web\Session' => 'web/Session.php',
@@ -179,6 +176,7 @@ function autoloader_QuickDRY($class)
     'QuickDRY\Web\PDFMargins' => 'web/PDFMargins.php',
 
     'QuickDRY\Web\FormClass' => 'web/FormClass.php',
+    'QuickDRY\Web\ElementID' => 'web/ElementID.php',
 
     'JsonResult' => 'JSON/JsonResult.php',
     'JsonStatusResult' => 'JSON/JsonStatusResult.php',
@@ -219,7 +217,8 @@ function autoloader_QuickDRY($class)
           $trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '', $trace, 1);
         }
 
-        exit($trace);
+
+        exit(print_r([getcwd(), '../httpdocs/' . $file, $trace], true));
       }
     }
   }
@@ -229,21 +228,23 @@ function autoloader_QuickDRY($class)
 spl_autoload_register('autoloader_QuickDRY');
 
 
-if (!class_exists('OAuth')) { // when not using the PHP OAuth extension
+if (!class_exists('QuickDRY\Connectors\OAuth')) { // when not using the PHP OAuth extension
   require_once 'connectors/oauth.php';
 }
 
 require_once 'utilities/helpers.php';
 require_once 'utilities/FineDiff.php';
-require_once 'utilities/phpmailer.php';
 
-if (!class_exists('MySQL')) {
+// compose require phpmailer/phpmailer
+// require_once 'utilities/phpmailer.php';
+
+if (!class_exists('QuickDRY\Connectors\MySQL')) {
   require_once 'connectors/MySQL.php';
 }
-if (!class_exists('MSSQL')) {
+if (!class_exists('QuickDRY\Connectors\MSSQL')) {
   require_once 'connectors/MSSQL.php';
 }
-if (!class_exists('MSAccess')) {
+if (!class_exists('QuickDRY\Connectors\MSAccess')) {
   require_once 'connectors/MSAccess.php';
 }
 

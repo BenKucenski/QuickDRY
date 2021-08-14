@@ -17,8 +17,8 @@ function autoloader_QuickDRY_Instance($class)
         'UserClass' => 'Common/UserClass.php',
         'UserManager' => 'Common/UserManager.php',
 
-        'Menu' => 'Menu/Menu.php',
-        'MenuAccess' => 'Menu/MenuAccess.php',
+        'QuickDRYInstance\Menu' => 'Menu/Menu.php',
+        'QuickDRYInstance\MenuAccess' => 'Menu/MenuAccess.php',
     ];
 
     if (!isset($class_map[$class])) {

@@ -28,9 +28,8 @@ class Meta
    */
   public static function Description($val = null)
   {
-    if (is_null($val)) {
+    if (is_null($val))
       return str_replace('"', '\\"', self::$description);
-    }
     self::$description = $val;
     return $val;
   }

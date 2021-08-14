@@ -6,13 +6,12 @@ namespace QuickDRY\Utilities;
  */
 class Network
 {
-    /* @var $interfaces string */
-    private static $interfaces = null;
+    private static ?string $interfaces = null;
 
     /**
      * @return null|string
      */
-    public static function Interfaces()
+    public static function Interfaces(): ?string
     {
         if (!is_null(static::$interfaces)) {
             return static::$interfaces;

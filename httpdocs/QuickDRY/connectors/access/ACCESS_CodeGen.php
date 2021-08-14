@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 /**
  * Class ACCESS_CodeGen

@@ -1,8 +1,5 @@
 <?php
-
 namespace QuickDRY\Web;
-
-use QuickDRY\Utilities\Debug;
 
 /**
  * Class HTTPStatus
@@ -16,7 +13,7 @@ class HTTPStatus
   public static function GetDescription($http_status_code): ?string
   {
     if (!is_numeric($http_status_code)) {
-      Debug::Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
+      Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
     }
 
     switch ($http_status_code) {
@@ -53,7 +50,7 @@ class HTTPStatus
 
     }
 
-    Debug::Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
+    Halt('QuickDRY Error: Invalid status code: ' . $http_status_code);
     return null;
   }
 }

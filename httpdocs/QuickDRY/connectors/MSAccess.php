@@ -1,5 +1,7 @@
 <?php
+namespace QuickDRY\Connectors;
 
+use DateTime;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
@@ -108,13 +110,13 @@ class MSAccess
 function autoloader_QuickDRY_ACCESS($class)
 {
   $class_map = [
-    'ACCESS_Connection' => 'access/ACCESS_Connection.php',
-    'ACCESS_A' => 'access/ACCESS_A.php',
-    'ACCESS_B' => 'access/ACCESS_B.php',
-    'ACCESS_X' => 'access/ACCESS_X.php',
-    'ACCESS_CodeGen' => 'access/ACCESS_CodeGen.php',
-    'ACCESS_Core' => 'access/ACCESS_Core.php',
-    'ACCESS_TableColumn' => 'access/ACCESS_TableColumn.php',
+    'QuickDRY\Connectors\ACCESS_Connection' => 'access/ACCESS_Connection.php',
+    'QuickDRY\Connectors\ACCESS_A' => 'access/ACCESS_A.php',
+    'QuickDRY\Connectors\ACCESS_B' => 'access/ACCESS_B.php',
+    'QuickDRY\Connectors\ACCESS_X' => 'access/ACCESS_X.php',
+    'QuickDRY\Connectors\ACCESS_CodeGen' => 'access/ACCESS_CodeGen.php',
+    'QuickDRY\Connectors\ACCESS_Core' => 'access/ACCESS_Core.php',
+    'QuickDRY\Connectors\ACCESS_TableColumn' => 'access/ACCESS_TableColumn.php',
   ];
 
 
@@ -137,4 +139,4 @@ function autoloader_QuickDRY_ACCESS($class)
 }
 
 
-spl_autoload_register('autoloader_QuickDRY_ACCESS');
+spl_autoload_register('QuickDRY\Connectors\autoloader_QuickDRY_ACCESS');

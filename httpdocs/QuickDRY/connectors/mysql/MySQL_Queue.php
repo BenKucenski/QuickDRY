@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Log;

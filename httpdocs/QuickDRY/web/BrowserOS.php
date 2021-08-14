@@ -1,5 +1,4 @@
 <?php
-
 namespace QuickDRY\Web;
 
 /**
@@ -7,89 +6,133 @@ namespace QuickDRY\Web;
  */
 class BrowserOS
 {
-  public static string $os = '';
-  public static string $browser = '';
-  private static string $is_mobile = '';
+	public static string $os = '';
+	public static string $browser = '';
+	private static string $is_mobile = '';
 
-  /**
-   * @return string
-   */
-  public static function IsMobile(): string
-  {
-    return static::$is_mobile;
-  }
-
-  /**
-   *
-   */
-  public static function Configure()
-  {
-    $ua = $_SERVER["HTTP_USER_AGENT"] ?? '';
-    if ($ua == '') return;
-
-    /* ==== Detect the OS ==== */
-
-    // ---- Mobile ----
-
-    // Android
-    strpos($ua, 'Android') ? BrowserOS::$os = 'Android' : false;
-
-    // BlackBerry
-    strpos($ua, 'BlackBerry') ? BrowserOS::$os = 'BlackBerry' : false;
-
-    // iPhone
-    strpos($ua, 'iPhone') ? BrowserOS::$os = 'iPhone' : false;
-
-    // Palm
-    strpos($ua, 'Palm') ? BrowserOS::$os = 'Palm' : false;
-
-    if (BrowserOS::$os != '')
-      BrowserOS::$is_mobile = true;
-    else {
-      // ---- Desktop ----
-
-      // Linux
-      strpos($ua, 'Linux') ? BrowserOS::$os = 'Linux' : false;
-
-      // Macintosh
-      strpos($ua, 'Macintosh') ? BrowserOS::$os = 'Macintosh' : false;
-
-      // Windows
-      strpos($ua, 'Windows') ? BrowserOS::$os = 'Windows' : false;
-
-      BrowserOS::$is_mobile = false;
+    /**
+     * @return string
+     */
+    public static function IsMobile(): string
+    {
+        return static::$is_mobile;
     }
 
-    /* ============================ */
+    /**
+     *
+     */
+	public static function Configure()
+	{
+		$ua = $_SERVER["HTTP_USER_AGENT"] ?? '';
+		if($ua == '') return;
+		
+		/* ==== Detect the OS ==== */
+		
+		// ---- Mobile ----
+		
+		// Android
+    if(strpos($ua, 'Android')) {
+      BrowserOS::$os = 'Android';
+    }
+		
+		// BlackBerry
+    if(strpos($ua, 'BlackBerry')) {
+      BrowserOS::$os = 'BlackBerry';
+    }
+		
+		// iPhone
+    if(strpos($ua, 'iPhone')) {
+      BrowserOS::$os = 'iPhone';
+    }
+		
+		// Palm
+    if(strpos($ua, 'Palm')) {
+      BrowserOS::$os = 'Palm';
+    }
+		
+		if(BrowserOS::$os != '')
+			BrowserOS::$is_mobile = true;
+		else 
+		{
+			// ---- Desktop ----
+			
+			// Linux
+      if(strpos($ua, 'Linux')) {
+        BrowserOS::$os = 'Linux';
+      }
+
+			// Macintosh
+      if(strpos($ua, 'Macintosh')) {
+        BrowserOS::$os = 'Macintosh';
+      }
+			
+			// Windows
+      if(strpos($ua, 'Windows')) {
+        BrowserOS::$os = 'Windows';
+      }
+
+			BrowserOS::$is_mobile = false;
+		}
+		
+		/* ============================ */
+		
+		
+		/* ==== Detect the UA ==== */
+		
+		// Firefox
+    if(strpos($ua, 'Firefox')) {
+      BrowserOS::$browser = 'Firefox';
+    }
+    if(strpos($ua, 'Firefox/2.0')) {
+      BrowserOS::$browser = 'Firefox/2.0';
+    }
+    if(strpos($ua, 'Firefox/3.0')) {
+      BrowserOS::$browser = 'Firefox/3.0';
+    }
+    if(strpos($ua, 'Firefox/3.6')) {
+      BrowserOS::$browser = 'Firefox/3.6';
+    }
 
 
-    /* ==== Detect the UA ==== */
+		// Internet Explorer
+    if(strpos($ua, 'MSIE')) {
+      BrowserOS::$browser = 'MSIE';
+    }
+    if(strpos($ua, 'MSIE 7.0')) {
+      BrowserOS::$browser = 'MSIE 7.0';
+    }
+    if(strpos($ua, 'MSIE 8.0')) {
+      BrowserOS::$browser = 'MSIE 8.0';
+    }
 
-    // Firefox
-    strpos($ua, 'Firefox') ? BrowserOS::$browser = 'Firefox' : false; // All Firefox
-    strpos($ua, 'Firefox/2.0') ? BrowserOS::$browser = 'Firefox/2.0' : false; // Firefox 2
-    strpos($ua, 'Firefox/3.0') ? BrowserOS::$browser = 'Firefox/3.0' : false; // Firefox 3
-    strpos($ua, 'Firefox/3.6') ? BrowserOS::$browser = 'Firefox/3.6' : false; // Firefox 3.6
 
-    // Internet Exlporer
-    strpos($ua, 'MSIE') ? BrowserOS::$browser = 'MSIE' : false; // All Internet Explorer
-    strpos($ua, 'MSIE 7.0') ? BrowserOS::$browser = 'MSIE 7.0' : false; // Internet Explorer 7
-    strpos($ua, 'MSIE 8.0') ? BrowserOS::$browser = 'MSIE 8.0' : false; // Internet Explorer 8
+		// Opera
+		$opera = preg_match("/\bOpera\b/i", $ua); // All Opera
+		if($opera != '') BrowserOS::$browser = 'Opera';
+		
+		// Safari
+    if(strpos($ua, 'Safari')) {
+      BrowserOS::$browser = 'Safari';
+    }
+    if(strpos($ua, 'Safari/419')) {
+      BrowserOS::$browser = 'Safari/419';
+    }
+    if(strpos($ua, 'Safari/525')) {
+      BrowserOS::$browser = 'Safari/525';
+    }
+    if(strpos($ua, 'Safari/528')) {
+      BrowserOS::$browser = 'Safari/528';
+    }
+    if(strpos($ua, 'Safari/531')) {
+      BrowserOS::$browser = 'Safari/531';
+    }
 
-    // Opera
-    $opera = preg_match("/\bOpera\b/i", $ua); // All Opera
-    if ($opera != '') BrowserOS::$browser = 'Opera';
 
-    // Safari
-    strpos($ua, 'Safari') ? BrowserOS::$browser = 'Safari' : false; // All Safari
-    strpos($ua, 'Safari/419') ? BrowserOS::$browser = 'Safari/419' : false; // Safari 2
-    strpos($ua, 'Safari/525') ? BrowserOS::$browser = 'Safari/525' : false; // Safari 3
-    strpos($ua, 'Safari/528') ? BrowserOS::$browser = 'Safari/528' : false; // Safari 3.1
-    strpos($ua, 'Safari/531') ? BrowserOS::$browser = 'Safari/531' : false; // Safari 4
+		// Chrome - chrome lists safari as well so we need to check this last
+    if(strpos($ua, 'Chrome')) {
+      BrowserOS::$browser = 'Chrome';
+    }
 
-    // Chrome - chrome lists safari as well so we need to check this last
-    strpos($ua, 'Chrome') ? BrowserOS::$browser = 'Chrome' : false; // Google Chrome
-
-    /* ============================ */
-  }
+		/* ============================ */
+	}
 }

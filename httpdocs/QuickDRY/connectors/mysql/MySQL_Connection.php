@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Connectors;
+
 /** DO NOT USE THIS CLASS DIRECTLY **/
 
 use QuickDRY\Utilities\Debug;

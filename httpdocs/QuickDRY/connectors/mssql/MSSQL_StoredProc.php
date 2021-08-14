@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Connectors;
 
 class MSSQL_StoredProc extends SafeClass
 {
