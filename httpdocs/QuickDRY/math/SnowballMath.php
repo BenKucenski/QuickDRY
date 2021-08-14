@@ -1,12 +1,14 @@
 <?php
 
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class SnowballMath
  */
 class SnowballMath extends SafeClass
 {
-	private $debts = [];
-	private $_last_id = 0;
+	private array $debts = [];
+	private int $_last_id = 0;
 
     /**
      * @param my_BkucenskiBankCreditCardsClass $cc
@@ -39,7 +41,7 @@ class SnowballMath extends SafeClass
     /**
      * @param bool $desc
      */
-	public function SortByInterest($desc = true)
+	public function SortByInterest(bool $desc = true)
 	{
 		$list = [];
 		foreach($this->debts as $debt)
@@ -60,8 +62,8 @@ class SnowballMath extends SafeClass
      * @param bool $apply_rollover
      * @return array
      */
-	public function DoSnowball($apply_rollover = true)
-	{
+	public function DoSnowball(bool $apply_rollover = true): array
+  {
 		$debts = $this->debts;
 		$points = [];
 		$point = new PrincipalInterest();
@@ -100,39 +102,40 @@ class SnowballMath extends SafeClass
 
 			foreach ($debts as $j => $debt)
 			{
-				$interest = round($debts[$j]->principal * $debts[$j]->interest_rate / 100.0 / 12.0, 2);
+				$interest = round($debt->principal * $debt->interest_rate / 100.0 / 12.0, 2);
 
 				$point->interest += $interest;
-				$point->principal += $debts[$j]->principal;
+				$point->principal += $debt->principal;
 
 				$point->interest_payment += $interest;
 
-				$debts[$j]->principal += $interest;
-				$payment = $debts[$j]->payment;
+				$debt->principal += $interest;
+				$payment = $debt->payment;
 
-				if ($payment > $debts[$j]->principal)
+				if ($payment > $debt->principal)
 				{
-					$rollover += $payment - $debts[$j]->principal;
-					$point->principal_payment += $debts[$j]->principal - $interest;
-					$payment = $debts[$j]->principal;
-					$debts[$j]->principal = 0;
+					$rollover += $payment - $debt->principal;
+					$point->principal_payment += $debt->principal - $interest;
+					$payment = $debt->principal;
+					$debt->principal = 0;
 				}
 				else
 				{
-					$debts[$j]->principal -= $payment;
+					$debt->principal -= $payment;
 					$point->principal_payment += $payment - $interest;
 				}
 
 				$d = new Debt();
-				$d->interest_rate = $debts[$j]->interest_rate;
+				$d->interest_rate = $debt->interest_rate;
 				$d->payment = $payment;
-				$d->principal = $debts[$j]->principal;
-				$d->name = $debts[$j]->name;
+				$d->principal = $debt->principal;
+				$d->name = $debt->name;
 				$h[$j] = $d;
 			}
 
 			$total_rollover = $rollover;
 
+      $debts = array_values($debts);
 			$has_debts = true;
 			while ($apply_rollover && $rollover > 0 && $has_debts)
 			{

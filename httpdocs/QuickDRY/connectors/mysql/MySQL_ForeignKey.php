@@ -13,7 +13,7 @@ class MySQL_ForeignKey
     /**
      * @param $row
      */
-    public function FromRow(&$row)
+    public function FromRow($row)
     {
         foreach($row as $key => $value)
         {

@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Utilities;
+
 # PHP Calendar (version 2.3), written by Keith Devens
 # http://keithdevens.com/software/php_calendar
 #  see example at http://keithdevens.com/weblog
@@ -19,7 +21,7 @@ class HTMLCalendar
      *
      * @return string
      */
-    public static function Generate($year, $month, $days = [], $pn = [], $day_name_length = 3, $month_href = NULL, $first_day = 0)
+    public static function Generate($year, $month, $days = [], $pn = [], $day_name_length = 3, $month_href = NULL, $first_day = 0): string
     {
         $first_of_month = gmmktime(0, 0, 0, $month, 1, $year);
         #remember that mktime will automatically correct if invalid dates are entered
@@ -60,9 +62,9 @@ class HTMLCalendar
             }
             if (isset($days[$day]) && is_array($days[$day])) {
                 if (isset($days[$day]['content'])) {
-                    $link = isset($days[$day]['link']) ? $days[$day]['link'] : null;
-                    $classes = isset($days[$day]['classes']) ? $days[$day]['classes'] : null;
-                    $content = isset($days[$day]['content']) ? $days[$day]['content'] : null;
+                    $link = $days[$day]['link'] ?? null;
+                    $classes = $days[$day]['classes'] ?? null;
+                    $content = $days[$day]['content'] ?? null;
 
                     $calendar .= '
 					<td class="calendar_day ' . ($classes ? htmlspecialchars($classes) : '') . ' droppable" id="cal_' . Dates::Datestamp($month . '/' . $day . '/' . $year) . '">
@@ -77,9 +79,9 @@ class HTMLCalendar
 				';
 
                     foreach ($days[$day] as $day_info) {
-                        $link = isset($day_info['link']) ? $day_info['link'] : null;
+                        $link = $day_info['link'] ?? null;
                         //$classes = isset($day_info['classes']) ? $day_info['classes'] : null;
-                        $content = isset($day_info['content']) ? $day_info['content'] : null;
+                        $content = $day_info['content'] ?? null;
 
                         $calendar .= ($link ? '<a href="' . htmlspecialchars($link) . '">' . $content . '</a>' : $content);
                     }

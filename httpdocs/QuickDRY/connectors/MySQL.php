@@ -1,5 +1,8 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class MySQL
  */
@@ -10,13 +13,13 @@ class MySQL extends SafeClass
      * @param $sql
      * @param $params
      *
-     * @return mixed
+     * @return array|string|string[]|null
      */
     public static function EscapeQuery($conn, $sql, $params)
     {
 
         if (is_null($conn)) {
-            Halt('QuickDRY Error: No MySQL Connection');
+            Debug::Halt('QuickDRY Error: No MySQL Connection');
         }
         $count = 0;
         return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
@@ -34,18 +37,18 @@ class MySQL extends SafeClass
 
                 if (isset($params[$result[1]])) {
                     if(is_array($params[$result[1]])) {
-                        Halt(['QuickDRY Error: Parameter cannot be array', $params]);
+                        Debug::Halt(['QuickDRY Error: Parameter cannot be array', $params]);
                     }
                     return '"' . mysqli_escape_string($conn, $params[$result[1]]) . '"';
 				}
 
-                Halt(array($sql, $params), $result[0] . ' does not having a matching parameter (mysql_escape_query).');
+              Debug::Halt(array($sql, $params), $result[0] . ' does not having a matching parameter (mysql_escape_query).');
             }
             return null;
         }, $sql);
     }
 
-    public static function PasswordHash($input, $hex = true)
+    public static function PasswordHash($input, $hex = true): string
     {
         $sha1_stage1 = sha1($input, true);
         $output = sha1($sha1_stage1, !$hex);

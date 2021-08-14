@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\Log;
+
 /**
  * Class MySQL_CodeGen
  */
@@ -39,16 +41,16 @@ class MySQL_CodeGen extends SQLCodeGen
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    function GenerateDatabaseClass()
+    function GenerateDatabaseClass(): ?array
     {
         $DatabaseClass = $this->DatabaseClass;
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
         $stored_procs = $DatabaseClass::GetStoredProcs();
 
         if (!$stored_procs) {
-            return false;
+            return null;
         }
         $sp_require = [];
         $sp_code = [];
@@ -75,7 +77,8 @@ class MySQL_CodeGen extends SQLCodeGen
             }
 
             $code = '<?php
-
+use QuickDRY\Utilities\SafeClass;
+use QuickDRY\Utilities\Debug;
 /**
  * Class db_' . $sp_class . '
  */
@@ -97,7 +100,7 @@ class MySQL_CodeGen extends SQLCodeGen
         });
 
         if (isset($rows[\'error\'])) {
-            Halt($rows);
+            Debug::Halt($rows);
         }
         return $rows;
     }

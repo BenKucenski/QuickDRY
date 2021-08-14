@@ -5,7 +5,7 @@
  */
 class MathClass
 {
-    public static function KMtoMiles($km)
+    public static function KMtoMiles($km): float
     {
         return $km * 0.621371;
     }
@@ -37,7 +37,7 @@ class MathClass
 
     /**
      * @param $arr
-     * @return mixed
+     * @return int|string
      */
     public static function Mode($arr)
     {
@@ -57,7 +57,7 @@ class MathClass
      * @param int $decimals
      * @return string
      */
-    public static function ReportPercent($raw, $decimals = 1)
+    public static function ReportPercent($raw, int $decimals = 1): string
     {
         return number_format($raw * 100, $decimals);
     }

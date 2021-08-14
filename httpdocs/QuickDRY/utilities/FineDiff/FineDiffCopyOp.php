@@ -1,6 +1,8 @@
 <?php
 class FineDiffCopyOp extends FineDiffOp {
-    public function __construct($len) {
+  private $len;
+
+  public function __construct($len) {
         $this->len = $len;
     }
     public function getFromLen() {

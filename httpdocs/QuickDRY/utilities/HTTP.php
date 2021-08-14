@@ -1,4 +1,8 @@
 <?php
+namespace QuickDRY\Utilities;
+
+use JsonStatusResult;
+use QuickDRY\Web\HTTPStatus;
 
 /**
  * Class HTTP
@@ -24,7 +28,7 @@ class HTTP extends SafeClass
      * @param $params
      * @return string
      */
-    public static function RemoveParameters($query_str, $params)
+    public static function RemoveParameters($query_str, $params): string
     {
         parse_str($query_str, $get);
         foreach ($params as $param) {
@@ -39,7 +43,7 @@ class HTTP extends SafeClass
     /**
      * @param JsonStatusResult $result
      */
-    public static function ExitJSONResult(JsonStatusResult &$result)
+    public static function ExitJSONResult(JsonStatusResult $result)
     {
         $res = $result->ToArray(true);
         $json = json_decode(json_encode($res), true);
@@ -80,10 +84,10 @@ class HTTP extends SafeClass
     }
 
 
-    /**
-     * @param $err
-     */
-    public static function Redirect($url = null)
+  /**
+   * @param string|null $url
+   */
+    public static function Redirect(string $url = null)
     {
         if (is_null($url)) {
             if (isset($_SERVER['HTTP_REFERER'])) {
@@ -97,10 +101,11 @@ class HTTP extends SafeClass
         exit();
     }
 
-    /**
-     * @param $err
-     */
-    public static function RedirectError($err, $url = '/')
+  /**
+   * @param $err
+   * @param string $url
+   */
+    public static function RedirectError($err, string $url = '/')
     {
         if (!isset($_SERVER['HTTP_HOST'])) {
             Log::Insert($err, true);
@@ -121,7 +126,7 @@ class HTTP extends SafeClass
      * @param $notice
      * @param string $url
      */
-    public static function RedirectNotice($notice, $url = '/')
+    public static function RedirectNotice($notice, string $url = '/')
     {
         $_SESSION['notice'] = serialize(str_replace('"', '\\"', str_replace('\\', '\\\\', $notice))); // make it compatible with the Session object
 
@@ -179,11 +184,14 @@ class HTTP extends SafeClass
         exit(json_encode(Strings::FixJSON($json), JSON_PRETTY_PRINT));
     }
 
-    /**
-     * @param $json
-     * @param int $HTTP_STATUS
-     */
-    public static function ExitFile($content, $filename, $HTTP_STATUS = HTTP_STATUS_OK, $ContentType = null, $Download = true)
+  /**
+   * @param $content
+   * @param $filename
+   * @param int $HTTP_STATUS
+   * @param null $ContentType
+   * @param bool $Download
+   */
+    public static function ExitFile($content, $filename, int $HTTP_STATUS = HTTP_STATUS_OK, $ContentType = null, bool $Download = true)
     {
         if ($HTTP_STATUS) {
             header('HTTP/1.1 ' . $HTTP_STATUS . ': ' . HTTPStatus::GetDescription($HTTP_STATUS));

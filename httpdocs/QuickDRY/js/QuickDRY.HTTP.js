@@ -49,13 +49,7 @@ var HTTP = {
                     eval(modalClass + '._active = true;');
                 }
 
-                try {
-                    var json = JSON.parse(XMLHttpRequest.responseText);
-                } catch(e) {
-                    console.log(e);
-                    return;
-                }
-
+                var json = JSON.parse(XMLHttpRequest.responseText);
                 if (typeof(error_callback) === "function") {
                     error_callback(data);
                 } else {
@@ -86,33 +80,6 @@ var HTTP = {
                     if (typeof(callback) === "function") {
                         callback(data);
                     }
-                }
-            }
-        });
-    },
-    PostNoJSON: function (url, vars, callback, error_callback, dialog, method) {
-
-        if (!method) {
-            method = "POST";
-        }
-
-        $.ajax({
-            method: method,
-            url: url,
-            data: vars,
-            dataType: "json",
-            async: true,
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-
-                var data = XMLHttpRequest.responseText;
-                if (typeof (callback) === "function") {
-                    callback(data);
-                }
-            },
-            success: function (data) {
-
-                if (typeof (callback) === "function") {
-                    callback(data);
                 }
             }
         });

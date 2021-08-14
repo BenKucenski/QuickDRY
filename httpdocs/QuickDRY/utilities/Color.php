@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Utilities;
 
 /**
  * Class Color
@@ -46,9 +47,8 @@ class Color extends SafeClass
             $g = hexdec(substr($hex, 2, 2));
             $b = hexdec(substr($hex, 4, 2));
         }
-        $rgb = new self($r, $g, $b);
-        //return implode(",", $rgb); // returns the rgb values separated by commas
-        return $rgb; // returns an array with the rgb values
+      //return implode(",", $rgb); // returns the rgb values separated by commas
+        return new self($r, $g, $b); // returns an array with the rgb values
     }
 
     /**

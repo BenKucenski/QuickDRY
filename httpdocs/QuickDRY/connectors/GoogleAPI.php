@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+
 /**
  * Class googleRequest
  */
@@ -72,15 +74,15 @@ class GoogleAPI {
 		} else {
 			$error = "No Google Maps Api Key" ;
 		}
-		Halt($error);
+    Debug::Halt($error);
 	}
 
     /**
      * @param $result
      * @return array
      */
-	public static function ParseResult($result)
-    {
+	public static function ParseResult($result): array
+  {
         $res = [];
         $res['error'] = '';
         $res['latitude'] = 0;

@@ -1,4 +1,9 @@
 <?php
+namespace QuickDRY\Web;
+
+use Curl;
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\Log;
 
 /* @var $Web Web */
 if (!$Web->PDFPageOrientation) {
@@ -27,10 +32,6 @@ if (!is_dir($Web->PDFRootDir)) {
 $html_file = $Web->PDFRootDir . '/' . $Web->PDFHash . '.html';
 $FileName = $html_file . '.pdf';
 
-if($Web->Request->ShowHTML) {
-    exit($Web->HTML);
-}
-
 if(defined('PDF_API')) {
     $res = Curl::Post(PDF_API, 'html=' . urlencode($Web->HTML));
     $fp = fopen($FileName, 'w');
@@ -43,7 +44,7 @@ if(defined('PDF_API')) {
     fclose($fp);
 
     $params = [];
-    $params[] = '--javascript-delay 1000';
+    $params[] = '--javascript-delay 5000';
     $params[] = '--enable-javascript';
     if(!$Web->PDFShrinkToFit) {
         $params[] = '--disable-smart-shrinking';

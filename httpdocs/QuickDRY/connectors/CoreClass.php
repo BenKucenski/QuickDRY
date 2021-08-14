@@ -4,12 +4,13 @@
  * Class CoreClass
  */
 abstract class CoreClass {
-    /**
-     * @param $req
-     * @param bool $save
-     * @return mixed
-     */
-    abstract public function FromRequest(&$req, $save = true, $keep_existing_values = false);
+  /**
+   * @param $req
+   * @param bool $save
+   * @param bool $keep_existing_values
+   * @return mixed
+   */
+    abstract public function FromRequest(&$req, bool $save = true, bool $keep_existing_values = true);
 
 
     /**

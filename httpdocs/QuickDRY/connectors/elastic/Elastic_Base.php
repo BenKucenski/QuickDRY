@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+
 class Elastic_Base extends SafeClass
 {
     protected $_id = null;
@@ -69,7 +71,7 @@ class Elastic_Base extends SafeClass
                 case 'geo_point': // double, double
                     break;
                 default:
-                    Halt($name . ': unknown type "' . static::$_strong_type[$name] . '" for value "' . $value . '"');
+                    Debug::Halt($name . ': unknown type "' . static::$_strong_type[$name] . '" for value "' . $value . '"');
             }
         }
 
@@ -92,7 +94,7 @@ class Elastic_Base extends SafeClass
 
 
         if (sizeof($missing)) {
-            Halt('QuickDRY Error: Calling missing property: ' . implode("\r\n", $missing));
+          Debug::Halt('QuickDRY Error: Calling missing property: ' . implode("\r\n", $missing));
         }
     }
 

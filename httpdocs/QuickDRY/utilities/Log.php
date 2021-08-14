@@ -1,16 +1,16 @@
 <?php
+namespace QuickDRY\Utilities;
 
+
+use Elastic_A;
 
 /**
  * Class Log
  */
 class Log extends SafeClass
 {
-    /**
-     * @var $_log_file LogFile
-     */
-    private static $_log_file;
-    private static $StartTime;
+    private static ?LogFile $_log_file = null;
+    private static int $StartTime;
 
     /**
      *
@@ -22,11 +22,12 @@ class Log extends SafeClass
         }
     }
 
-    /**
-     * @param $message
-     * @param bool $echo
-     */
-    public static function Insert($message, $echo = false, $write_to_file = true)
+  /**
+   * @param $message
+   * @param bool $echo
+   * @param bool $write_to_file
+   */
+    public static function Insert($message, bool $echo = false, bool $write_to_file = true)
     {
         self::_init();
         if (!defined('GUID')) {
@@ -43,7 +44,7 @@ class Log extends SafeClass
 
     public static function File($message)
     {
-        self::Insert($message, false, true);
+        self::Insert($message);
     }
 
     public static function Elastic($message)
@@ -73,7 +74,7 @@ class Log extends SafeClass
         $msg = [$msg];
         $res = Elastic_A::Insert('cron', 'log', $msg);
         if($res['error']) {
-            CleanHalt($res);
+            Debug::Halt($res);
         }
     }
 }

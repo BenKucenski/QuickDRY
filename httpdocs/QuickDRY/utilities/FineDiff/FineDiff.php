@@ -516,7 +516,7 @@ class FineDiff {
     private static function extractFragments($text, $delimiters) {
         // special case: split into characters
         if ( empty($delimiters) ) {
-            $chars = str_split($text, 1);
+            $chars = str_split($text);
             $chars[strlen($text)] = '';
             return $chars;
         }
@@ -563,8 +563,7 @@ class FineDiff {
     public static function String($from_text, $to_text)
     {
         $opcodes = FineDiff::getDiffOpcodes($from_text, $to_text, json_decode(FINE_DIFF_GRANULARITY_WORD));
-        $to_text = FineDiff::renderDiffToHTMLFromOpcodes($from_text, $opcodes);
-        return $to_text;
+      return FineDiff::renderDiffToHTMLFromOpcodes($from_text, $opcodes);
     }
 }
 

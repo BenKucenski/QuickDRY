@@ -22,7 +22,7 @@ class Elastic_A extends Elastic_Core
      * @param int $limit
      * @return array
      */
-    public static function GetAll($where, $limit = 10000)
+    public static function GetAll($where, int $limit = 10000): array
     {
         $return_type = get_called_class();
 
@@ -47,12 +47,13 @@ class Elastic_A extends Elastic_Core
         return $list;
     }
 
-    /**
-     * @param $where
-     * @param int $limit
-     * @return array
-     */
-    public static function GetAllPaginated($where, $page, $per_page)
+  /**
+   * @param $where
+   * @param $page
+   * @param $per_page
+   * @return array
+   */
+    public static function GetAllPaginated($where, $page, $per_page): array
     {
         $return_type = get_called_class();
 
@@ -73,7 +74,7 @@ class Elastic_A extends Elastic_Core
      * @param $where
      * @return int
      */
-    public static function GetCount($where)
+    public static function GetCount($where): int
     {
         $return_type = get_called_class();
 

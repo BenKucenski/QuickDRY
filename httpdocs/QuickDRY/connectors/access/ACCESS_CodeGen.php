@@ -20,11 +20,11 @@ class ACCESS_CodeGen extends SQLCodeGen
         $this->DatabaseClass = $DatabaseClass;
         $this->Database = $database;
         $this->DatabaseConstant = $database_constant;
-        $this->UserClass = $user_class ? $user_class : 'UserClass';
-        $this->UserVar = $user_var ? $user_var : 'CurrentUser';
-        $this->UserIdColumn = $user_id_column ? $user_id_column : 'id';
-        $this->MasterPage = $master_page ? $master_page : 'MASTERPAGE_DEFAULT';
-        $this->DatabasePrefix = $this->DatabaseConstant ? $this->DatabaseConstant : $this->Database;
+        $this->UserClass = $user_class ?: 'UserClass';
+        $this->UserVar = $user_var ?: 'CurrentUser';
+        $this->UserIdColumn = $user_id_column ?: 'id';
+        $this->MasterPage = $master_page ?: 'MASTERPAGE_DEFAULT';
+        $this->DatabasePrefix = $this->DatabaseConstant ?: $this->Database;
         $this->LowerCaseTables = $lowercase_tables;
         $this->UseFKColumnName = $use_fk_column_name;
         $this->GenerateJSON = $GenerateJSON;
@@ -41,7 +41,7 @@ class ACCESS_CodeGen extends SQLCodeGen
     /**
      * @return array
      */
-    function GenerateDatabaseClass()
+    function GenerateDatabaseClass(): array
     { // no stored procedures
         return [];
     }

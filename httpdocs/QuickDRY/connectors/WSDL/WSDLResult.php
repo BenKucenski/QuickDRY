@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class WSDLResult
  *
@@ -10,7 +12,7 @@ class WSDLResult extends SafeClass
     public $Name;
     public $Parameters;
 
-    public function AddParameter(WSDLParameter &$param)
+    public function AddParameter(WSDLParameter $param)
     {
         if(!is_array($this->Parameters)) {
             $this->Parameters = [];

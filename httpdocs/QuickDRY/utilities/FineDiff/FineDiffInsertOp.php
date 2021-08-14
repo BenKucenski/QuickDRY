@@ -1,6 +1,8 @@
 <?php
 class FineDiffInsertOp extends FineDiffOp {
-    public function __construct($text) {
+  private $text;
+
+  public function __construct($text) {
         $this->text = $text;
     }
     public function getFromLen() {

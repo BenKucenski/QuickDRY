@@ -1,141 +1,148 @@
 <?php
 
+use QuickDRY\Utilities\Log;
+use QuickDRY\Utilities\SafeClass;
+use QuickDRY\Utilities\Strings;
+
 /**
  * Class SQLCodeGen
  */
 class SQLCodeGen extends SafeClass
 {
-    protected $DestinationFolder;
-    protected $Database;
-    protected $DatabaseConstant;
-    protected $DatabasePrefix;
-    protected $UserClass;
-    protected $UserVar;
-    protected $UserIdColumn;
-    protected $MasterPage;
-    protected $Tables;
-    protected $LowerCaseTables;
-    protected $UseFKColumnName;
-    protected $DatabaseTypePrefix;
-    protected $DatabaseClass;
-    protected $GenerateJSON;
+  protected $DestinationFolder;
+  protected $Database;
+  protected $DatabaseConstant;
+  protected $DatabasePrefix;
+  protected $UserClass;
+  protected $UserVar;
+  protected $UserIdColumn;
+  protected $MasterPage;
+  protected $Tables;
+  protected $LowerCaseTables;
+  protected $UseFKColumnName;
+  protected $DatabaseTypePrefix;
+  protected $DatabaseClass;
+  protected $GenerateJSON;
 
-    protected $IncludeFolder;
-    protected $CommonFolder;
-    protected $CommonClassFolder;
-    protected $CommonClassDBFolder;
-    protected $CommonClassSPFolder;
-    protected $CommonClassSPDBFolder;
-    protected $PagesBaseJSONFolder;
-    protected $PagesJSONFolder;
-    protected $PagesJSONControlsFolder;
+  protected $IncludeFolder;
+  protected $CommonFolder;
+  protected $CommonClassFolder;
+  protected $CommonClassDBFolder;
+  protected $CommonClassSPFolder;
+  protected $CommonClassSPDBFolder;
+  protected $PagesBaseJSONFolder;
+  protected $PagesJSONFolder;
+  protected $PagesJSONControlsFolder;
 
-    protected $PagesBaseManageFolder;
-    protected $PagesManageFolder;
-    protected $PagesPHPUnitFolder;
+  protected $PagesBaseManageFolder;
+  protected $PagesManageFolder;
+  protected $PagesPHPUnitFolder;
 
-    protected function CreateDirectories()
-    {
-        $this->IncludeFolder = $this->DestinationFolder . '/includes';
+  protected function CreateDirectories()
+  {
+    $this->IncludeFolder = $this->DestinationFolder . '/includes';
 
-        $this->CommonFolder = $this->DestinationFolder . '/common';
-        $this->CommonClassFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-        $this->CommonClassDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db';
+    $this->CommonFolder = $this->DestinationFolder . '/common';
+    $this->CommonClassFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+    $this->CommonClassDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/db';
 
-        $this->CommonClassSPFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp';
-        $this->CommonClassSPDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db';
+    $this->CommonClassSPFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp';
+    $this->CommonClassSPDBFolder = $this->DestinationFolder . '/common/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/sp_db';
 
-        $this->PagesPHPUnitFolder = $this->DestinationFolder . '/phpunit';
+    $this->PagesPHPUnitFolder = $this->DestinationFolder . '/phpunit';
 
-        $this->PagesBaseJSONFolder = $this->DestinationFolder . '/pages/json';
-        $this->PagesBaseManageFolder = $this->DestinationFolder . '/pages/manage';
+    $this->PagesBaseJSONFolder = $this->DestinationFolder . '/pages/json';
+    $this->PagesBaseManageFolder = $this->DestinationFolder . '/pages/manage';
 
-        if(!is_dir($this->PagesBaseJSONFolder)) {
-            mkdir($this->PagesBaseJSONFolder);
-        }
-
-        if(!is_dir($this->PagesBaseManageFolder)) {
-            mkdir($this->PagesBaseManageFolder);
-        }
-
-        if (!is_dir($this->IncludeFolder)) {
-            mkdir($this->IncludeFolder);
-        }
-
-        if (!is_dir($this->CommonFolder)) {
-            mkdir($this->CommonFolder);
-        }
-
-        if (!is_dir($this->CommonClassFolder)) {
-            mkdir($this->CommonClassFolder);
-        }
-
-        if (!is_dir($this->CommonClassDBFolder)) {
-            mkdir($this->CommonClassDBFolder);
-        }
-
-        if (!is_dir($this->CommonClassSPFolder)) {
-            mkdir($this->CommonClassSPFolder);
-        }
-
-        if (!is_dir($this->CommonClassSPDBFolder)) {
-            mkdir($this->CommonClassSPDBFolder);
-        }
-
-        if (!is_dir($this->PagesPHPUnitFolder)) {
-            mkdir($this->PagesPHPUnitFolder);
-        }
+    if (!is_dir($this->PagesBaseJSONFolder)) {
+      mkdir($this->PagesBaseJSONFolder);
     }
 
-    /**
-     * @param $col_type
-     *
-     * @return string
-     */
-    public static function ColumnTypeToProperty($col_type)
-    {
-        switch (strtolower($col_type)) {
-            case 'varchar':
-            case 'char':
-            case 'nchar':
-            case 'keyword':
-            case 'text':
-            case 'nvarchar':
-            case 'image':
-            case 'uniqueidentifier':
-                return 'string';
-
-            case 'tinyint unsigned':
-            case 'bigint unsigned':
-            case 'int unsigned':
-                return 'uint';
-
-            case 'numeric':
-            case 'tinyint':
-            case 'smallint':
-            case 'bigint':
-            case 'bit':
-            case 'long':
-                return 'int';
-
-            case 'money':
-            case 'decimal':
-                return 'float';
-
-            case 'smalldatetime':
-            case 'datetime':
-            case 'date':
-                return 'DateTime';
-        }
-        return $col_type;
+    if (!is_dir($this->PagesBaseManageFolder)) {
+      mkdir($this->PagesBaseManageFolder);
     }
 
-    /**
-     * @param $sp_class
-     */
-    public function GenerateSPClassFile($sp_class)
-    {
-        $code = '<?php
+    if (!is_dir($this->IncludeFolder)) {
+      mkdir($this->IncludeFolder);
+    }
+
+    if (!is_dir($this->CommonFolder)) {
+      mkdir($this->CommonFolder);
+    }
+
+    if (!is_dir($this->CommonClassFolder)) {
+      mkdir($this->CommonClassFolder);
+    }
+
+    if (!is_dir($this->CommonClassDBFolder)) {
+      mkdir($this->CommonClassDBFolder);
+    }
+
+    if (!is_dir($this->CommonClassSPFolder)) {
+      mkdir($this->CommonClassSPFolder);
+    }
+
+    if (!is_dir($this->CommonClassSPDBFolder)) {
+      mkdir($this->CommonClassSPDBFolder);
+    }
+
+    if (!is_dir($this->PagesPHPUnitFolder)) {
+      mkdir($this->PagesPHPUnitFolder);
+    }
+  }
+
+  /**
+   * @param $col_type
+   *
+   * @return string
+   */
+  public static function ColumnTypeToProperty($col_type): string
+  {
+    switch (strtolower($col_type)) {
+      case 'varchar':
+      case 'char':
+      case 'nchar':
+      case 'keyword':
+      case 'text':
+      case 'longtext':
+      case 'nvarchar':
+      case 'image':
+      case 'uniqueidentifier':
+      case 'enum':
+        return 'string';
+
+      case 'tinyint unsigned':
+      case 'bigint unsigned':
+      case 'int unsigned':
+        return 'uint';
+
+      case 'numeric':
+      case 'tinyint':
+      case 'smallint':
+      case 'bigint':
+      case 'bit':
+      case 'long':
+        return 'int';
+
+      case 'money':
+      case 'decimal':
+        return 'float';
+
+      case 'smalldatetime':
+      case 'datetime':
+      case 'date':
+        return 'DateTime';
+    }
+    return $col_type;
+  }
+
+  /**
+   * @param $sp_class
+   */
+  public function GenerateSPClassFile($sp_class)
+  {
+    $code = '<?php
+use QuickDRY\Utilities\Debug;
 
 /**
  * Class ' . $sp_class . '
@@ -152,41 +159,41 @@ class ' . $sp_class . ' extends db_' . $sp_class . '
             $this->HaltOnError(false);
             $this->FromRow($row);
             if($this->HasMissingProperties()) {
-                Halt($this->GetMissingPropeties());
+                Debug::Halt($this->GetMissingPropeties());
             }
             $this->HaltOnError(true);
         }
     }
 }
 ';
-        self::SaveFile($this->CommonClassSPFolder, $sp_class, $code);
+    self::SaveFile($this->CommonClassSPFolder, $sp_class, $code);
+  }
+
+  public function GenerateClasses()
+  {
+    $modules = $this->GenerateDatabaseClass();
+
+    foreach ($this->Tables as $table_name) {
+      Log::Insert($table_name, true);
+
+
+      $DatabaseClass = $this->DatabaseClass;
+      $columns = $DatabaseClass::GetTableColumns($table_name);
+      $mod = $this->GenerateClass($table_name, $columns);
+
+      $modules['db_' . $mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassDBFolder . '/db_' . $mod . '.php');
+      $modules[$mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassFolder . '/' . $mod . '.php');
     }
 
-    public function GenerateClasses()
-    {
-        $modules = $this->GenerateDatabaseClass();
+    $fp = fopen($this->IncludeFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
 
-        foreach ($this->Tables as $table_name) {
-            Log::Insert($table_name, true);
+    $mod_map = [];
+    foreach ($modules as $mod => $file) {
+      $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
+    }
+    $autoloader_class = 'autoloader_' . md5($this->DatabaseTypePrefix . '_' . $this->DatabasePrefix);
 
-
-            $DatabaseClass = $this->DatabaseClass;
-            $columns = $DatabaseClass::GetTableColumns($table_name);
-            $mod = $this->GenerateClass($table_name, $columns);
-
-            $modules['db_' . $mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassDBFolder . '/db_' . $mod . '.php');
-            $modules[$mod] = str_replace($this->DestinationFolder . '/', '', $this->CommonClassFolder . '/' . $mod . '.php');
-        }
-
-        $fp = fopen($this->IncludeFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '.php', 'w');
-
-        $mod_map = [];
-        foreach ($modules as $mod => $file) {
-            $mod_map[] = '\'' . $mod . '\' => \'' . $file . '\',';
-        }
-        $autoloader_class = 'autoloader_' . md5($this->DatabaseTypePrefix . '_' . $this->DatabasePrefix);
-
-        $include_php = '<?php
+    $include_php = '<?php
 /**
  * @param $class
  */
@@ -205,7 +212,7 @@ function ' . $autoloader_class . '($class) {
         if (file_exists(\'../\' . $class_map[$class])) { // cron folder
             require_once \'../\' . $class_map[$class];
         } else { // scripts folder
-           require_once \''  . $this->DestinationFolder . '/\' . $class_map[$class];
+           require_once \'' . $this->DestinationFolder . '/\' . $class_map[$class];
         }
     }
 }
@@ -214,144 +221,146 @@ function ' . $autoloader_class . '($class) {
 spl_autoload_register(\'' . $autoloader_class . '\');
         ';
 
-        fwrite($fp, $include_php);
-        fclose($fp);
+    fwrite($fp, $include_php);
+    fclose($fp);
+  }
+
+  /**
+   * @param $table_name
+   * @param $cols
+   * @return string
+   */
+  function GenerateClass($table_name, $cols): string
+  {
+    $DatabaseClass = $this->DatabaseClass;
+    $class_props = [];
+
+    $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+    Log::Insert($c_name, true);
+
+    $props = '';
+    $unique = $DatabaseClass::GetUniqueKeys($table_name);
+    $primary = $DatabaseClass::GetPrimaryKey($table_name);
+    $indexes = $DatabaseClass::GetIndexes($table_name);
+    $aliases = [];
+
+    $HasUserLink = false;
+
+    foreach ($cols as $col) {
+      /* @var $col MSSQL_TableColumn */ // these are the same for MySQL and MSSQL, only claim it's one to help with code completion
+      if ($col->field !== $col->field_alias) {
+        $aliases[] = $col;
+      }
+      $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
+      $props .= "'" . $col->field . "' => ['type' => '" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable' => " . ($col->null ? 'true' : 'false') . ", 'display' => '" . SQLCodeGen::FieldToDisplay($col->field) . "'],\r\n\t\t";
+      if ($col->field === 'user_id') {
+        $HasUserLink = true;
+      }
     }
 
-    /**
-     * @param $table_name
-     * @param $cols
-     * @return string
-     */
-    function GenerateClass($table_name, $cols)
-    {
-        $DatabaseClass = $this->DatabaseClass;
-        $class_props = [];
 
-        $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
-        Log::Insert($c_name, true);
+    $refs = $DatabaseClass::GetForeignKeys($table_name);
+    $gets = [];
+    $sets = [];
 
-        $props = '';
-        $unique = $DatabaseClass::GetUniqueKeys($table_name);
-        $primary = $DatabaseClass::GetPrimaryKey($table_name);
-        $indexes = $DatabaseClass::GetIndexes($table_name);
+    $foreign_key_props = [];
 
-        $aliases = [];
+    $seens_vars = [];
 
-        $HasUserLink = false;
-
-        foreach ($cols as $col) { /* @var $col MSSQL_TableColumn */ // these are the same for MySQL and MSSQL, only claim it's one to help with code completion
-            if($col->field !== $col->field_alias) {
-                $aliases[] = $col;
-            }
-            $class_props[] = ' * @property ' . SQLCodeGen::ColumnTypeToProperty(preg_replace('/\(.*?\)/si', '', $col->type)) . ' ' . $col->field_alias;
-            $props .= "'" . $col->field . "' => ['type' => '" . str_replace('\'', '\\\'', $col->type) . "', 'is_nullable' => " . ($col->null ? 'true' : 'false') . ", 'display' => '" . SQLCodeGen::FieldToDisplay($col->field) . "'],\r\n\t\t";
-            if($col->field === 'user_id') {
-                $HasUserLink = true;
-            }
-        }
-
-
-        $refs = $DatabaseClass::GetForeignKeys($table_name);
-        $gets = [];
-        $sets = [];
-
-        $foreign_key_props = [];
-
-        $seens_vars = [];
-
-        foreach($aliases as $alias) { /* @var $alias MSSQL_TableColumn */
-            $gets[] = "
+    foreach ($aliases as $alias) {
+      /* @var $alias MSSQL_TableColumn */
+      $gets[] = "
             case '" . $alias->field_alias . "':
                 return \$this->GetProperty('" . $alias->field . "');
             ";
 
-            $sets[] = "
+      $sets[] = "
             case '" . $alias->field_alias . "':
                 return \$this->SetProperty('" . $alias->field . "', \$value);
             ";
 
+    }
+
+    foreach ($refs as $fk) {
+      if (is_array($fk->column_name)) {
+        $column_name = $this->UseFKColumnName ? '_' . implode('_', $fk->column_name) : '';
+        $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+      } else {
+        $column_name = $this->UseFKColumnName ? '_' . $fk->column_name : '';
+        $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+      }
+
+      if (in_array($var, $seens_vars)) {
+        Log::Insert(['duplicate FK', $fk], true);
+        continue;
+      }
+      $seens_vars[] = $var;
+
+      $class_name = SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+      $class_props[] = ' * @property ' . $class_name . ' ' . $var;
+      $foreign_key_props[] = 'protected ?' . $class_name . ' $_' . $var . ' = null;';
+
+      if (is_array($fk->column_name)) {
+        $isset = [];
+        $get_params = [];
+        foreach ($fk->column_name as $i => $col) {
+          $isset[] = '$this->' . $col;
+          $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
         }
 
-        foreach ($refs as $fk) {
-            if (is_array($fk->column_name)) {
-                $column_name = $this->UseFKColumnName ? '_' . implode('_', $fk->column_name) : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
-            } else {
-                $column_name = $this->UseFKColumnName ? '_' . $fk->column_name : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
-            }
-
-            if (in_array($var, $seens_vars)) {
-                Log::Insert(['duplicate FK', $fk], true);
-                continue;
-            }
-            $seens_vars[] = $var;
-
-            $class_props[] = ' * @property ' . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . ' ' . $var;
-            $foreign_key_props[] = 'protected $_' . $var . ' = null;';
-
-            if (is_array($fk->column_name)) {
-                $isset = [];
-                $get_params = [];
-                foreach ($fk->column_name as $i => $col) {
-                    $isset[] = '$this->' . $col;
-                    $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
-                }
-
-                $gets[] = "
+        $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && " . implode(' && ', $isset) . ") {
                     \$this->_$var = " . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get([" . implode(', ', $get_params) . "]);
                 }
                 return \$this->_$var;
             ";
-            } else {
-                $gets[] = "
+      } else {
+        $gets[] = "
             case '$var':
                 if(!isset(\$this->_$var) && \$this->" . $fk->column_name . ") {
                     \$this->_$var = " . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::Get(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
                 }
                 return \$this->_$var;
             ";
-            }
+      }
+    }
+
+    $refs = $DatabaseClass::GetLinkedTables($table_name);
+    $fk_counts = [];
+    foreach ($refs as $fk) {
+      if (is_array($fk->column_name)) {
+        $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
+        $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+      } else {
+        $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', $fk->column_name) : '';
+        $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
+      }
+
+
+      if (in_array($var, $seens_vars)) {
+        Log::Insert(['duplicate FK', $fk], true);
+        continue;
+      }
+      $seens_vars[] = $var;
+
+      $class_props[] = ' * @property ' . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . '[] ' . $var;
+      $class_props[] = ' * @property int ' . $var . 'Count';
+
+
+      $foreign_key_props[] = 'protected ?array $_' . $var . ' = null;';
+      $foreign_key_props[] = 'protected ?int $_' . $var . 'Count = null;';
+
+      if (is_array($fk->column_name)) {
+        $isset = [];
+        $get_params = [];
+        foreach ($fk->column_name as $i => $col) {
+          $isset[] = '$this->' . $col;
+          $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
         }
+        $fk_counts [] = $var . 'Count';
 
-        $refs = $DatabaseClass::GetLinkedTables($table_name);
-        $fk_counts = [];
-        foreach ($refs as $fk) {
-            if (is_array($fk->column_name)) {
-                $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', implode('_', $fk->column_name)) : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
-            } else {
-                $column_name = $this->UseFKColumnName ? '_' . str_ireplace('_ID', '', $fk->column_name) : '';
-                $var = preg_replace('/[^a-z0-9]/si', '_', str_replace(' ', '_', $fk->foreign_table_name) . $column_name);
-            }
-
-
-            if (in_array($var, $seens_vars)) {
-                Log::Insert(['duplicate FK', $fk], true);
-                continue;
-            }
-            $seens_vars[] = $var;
-
-            $class_props[] = ' * @property ' . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . '[] ' . $var;
-            $class_props[] = ' * @property int ' . $var . 'Count';
-
-
-            $foreign_key_props[] = 'protected $_' . $var . ' = null;';
-            $foreign_key_props[] = 'protected $_' . $var . 'Count = null;';
-
-            if (is_array($fk->column_name)) {
-                $isset = [];
-                $get_params = [];
-                foreach ($fk->column_name as $i => $col) {
-                    $isset[] = '$this->' . $col;
-                    $get_params[] = "'" . $fk->foreign_column_name[$i] . "'=>\$this->" . $col;
-                }
-                $fk_counts [] = $var . 'Count';
-
-                $gets[] = "
+        $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && " . implode(' && ', $isset) . ") {
                     \$this->_$var = " . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll([" . implode(', ', $get_params) . "]);
@@ -365,9 +374,9 @@ spl_autoload_register(\'' . $autoloader_class . '\');
                 return \$this->_{$var}Count;
             ";
 
-            } else {
-                $fk_counts [] = $var . 'Count';
-                $gets[] = "
+      } else {
+        $fk_counts [] = $var . 'Count';
+        $gets[] = "
             case '$var':
                 if(is_null(\$this->_$var) && \$this->" . $fk->column_name . ") {
                     \$this->_$var = " . SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix) . "::GetAll(['" . $fk->foreign_column_name . "'=>\$this->" . $fk->column_name . "]);
@@ -380,55 +389,57 @@ spl_autoload_register(\'' . $autoloader_class . '\');
                 }
                 return \$this->_{$var}Count;
             ";
-            }
-        }
+      }
+    }
 
 
-        $code = '<?php
+    $code = '<?php
 
 /**
  *
- * ' . $c_name . '
+ * db_' . $c_name . '
  * @author Ben Kucenski <bkucenski@gmail.com>
  * generated by QuickDRY
  *
 ';
-        $code .= implode("\r\n", $class_props);
-        $code .= '
+    $code .= implode("\r\n", $class_props);
+    $code .= '
  *
  */
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Dates;
 
 class db_' . $c_name . ' extends ' . $DatabaseClass . '
 {
-    public static $_primary = ' . (sizeof($primary) ? '[\'' . implode('\',\'', $primary) . '\']' : '[]') . ';
-    public static $_unique = [
+    public static array $_primary = ' . (sizeof($primary) ? '[\'' . implode('\',\'', $primary) . '\']' : '[]') . ';
+    public static array $_unique = [
 ';
 
-        foreach ($unique as $key => $columns) {
-            $code .= '          [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
-        }
+    foreach ($unique as $key => $columns) {
+      $code .= '          [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+    }
 
 
-            $code .= '
+    $code .= '
     ];
 
-    public static $_indexes = [
+    public static array $_indexes = [
 ';
 
-            foreach ($indexes as $key => $columns) {
-                $code .= '        \'' . $key . '\' => [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
-            }
+    foreach ($indexes as $key => $columns) {
+      $code .= '        \'' . $key . '\' => [' . (sizeof($columns) ? '\'' . implode('\',\'', $columns) . '\'' : '') . '],' . PHP_EOL;
+    }
 
-            $code .= '
+    $code .= '
     ];
 
-    protected static $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
-    protected static $table = \'' . $table_name . '\';
-    protected static $DatabasePrefix = \'' . (!$this->DatabaseConstant ? $this->Database : $this->DatabaseConstant) . '\';
-    protected static $DatabaseTypePrefix = \'' . $this->DatabaseTypePrefix . '\';
-    protected static $LowerCaseTable = ' . ($this->LowerCaseTables ? 1 : 0) . ';
+    protected static ?string $database = ' . (!$this->DatabaseConstant ? '\'' . $this->Database . '\'' : $this->DatabaseConstant) . ';
+    protected static ?string $table = \'' . $table_name . '\';
+    protected static string $DatabasePrefix = \'' . (!$this->DatabaseConstant ? $this->Database : $this->DatabaseConstant) . '\';
+    protected static string $DatabaseTypePrefix = \'' . $this->DatabaseTypePrefix . '\';
+    protected static bool $LowerCaseTable = ' . ($this->LowerCaseTables ? 'true' : 'false') . ';
 
-    protected static $prop_definitions = [
+    protected static array $prop_definitions = [
         ' . $props . '
     ];
 
@@ -466,8 +477,9 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     /**
      * @param bool $return_query
      * @return array|SQL_Query
+     * @throws Exception
      */
-    public function Insert($return_query = false)
+    public function Insert(bool $return_query = false)
     {
         return $this->_Insert($return_query);
     }
@@ -475,8 +487,9 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     /**
      * @param bool $return_query
      * @return array|SQL_Query
+     * @throws Exception
      */
-    public function Update($return_query = false)
+    public function Update(bool $return_query = false)
     {
         return $this->_Update($return_query);
     }
@@ -485,9 +498,9 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param $req
      * @param bool $save
      * @param bool $keep_existing_values
-     * @return bool
+     * @return array
      */
-    public function FromRequest(&$req, $save = true, $keep_existing_values = false)
+    public function FromRequest(&$req, bool $save = true, bool $keep_existing_values = true): ?array
     {
         return parent::FromRequest($req, $save, $keep_existing_values);
     }
@@ -496,7 +509,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param $search
      * @param UserClass $user
      */
-    public static function Suggest($search, ' . $this->UserClass . ' &$user)
+    public static function Suggest($search, ' . $this->UserClass . ' $user)
     {
         HTTP::ExitJSON([\'error\' => \'Suggest not implemented\', \'search\' => $search, \'user\' => $user]);
     }
@@ -504,7 +517,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     /**
      * @return int
      */
-    public function IsReferenced()
+    public function IsReferenced(): int
     {
         return ' . (sizeof($fk_counts) == 0 ? '0' : '$this->' . implode(' + $this->', $fk_counts)) . ';
     }
@@ -513,7 +526,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param UserClass $user
      * @return bool
      */
-    public function VisibleTo(' . $this->UserClass . ' &$user)
+    public function VisibleTo(' . $this->UserClass . ' &$user): bool
     {
         if($user->Is([ROLE_ID_ADMIN])) {
             return true;
@@ -534,7 +547,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param UserClass $user
      * @return bool
      */
-    public function CanDelete(' . $this->UserClass . ' &$user)
+    public function CanDelete(' . $this->UserClass . ' $user): bool
     {
         if($user->Is([ROLE_ID_ADMIN])) {
             return true;
@@ -555,7 +568,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param $column_name
      * @return string
      */
-    public static function ColumnNameToNiceName($column_name)
+    public static function ColumnNameToNiceName($column_name): string
     {
         return isset(static::$prop_definitions[$column_name]) ? static::$prop_definitions[$column_name][\'display\'] : \'<i>unknown</i>\';
     }
@@ -566,7 +579,7 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
      * @param false $force_value
      * @return mixed
      */
-    public function ValueToNiceValue($column_name, $value = null, $force_value = false)
+    public function ValueToNiceValue($column_name, $value = null, bool $force_value = false)
     {
         if($value instanceof DateTime) {
             $value = Dates::Timestamp($value, \'\');
@@ -615,13 +628,21 @@ class db_' . $c_name . ' extends ' . $DatabaseClass . '
     }
 }
 ';
-        $fp = fopen($this->CommonClassDBFolder . '/db_' . $c_name . '.php', 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+    $fp = fopen($this->CommonClassDBFolder . '/db_' . $c_name . '.php', 'w');
+    fwrite($fp, $code);
+    fclose($fp);
 
-        $code = '<?php
+    $code = '<?php
 /**
- * Class ' . $c_name . '
+ *
+ * ' . $c_name . '
+ * @author Ben Kucenski <bkucenski@gmail.com>
+ * generated by QuickDRY
+ *
+';
+    $code .= implode("\r\n", $class_props);
+    $code .= '
+ *
  */
 class ' . $c_name . ' extends db_' . $c_name . '
 {
@@ -651,7 +672,7 @@ class ' . $c_name . ' extends db_' . $c_name . '
 ' . ($HasUserLink ? '
         global $Web;
         if($this->id) {
-            if($this->user_id !== $Web->CurrentUser->id) {
+            if($this->user_id !== (int)$Web->CurrentUser->id) {
                 $res[\'error\'] = [\'No Permission\'];
                 return $res;
             }
@@ -665,159 +686,161 @@ class ' . $c_name . ' extends db_' . $c_name . '
 
 ';
 
-        self::SaveFile($this->CommonClassFolder, $c_name, $code);
+    self::SaveFile($this->CommonClassFolder, $c_name, $code);
 
-        return $c_name;
+    return $c_name;
+  }
+
+  public static $CacheFileLists;
+
+  /**
+   * @param $base_folder
+   * @param $file_name
+   * @param $data
+   * @param bool $force
+   */
+  public static function SaveFile($base_folder, $file_name, $data, bool $force = false)
+  {
+    $file = $base_folder . '/' . $file_name . '.php';
+    if (!$force) {
+      if (!isset(self::$CacheFileLists[$base_folder])) {
+        self::$CacheFileLists[$base_folder] = scandir($base_folder);
+      }
+      $files = self::$CacheFileLists[$base_folder];
+      $file_exists = false;
+      foreach ($files as $fname) {
+        if (strcasecmp($fname, $file_name . '.php') == 0) {
+          $file_exists = true;
+          if (strcmp($fname, $file_name . '.php') != 0) {
+            rename($base_folder . '/' . $file_name . '.php', $file);
+          }
+          break;
+        }
+      }
+
+
+      if (!$file_exists) {
+        $fp = fopen($file, 'w');
+        fwrite($fp, $data);
+        fclose($fp);
+      }
+    } else {
+      $fp = fopen($file, 'w');
+      fwrite($fp, $data);
+      fclose($fp);
+    }
+  }
+
+  public function GenerateJSON()
+  {
+    if (!$this->GenerateJSON) {
+      return;
     }
 
-    public static $CacheFileLists;
+
+    $DatabaseClass = $this->DatabaseClass;
+
+    foreach ($this->Tables as $table_name) {
+      Log::Insert($table_name, true);
+      $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+
+      $this->PagesJSONFolder = $this->PagesBaseJSONFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
+      if (!is_dir($this->PagesJSONFolder)) {
+        mkdir($this->PagesJSONFolder);
+      }
+
+      $table_nice_name = $DatabaseClass::TableToNiceName($table_name, $this->LowerCaseTables);
+
+      $this->PagesJSONFolder .= '/' . $table_nice_name;
+      if (!is_dir($this->PagesJSONFolder)) {
+        mkdir($this->PagesJSONFolder);
+      }
+
+      if (!is_dir($this->PagesJSONFolder . '/base')) {
+        mkdir($this->PagesJSONFolder . '/base');
+      }
+
+      $this->PagesJSONControlsFolder = $this->PagesJSONFolder . '/controls';
+      if (!is_dir($this->PagesJSONControlsFolder)) {
+        mkdir($this->PagesJSONControlsFolder);
+      }
+
+
+      $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
+      if (!is_dir($this->PagesManageFolder)) {
+        mkdir($this->PagesManageFolder);
+      }
+
+      $this->PagesManageFolder .= '/' . $table_nice_name;
+      if (!is_dir($this->PagesManageFolder)) {
+        mkdir($this->PagesManageFolder);
+      }
+
+
+      $columns = $DatabaseClass::GetTableColumns($table_name);
+      $this->_GenerateJSON($table_name, $table_nice_name, $columns);
+    }
+  }
+
+  protected function _GenerateJSON($table_name, $table_nice_name, $cols)
+  {
+    $DatabaseClass = $this->DatabaseClass;
+
+    // $column_names = [];
+//        foreach ($cols as $col) {
+//            $column_names[] = $col->field;
+//        }
+
+    $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+
+    // $unique = $DatabaseClass::GetUniqueKeys($table_name);
+    $primary = $DatabaseClass::GetPrimaryKey($table_name);
+
+    $this->Add($c_name, $table_name, $cols, $primary, $table_nice_name);
+    $this->History($c_name, $table_nice_name, $primary);
+    $this->Manage($c_name, $table_nice_name);
+
+    $this->CRUDClass($c_name, $table_nice_name, $primary);
 
     /**
-     * @param $base_folder
-     * @param $file_name
-     * @param $data
-     */
-    public static function SaveFile($base_folder, $file_name, $data, $force = false)
-    {
-        $file = $base_folder . '/' . $file_name . '.php';
-        if(!$force) {
-            if (!isset(self::$CacheFileLists[$base_folder])) {
-                self::$CacheFileLists[$base_folder] = scandir($base_folder);
-            }
-            $files = self::$CacheFileLists[$base_folder];
-            $file_exists = false;
-            foreach ($files as $fname) {
-                if (strcasecmp($fname, $file_name . '.php') == 0) {
-                    $file_exists = true;
-                    if (strcmp($fname, $file_name . '.php') == 0) {
-                    } else {
-                        rename($base_folder . '/' . $file_name . '.php', $file);
-                    }
-                    break;
-                }
-            }
+     * $this->SaveJSON($c_name, $primary);
+     * $this->GetJSON($c_name, $primary);
+     * $this->LookupJSON($c_name);
+     * $this->DeleteJSON($c_name, $unique, $primary);
+     * $this->HistoryJSON($c_name, $primary);
+     **/
 
 
-            if (!$file_exists) {
-                $fp = fopen($file, 'w');
-                fwrite($fp, $data);
-                fclose($fp);
-            }
-        } else {
-            $fp = fopen($file, 'w');
-            fwrite($fp, $data);
-            fclose($fp);
-        }
+  }
+
+  protected function CRUDClass($c_name, $table_nice_name, $primary)
+  {
+    if (!sizeof($primary)) {
+      return;
     }
 
-    public function GenerateJSON()
-    {
-        if(!$this->GenerateJSON) {
-            return;
-        }
-
-
-        $DatabaseClass = $this->DatabaseClass;
-
-        foreach ($this->Tables as $table_name) {
-            Log::Insert($table_name, true);
-            $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
-
-            $this->PagesJSONFolder = $this->PagesBaseJSONFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-
-            if(!is_dir($this->PagesJSONFolder)) {
-                mkdir($this->PagesJSONFolder);
-            }
-
-            $table_nice_name = $DatabaseClass::TableToNiceName($table_name, $this->LowerCaseTables);
-
-            $this->PagesJSONFolder .= '/' . $table_nice_name;
-            if(!is_dir($this->PagesJSONFolder)) {
-                mkdir($this->PagesJSONFolder);
-            }
-
-            if(!is_dir($this->PagesJSONFolder . '/base')) {
-                mkdir($this->PagesJSONFolder . '/base');
-            }
-
-            $this->PagesJSONControlsFolder = $this->PagesJSONFolder . '/controls';
-            if(!is_dir($this->PagesJSONControlsFolder)) {
-                mkdir($this->PagesJSONControlsFolder);
-            }
-
-
-            $this->PagesManageFolder = $this->PagesBaseManageFolder . '/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
-
-            if(!is_dir($this->PagesManageFolder)) {
-                mkdir($this->PagesManageFolder);
-            }
-
-            $this->PagesManageFolder .= '/' . $table_nice_name;
-            if(!is_dir($this->PagesManageFolder)) {
-                mkdir($this->PagesManageFolder);
-            }
-
-
-            $columns = $DatabaseClass::GetTableColumns($table_name);
-            $this->_GenerateJSON($table_name, $table_nice_name, $columns);
-        }
-    }
-
-    protected function _GenerateJSON($table_name, $table_nice_name, $cols)
-    {
-        $DatabaseClass = $this->DatabaseClass;
-
-        $column_names = [];
-        foreach ($cols as $col) {
-            $column_names[] = $col->field;
-        }
-
-        $c_name = SQL_Base::TableToClass($this->DatabasePrefix, $table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
-
-        $unique = $DatabaseClass::GetUniqueKeys($table_name);
-        $primary = $DatabaseClass::GetPrimaryKey($table_name);
-
-        $this->Add($c_name, $table_name, $cols, $primary, $table_nice_name);
-        $this->History($c_name, $table_nice_name, $primary);
-        $this->Manage($c_name, $table_nice_name);
-
-        $this->CRUDClass($c_name, $table_name, $table_nice_name, $primary);
-
-        /**
-        $this->SaveJSON($c_name, $primary);
-        $this->GetJSON($c_name, $primary);
-        $this->LookupJSON($c_name);
-        $this->DeleteJSON($c_name, $unique, $primary);
-        $this->HistoryJSON($c_name, $primary);
-        **/
-
+    $get_params = [];
+    $missing_params = [];
+    foreach ($primary as $param) {
+      $get_params [] = '\'' . $param . '\' => self::$Request->' . $param;
+      $missing_params [] = '!self::$Request->' . $param;
 
     }
+    $get_params = implode(', ', $get_params);
+    $missing_params = implode(' || ', $missing_params);
 
-    protected function CRUDClass($c_name, $table_name, $table_nice_name, $primary)
-    {
-        if(!sizeof($primary)) {
-            return;
-        }
+    $code = '<?php
+use QuickDRY\Utilities\HTTP;
 
-        $get_params = [];
-        $missing_params = [];
-        foreach($primary as $param) {
-            $get_params []= '\'' . $param . '\' => self::$Request->' . $param;
-            $missing_params []= '!self::$Request->' . $param;
-
-        }
-        $get_params = implode(', ', $get_params);
-        $missing_params = implode(' || ', $missing_params);
-
-        $code = '<?php
 if(!' . $table_nice_name . '::$Item) {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_BAD_REQUEST);
 }
         ';
-        self::SaveFile($this->PagesJSONFolder, $table_nice_name, $code);
+    self::SaveFile($this->PagesJSONFolder, $table_nice_name, $code);
 
-        $code = '<?php
+    $code = '<?php
 require_once \'base/' . $table_nice_name . 'Base.php\';
 
 class ' . $table_nice_name . ' extends ' . $table_nice_name . 'Base
@@ -825,19 +848,22 @@ class ' . $table_nice_name . ' extends ' . $table_nice_name . 'Base
 
 }
         ';
-        self::SaveFile($this->PagesJSONFolder, $table_nice_name . '.code', $code);
+    self::SaveFile($this->PagesJSONFolder, $table_nice_name . '.code', $code);
 
-        $code = '<?php
+    $code = '<?php
+use QuickDRY\Web\BasePage;
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\ChangeLogClass;
 
 /**
  * Class ' . $table_nice_name . 'Base
  */
 class ' . $table_nice_name . 'Base extends BasePage
 {
-    public static $History;
+    public static ?array $History = null;
 
-    /* @var $Item ' . $c_name . ' */
-    public static $Item;
+    public static ' . $c_name . ' $Item;
 
     public static function DoGet()
     {
@@ -888,8 +914,8 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
 
         $req = self::$Request->ToArray();
-        $res = self::$Item->FromRequest($req, true, true);
-        if ($res[\'error\']) {
+        $res = self::$Item->FromRequest($req);
+        if (isset($res[\'error\']) && $res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
         }
 
@@ -911,9 +937,9 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
 
         $req = self::$Request->ToArray();
-        $res = self::$Item->FromRequest($req, false, true);
+        $res = self::$Item->FromRequest($req, false);
 
-        if ($res[\'error\']) {
+        if (isset($res[\'error\']) && $res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
         }
 
@@ -922,7 +948,7 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
 
         $res = self::$Item->Save();
-        if ($res[\'error\']) {
+        if (isset($res[\'error\']) && $res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
         }
 
@@ -947,7 +973,7 @@ class ' . $table_nice_name . 'Base extends BasePage
         }
 
         $res = self::$Item->Remove(self::$CurrentUser);
-        if ($res[\'error\']) {
+        if (isset($res[\'error\']) && $res[\'error\']) {
             HTTP::ExitJSON([\'error\' => $res[\'error\']], HTTP_STATUS_BAD_REQUEST);
         }
         HTTP::ExitJSON([\'success\' => $success_message], HTTP_STATUS_OK);
@@ -1014,16 +1040,20 @@ class ' . $table_nice_name . 'Base extends BasePage
     }
 }
         ';
-        self::SaveFile($this->PagesJSONFolder . '/base', $table_nice_name . 'Base', $code, true);
+    self::SaveFile($this->PagesJSONFolder . '/base', $table_nice_name . 'Base', $code, true);
+  }
+
+  protected function SaveJSON($c_name, $primary)
+  {
+    if (!isset($primary[0])) {
+      return;
     }
 
-    protected function SaveJSON($c_name, $primary)
-    {
-        if (!isset($primary[0])) {
-            return;
-        }
+    $save = '<?php
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Strings;
+global $Web;
 
-        $save = '<?php
 if(!$Web->' . $this->UserVar . ' || !$Web->' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -1065,18 +1095,22 @@ if($_SERVER[\'REQUEST_METHOD\'] == \'POST\')
 
 HTTP::ExitJSON($returnvals);
 	';
-        $fp = fopen($this->PagesJSONFolder . '/save.json.php', 'w');
-        fwrite($fp, $save);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONFolder . '/save.json.php', 'w');
+    fwrite($fp, $save);
+    fclose($fp);
+  }
+
+  protected function GetJSON($c_name, $primary)
+  {
+    if (!isset($primary[0])) {
+      return;
     }
 
-    protected function GetJSON($c_name, $primary)
-    {
-        if (!isset($primary[0])) {
-            return;
-        }
+    $get = '<?php
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Strings;
+global $Web;
 
-        $get = '<?php
 if(!$Web->' . $this->UserVar . ' || !$Web->' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -1100,14 +1134,18 @@ if(isset($Web->Request->uuid))
 HTTP::ExitJSON($returnvals);
 	';
 
-        $fp = fopen($this->PagesJSONFolder . '/get.json.php', 'w');
-        fwrite($fp, $get);
-        fclose($fp);
-    }
+    $fp = fopen($this->PagesJSONFolder . '/get.json.php', 'w');
+    fwrite($fp, $get);
+    fclose($fp);
+  }
 
-    protected function LookupJSON($c_name)
-    {
-        $lookup = '<?php
+  protected function LookupJSON($c_name)
+  {
+    $lookup = '<?php
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Strings;
+global $Web;
+
 if(!$Web->' . $this->UserVar . ' || !$Web->' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -1124,44 +1162,44 @@ $returnvals = ' . $c_name . '::Suggest($search, $Web->' . $this->UserVar . ');
 HTTP::ExitJSON($returnvals);
 	';
 
-        $fp = fopen($this->PagesJSONFolder . '/lookup.json.php', 'w');
-        fwrite($fp, $lookup);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONFolder . '/lookup.json.php', 'w');
+    fwrite($fp, $lookup);
+    fclose($fp);
+  }
+
+  /**
+   * @param $c_name
+   * @param $unique
+   * @param $primary
+   */
+  protected function DeleteJSON($c_name, $unique, $primary)
+  {
+    if (!isset($primary[0])) {
+      return;
     }
 
-    /**
-     * @param $c_name
-     * @param $unique
-     * @param $primary
-     */
-    protected function DeleteJSON($c_name, $unique, $primary)
-    {
-        if (!isset($primary[0])) {
-            return;
+    $unique_php = '';
+    $unique_cols = [];
+    $u_ret = [];
+    if (sizeof($unique)) {
+      foreach ($unique as $key => $cols) {
+        if (!sizeof($cols)) {
+          continue;
         }
 
-        $unique_php = '';
-        $unique_cols = [];
-        $u_ret = [];
-        if (sizeof($unique)) {
-            foreach ($unique as $key => $cols) {
-                if (!sizeof($cols)) {
-                    continue;
-                }
+        $u_req = [];
+        $u_seq = [];
 
-                $u_req = [];
-                $u_seq = [];
+        foreach ($cols as $u) {
+          $u_req[] = '$Web->Request->' . $u;
+          $u_seq[] = "'$u'=>\$Web->Request->$u";
+          if (!in_array($u, $unique_cols)) {
+            $u_ret[] = "\$returnvals['$u'] = \$Web->Request->$u;";
+            $unique_cols[] = $u;
+          }
+        }
 
-                foreach ($cols as $u) {
-                    $u_req[] = '$Web->Request->' . $u;
-                    $u_seq[] = "'$u'=>\$Web->Request->$u";
-                    if (!in_array($u, $unique_cols)) {
-                        $u_ret[] = "\$returnvals['$u'] = \$Web->Request->$u;";
-                        $unique_cols[] = $u;
-                    }
-                }
-
-                $unique_php .= '
+        $unique_php .= '
 if(' . implode(' && ', $u_req) . ') {
 	$t = ' . $c_name . '::Get([' . implode(', ', $u_seq) . ']);
 	if($t) {
@@ -1170,11 +1208,15 @@ if(' . implode(' && ', $u_req) . ') {
 }
 ';
 
-            }
-        }
+      }
+    }
 
 
-        $delete = '<?php
+    $delete = '<?php
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Strings;
+global $Web;
+
 if(!$Web->' . $this->UserVar . ' || !$Web->' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -1211,17 +1253,22 @@ if($Web->Request->uuid)
 HTTP::ExitJSON($returnvals);
 ';
 
-        $fp = fopen($this->PagesJSONFolder . '/delete.json.php', 'w');
-        fwrite($fp, $delete);
-        fclose($fp);
-    }
+    $fp = fopen($this->PagesJSONFolder . '/delete.json.php', 'w');
+    fwrite($fp, $delete);
+    fclose($fp);
+  }
 
-    protected function HistoryJSON($c_name, $primary)
-    {
-        if (!isset($primary[0])) {
-            return;
-        }
-        $history = '<?php
+  protected function HistoryJSON($c_name, $primary)
+  {
+    if (!isset($primary[0])) {
+      return;
+    }
+    $history = '<?php
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Strings;
+use QuickDRY\Utilities\Dates;
+global $Web;
+
 if(!$Web->' . $this->UserVar . ' || !$Web->' . $this->UserVar . '->' . $this->UserIdColumn . ') {
     HTTP::ExitJSON([\'error\'=>\'Invalid Request\'], HTTP_STATUS_UNAUTHORIZED);
 }
@@ -1281,117 +1328,117 @@ $returnvals[\'html\'] = $html;
 HTTP::ExitJSON($returnvals);
 ';
 
-        $fp = fopen($this->PagesJSONFolder . '/history.json.php', 'w');
-        fwrite($fp, $history);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONFolder . '/history.json.php', 'w');
+    fwrite($fp, $history);
+    fclose($fp);
+  }
+
+  protected function Add($c_name, $table_name, $cols, $primary, $table_nice_name)
+  {
+    if (!sizeof($cols)) {
+      return;
     }
 
-    protected function Add($c_name, $table_name, $cols, $primary, $table_nice_name)
-    {
-        if (!sizeof($cols)) {
-            return;
-        }
+    if (!sizeof($primary)) {
+      return;
+    }
 
-        if (!sizeof($primary)) {
-            return;
-        }
+    $DatabaseClass = $this->DatabaseClass;
 
-        $DatabaseClass = $this->DatabaseClass;
+    $res = $DatabaseClass::GetForeignKeys($table_name);
+    $refs = [];
 
-        $res = $DatabaseClass::GetForeignKeys($table_name);
-        $refs = [];
+    foreach ($res as $fk) {
+      if (!is_array($fk->column_name)) {
+        /* @var $fk MSSQL_ForeignKey */
+        $refs[$fk->column_name] = SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
+      }
+    }
 
-        foreach ($res as $fk) {
-            if (!is_array($fk->column_name)) {
-                /* @var $fk MSSQL_ForeignKey */
-                $refs[$fk->column_name] = SQL_Base::TableToClass($this->DatabasePrefix, $fk->foreign_table_name, $this->LowerCaseTables, $this->DatabaseTypePrefix);
-            }
-        }
+    $colors = '';
+    $colors_set = '';
+    $form = '';
 
-        $colors = '';
-        $colors_set = '';
-        $form = '';
+    foreach ($primary as $col) {
+      $form .= '<input type="hidden" name="' . $col . '" id="' . $c_name . '_' . $col . '" />' . "\r\n";
+    }
 
-        foreach ($primary as $col) {
-            $form .= '<input type="hidden" name="' . $col . '" id="' . $c_name . '_' . $col . '" />' . "\r\n";
-        }
-
-        $form .= '
-<table class="dialog_form">
+    $form .= '
+<div class="form-group">
 ';
 
 
-        foreach ($cols as $col)
-            if (!in_array($col->field, $primary)) {
-                if($col->field === 'user_id') {
-                    continue;
-                }
-                if (substr($col->field, strlen($col->field) - 6, 6) === '_by_id') {
-                    continue;
-                }
-                if (substr($col->field, strlen($col->field) - 3, 3) === '_at') {
-                    continue;
-                }
-                if (substr($col->field, strlen($col->field) - 5, 5) === '_file') {
-                    continue;
-                }
+    foreach ($cols as $col)
+      if (!in_array($col->field, $primary)) {
+        if ($col->field === 'user_id') {
+          continue;
+        }
+        if (substr($col->field, strlen($col->field) - 6, 6) === '_by_id') {
+          continue;
+        }
+        if (substr($col->field, strlen($col->field) - 3, 3) === '_at') {
+          continue;
+        }
+        if (substr($col->field, strlen($col->field) - 5, 5) === '_file') {
+          continue;
+        }
 
-                if (isset($refs[$col->field])) {
-                    if ($refs[$col->field] === 'ColorClass') {
-                        $colors .= '
+        if (isset($refs[$col->field])) {
+          if ($refs[$col->field] === 'ColorClass') {
+            $colors .= '
 	$(\'#' . $c_name . '_' . $col->field . '_selected\').html(\'Select One...\');
 	$(\'#' . $c_name . '_' . $col->field . '_selected\').css({\'background-color\' : \'#ffffff\'});
 				';
 
-                        $color_var = str_replace('_id', '', $col->field);
-                        $colors_set .= '
+            $color_var = str_replace('_id', '', $col->field);
+            $colors_set .= '
 	if(data.serialized.' . $color_var . ') {
 		$(\'#' . $c_name . '_' . $col->field . '_selected\').html(\'\');
 		$(\'#' . $c_name . '_' . $col->field . '_selected\').css({\'background-color\' : \'#\' + data.serialized.' . $color_var . '});
 	}
 				';
-                    }
+          }
 
-                    $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><?php echo ' . $refs[$col->field] . '::Select(null, [\'name\'=>\'' . $col->field . '\',\'id\'=>\'' . $c_name . '_' . $col->field . '\']); ?></td></tr>' . "\r\n";
+          $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<?php echo ' . $refs[$col->field] . '::Select(null, [\'name\'=>\'' . $col->field . '\',\'id\'=>\'' . $c_name . '_' . $col->field . '\']); ?></label>' . "\r\n";
 
-                } else
-                    switch ($col->type) {
-                        case 'text':
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><textarea class="form-control" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '"></textarea></td></tr>' . "\r\n";
-                            break;
+        } else
+          switch ($col->type) {
+            case 'text':
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<textarea class="form-control" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '"></textarea></label>' . "\r\n";
+              break;
 
-                        case 'bit':
-                        case 'tinyint(1)':
-                        case 'tinyint':
-                            $elem = $c_name . '_' . $col->field;
+            case 'bit':
+            case 'tinyint(1)':
+            case 'tinyint':
+              $elem = $c_name . '_' . $col->field;
 
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field">
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '
 					<input type="checkbox" id="' . $elem . '" onclick="$(\'#' . $elem . '_hidden\').val(this.checked ? 1 : 0);" />
 					<input type="hidden" name="' . $col->field . '" id="' . $elem . '_hidden" value="0" />
-					</td></tr>' . "\r\n";
-                            break;
+					</label>' . "\r\n";
+              break;
 
-                        case 'datetime':
-                        case 'timestamp':
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="time-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
-                            break;
+            case 'datetime':
+            case 'timestamp':
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<input class="time-picker form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></label>' . "\r\n";
+              break;
 
-                        case 'date':
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="form-control" type="date" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
-                            break;
+            case 'date':
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<input class="form-control" type="date" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></label>' . "\r\n";
+              break;
 
-                        case 'varchar(6)':
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="color form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
-                            break;
+            case 'varchar(6)':
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<input class="color form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></label>' . "\r\n";
+              break;
 
-                        default:
-                            $form .= '<tr><td class="name">' . SQLCodeGen::FieldToDisplay($col->field) . '</td><td class="field"><input class="form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></td></tr>' . "\r\n";
-                    }
-            }
+            default:
+              $form .= '<label for="' . $c_name . '_' . $col->field . '">' . SQLCodeGen::FieldToDisplay($col->field) . '<input class="form-control" type="text" name="' . $col->field . '" id="' . $c_name . '_' . $col->field . '" /></label>' . "\r\n";
+          }
+      }
 
-        $form .= '</table>';
+    $form .= '</div>';
 
-        $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/add.js"></script>
+    $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/add.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_dialog" style="display: none;" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -1421,9 +1468,9 @@ HTTP::ExitJSON($returnvals);
 </div>
 ';
 
-        $fp = fopen($this->PagesJSONControlsFolder . '/add.php', 'w');
-        fwrite($fp, $add);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONControlsFolder . '/add.php', 'w');
+    fwrite($fp, $add);
+    fclose($fp);
 
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
@@ -1432,7 +1479,7 @@ HTTP::ExitJSON($returnvals);
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 
-        $js = '
+    $js = '
 
 
 var ' . $c_name . ' = {
@@ -1440,7 +1487,7 @@ var ' . $c_name . ' = {
     save_action: "Saving ' . $table_nice_name . '",
     delete_action: "Deleting ' . $table_nice_name . '",
     _form: "' . $c_name . '_form",
-    _path: "' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) .  '/' . $table_nice_name . '",
+    _path: "' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '",
     _class: "' . $c_name . '",
     _dialog: "' . $c_name . '_dialog",
     _active: false,
@@ -1510,25 +1557,25 @@ var ' . $c_name . ' = {
 };
 ';
 
-        $fp = fopen($this->PagesJSONControlsFolder . '/add.js', 'w');
-        fwrite($fp, $js);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONControlsFolder . '/add.js', 'w');
+    fwrite($fp, $js);
+    fclose($fp);
 
 
+  }
+
+  /**
+   * @param $c_name
+   * @param $table_nice_name
+   * @param $primary
+   */
+  protected function History($c_name, $table_nice_name, $primary)
+  {
+    if (!sizeof($primary)) {
+      return;
     }
 
-    /**
-     * @param $c_name
-     * @param $table_nice_name
-     * @param $primary
-     */
-    protected function History($c_name, $table_nice_name, $primary)
-    {
-        if (!sizeof($primary)) {
-            return;
-        }
-
-        $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/history.js"></script>
+    $add = '<script src="/pages/json/' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix) . '/' . $table_nice_name . '/controls/history.js"></script>
 
 <div class="modal fade" id="' . $c_name . '_history_dialog" style="display: none;" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -1563,12 +1610,12 @@ var ' . $c_name . ' = {
 </div>
 
 ';
-        $fp = fopen($this->PagesJSONControlsFolder . '/history.php', 'w');
-        fwrite($fp, $add);
-        fclose($fp);
+    $fp = fopen($this->PagesJSONControlsFolder . '/history.php', 'w');
+    fwrite($fp, $add);
+    fclose($fp);
 
 
-        $add = '
+    $add = '
 var ' . $c_name . 'History = {
     Load : function(uuid) {
         $(\'#' . $c_name . '_history_div\').html(\'\');
@@ -1604,20 +1651,23 @@ var ' . $c_name . 'History = {
     }
 };
 ';
-        $fp = fopen($this->PagesJSONControlsFolder . '/history.js', 'w');
-        fwrite($fp, $add);
-        fclose($fp);
-    }
+    $fp = fopen($this->PagesJSONControlsFolder . '/history.js', 'w');
+    fwrite($fp, $add);
+    fclose($fp);
+  }
 
-    /**
-     * @param $c_name
-     * @param $table_nice_name
-     */
-    protected function Manage($c_name, $table_nice_name)
-    {
-        $page_dir = str_replace('Class', '', $c_name);
+  /**
+   * @param $c_name
+   * @param $table_nice_name
+   */
+  protected function Manage($c_name, $table_nice_name)
+  {
+    $page_dir = str_replace('Class', '', $c_name);
 
-        $page = '<div class="panel panel-default">
+    $page = '<?php
+use QuickDRY\Utilities\Navigation; 
+?>
+<div class="panel panel-default">
     <div class="panel-heading">
         <div class="pull-right"><a id="" onclick="' . $c_name . '.Load();"><i class="fa fa-plus"></i></a></div>
         <div class="panel-title">' . $table_nice_name . '</div>
@@ -1641,11 +1691,12 @@ var ' . $c_name . 'History = {
 <?php require_once \'' . str_replace($this->DestinationFolder . '/', '', $this->PagesJSONFolder) . '/controls/add.php\'; ?>
 ';
 
-        $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.php', 'w');
-        fwrite($fp, $page);
-        fclose($fp);
+    $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.php', 'w');
+    fwrite($fp, $page);
+    fclose($fp);
 
-        $code = '<?php
+    $code = '<?php
+use QuickDRY\Web\BasePage;
 
 /**
  * Class ' . $table_nice_name . '
@@ -1654,13 +1705,12 @@ var ' . $c_name . 'History = {
 class ' . $table_nice_name . ' extends BasePage
 {
     /* @var $Items ' . $c_name . '[]  */
-    public static $Items;
+    public static ?array $Items = null;
 
-    /* @var $Count int */
-    public static $Count;
+    public static int $Count;
 
     /* @var $TableHeader string */
-    public static $TableHeader;
+    public static string $TableHeader;
 
     public static function DoInit()
     {
@@ -1677,23 +1727,23 @@ class ' . $table_nice_name . ' extends BasePage
     }
 }
 ';
-        $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.code.php', 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+    $fp = fopen($this->PagesManageFolder . '/' . $table_nice_name . '.code.php', 'w');
+    fwrite($fp, $code);
+    fclose($fp);
 
-    }
+  }
 
-    /**
-     * @param $field
-     *
-     * @return string
-     */
-    public static function FieldToDisplay($field)
-    {
-        $t = ucwords(implode(' ', explode('_', $field)));
-        $t = str_replace(' ', '', $t);
-        if (strcasecmp(substr($t, -2), 'id') == 0)
-            $t = substr($t, 0, strlen($t) - 2);
-        return Strings::CapsToSpaces($t);
-    }
+  /**
+   * @param $field
+   *
+   * @return string
+   */
+  public static function FieldToDisplay($field): string
+  {
+    $t = ucwords(implode(' ', explode('_', $field)));
+    $t = str_replace(' ', '', $t);
+    if (strcasecmp(substr($t, -2), 'id') == 0)
+      $t = substr($t, 0, strlen($t) - 2);
+    return Strings::CapsToSpaces($t);
+  }
 }

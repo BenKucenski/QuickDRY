@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Utilities;
+
 /*
  * jQuery File Upload Plugin PHP Class 5.11.1
  * https://github.com/blueimp/jQuery-File-Upload
@@ -10,12 +12,14 @@
  * http://www.opensource.org/licenses/MIT
  */
 
+use FileClass;
+
 /**
  * Class UploadHandler
  */
 class UploadHandler
 {
-    protected $options;
+    protected array $options;
 
     /**
      * @param null $options
@@ -57,17 +61,17 @@ class UploadHandler
      *
      * @return string
      */
-    protected function upcount_name_callback($matches)
+    protected function upcount_name_callback($matches): string
     {
         $index = isset($matches[1]) ? intval($matches[1]) + 1 : 1;
-        $ext = isset($matches[2]) ? $matches[2] : '';
+        $ext = $matches[2] ?? '';
         return ' (' . $index . ')' . $ext;
     }
 
     /**
      * @param $name
      *
-     * @return mixed
+     * @return array|string|string[]|null
      */
     protected function upcount_name($name)
     {
@@ -79,14 +83,12 @@ class UploadHandler
         );
     }
 
-    /**
-     * @param $name
-     * @param $type
-     * @param $index
-     *
-     * @return mixed|string
-     */
-    protected function trim_file_name($name, $type)
+  /**
+   * @param string $name
+   * @param string $type
+   * @return array|string|string[]|null
+   */
+    protected function trim_file_name(string $name, string $type)
     {
         // Remove path information and dots around the filename, to prevent uploading
         // into different directories or replacing hidden system files.
@@ -105,19 +107,17 @@ class UploadHandler
         return $file_name;
     }
 
-    /**
-     * @param $uploaded_file
-     * @param $name
-     * @param $size
-     * @param $type
-     * @param $error
-     * @param $index
-     * @param $entity_id
-     * @param $entity_type_id
-     *
-     * @return array
-     */
-    protected function handle_file_upload($uploaded_file, $name, $size, $type, $entity_id, $entity_type_id)
+  /**
+   * @param string $uploaded_file
+   * @param string $name
+   * @param int $size
+   * @param string $type
+   * @param int $entity_id
+   * @param int $entity_type_id
+   *
+   * @return array
+   */
+    protected function handle_file_upload(string $uploaded_file, string $name, int $size, string $type, int $entity_id, int $entity_type_id): array
     {
         $fileArray = [
             'name' => $name,
@@ -127,8 +127,7 @@ class UploadHandler
             'entity_id' => $entity_id,
             'entity_type_id' => $entity_type_id,
         ];
-        $file = self::UploadFiles($fileArray);
-        return $file;
+      return self::UploadFiles($fileArray);
     }
 
 
@@ -141,7 +140,7 @@ class UploadHandler
         if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
             return;
         }
-        $upload = isset($_FILES[$this->options['param_name']]) ? $_FILES[$this->options['param_name']] : null;
+        $upload = $_FILES[$this->options['param_name']] ?? null;
         $info = [];
         if ($upload && is_array($upload['tmp_name'])) {
             // param_name is an array identifier like "files[]",
@@ -149,9 +148,9 @@ class UploadHandler
             foreach ($upload['tmp_name'] as $index => $value) {
                 $info[] = $this->handle_file_upload(
                     $upload['tmp_name'][$index],
-                    isset($_SERVER['HTTP_X_FILE_NAME']) ? $_SERVER['HTTP_X_FILE_NAME'] : $upload['name'][$index],
-                    isset($_SERVER['HTTP_X_FILE_SIZE']) ? $_SERVER['HTTP_X_FILE_SIZE'] : $upload['size'][$index],
-                    isset($_SERVER['HTTP_X_FILE_TYPE']) ? $_SERVER['HTTP_X_FILE_TYPE'] : $upload['type'][$index],
+                  $_SERVER['HTTP_X_FILE_NAME'] ?? $upload['name'][$index],
+                  $_SERVER['HTTP_X_FILE_SIZE'] ?? $upload['size'][$index],
+                  $_SERVER['HTTP_X_FILE_TYPE'] ?? $upload['type'][$index],
                     $entity_id,
                     $entity_type_id
                 );
@@ -160,10 +159,10 @@ class UploadHandler
             // param_name is a single object identifier like "file",
             // $_FILES is a one-dimensional array:
             $info[] = $this->handle_file_upload(
-                isset($upload['tmp_name']) ? $upload['tmp_name'] : null,
-                isset($_SERVER['HTTP_X_FILE_NAME']) ? $_SERVER['HTTP_X_FILE_NAME'] : (isset($upload['name']) ? $upload['name'] : null),
-                isset($_SERVER['HTTP_X_FILE_SIZE']) ? $_SERVER['HTTP_X_FILE_SIZE'] : (isset($upload['size']) ? $upload['size'] : null),
-                isset($_SERVER['HTTP_X_FILE_TYPE']) ? $_SERVER['HTTP_X_FILE_TYPE'] : (isset($upload['type']) ? $upload['type'] : null),
+                $upload['tmp_name'] ?? null,
+              $_SERVER['HTTP_X_FILE_NAME'] ?? ($upload['name'] ?? null),
+              $_SERVER['HTTP_X_FILE_SIZE'] ?? ($upload['size'] ?? null),
+              $_SERVER['HTTP_X_FILE_TYPE'] ?? ($upload['type'] ?? null),
                 $entity_id,
                 $entity_type_id
             );
@@ -185,12 +184,12 @@ class UploadHandler
         echo $json;
     }
 
-    /**
-     * @param $fileArray
-     *
-     * @return array
-     */
-    public static function UploadFiles($fileArray, $user_id = null)
+  /**
+   * @param $fileArray
+   * @param null $user_id
+   * @return array
+   */
+    public static function UploadFiles($fileArray, $user_id = null): array
     {
         $file = new FileClass();
         $file->user_id = $user_id;

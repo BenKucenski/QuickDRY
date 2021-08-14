@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Utilities;
+
 /**
  * Class SimpleExcel_Column
  */

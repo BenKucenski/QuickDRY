@@ -1,4 +1,6 @@
 <?php
+namespace QuickDRY\Utilities;
+
 class Chart
 {
 	var $width;

@@ -14,7 +14,7 @@ class MySQL_TableColumn
     /**
      * @param $row
      */
-    public function FromRow(&$row)
+    public function FromRow($row)
     {
         foreach($row as $key => $value)
         {
@@ -32,7 +32,7 @@ class MySQL_TableColumn
                     $this->field_alias = $value;
                     break;
                 case 'Type': $this->type = $value; break;
-                case 'Null': $this->null = $value === 'YES' ? true : false; break;
+                case 'Null': $this->null = $value === 'YES'; break;
                 case 'Default': $this->default = $value; break;
             }
         }

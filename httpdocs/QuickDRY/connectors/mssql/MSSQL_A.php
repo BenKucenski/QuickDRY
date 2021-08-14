@@ -27,7 +27,7 @@ class MSSQL_A extends MSSQL_Core
     /**
      * @return string|null
      */
-    public static function _Table()
+    public static function _Table(): ?string
     {
         return static::$table;
     }

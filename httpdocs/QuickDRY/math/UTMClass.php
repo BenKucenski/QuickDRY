@@ -118,13 +118,11 @@ class UTMClass
         $epsilon = (315.0 * pow($n, 4.0) / 512.0);
 
         /* Now calculate the sum of the series and return */
-        $result = $alpha
-            * ($phi + ($beta * sin(2.0 * $phi))
-                + ($gamma * sin(4.0 * $phi))
-                + ($delta * sin(6.0 * $phi))
-                + ($epsilon * sin(8.0 * $phi)));
-
-        return $result;
+      return $alpha
+          * ($phi + ($beta * sin(2.0 * $phi))
+              + ($gamma * sin(4.0 * $phi))
+              + ($delta * sin(6.0 * $phi))
+              + ($epsilon * sin(8.0 * $phi)));
     }
 
 
@@ -146,13 +144,11 @@ class UTMClass
      * @param $zone
      * @return float
      */
-    public static function UTMCentralMeridian($zone)
+    public static function UTMCentralMeridian($zone): float
     {
         //var cmeridian;
 
-        $cmeridian = self::DegToRad(-183.0 + ($zone * 6.0));
-
-        return $cmeridian;
+      return self::DegToRad(-183.0 + ($zone * 6.0));
     }
 
 
@@ -204,12 +200,10 @@ class UTMClass
         $epsilon_ = (1097.0 * pow($n, 4.0) / 512.0);
 
         /* Now calculate the sum of the series (Eq. 10.21) */
-        $result = $y_ + ($beta_ * sin(2.0 * $y_))
-            + ($gamma_ * sin(4.0 * $y_))
-            + ($delta_ * sin(6.0 * $y_))
-            + ($epsilon_ * sin(8.0 * $y_));
-
-        return $result;
+      return $y_ + ($beta_ * sin(2.0 * $y_))
+          + ($gamma_ * sin(4.0 * $y_))
+          + ($delta_ * sin(6.0 * $y_))
+          + ($epsilon_ * sin(8.0 * $y_));
     }
 
 
@@ -344,12 +338,11 @@ class UTMClass
      * @param $lon
      * @return array
      */
-    public static function ToUTM($lat, $lon)
+    public static function ToUTM($lat, $lon): array
     {
         $zone = floor(($lon + 180.0) / 6) + 1;
 
-        $xy = self::LatLonToUTMXY(self::DegToRad($lat), self::DegToRad($lon), $zone);
-        return $xy;
+      return self::LatLonToUTMXY(self::DegToRad($lat), self::DegToRad($lon), $zone);
     }
 
     /**

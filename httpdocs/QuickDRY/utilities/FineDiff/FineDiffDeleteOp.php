@@ -1,6 +1,8 @@
 <?php
 class FineDiffDeleteOp extends FineDiffOp {
-    public function __construct($len) {
+  private $fromLen;
+
+  public function __construct($len) {
         $this->fromLen = $len;
     }
     public function getFromLen() {

@@ -1,31 +1,34 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\Log;
+use QuickDRY\Utilities\Metrics;
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class MSSQL_Connection
  */
 class MSSQL_Connection extends SafeClass
 {
-    public static $log = [];
-    public static $use_log = false;
-    public static $keep_files = false;
-    public static $PacketSize = 32767;
+    public static array $log = [];
+    public static bool $use_log = false;
+    public static bool $keep_files = false;
+    public bool $IgnoreDuplicateError = false;
+    public float $query_time = 0;
+    public int $query_count = 0;
 
-    public $IgnoreDuplicateError = false;
-    public $query_time = 0;
-    public $query_count = 0;
+    private bool $_usesqlsrv = false;
+    private array $_LastConnection;
 
-    private $_usesqlsrv = false;
-    private $_LastConnection;
-
-    protected $db_conns = [];
+    protected array $db_conns = [];
     protected $db = null;
-    protected $current_db = null;
+    protected ?string $current_db = null;
 
-    protected $DB_HOST;
-    protected $DB_USER;
-    protected $DB_PASS;
+    protected string $DB_HOST;
+    protected string $DB_USER;
+    protected string $DB_PASS;
 
-    public function __construct($host, $user, $pass)
+    public function __construct(string $host, string $user, string $pass)
     {
         $this->DB_HOST = $host;
         $this->DB_USER = $user;
@@ -33,6 +36,9 @@ class MSSQL_Connection extends SafeClass
     }
 
 
+    /**
+     * @throws Exception
+     */
     private function _connect()
     {
         // p: means persistent
@@ -49,7 +55,7 @@ class MSSQL_Connection extends SafeClass
      *
      * @return string
      */
-    public function TableToClass($database, $table)
+    public function TableToClass($database, $table): string
     {
         $t = explode('_', $database . '_' . $table);
         $type = '';
@@ -65,8 +71,9 @@ class MSSQL_Connection extends SafeClass
      * @param $db_base
      *
      * @return bool
+     * @throws Exception
      */
-    public function CheckDatabase($db_base)
+    public function CheckDatabase($db_base): bool
     {
         $sql = 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "' . $db_base . '"';
         $res = $this->Query($sql);
@@ -76,7 +83,8 @@ class MSSQL_Connection extends SafeClass
     /**
      * @param $db_base
      *
-     * @return bool|void
+     * @return void
+     * @throws Exception
      */
 
     public function SetDatabase($db_base)
@@ -103,11 +111,23 @@ class MSSQL_Connection extends SafeClass
         }
 
         if (!isset($this->db_conns[$db_base]) || is_null($this->db_conns[$db_base])) {
-            try {
-                if (!$this->_usesqlsrv) {
+            if (!$this->_usesqlsrv) {
+                try {
+                    if (!function_exists('mssql_connect')) {
+                        exit('mssql_connect does not exist');
+                    }
+                    if (!function_exists('mssql_min_error_severity')) {
+                        exit('mssql_min_error_severity does not exist');
+                    }
+                    if (!function_exists('mssql_get_last_message')) {
+                        exit('mssql_get_last_message does not exist');
+                    }
+                    if (!function_exists('mssql_select_db')) {
+                        exit('mssql_select_db does not exist');
+                    }
                     $this->db_conns[$db_base] = mssql_connect($this->DB_HOST, $this->DB_USER, $this->DB_PASS);
                     if (!$this->db_conns[$db_base]) {
-                        Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
+                        Debug::Halt(['Could not connect', $this->DB_HOST, $this->DB_USER]);
                     }
                     mssql_min_error_severity(1);
                     if ($db_base) {
@@ -117,54 +137,54 @@ class MSSQL_Connection extends SafeClass
                         }
                         mssql_select_db($db_base, $this->db_conns[$db_base]);
                     }
-                } else {
-                    sqlsrv_errors(SQLSRV_ERR_ERRORS);
-                    if (stristr($db_base, '.') !== false) { // linked server support
-                        $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
-                    } else {
-                        $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["Database" => $db_base, "UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
-                    }
-                    $error = print_r(sqlsrv_errors(), true);
-                    if (isset($error['message']) && $error['message']) {
-                        throw new Exception($error);
-                    }
+                } catch (Exception $e) {
+                    // Log exception
+                    Debug::Halt($e);
                 }
-            } catch (Exception $e) {
-                // Log exception
-                Halt($e);
+            } else {
+                sqlsrv_errors(SQLSRV_ERR_ERRORS);
+                if (stristr($db_base, '.') !== false) { // linked server support
+                    $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
+                } else {
+                    $this->db_conns[$db_base] = sqlsrv_connect($this->DB_HOST, ["Database" => $db_base, "UID" => $this->DB_USER, "PWD" => $this->DB_PASS]);
+                }
+                $error = print_r(sqlsrv_errors(), true);
+                if (isset($error['message']) && $error['message']) {
+                    throw new Exception($error);
+                }
             }
+
+            $this->_LastConnection['error'] = $error;
+
+            $this->db = $this->db_conns[$db_base];
+            if (!$this->db) {
+                Debug::Halt($this->_LastConnection);
+            }
+            $this->current_db = $db_base;
+            $time = microtime(true) - $time;
+            $this->query_time += $time;
+            $sql = 'Set Database: ' . $db_base;
+            self::Log($sql, null, $time, $error);
+
+            $this->_LastConnection['current_db'] = $db_base;
+
+            /**
+             * if(!$this->_usesqlsrv) {
+             * //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
+             * }
+             * **/
+            /*
+                // this query should show "1" for arithabort when run from SSMS
+                select
+                    arithabort,
+                    *
+                from
+                    sys.dm_exec_sessions
+                where
+                    session_id > 50
+
+             */
         }
-
-        $this->_LastConnection['error'] = $error;
-
-        $this->db = $this->db_conns[$db_base];
-        if (!$this->db) {
-            Halt($this->_LastConnection);
-        }
-        $this->current_db = $db_base;
-        $time = microtime(true) - $time;
-        $this->query_time += $time;
-        $sql = 'Set Database: ' . $db_base;
-        self::Log($sql, null, $time, $error);
-
-        $this->_LastConnection['current_db'] = $db_base;
-
-        /**
-         * if(!$this->_usesqlsrv) {
-         * //mssql_query('SET ARITHABORT ON', $this->db); // https://msdn.microsoft.com/en-us/library/ms190306.aspx
-         * }
-         * **/
-        /*
-            // this query should show "1" for arithabort when run from SSMS
-            select
-                arithabort,
-                *
-            from
-                sys.dm_exec_sessions
-            where
-                session_id > 50
-
-         */
     }
 
     /**
@@ -173,13 +193,13 @@ class MSSQL_Connection extends SafeClass
      * @param int $time
      * @param null $err
      */
-    private function Log(&$sql, $params, $time = 0, $err = null)
+    private function Log($sql, $params, int $time = 0, $err = null)
     {
         if (!static::$use_log)
             return;
 
         if (!$sql) {
-            Halt('QuickDRY Error: empty query');
+            Debug::Halt('QuickDRY Error: empty query');
         }
 
         $this->query_time += $time;
@@ -206,7 +226,7 @@ class MSSQL_Connection extends SafeClass
 
     }
 
-    private static function SQLErrorsToString()
+    private static function SQLErrorsToString(): string
     {
         $errs = sqlsrv_errors();
 
@@ -220,11 +240,12 @@ class MSSQL_Connection extends SafeClass
 
     /**
      * @param $sql
-     * @param array $params
+     * @param array|null $params
      * @param null $map_function
      * @return array|mixed
+     * @throws Exception
      */
-    private function QueryWindows($sql, $params = [], $map_function = null)
+    private function QueryWindows($sql, array $params = null, $map_function = null)
     {
         Metrics::Start('MSSQL');
 
@@ -239,6 +260,8 @@ class MSSQL_Connection extends SafeClass
         ];
 
         $query = MSSQL::EscapeQuery($sql, $params);
+
+
         $returnval['query'] = $query;
 
         $this->_connect();
@@ -255,9 +278,9 @@ class MSSQL_Connection extends SafeClass
             $result = sqlsrv_query($this->db, $query);
 
             if (!$result) {
-                $returnval = ['error_type'=>'No Result Set', 'error' => static::SQLErrorsToString(), 'query' => $query, 'params' => $params];
+                $returnval = ['error_type' => 'No Result Set', 'error' => static::SQLErrorsToString(), 'query' => $query, 'params' => $params];
                 if ($returnval['error'] && defined('MYSQL_EXIT_ON_ERROR') && MYSQL_EXIT_ON_ERROR) {
-                    Halt($returnval);
+                    Debug::Halt($returnval);
                 }
             } else {
                 while ($r = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
@@ -297,7 +320,7 @@ class MSSQL_Connection extends SafeClass
 
             Metrics::Stop('MSSQL');
             if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
-                Halt($returnval);
+                Debug::Halt($returnval);
             }
             return $returnval;
         }
@@ -308,8 +331,8 @@ class MSSQL_Connection extends SafeClass
 
         if ($returnval['error']) {
             if ($map_function) {
-                if(defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR) {
-                    Halt($returnval);
+                if (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR) {
+                    Debug::Halt($returnval);
                 }
                 return $returnval;
             }
@@ -322,16 +345,18 @@ class MSSQL_Connection extends SafeClass
 
     /**
      * @param $sql
-     * @param array $params
+     * @param array|null $params
      * @param null $map_function
      * @return array|mixed
+     * @throws Exception
      */
-    public function Query($sql, $params = [], $map_function = null)
+    public function Query($sql, array $params = null, $map_function = null)
     {
         $this->_connect();
 
-        if ($this->_usesqlsrv)
+        if ($this->_usesqlsrv) {
             return $this->QueryWindows($sql, $params, $map_function);
+        }
 
         Metrics::Start('MSSQL');
 
@@ -360,6 +385,18 @@ class MSSQL_Connection extends SafeClass
             $result = false;
             $query = MSSQL::EscapeQuery($sql, $params);
 
+            if (!function_exists('mssql_query')) {
+                exit('mssql_query does not exist');
+            }
+
+            if (!function_exists('mssql_get_last_message')) {
+                exit('mssql_get_last_message does not exist');
+            }
+
+            if (!function_exists('mssql_fetch_assoc')) {
+                exit('mssql_fetch_assoc does not exist');
+            }
+
             if (defined('QUERY_RETRY')) {
                 $count = 0;
                 while (!$result && $count <= QUERY_RETRY) {
@@ -382,7 +419,7 @@ class MSSQL_Connection extends SafeClass
             if (!$result) {
                 $returnval = ['error' => print_r(mssql_get_last_message(), true), 'query' => $query, 'params' => $params, 'sql' => $sql];
                 if ($returnval['error']) {
-                    Halt($returnval);
+                    Debug::Halt($returnval);
                 }
             } else {
                 while ($r = mssql_fetch_assoc($result)) {
@@ -395,7 +432,7 @@ class MSSQL_Connection extends SafeClass
             $returnval['error'] = 'Exception: ' . $e->getMessage();
             $returnval['sql'] = print_r([$sql, $params], true);
             if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
-                Halt($returnval);
+                Debug::Halt($returnval);
             }
             Metrics::Stop('MSSQL');
             return $returnval;
@@ -408,7 +445,7 @@ class MSSQL_Connection extends SafeClass
 
         if ($returnval['error']) {
             if ($map_function || (defined('MSSQL_EXIT_ON_ERROR') && MSSQL_EXIT_ON_ERROR)) {
-                Halt($returnval);
+                Debug::Halt($returnval);
             }
         }
 
@@ -422,8 +459,9 @@ class MSSQL_Connection extends SafeClass
      * @param $query
      * @param bool $large
      * @return array
+     * @throws Exception
      */
-    public function ExecuteWindows(&$query, $large = false)
+    public function ExecuteWindows($query, bool $large = false): array
     {
         Metrics::Start('MSSQL');
 
@@ -471,7 +509,7 @@ class MSSQL_Connection extends SafeClass
                 }
                 $opts[] = '-j';
                 $opts[] = '-l 0';
-                $opts[] = '-a ' . self::$PacketSize;
+                $opts[] = '-a 32767';
                 $opts[] = '-x';
 //                $opts[] = '-E';
                 $opts[] = '-U"' . $this->DB_USER . '"';
@@ -493,17 +531,17 @@ class MSSQL_Connection extends SafeClass
                 $returnval['error'] = [];
                 foreach ($output as $i => $line) {
                     if (preg_match('/Msg \d+, Level \d+, State \d+/si', $line)) {
-                        $error = implode(', ', [$output[$i], $output[$i + 1], $fname]);
-                        if($this->IgnoreDuplicateError && stristr($error, 'The duplicate key value is') !== false) {
+                        $error = implode(', ', [$line, $output[$i + 1], $fname]);
+                        if ($this->IgnoreDuplicateError && stristr($error, 'The duplicate key value is') !== false) {
                             continue;
                         }
-                        if($this->IgnoreDuplicateError && stristr($error, 'Cannot insert duplicate key row') !== false) {
+                        if ($this->IgnoreDuplicateError && stristr($error, 'Cannot insert duplicate key row') !== false) {
                             continue;
                         }
                         $returnval['error'][$i] = 'IgnoreDuplicateError - ' . $this->IgnoreDuplicateError . ': ' . $error;
                     }
                 }
-                if(sizeof($returnval['error'])) {
+                if (sizeof($returnval['error'])) {
                     $returnval['error'] = trim(implode("\r\n", $returnval['error']));
                 } else {
                     $returnval['error'] = '';
@@ -557,10 +595,11 @@ class MSSQL_Connection extends SafeClass
     /**
      * @param       $sql
      * @param array $params
-     *
+     * @param bool $large
      * @return array
+     * @throws Exception
      */
-    public function Execute(&$sql, $params = [], $large = false)
+    public function Execute($sql, array $params = null, bool $large = false): array
     {
         Metrics::Start('MSSQL');
 
@@ -592,6 +631,15 @@ class MSSQL_Connection extends SafeClass
             return $returnval;
         }
         try {
+            if (!function_exists('mssql_query')) {
+                exit;
+            }
+            if (!function_exists('mssql_get_last_message')) {
+                exit;
+            }
+            if (!function_exists('mssql_rows_affected')) {
+                exit;
+            }
             $result = mssql_query($query, $this->db);
             if (!$result)
                 $returnval = ['error' => print_r(mssql_get_last_message()), 'query' => $query];
@@ -615,6 +663,7 @@ class MSSQL_Connection extends SafeClass
 
     /**
      * @return null
+     * @throws Exception
      */
     public function LastID()
     {
@@ -622,16 +671,19 @@ class MSSQL_Connection extends SafeClass
 					SELECT SCOPE_IDENTITY() AS lid
 				';
         $res = $this->Query($sql);
-        return isset($res['data'][0]['lid']) ? $res['data'][0]['lid'] : null;
+        return $res['data'][0]['lid'] ?? null;
     }
 
-    public function GetDatabases()
+    /**
+     * @throws Exception
+     */
+    public function GetDatabases(): array
     {
         $sql = 'SELECT * FROM sys.databases ORDER BY name';
         $res = $this->Query($sql);
         $list = [];
         if ($res['error']) {
-            Halt($res);
+            Debug::Halt($res);
         }
         foreach ($res['data'] as $row) {
             $t = $row['name'];
@@ -645,14 +697,15 @@ class MSSQL_Connection extends SafeClass
 
     /**
      * @return array
+     * @throws Exception
      */
-    public function GetTables()
+    public function GetTables(): array
     {
         $sql = 'SELECT * FROM [' . $this->current_db . '].information_schema.tables WHERE "TABLE_TYPE" <> \'VIEW\' ORDER BY "TABLE_NAME"';
         $res = $this->Query($sql);
         $list = [];
         if ($res['error']) {
-            Halt($res);
+            Debug::Halt($res);
         }
 
         foreach ($res['data'] as $row) {
@@ -669,8 +722,9 @@ class MSSQL_Connection extends SafeClass
      * @param $table_name
      *
      * @return array
+     * @throws Exception
      */
-    public function GetTableColumns($table_name)
+    public function GetTableColumns($table_name): array
     {
         $sql = '
 			SELECT
@@ -694,8 +748,9 @@ class MSSQL_Connection extends SafeClass
      * @param $table_name
      *
      * @return array
+     * @throws Exception
      */
-    public function GetTableIndexes($table_name)
+    public function GetTableIndexes($table_name): array
     {
         $sql = '
 			SELECT
@@ -741,12 +796,13 @@ class MSSQL_Connection extends SafeClass
         return $indexes;
     }
 
-    private static $_UniqueKeys = null;
-    private static $_Indexes = null;
+    private static ?array $_UniqueKeys = null;
+    private static ?array $_Indexes = null;
 
     /**
      * @param $table_name
      * @return mixed
+     * @throws Exception
      */
     public function GetIndexes($table_name)
     {
@@ -762,8 +818,10 @@ class MSSQL_Connection extends SafeClass
     /**
      * @param $table_name
      * @return mixed
+     * @throws Exception
      */
-    public function GetUniqueKeys($table_name)
+    public
+    function GetUniqueKeys($table_name)
     {
         if (is_null(self::$_UniqueKeys)) {
             self::$_UniqueKeys = [];
@@ -795,7 +853,7 @@ ORDER BY
 
             $res = $this->Query($sql);
             if ($res['error']) {
-                Halt($res);
+                Debug::Halt($res);
             }
             foreach ($res['data'] as $row) {
                 if ($row['is_primary_key']) {
@@ -820,19 +878,21 @@ ORDER BY
         return self::$_UniqueKeys[$table_name];
     }
 
+    private static ?array $_ForeignKeys = null;
+
     /**
      * @param $table_name
      *
      * @return array
+     * @throws Exception
      */
 
-    private static $_ForeignKeys = null;
-
-    // https://stackoverflow.com/questions/483193/how-can-i-list-all-foreign-keys-referencing-a-given-table-in-sql-server
-    // Note: SYS Tables are far more reliable for this.  Using the information schema table, you will not accurately get
-    // foreign keys that link to UNIQUE indexes, only ones that link to PRIMARY Keys
-    public function GetForeignKeys($table_name)
+    public function GetForeignKeys($table_name): array
     {
+        // https://stackoverflow.com/questions/483193/how-can-i-list-all-foreign-keys-referencing-a-given-table-in-sql-server
+        // Note: SYS Tables are far more reliable for this.  Using the information schema table, you will not accurately get
+        // foreign keys that link to UNIQUE indexes, only ones that link to PRIMARY Keys
+
         if (!isset(self::$_ForeignKeys[$this->current_db])) {
 
             $sql = '
@@ -879,9 +939,13 @@ ORDER BY obj.name, fkc.referenced_column_id
         return self::$_ForeignKeys[$this->current_db][$table_name];
     }
 
-    private static $_LinkedTables = null;
+    private static ?array $_LinkedTables = null;
 
-    public function GetLinkedTables($table_name)
+    /**
+     * @throws Exception
+     */
+    public
+    function GetLinkedTables($table_name)
     {
         if (!isset(self::$_LinkedTables[$this->current_db])) {
             $sql = '
@@ -939,8 +1003,9 @@ ORDER BY obj.name, fkc.referenced_column_id
      * @param $table_name
      *
      * @return array
+     * @throws Exception
      */
-    public function GetPrimaryKey($table_name)
+    public function GetPrimaryKey($table_name): array
     {
         $sql = '
 			SELECT
@@ -953,7 +1018,7 @@ ORDER BY obj.name, fkc.referenced_column_id
 		';
         $res = $this->Query($sql, [$table_name]);
         if ($res['error']) {
-            Halt($res);
+            Debug::Halt($res);
         }
         $list = [];
         foreach ($res['data'] as $col) {
@@ -964,8 +1029,9 @@ ORDER BY obj.name, fkc.referenced_column_id
 
     /**
      * @return MSSQL_Trigger[]
+     * @throws Exception
      */
-    public function GetTriggers()
+    public function GetTriggers(): array
     {
         $sql = '
 select * from [' . $this->current_db . '].sys.triggers ORDER BY name        
@@ -983,30 +1049,29 @@ WHERE
     ';
             $def = $this->Query($sql, ['object_id' => $t->object_id]);
 
-            $t->definition = isset($def['data'][0]['definition']) ? $def['data'][0]['definition'] : '';
+            $t->definition = $def['data'][0]['definition'] ?? '';
 
             return $t;
         });
         if (isset($res['error'])) {
-            CleanHalt($res);
+            Debug::Halt($res);
         }
         return $res;
     }
 
     /**
      * @return MSSQL_Definition[]
+     * @throws Exception
      */
-    public function GetDefinitions()
+    public function GetDefinitions(): array
     {
         $sql = '
 select 
    OBJECT_NAME(sm.object_id) AS object_name   
    ,o.type_desc
    ,sm.definition
-   ,p.name AS table_name
   from [' . $this->current_db . '].sys.sql_modules AS sm  
   INNER JOIN [' . $this->current_db . '].sys.objects o ON sm.object_id = o.object_id  
-  LEFT JOIN [' . $this->current_db . '].sys.objects AS p ON p.object_id = o.parent_object_id
 ORDER BY type_desc, OBJECT_NAME(sm.object_id)
         ';
         /* @var $res MSSQL_Definition[] */
@@ -1014,15 +1079,16 @@ ORDER BY type_desc, OBJECT_NAME(sm.object_id)
             return new MSSQL_Definition($row);
         });
         if (isset($res['error'])) {
-            CleanHalt($res);
+            Debug::Halt($res);
         }
         return $res;
     }
 
     /**
      * @return MSSQL_StoredProc[]
+     * @throws Exception
      */
-    public function GetStoredProcs()
+    public function GetStoredProcs(): array
     {
         $sql = '
 select 
@@ -1038,21 +1104,22 @@ select
             return new MSSQL_StoredProc($row);
         });
         if (isset($res['error'])) {
-            CleanHalt($res);
+            Debug::Halt($res);
         }
         return $res;
     }
 
-    private $_StoredProcParams = [];
+    private array $_StoredProcParams = [];
 
     /**
      * @param $stored_proc
      * @return MSSQL_StoredProcParam[]
+     * @throws Exception
      */
-    public function GetStoredProcParams($stored_proc)
+    public function GetStoredProcParams($stored_proc): array
     {
         if (sizeof($this->_StoredProcParams)) {
-            return isset($this->_StoredProcParams[$stored_proc]) ? $this->_StoredProcParams[$stored_proc] : [];
+            return $this->_StoredProcParams[$stored_proc] ?? [];
         }
 
         $sql = '
@@ -1083,6 +1150,6 @@ select
         }
 
         Log::Insert('Got Stored Procs', true);
-        return isset($this->_StoredProcParams[$stored_proc]) ? $this->_StoredProcParams[$stored_proc] : [];
+        return $this->_StoredProcParams[$stored_proc] ?? [];
     }
 }

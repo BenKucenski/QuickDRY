@@ -16,7 +16,7 @@ class MSSQL_ForeignKey
     /**
      * @param $row
      */
-    public function FromRow(&$row)
+    public function FromRow($row)
     {
         foreach($row as $key => $value)
         {

@@ -1,9 +1,12 @@
 <?php
 
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\SafeClass;
 use Twilio\Rest\Client;
 
-define('TWILIO_MODE_TEST', 0);
-define('TWILIO_MODE_LIVE', 1);
+const TWILIO_MODE_TEST = 0;
+const TWILIO_MODE_LIVE = 1;
 
 class Twilio extends SafeClass
 {
@@ -49,7 +52,7 @@ class Twilio extends SafeClass
             case 'Twilio\Rest\Api\V2010\Account\CallInstance':
                 break;
             default:
-                CleanHalt($response);
+              Debug::Halt($response);
 
         }
 
@@ -70,7 +73,7 @@ class Twilio extends SafeClass
                 self::$from_number = TWILIO_TEST_FROM_NUMBER;
                 break;
             default:
-                Halt('QuickDRY Error: invalid twilio mode');
+              Debug::Halt('QuickDRY Error: invalid twilio mode');
         }
         self::$mode = $mode;
     }
@@ -81,7 +84,6 @@ class Twilio extends SafeClass
      * @param $text
      * @param bool $allow
      * @return TwilioLog|null
-     * @throws \Twilio\Exceptions\ConfigurationException
      */
     public static function SendSMS($mobile_number, $text, $allow = false)
     {
@@ -105,11 +107,12 @@ class Twilio extends SafeClass
         }
     }
 
-    /**
-     * @param $to_number
-     * @param $xml_url
-     * @return TwilioLog
-     */
+  /**
+   * @param $to_number
+   * @param $xml_url
+   * @param bool $allow
+   * @return TwilioLog
+   */
     public static function CallNumber($to_number, $xml_url, $allow = false)
     {
         if (!$allow && !TwilioDNC::CheckNumber($to_number)) {

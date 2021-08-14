@@ -2,19 +2,19 @@
 // php elastic_create_index.php -hhome -iindex -ttype
 
 
+use QuickDRY\Utilities\Debug;
 
-$shortopts = '';
-$shortopts .= 'h:';
+$shortopts = 'h:';
 $shortopts .= 'i:';
 $shortopts .= 't:';
 $shortopts .= 'f:';
 
 $options = getopt($shortopts);
 
-$_HOST = isset($options['h']) ? $options['h'] : '';
-$_INDEX = isset($options['i']) ? $options['i'] : '';
-$_TYPE = isset($options['t']) ? $options['t'] : '';
-$_FILE = isset($options['f']) ? $options['f'] : '';
+$_HOST = $options['h'] ?? '';
+$_INDEX = $options['i'] ?? '';
+$_TYPE = $options['t'] ?? '';
+$_FILE = $options['f'] ?? '';
 
 if (!$_HOST || !$_INDEX || !$_FILE) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type> -f<file> - json format>' . "\r\n");
@@ -42,9 +42,9 @@ try {
         $res = Elastic_A::CreateIndexType($_INDEX, $_TYPE, $schema);
     }
 } catch (Exception $e) {
-    CleanHalt($e->getMessage());
+  Debug::Halt($e->getMessage());
 }
 
-CleanHalt($res);
+Debug::Halt($res);
 
 

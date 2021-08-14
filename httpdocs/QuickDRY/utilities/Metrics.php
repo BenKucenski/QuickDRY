@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Utilities;
 
 /**
  * Class Metrics
@@ -21,9 +22,9 @@ class Metrics
     }
 
     /**
-     * @return int|mixed
+     * @return int
      */
-    public static function GetGlobal()
+    public static function GetGlobal(): int
     {
         return microtime(true) - static::$global_start;
     }
@@ -31,7 +32,7 @@ class Metrics
     /**
      * @return string
      */
-    public static function ToString($show_total = true)
+    public static function ToString($show_total = true): string
     {
         $res = "individual task time (secs)\r\n";
         $res .= "--------------------\r\n";

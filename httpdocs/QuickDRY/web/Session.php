@@ -1,129 +1,131 @@
 <?php
 
+namespace QuickDRY\Web;
+
 /**
  * Class Session
  */
 class Session
 {
-	static $_VALS = [];
+  static array $_VALS = [];
 
-    /**
-     * @return array
-     */
-    public function ToArray()
-    {
-        $vals = [];
-        foreach ($_SESSION as $k => $v) {
-            $vals[$k] = $v;
-        }
-        foreach (self::$_VALS as $k => $v) {
-            $vals[$k] = $v;
-        }
-
-        return $vals;
+  /**
+   * @return array
+   */
+  public function ToArray(): array
+  {
+    $vals = [];
+    foreach ($_SESSION as $k => $v) {
+      $vals[$k] = $v;
+    }
+    foreach (self::$_VALS as $k => $v) {
+      $vals[$k] = $v;
     }
 
-    /**
-     *
-     */
-	public static function ClearAll()
-	{
-		foreach($_SESSION as $n => $v)
-		{
-			unset(static::$_VALS[$n]);
-			unset($_SESSION[$n]);
-		}
-	}
+    return $vals;
+  }
 
-    /**
-     * @param $name
-     *
-     * @return mixed|string
-     */
-    public static function Get($name) {
-        if(isset($_SESSION[$name])) {
-            return unserialize($_SESSION[$name]);
-        }
+  /**
+   *
+   */
+  public static function ClearAll()
+  {
+    foreach ($_SESSION as $n => $v) {
+      unset(static::$_VALS[$n]);
+      unset($_SESSION[$n]);
+    }
+  }
 
-        if(isset(static::$_VALS[$name]))
-            return unserialize(static::$_VALS[$name]);
-
-        return '';
+  /**
+   * @param $name
+   *
+   * @return mixed|string
+   */
+  public static function Get($name)
+  {
+    if (isset($_SESSION[$name])) {
+      return unserialize($_SESSION[$name]);
     }
 
-    /**
-     * @param $name
-     *
-     * @return mixed|string
-     */
-    public function __get($name)
-	{
-        return static::Get($name);
-	}
+    if (isset(static::$_VALS[$name]))
+      return unserialize(static::$_VALS[$name]);
 
-    /**
-     * @param $name
-     */
-    public static function Clear($name = null)
-    {
-        if(is_null($name)) {
-            session_destroy();
-        }
-        if(isset($_SESSION[$name]))
-        {
-            unset(static::$_VALS[$name]);
-            unset($_SESSION[$name]);
-        }
+    return '';
+  }
+
+  /**
+   * @param $name
+   *
+   * @return mixed|string
+   */
+  public function __get($name)
+  {
+    return static::Get($name);
+  }
+
+  /**
+   * @param $name
+   */
+  public static function Clear($name = null)
+  {
+    if (is_null($name)) {
+      session_destroy();
     }
-
-    /**
-     * @param $name
-     */
-    public function __unset($name)
-	{
-        static::Clear($name);
-	}
-
-    /**
-     * @param $name
-     * @param $value
-     * @return mixed
-     */
-    public static function Set($name, $value)
-    {
-        $_SESSION[$name] = serialize($value);
-        static::$_VALS[$name] = $_SESSION[$name];
-        return $value;
+    if (isset($_SESSION[$name])) {
+      unset(static::$_VALS[$name]);
+      unset($_SESSION[$name]);
     }
+  }
 
-    /**
-     * @param $name
-     * @param $value
-     */
-    public function __set($name, $value)
-	{
-        return static::Set($name, $value);
-	}
+  /**
+   * @param $name
+   */
+  public function __unset($name)
+  {
+    static::Clear($name);
+  }
 
-    /**
-     * @param $name
-     *
-     * @return bool
-     */
-    public static function Check($name)
-    {
-        return isset($_SESSION[$name]);
-    }
+  /**
+   * @param $name
+   * @param $value
+   * @return mixed
+   */
+  public static function Set($name, $value)
+  {
+    $_SESSION[$name] = serialize($value);
+    static::$_VALS[$name] = $_SESSION[$name];
+    return $value;
+  }
 
-    /**
-     * @param $name
-     *
-     * @return bool
-     */
-    public function __isset($name)
-	{
-		return static::Check($name);
-	}
+  /**
+   * @param string $name
+   * @param $value
+   * @return mixed
+   */
+  public function __set(string $name, $value)
+  {
+    return static::Set($name, $value);
+  }
+
+  /**
+   * @param $name
+   *
+   * @return bool
+   */
+  public static function Check($name): bool
+  {
+    return isset($_SESSION[$name]);
+  }
+
+  /**
+   * @param $name
+   *
+   * @return bool
+   */
+  public function __isset($name)
+  {
+    return static::Check($name);
+  }
 }
 
 

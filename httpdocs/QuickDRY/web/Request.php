@@ -1,6 +1,7 @@
 <?php
+namespace QuickDRY\Web;
 
-
+use QuickDRY\Utilities\HTTP;
 
 /**
  * Class Request
@@ -8,13 +9,13 @@
 class Request
 {
 
-    private $_vars = [];
+    private array $_vars = [];
 
     /**
      * @return array
      */
 
-    public function ToArray()
+    public function ToArray(): array
     {
         $vals = [];
         foreach ($_POST as $k => $v) {

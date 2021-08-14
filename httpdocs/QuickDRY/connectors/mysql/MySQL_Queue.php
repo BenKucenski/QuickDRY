@@ -1,4 +1,8 @@
 <?php
+
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\Log;
+
 class MySQL_Queue
 {
     private $_sql = [];

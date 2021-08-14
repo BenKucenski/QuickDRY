@@ -50,7 +50,6 @@ class MSSQL_CodeGen extends SQLCodeGen
             mkdir($BaseFolder);
         }
 
-        // this is everything, views, triggers, stored procs, etc
         /* @var $definitions MSSQL_Definition[] */
         $definitions = $DatabaseClass::GetDefinitions();
         if($definitions) {
@@ -60,14 +59,10 @@ class MSSQL_CodeGen extends SQLCodeGen
                 if (!is_dir($dest)) {
                     mkdir($dest);
                 }
-                if($definition->table_name) {
-                    $fp =  fopen($dest . '/' . $definition->table_name . '.' . $definition->object_name . '.txt','w');
-                }
-                else {
-                    $fp =  fopen($dest . '/' . $definition->object_name . '.txt','w');
-                }
+                $fp =  fopen($dest . '/' . $definition->object_name . '.txt','w');
                 fwrite($fp, $definition->definition);
                 fclose($fp);
+
             }
         }
     }
@@ -79,6 +74,30 @@ class MSSQL_CodeGen extends SQLCodeGen
     {
         $DatabaseClass = $this->DatabaseClass;
         $class_name = $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+
+        /* @var $triggers MSSQL_Trigger[] */
+        /* // hold off on this
+        $triggers = $DatabaseClass::GetTriggers();
+
+        $dest = $this->CommonClassFolder . '/triggers';
+        if (!is_dir($dest)) {
+            mkdir($dest);
+        }
+        foreach ($triggers as $trigger) {
+            Log::Insert('Trigger: ' . $trigger->name, true);
+
+            $temp = $trigger->definition;
+            $trigger->definition = ''; // clear out for the JSON file
+            $fp = fopen($dest . '/' . $trigger->name . '.json', 'w');
+            fwrite($fp, json_encode($trigger->ToArray(true), JSON_PRETTY_PRINT));
+            fclose($fp);
+
+            $trigger->definition = $temp; // store it as given in a txt file
+            $fp = fopen($dest . '/' . $trigger->name . '.txt', 'w');
+            fwrite($fp, $trigger->definition);
+            fclose($fp);
+        }
+        */
 
         /* @var $stored_procs MSSQL_StoredProc[] */
         $stored_procs = $DatabaseClass::GetStoredProcs();
@@ -112,6 +131,8 @@ class MSSQL_CodeGen extends SQLCodeGen
             }
 
             $code = '<?php
+use QuickDRY\Utilities\SafeClass;
+use QuickDRY\Utilities\Debug;
 
 /**
  * Class db_' . $sp_class . '
@@ -136,7 +157,7 @@ class db_' . $sp_class . ' extends SafeClass
         });
 
         if (self::$HaltSPOnError && isset($rows[\'error\'])) {
-            Halt($rows);
+            Debug::Halt($rows);
         }
         return $rows;
     }
@@ -145,7 +166,7 @@ class db_' . $sp_class . ' extends SafeClass
      * @param  ' . implode(PHP_EOL . '     * @param  ', $clean_params) . '
      * @return array
      */
-    public static function Exec(' . implode(', ', $func_params) . ')
+    public static function Exec(' . implode(', ', $func_params) . '): array
     {
         $sql = \'
         EXEC \' . ' . ($this->DatabaseConstant ? $this->DatabaseConstant : '\'[' . $this->Database . ']\'') . ' . \'.[dbo].[' . $sp->SPECIFIC_NAME . ']
@@ -155,7 +176,7 @@ class db_' . $sp_class . ' extends SafeClass
         $res = ' . $DatabaseClass . '::Execute($sql, [' . implode(', ', $params) . ']);
 
         if (self::$HaltSPOnError && $res[\'error\']) {
-            Halt($res);
+            Debug::Halt($res);
         }
         return $res;
     }

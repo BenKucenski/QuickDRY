@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class SQL_Query
  *
@@ -8,10 +10,10 @@
  */
 class SQL_Query extends SafeClass
 {
-    public $SQL;
-    public $Params;
+    public string $SQL;
+    public ?array $Params;
 
-    public function __construct($sql, $params)
+    public function __construct(string $sql, array $params = null)
     {
         $this->SQL = $sql;
         $this->Params = $params;

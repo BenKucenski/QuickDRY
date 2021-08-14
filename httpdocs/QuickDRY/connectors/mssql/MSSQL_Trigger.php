@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\SimpleReport;
+
 class MSSQL_Trigger extends SimpleReport
 {
     public $name;
@@ -16,4 +18,9 @@ class MSSQL_Trigger extends SimpleReport
     public $is_not_for_replication;
     public $is_instead_of_trigger;
     public $definition;
+
+    public function __construct($row = null)
+    {
+      parent::__construct($row);
+    }
 }

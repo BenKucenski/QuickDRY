@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class WSDLFunction
  *
@@ -18,7 +20,7 @@ class WSDLFunction extends SafeClass
     public $Nillable;
     public $Type;
 
-    public function AddParameter(WSDLParameter &$param)
+    public function AddParameter(WSDLParameter $param)
     {
         if(!is_array($this->Parameters)) {
             $this->Parameters = [];

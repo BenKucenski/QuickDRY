@@ -1,11 +1,14 @@
 <?php
+namespace QuickDRY\Web;
 
 /**
  * Class FormClass
  */
 class FormClass
 {
-    public static function Options()
+  public static array $_options = [];
+
+    public static function Options(): array
     {
         return static::$_options;
     }
@@ -17,18 +20,19 @@ class FormClass
      */
     public static function Get($id)
     {
-        return isset(static::$_options[$id]) ? static::$_options[$id] : null;
+        return static::$_options[$id] ?? null;
     }
 
-    /**
-     * @param $options
-     * @param $selected
-     * @param $id
-     * @param string $class
-     * @param string $onchange
-     * @return string
-     */
-    public static function SelectItems($options, $selected, $id, $class = '', $onchange='', $add_none = false)
+  /**
+   * @param $options
+   * @param $selected
+   * @param $id
+   * @param string $class
+   * @param string $onchange
+   * @param bool $add_none
+   * @return string
+   */
+    public static function SelectItems($options, $selected, $id, string $class = '', string $onchange='', bool $add_none = false): string
     {
         if (!is_array($id)) {
             $name = $id;
@@ -61,7 +65,7 @@ class FormClass
      * @param null $inner_style
      * @return string
      */
-    public static function Textarea($val, $id, $outer_style = null, $inner_style = null)
+    public static function Textarea($val, $id, $outer_style = null, $inner_style = null): string
     {
         if (is_array($id)) {
             $name = $id['name'];
@@ -82,7 +86,7 @@ class FormClass
      * @param null $inner_style
      * @return string
      */
-    public static function Text($val, $id, $outer_style = null, $inner_style = null)
+    public static function Text($val, $id, $outer_style = null, $inner_style = null): string
     {
         if (is_array($id)) {
             $name = $id['name'];
@@ -105,7 +109,7 @@ class FormClass
      * @param string $onchange
      * @return string
      */
-    public static function Checkbox($selected, $options, $id, $outer_class = null, $inner_style = null, $new_line = false, $onchange = '')
+    public static function Checkbox($selected, $options, $id, $outer_class = null, $inner_style = null, bool $new_line = false, string $onchange = ''): string
     {
         if (!is_array($selected)) {
             $selected = explode(',', $selected);
@@ -148,7 +152,7 @@ class FormClass
      * @param bool $new_line
      * @return string
      */
-    public static function Radio($selected, $options, $id, $outer_style = null, $inner_style = null, $new_line = false)
+    public static function Radio($selected, $options, $id, $outer_style = null, $inner_style = null, bool $new_line = false): string
     {
         if (!is_array($selected)) {
             $selected = explode(',', $selected);

@@ -66,7 +66,6 @@ class CurlHeader extends SimpleReport
                     $this->Location = $v;
                     break;
                 default:
-                    break;
             }
         }
     }

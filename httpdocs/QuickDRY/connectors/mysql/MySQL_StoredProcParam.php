@@ -1,4 +1,7 @@
 <?php
+
+use QuickDRY\Utilities\SafeClass;
+
 class MySQL_StoredProcParam extends SafeClass
 {
     public $StoredProc;

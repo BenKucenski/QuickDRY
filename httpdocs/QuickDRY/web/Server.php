@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Web;
 
 /**
  * Class Server
@@ -47,7 +48,7 @@
  */
 class Server
 {
-    private $_VALS = [];
+    private ?array $_VALS = null;
 
     /**
      * Server constructor.
@@ -62,7 +63,7 @@ class Server
      * @param string $prefix
      * @return array
      */
-    public function ToArray($prefix = '')
+    public function ToArray(string $prefix = ''): array
     {
         $res = [];
         foreach ($this->_VALS as $k => $v) {

@@ -1,4 +1,8 @@
 <?php
+namespace QuickDRY\Utilities;
+
+use Exception;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
@@ -22,7 +26,7 @@ class SimpleExcel_Reader extends SafeClass
             if ($debug) {
                 Log::Insert('Loading', true);
             }
-            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+            $spreadsheet = IOFactory::load($file);
             if ($debug) {
                 Log::Insert('Done Loading', true);
             }
@@ -41,7 +45,7 @@ class SimpleExcel_Reader extends SafeClass
      * @param null $row_limit
      * @return array
      */
-    public static function ToReport(Spreadsheet &$spreadsheet, $process_cells = true, $debug = false, $row_limit = null)
+    public static function ToReport(Spreadsheet $spreadsheet, bool $process_cells = true, bool $debug = false, $row_limit = null): array
     {
         if ($debug) {
             Log::Insert('SimpleExcel_Reader::ToReport', true);
@@ -98,7 +102,7 @@ class SimpleExcel_Reader extends SafeClass
                 }
 
             } catch (Exception $ex) {
-                Halt($ex);
+              Debug::Halt($ex);
             }
         }
         return $report;

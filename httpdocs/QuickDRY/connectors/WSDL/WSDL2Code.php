@@ -1,4 +1,9 @@
 <?php
+
+use QuickDRY\Utilities\Log;
+use QuickDRY\Utilities\SafeClass;
+use QuickDRY\Utilities\Strings;
+
 /**
  * Class WSDL2Code
  *
@@ -7,51 +12,50 @@
  */
 class WSDL2Code extends SafeClass
 {
-    public $TargetNamespace;
-    public $Functions;
-    public $BaseDir;
+  public $TargetNamespace;
+  public $Functions;
+  public $BaseDir;
 
-    public function Generate($URL, $ClassName, $BaseDir = '../httpdocs')
-    {
-        $this->BaseDir = $BaseDir;
+  public function Generate(string $URL, string $ClassName, string $BaseDir = '../httpdocs')
+  {
+    $this->BaseDir = $BaseDir;
 
-        $this->GetFunctions($URL);
+    $this->GetFunctions($URL);
 
-        $this->GenerateCode($ClassName);
-    }
+    $this->GenerateCode($ClassName);
+  }
 
-    private function GenerateCode($ClassName)
-    {
-        $function_code = [];
+  private function GenerateCode($ClassName)
+  {
+    $function_code = [];
 
-        usort($this->Functions, function(WSDLFunction &$a, WSDLFunction &$b) {
-            return strcasecmp($a->Name, $b->Name);
-        });
+    usort($this->Functions, function (WSDLFunction $a, WSDLFunction $b) {
+      return strcasecmp($a->Name, $b->Name);
+    });
 
-        foreach($this->Functions as $function)
-        {
-            $result_array = [];
-            $result_array[] = '\'xml\' => $a';
-            if($function->Result) {
-                foreach ($function->Result->Parameters as $param) {
-                    $key_a = strtoupper($function->Result->Name);
-                    $key_b = strtoupper($param->Name);
+    foreach ($this->Functions as $function) {
+      $result_array = [];
+      $result_array[] = '\'xml\' => $a';
+      if ($function->Result) {
+        foreach ($function->Result->Parameters as $param) {
+          $key_a = strtoupper($function->Result->Name);
+          $key_b = strtoupper($param->Name);
 
-                    $result_array[] = '\'' . $param->Name . '\' => isset($a[\'' . $key_a. '\'][\'' . $key_b. '\']) ? $a[\'' . $key_a. '\'][\'' . $key_b. '\'] : null';
-                }
-            }
-            $parameters = [];
-            $param_comment = [];
-            $param_res = [];
-            if($function->Parameters) {
-                foreach ($function->Parameters as $param) {
-                    $parameters[] = '$' . $param->Name;
-                    $param_comment[] = '     * @param $' . $param->Name;
-                    $param_res[] = '        $res->' . $param->Name . ' = $' . $param->Name . ';';
-                }
-            }
+          $result_array[] = '\'' . $param->Name . '\' => isset($a[\'' . $key_a . '\'][\'' . $key_b . '\']) ? $a[\'' . $key_a . '\'][\'' . $key_b . '\'] : null';
+        }
+      }
+      $parameters = [];
+      $param_comment = [];
+      $param_res = [];
+      if ($function->Parameters) {
+        foreach ($function->Parameters as $param) {
+          $parameters[] = '$' . $param->Name;
+          $param_comment[] = '     * @param $' . $param->Name;
+          $param_res[] = '        $res->' . $param->Name . ' = $' . $param->Name . ';';
+        }
+      }
 
-            $code = '
+      $code = '
     /**
 ' . implode("\r\n", $param_comment) . '
      */
@@ -68,10 +72,10 @@ class WSDL2Code extends SafeClass
             ' . implode(",\r\n            ", $result_array) . '
         ];
     }';
-            $function_code[] = $code;
-        }
+      $function_code[] = $code;
+    }
 
-        $code = '<?php
+    $code = '<?php
 /**
  * Class ' . $ClassName . 'Base
  */
@@ -81,95 +85,93 @@ class ' . $ClassName . 'Base extends APIRequest
 }
         ';
 
-        $dir = $this->BaseDir . '/common/WSDL';
-        if(!is_dir($dir)) {
-            Log::Insert($dir, true);
-            mkdir($dir);
-        }
-
-        $filename = $this->BaseDir . '/common/WSDL/' . $ClassName . 'Base.php';
-        $fp = fopen($filename, 'w');
-        fwrite($fp, $code);
-        fclose($fp);
+    $dir = $this->BaseDir . '/common/WSDL';
+    if (!is_dir($dir)) {
+      Log::Insert($dir, true);
+      mkdir($dir);
     }
 
-    private function GetFunctions($URL)
-    {
-        $xml = file_get_contents($URL);
+    $filename = $this->BaseDir . '/common/WSDL/' . $ClassName . 'Base.php';
+    $fp = fopen($filename, 'w');
+    fwrite($fp, $code);
+    fclose($fp);
+  }
 
-        $services =  Strings::SimpleXMLToArray($xml);
+  private function GetFunctions($URL)
+  {
+    $xml = file_get_contents($URL);
 
-        $this->TargetNamespace = $services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['TARGETNAMESPACE'];
-        $this->Functions = [];
+    $services = Strings::SimpleXMLToArray($xml);
 
-        foreach($services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['S:ELEMENT'] as $i => $function) {
+    $this->TargetNamespace = $services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['TARGETNAMESPACE'];
+    $this->Functions = [];
 
-            //CleanHalt($function);
+    foreach ($services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['S:ELEMENT'] as $i => $function) {
 
-            if(isset($function['NAME'])) {
+      if (isset($function['NAME'])) {
 
-                if(!isset($function['S:COMPLEXTYPE'][$i]['S:SEQUENCE'][$i]['S:ELEMENT'])) {
-                    continue;
-                }
-
-                $function_name = $function['NAME'];
-
-                $is_response = false;
-                if(Strings::EndsWith($function_name, 'Response')) {
-                    $function_name = Strings::RemoveFromEnd('Response', $function_name);
-                    $is_response = true;
-                }
-
-                $f = !isset($this->Functions[$function_name]) ? new WSDLFunction() : $this->Functions[$function_name];
-                $f->Name = $function_name;
-
-
-                foreach ($function['S:COMPLEXTYPE'][$i]['S:SEQUENCE'][$i]['S:ELEMENT'] as $param) {
-                    $p = new WSDLParameter();
-                    $p->MaxOccurs = $param['MAXOCCURS'];
-                    $p->MinOccurs = $param['MINOCCURS'];
-                    $p->Name = $param['NAME'];
-                    $p->Type = $param['TYPE'];
-                    if($is_response) {
-
-                        $f->AddResponse($p, $function['NAME']);
-                    } else {
-                        $f->AddParameter($p);
-                    }
-                }
-                $this->Functions[$function_name] = $f;
-            }
+        if (!isset($function['S:COMPLEXTYPE'][$i]['S:SEQUENCE'][$i]['S:ELEMENT'])) {
+          continue;
         }
 
-        foreach($services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['S:COMPLEXTYPE'] as $i => $function) {
+        $function_name = $function['NAME'];
 
-            if(!isset($function['NAME'])) {
-                continue;
-            }
-
-            $function_name = $function['NAME'];
-
-            if(Strings::EndsWith($function_name, 'Result')) {
-                $function_name = Strings::RemoveFromEnd('Result', $function_name);
-            } else {
-                continue;
-            }
-
-            $f = !isset($this->Functions[$function_name]) ? new WSDLFunction() : $this->Functions[$function_name];
-            $f->Name = $function_name;
-
-            foreach ($function['S:SEQUENCE'][$i]['S:ELEMENT'] as $param) {
-                $p = new WSDLParameter();
-                $p->MaxOccurs = $param['MAXOCCURS'];
-                $p->MinOccurs = $param['MINOCCURS'];
-                $p->Name = $param['NAME'];
-                $p->Type = $param['TYPE'];
-                $f->AddResult($p, $function['NAME']);
-            }
-
-            $this->Functions[$function_name] = $f;
+        $is_response = false;
+        if (Strings::EndsWith($function_name, 'Response')) {
+          $function_name = Strings::RemoveFromEnd('Response', $function_name);
+          $is_response = true;
         }
+
+        $f = !isset($this->Functions[$function_name]) ? new WSDLFunction() : $this->Functions[$function_name];
+        $f->Name = $function_name;
+
+
+        foreach ($function['S:COMPLEXTYPE'][$i]['S:SEQUENCE'][$i]['S:ELEMENT'] as $param) {
+          $p = new WSDLParameter();
+          $p->MaxOccurs = $param['MAXOCCURS'];
+          $p->MinOccurs = $param['MINOCCURS'];
+          $p->Name = $param['NAME'];
+          $p->Type = $param['TYPE'];
+          if ($is_response) {
+
+            $f->AddResponse($p, $function['NAME']);
+          } else {
+            $f->AddParameter($p);
+          }
+        }
+        $this->Functions[$function_name] = $f;
+      }
     }
+
+    foreach ($services['WSDL:DEFINITIONS']['WSDL:TYPES']['S:SCHEMA']['S:COMPLEXTYPE'] as $i => $function) {
+
+      if (!isset($function['NAME'])) {
+        continue;
+      }
+
+      $function_name = $function['NAME'];
+
+      if (Strings::EndsWith($function_name, 'Result')) {
+        $function_name = Strings::RemoveFromEnd('Result', $function_name);
+      } else {
+        continue;
+      }
+
+      $f = !isset($this->Functions[$function_name]) ? new WSDLFunction() : $this->Functions[$function_name];
+      $f->Name = $function_name;
+
+      foreach ($function['S:SEQUENCE'][$i]['S:ELEMENT'] as $param) {
+        $p = new WSDLParameter();
+        $p->MaxOccurs = $param['MAXOCCURS'];
+        $p->MinOccurs = $param['MINOCCURS'];
+        $p->Name = $param['NAME'];
+        $p->Type = $param['TYPE'];
+        $f->AddResult($p, $function['NAME']);
+      }
+
+      $this->Functions[$function_name] = $f;
+    }
+  }
 }
 
 

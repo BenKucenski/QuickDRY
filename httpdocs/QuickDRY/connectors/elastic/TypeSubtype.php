@@ -1,7 +1,9 @@
 <?php
 namespace elastic;
 
-class TypeSubtype extends \SafeClass
+use QuickDRY\Utilities\SafeClass;
+
+class TypeSubtype extends SafeClass
 {
     public $Type;
     public $SubType;

@@ -1,4 +1,7 @@
 <?php
+namespace QuickDRY\Utilities;
+
+use Exception;
 
 /**
  * Class ExceptionHandler
@@ -11,7 +14,7 @@ class ExceptionHandler
     public static function Exception($err)
     {
         if (defined('SHOW_ERRORS') && SHOW_ERRORS) {
-            Halt($err);
+            Debug::Halt($err);
         }
         self::LogError(-1, $err, '', '');
     }
@@ -47,21 +50,24 @@ class ExceptionHandler
     public static function Fatal()
     {
         $error = error_get_last();
+        if(!isset($error['type'])) {
+            return;
+        }
         if ($error['type'] == E_ERROR) {
             try {
                 self::Error($error['type'], $error['message'], $error['file'], $error['line']);
             } catch(Exception $e) {
-                Halt($e);
+                Debug::Halt($e);
             }
         }
     }
 
     public static function Init()
     {
-        register_shutdown_function(['ExceptionHandler', 'Fatal']);
+        register_shutdown_function(['QuickDRY\Utilities\ExceptionHandler', 'Fatal']);
 
-        set_exception_handler(['ExceptionHandler', 'Exception']);
-        set_error_handler(['ExceptionHandler', 'Error']);
+        set_exception_handler(['QuickDRY\Utilities\ExceptionHandler', 'Exception']);
+        set_error_handler(['QuickDRY\Utilities\ExceptionHandler', 'Error']);
 
     }
 }

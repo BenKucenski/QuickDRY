@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Utilities;
 
 /**
  * Class LogFile
@@ -9,17 +10,21 @@ class LogFile
 
     public function __construct()
     {
+      if(!defined('DOC_ROOT_PATH')) {
+        define('DOC_ROOT_PATH', '.');
+      }
         if (!is_dir(DOC_ROOT_PATH . '/logs')) {
             mkdir(DOC_ROOT_PATH . '/logs');
         }
     }
 
-    /**
-     * @param $filename
-     * @param $message
-     * @param bool $echo
-     */
-    public function Insert($filename, $message, $echo = false, $write_to_file = true)
+  /**
+   * @param $filename
+   * @param $message
+   * @param bool $echo
+   * @param bool $write_to_file
+   */
+    public function Insert($filename, $message, bool $echo = false, bool $write_to_file = true)
     {
         if (is_object($message)) {
             if (method_exists($message, 'GetMessage')) {
@@ -47,8 +52,8 @@ class LogFile
             $fp = fopen($log_path, 'a');
 
             if (false === $fp) {
-                error_get_last();
-                error_log('Unable to log to ' . DOC_ROOT_PATH . '/logs/' . $f . '.log. Please check permissions');
+                $error = error_get_last();
+                error_log('Unable to log to ' . DOC_ROOT_PATH . '/logs/' . $f . '.log. Please check permissions: ' . $error);
                 return;
             }
 

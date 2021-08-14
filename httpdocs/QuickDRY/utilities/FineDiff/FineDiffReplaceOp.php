@@ -1,6 +1,9 @@
 <?php
 class FineDiffReplaceOp extends FineDiffOp {
-    public function __construct($fromLen, $text) {
+  private $fromLen;
+  private $text;
+
+  public function __construct($fromLen, $text) {
         $this->fromLen = $fromLen;
         $this->text = $text;
     }

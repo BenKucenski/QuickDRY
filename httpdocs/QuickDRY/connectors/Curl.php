@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+
 /**
  * Class Curl
  * @property CurlHeader Header
@@ -10,17 +12,17 @@
  */
 class Curl
 {
-    public $Body;
-    public $HeaderHash;
-    public $HeaderRaw;
-    public $Header;
-    public $StatusCode;
+    public string $Body;
+    public array $HeaderHash;
+    public string $HeaderRaw;
+    public CurlHeader $Header;
+    public int $StatusCode;
 
-    public $URL;
+    public string $URL;
     public $Params;
     public $SentHeader;
 
-    public static $FollowLocation = true;
+    public static bool $FollowLocation = true;
 
     /**
      * Returns the size of a file without downloading it, or -1 if the file
@@ -72,12 +74,14 @@ class Curl
     }
 
 
-    /**
-     * @param $path
-     * @param $params
-     * @return Curl
-     */
-    public static function Post($path, $params, $tweak_params = false, $additional_headers = null)
+  /**
+   * @param $path
+   * @param $params
+   * @param bool $tweak_params
+   * @param null $additional_headers
+   * @return Curl
+   */
+    public static function Post($path, $params, bool $tweak_params = false, $additional_headers = null): Curl
     {
         if (is_array($params)) {
             $params = http_build_query($params);
@@ -94,7 +98,7 @@ class Curl
         curl_setopt($ch, CURLOPT_POST, true);
 
         $parts = parse_url($path);
-        $host = isset($parts['host']) ? $parts['host'] : '';
+        $host = $parts['host'] ?? '';
 
         $header[] = "Accept: */*";
         $header[] = "Accept-Language: en-us";
@@ -134,7 +138,7 @@ class Curl
 
         $err = curl_error($ch);
         if ($err) {
-            Halt($err);
+            Debug::Halt($err);
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -167,13 +171,14 @@ class Curl
         return $res;
     }
 
-    /**
-     * @param $path
-     * @param null $params
-     * @param null $username
-     * @param null $password
-     * @return Curl
-     */
+  /**
+   * @param $path
+   * @param null $params
+   * @param null $username
+   * @param null $password
+   * @param null $additional_headers
+   * @return Curl
+   */
     public static function Get($path, $params = null, $username = null, $password = null, $additional_headers = null)
     {
         if (is_array($params)) {
@@ -188,7 +193,7 @@ class Curl
             curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);
         }
         $parts = parse_url($path);
-        $host = isset($parts['host']) ? $parts['host'] : '';
+        $host = $parts['host'] ?? '';
 
         $header[] = "Accept: */*";
         $header[] = "Accept-Language: en-us";
@@ -229,7 +234,7 @@ class Curl
 
         $err = curl_error($ch);
         if ($err) {
-            Halt($err);
+          Debug::Halt($err);
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -276,8 +281,7 @@ class Curl
             ],
         ];
 
-        $html = file_get_contents($url, false, stream_context_create($context));
-        return $html;
+      return file_get_contents($url, false, stream_context_create($context));
     }
 }
 

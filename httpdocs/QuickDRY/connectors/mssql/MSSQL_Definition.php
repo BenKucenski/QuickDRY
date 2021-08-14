@@ -1,12 +1,13 @@
 <?php
 
+use QuickDRY\Utilities\SimpleReport;
+
 /**
  * Class MSSQL_Definition
  */
 class MSSQL_Definition extends SimpleReport
 {
-    public $object_name;
-    public $type_desc;
-    public $definition;
-    public $table_name;
+    public string $object_name;
+    public string $type_desc;
+    public string $definition;
 }

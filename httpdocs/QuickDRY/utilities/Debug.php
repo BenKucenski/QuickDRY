@@ -1,4 +1,8 @@
 <?php
+namespace QuickDRY\Utilities;
+
+use Exception;
+use ReflectionClass;
 
 /**
  * Class Debug
@@ -47,7 +51,7 @@ class Debug extends SafeClass
      */
     public static function Halt($var, $message = null)
     {
-        static::_Debug($var, $message, true, true, true);
+        static::_Debug($var, $message, true, true);
     }
 
     /**
@@ -66,7 +70,7 @@ class Debug extends SafeClass
      */
     public static function HaltCL($var, $message = null)
     {
-        static::_DebugCL($var, $message, true, true, true);
+        static::_DebugCL($var, $message, true, true);
     }
 
     /**
@@ -76,7 +80,7 @@ class Debug extends SafeClass
      * @param bool $exit
      * @param bool $backtrace
      */
-    public static function _Debug($var, $msg = null, $print = false, $exit = false, $backtrace = true)
+    public static function _Debug($var, $msg = null, bool $print = false, bool $exit = false, bool $backtrace = true)
     {
         global $Web;
 
@@ -110,7 +114,7 @@ class Debug extends SafeClass
         $finalMsg .= '</pre>' . PHP_EOL;
 
         if (defined('IS_PRODUCTION') && IS_PRODUCTION) {
-            $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_FILENAME'];
+            $uri = $_SERVER['REQUEST_URI'] ?? $_SERVER['SCRIPT_FILENAME'];
             if(defined('SMTP_DEBUG_EMAIL') && defined('SMTP_FROM_NAME')) {
                 $t = Mailer::Queue(SMTP_DEBUG_EMAIL, SMTP_FROM_NAME, SMTP_FROM_NAME . ' HALT: ' . $uri, $finalMsg);
                 try {
@@ -141,13 +145,14 @@ class Debug extends SafeClass
         }
     }
 
-    /**
-     * @param      $var
-     * @param bool $exit
-     * @param bool $backtrace
-     * @param bool $display
-     */
-    private static function _DebugCL($var, $msg = null, $print = false, $exit = false, $backtrace = true)
+  /**
+   * @param      $var
+   * @param null $msg
+   * @param bool $print
+   * @param bool $exit
+   * @param bool $backtrace
+   */
+    private static function _DebugCL($var, $msg = null, bool $print = false, bool $exit = false, bool $backtrace = true)
     {
         $res = "\n----\n";
         if ($msg) {
@@ -176,7 +181,7 @@ class Debug extends SafeClass
     }
 
     /**
-     * @return mixed|string
+     * @return array|false|string|string[]|null
      */
     private static function _debug_string_backtrace()
     {
@@ -199,7 +204,7 @@ class Debug extends SafeClass
      * @param $errno
      * @return string
      */
-    private static function _convert_error_no($errno)
+    private static function _convert_error_no($errno): string
     {
         switch ($errno) {
             case E_USER_ERROR:

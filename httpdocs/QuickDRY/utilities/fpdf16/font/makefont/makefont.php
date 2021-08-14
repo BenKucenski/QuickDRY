@@ -137,10 +137,10 @@ function ReadAFM($file, &$map)
 function MakeFontDescriptor($fm, $symbolic)
 {
 	//Ascent
-	$asc=(isset($fm['Ascender']) ? $fm['Ascender'] : 1000);
+	$asc=($fm['Ascender'] ?? 1000);
 	$fd="array('Ascent'=>".$asc;
 	//Descent
-	$desc=(isset($fm['Descender']) ? $fm['Descender'] : -200);
+	$desc=($fm['Descender'] ?? -200);
 	$fd.=",'Descent'=>".$desc;
 	//CapHeight
 	if(isset($fm['CapHeight']))
@@ -168,7 +168,7 @@ function MakeFontDescriptor($fm, $symbolic)
 		$fbb=array(0,$desc-100,1000,$asc+100);
 	$fd.=",'FontBBox'=>'[".$fbb[0].' '.$fbb[1].' '.$fbb[2].' '.$fbb[3]."]'";
 	//ItalicAngle
-	$ia=(isset($fm['ItalicAngle']) ? $fm['ItalicAngle'] : 0);
+	$ia=($fm['ItalicAngle'] ?? 0);
 	$fd.=",'ItalicAngle'=>".$ia;
 	//StemV
 	if(isset($fm['StdVW']))
@@ -278,7 +278,7 @@ function CheckTTF($file)
 	}
 	fseek($f,4,SEEK_CUR);
 	$offset=ReadLong($f);
-	fseek($f,$offset,SEEK_SET);
+	fseek($f,$offset);
 	//Extract fsType flags
 	fseek($f,8,SEEK_CUR);
 	$fsType=ReadShort($f);
@@ -299,9 +299,7 @@ function CheckTTF($file)
 *******************************************************************************/
 function MakeFont($fontfile, $afmfile, $enc='cp1252', $patch=array(), $type='TrueType')
 {
-	//Generate a font definition file
-	if(get_magic_quotes_runtime())
-		@set_magic_quotes_runtime(0);
+
 	ini_set('auto_detect_line_endings','1');
 	if($enc)
 	{

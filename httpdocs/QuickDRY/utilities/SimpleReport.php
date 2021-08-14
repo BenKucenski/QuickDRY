@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Utilities;
 
 /**
  * Class SimpleReport
@@ -15,7 +16,7 @@ class SimpleReport extends SafeClass
             $this->HaltOnError(false);
             $this->FromRow($row);
             if ($this->HasMissingProperties()) {
-                Halt($this->GetMissingPropeties());
+              Debug::Halt($this->GetMissingProperties());
             }
             $this->HaltOnError(true);
         }
@@ -25,7 +26,7 @@ class SimpleReport extends SafeClass
      * @param SimpleReport[] $items
      * @return SimpleExcel
      */
-    public static function ToExcel(&$items)
+    public static function ToExcel($items): ?SimpleExcel
     {
         if(!sizeof($items)) {
             return null;
@@ -42,11 +43,15 @@ class SimpleReport extends SafeClass
         return $se;
     }
 
-    /**
-     * @param SimpleReport[] $items
-     * @return string
-     */
-    public static function ToHTML(&$items, $class = '', $style = '', $numbered = false, $limit = 0)
+  /**
+   * @param SimpleReport[] $items
+   * @param string $class
+   * @param string $style
+   * @param bool $numbered
+   * @param int $limit
+   * @return string
+   */
+    public static function ToHTML(array &$items, string $class = '', string $style = '', bool $numbered = false, $limit = 0): string
     {
         if(!sizeof($items)) {
             return '';

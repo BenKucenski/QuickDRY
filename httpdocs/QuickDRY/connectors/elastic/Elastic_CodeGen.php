@@ -1,23 +1,28 @@
 <?php
+
+use QuickDRY\Utilities\Debug;
+use QuickDRY\Utilities\Log;
+use QuickDRY\Utilities\SafeClass;
+
 class Elastic_CodeGen extends SafeClass
 {
-    public $DestinationFolder;
-    public $ConnectionClassName;
-    public $ClassPrefix;
-    public $Indexes;
-    public $ExcludeStartsWith;
+    public string $DestinationFolder;
+    public string $ConnectionClassName;
+    public string $ClassPrefix;
+    public array $Indexes;
+    public string $ExcludeStartsWith;
 
-    public $ClassFolder;
-    public $ClassSchemaFolder;
+    public string $ClassFolder;
+    public string $ClassSchemaFolder;
 
-    public function __construct($ConnectionClassName, $ClassPrefix, $ExcludeStartsWith = [], $DestinationFolder = '../httpdocs')
+    public function __construct(string $ConnectionClassName, string $ClassPrefix, $ExcludeStartsWith = [], string $DestinationFolder = '../httpdocs')
     {
         if(!class_exists($ConnectionClassName)) {
-            CleanHalt(['$ConnectionClassName ' . $ConnectionClassName . ' does not exist']);
+          Debug::Halt(['$ConnectionClassName ' . $ConnectionClassName . ' does not exist']);
         }
 
         if(!method_exists($ConnectionClassName, 'GetIndexes')) {
-            CleanHalt(['$ConnectionClassName ' . $ConnectionClassName . ' does not implement GetIndexes']);
+          Debug::Halt(['$ConnectionClassName ' . $ConnectionClassName . ' does not implement GetIndexes']);
         }
 
         $this->DestinationFolder = $DestinationFolder;
@@ -49,9 +54,9 @@ class Elastic_CodeGen extends SafeClass
         }
         $include_php = '<?php
 /**
- * @param $class
+ * @param string $class
  */
-function es_' . strtolower($this->ClassPrefix) . '_autoloader($class) {
+function es_' . strtolower($this->ClassPrefix) . '_autoloader(string $class) {
     $class_map = [
         ' . implode("\r\n\t\t", $mod_map) . '
     ];

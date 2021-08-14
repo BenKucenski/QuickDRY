@@ -14,7 +14,7 @@ class MSSQL_TableColumn
     /**
      * @param $row
      */
-    public function FromRow(&$row)
+    public function FromRow($row)
     {
         foreach($row as $key => $value)
         {
@@ -33,7 +33,7 @@ class MSSQL_TableColumn
                     $this->field_alias = $value;
                     break;
                 case 'DATA_TYPE': $this->type = $value; break;
-                case 'IS_NULLABLE': $this->null = $value === 'YES' ? true : false; break;
+                case 'IS_NULLABLE': $this->null = $value === 'YES'; break;
                 case 'COLUMN_DEFAULT': $this->default = $value; break;
             }
         }

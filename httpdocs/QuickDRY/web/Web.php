@@ -1,5 +1,17 @@
 <?php
 
+namespace QuickDRY\Web;
+
+use QuickDRY\Utilities\Debug;
+use Menu;
+use MenuAccess;
+use MSSQL_Connection;
+use MySQL_Connection;
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Utilities\Navigation;
+use QuickDRY\Utilities\SafeClass;
+use UserClass;
+
 /**
  * Class Web
  *
@@ -33,308 +45,305 @@
  * @property string PDFRootDir
  * @property string DOCXPageOrientation
  * @property string DOCXFileName
- * @property UserClass CurrentUser
+ * @property ?UserClass CurrentUser
  * @property string DefaultURL
  */
 class Web extends SafeClass
 {
-    public $ControllerFile;
-    public $ViewFile;
-    public $PageClass;
-    public $IsJSON;
+  public ?string $ControllerFile;
+  public ?string $ViewFile;
+  public string $PageClass;
+  public bool $IsJSON;
 
-    public $Request;
-    public $Session;
-    public $Cookie;
-    public $Server;
-    public $CurrentUser;
-    public $Navigation;
-    public $AccessDenied;
-    public $MasterPage;
-    public $SettingsFile;
-    public $PageMode;
-    public $CurrentPage;
-    public $CurrentPageName;
-    public $DefaultURL;
+  public Request $Request;
+  public Session $Session;
+  public Cookie $Cookie;
+  public Server $Server;
+  public ?UserClass $CurrentUser;
+  public Navigation $Navigation;
+  public bool $AccessDenied;
+  public ?string $MasterPage = null;
+  public string $SettingsFile;
+  public int $PageMode;
+  public string $CurrentPage;
+  public string $CurrentPageName;
+  public string $DefaultURL;
 
-    private $SecureMasterPages;
+  private array $SecureMasterPages = [];
 
-    public $RenderPDF;
-    public $PDFPageOrientation;
-    public $PDFPageSize;
-    public $PDFFileName;
-    public $PDFPostRedirect;
-    public $PDFHeader;
-    public $PDFFooter;
-    public $PDFSimplePageNumbers;
-    public $PDFMargins;
-    public $PDFPostFunction;
-    public $PDFHash;
-    public $PDFRootDir;
-    public $PDFShrinkToFit;
+  public bool $RenderPDF = false;
+  public ?string $PDFPageOrientation = null;
+  public ?string $PDFPageSize = null;
+  public ?string $PDFFileName = null;
+  public ?string $PDFPostRedirect = null;
+  public ?string $PDFHeader = null;
+  public ?string $PDFFooter = null;
+  public ?string $PDFSimplePageNumbers = null;
+  public ?PDFMargins $PDFMargins = null;
+  public ?string $PDFPostFunction = null;
+  public ?string $PDFHash = null;
+  public ?string $PDFRootDir = null;
+  public ?string $PDFShrinkToFit = null;
 
-    public $HTML;
+  public string $HTML;
 
-    public $RenderDOCX;
-    public $DOCXPageOrientation;
-    public $DOCXFileName;
+  public bool $RenderDOCX = false;
+  public string $DOCXPageOrientation;
+  public string $DOCXFileName;
 
-    public $StaticModel;
-    public $InstanceModel;
+  public ?string $StaticModel = null;
+  public ?string $InstanceModel = null;
 
-    public $Verb;
-    public $StartTime;
-    public $InitTime;
+  public string $Verb;
+  public int $StartTime;
+  public int $InitTime;
 
-    public $DefaultPage;
-    public $DefaultUserPage;
+  public string $DefaultPage;
+  public string $DefaultUserPage;
 
-    public $MetaTitle;
-    public $MetaDescription;
-    public $MetaKeywords;
+  public string $MetaTitle;
+  public string $MetaDescription;
+  public string $MetaKeywords;
 
-    /**
-     * @param string[] $MasterPages
-     */
-    public function SetSecureMasterPages($MasterPages)
-    {
-        $this->SecureMasterPages = $MasterPages;
+  /**
+   * @param string[] $MasterPages
+   */
+  public function SetSecureMasterPages(array $MasterPages)
+  {
+    $this->SecureMasterPages = $MasterPages;
+  }
+
+  /**
+   * @return bool
+   */
+  public function IsSecureMasterPage(): bool
+  {
+    if (!is_array($this->SecureMasterPages)) {
+      return false;
     }
 
-    /**
-     * @return bool
-     */
-    public function IsSecureMasterPage()
-    {
-        if (!is_array($this->SecureMasterPages)) {
-            return false;
-        }
+    return in_array($this->MasterPage, $this->SecureMasterPages);
+  }
 
-        return in_array($this->MasterPage, $this->SecureMasterPages);
+  public function __construct()
+  {
+
+    $this->StartTime = time();
+    $this->RenderPDF = false;
+
+    $this->Request = new Request();
+    $this->Session = new Session();
+    $this->Cookie = new Cookie();
+    $this->Server = new Server();
+
+    $this->PageMode = QUICKDRY_MODE_STATIC; // default to static classes for pages
+
+    $this->CurrentUser = null;
+
+    if ($this->Session->user) {
+      $this->CurrentUser = $this->Session->user;
     }
 
-    public function __construct()
-    {
-        $this->StartTime = time();
-        $this->RenderPDF = false;
 
-        $this->Request = new Request();
-        $this->Session = new Session();
-        $this->Cookie = new Cookie();
-        $this->Server = new Server();
-
-        $this->PageMode = QUICKDRY_MODE_STATIC; // default to static classes for pages
-
-        $this->CurrentUser = null;
-        if ($this->Session->user) {
-            $this->CurrentUser = $this->Session->user;
-        }
-
-        if (isset($this->Server->REQUEST_URI)) {
-            if (!defined('HTTP_HOST')) {
-                if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-                    $host = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
-                    $host = trim($host[sizeof($host) - 1]);
-                } else {
-                    $host = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : (isset($_HOST) ? $_HOST : '');
-                }
-
-                define('HTTP_HOST', strtolower($host)); // the domain that the site needs to behave as (for proxies)
-            }
-        }
-
-        if (defined('HTTP_HOST')) {
-            // allow non-standard ports
-            $this->SettingsFile = 'settings.' . str_replace(':','.',HTTP_HOST) . '.php';
-        }
-
-        if (defined('MYSQL_LOG') && MYSQL_LOG) {
-            MySQL_Connection::$use_log = true;
-        }
-
-        if (defined('MSSQL_LOG') && MSSQL_LOG) {
-            MSSQL_Connection::$use_log = true;
-        }
-
-        if (file_exists($this->SettingsFile)) {
-            require_once $this->SettingsFile;
+    if (isset($this->Server->REQUEST_URI)) {
+      if (!defined('HTTP_HOST')) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+          $host = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
+          $host = trim($host[sizeof($host) - 1]);
         } else {
-            if (file_exists('../' . $this->SettingsFile)) {
-                require_once '../' . $this->SettingsFile;
-
-            } else {
-                if (file_exists('../httpdocs/' . $this->SettingsFile)) {
-                    require_once '../httpdocs/' . $this->SettingsFile;
-
-                } else {
-                    Debug::Halt($this->SettingsFile . ' does not exist');
-                }
-            }
+          $host = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : ($_HOST ?? '');
         }
+
+        define('HTTP_HOST', strtolower($host)); // the domain that the site needs to behave as (for proxies)
+      }
     }
 
-    /**
-     * @param string $default_page
-     * @param string $default_user_page
-     */
-    public function Init($default_page, $default_user_page, $script_dir)
-    {
-        $this->DefaultPage = $default_page;
-        $this->DefaultUserPage = $default_user_page;
+    if (defined('HTTP_HOST')) {
+      $this->SettingsFile = 'settings.' . HTTP_HOST . '.php';
+    }
 
-        $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
-        if ($t[strlen($t) - 1] == '/') {
-            $t = substr($t, 0, strlen($t) - 1);
-        }
-        define('DOC_ROOT_PATH', $t);
+    if (defined('MYSQL_LOG') && MYSQL_LOG) {
+      MySQL_Connection::$use_log = true;
+    }
 
-        define('SORT_BY', isset($this->Request->sort_by) ? $this->Request->sort_by : null);
-        define('SORT_DIR', isset($this->Request->sort_dir) ? $this->Request->sort_dir : 'asc');
+    if (defined('MSSQL_LOG') && MSSQL_LOG) {
+      MSSQL_Connection::$use_log = true;
+    }
 
-        define('PAGE', isset($this->Request->page) ? $this->Request->page : 0);
-        define('PER_PAGE', isset($this->Request->per_page) ? $this->Request->per_page : 20);
+    if (file_exists($this->SettingsFile)) {
+      require_once $this->SettingsFile;
+    } else {
+      if (file_exists('../' . $this->SettingsFile)) {
+        require_once '../' . $this->SettingsFile;
 
-        $url = strtok($this->Server->REQUEST_URI, '?');
+      } else {
+        if (file_exists('../httpdocs/' . $this->SettingsFile)) {
+          require_once '../httpdocs/' . $this->SettingsFile;
 
-        $this->Session->last_url = $url;
-
-        $qs = $this->Server->QUERY_STRING;
-        $ru = $this->Server->REQUEST_URI;
-
-        define('JSON_REQUEST', stristr($ru, '.json') !== false);
-
-        $page = str_replace('?' . $qs, '', $ru);
-        $page = str_replace('/' . $qs, '/', $page);
-
-        if (strstr($page, '/') === false)
-            $page .= '/';
-
-        if ($page[strlen($page) - 1] == '/') {
-            $page = substr($page, 0, strlen($page) - 1);
-        }
-
-        $full_path = $page != '/' ? $page : '/';
-        $t = explode('/', $full_path);
-        $cur_page = $t[sizeof($t) - 1];
-
-        if (!$cur_page) {
-            $cur_page = $this->CurrentUser ? $this->DefaultUserPage : $this->DefaultPage;
-            $full_path = '/' . $cur_page;
-            $cur_page = explode('/', $cur_page);
-            $cur_page = $cur_page[sizeof($cur_page) - 1];
-        }
-
-        $host = explode('.', HTTP_HOST);
-        $m = sizeof($host);
-
-        if (sizeof($host) >= 2) {
-            define('URL_DOMAIN', $host[$m - 2] . '.' . $host[$m - 1]);
         } else {
-            define('URL_DOMAIN', $host[0]);
+          Debug::Halt($this->SettingsFile . ' does not exist');
         }
+      }
+    }
+  }
 
-        define('COOKIE_DOMAIN', '.' . URL_DOMAIN);
+  /**
+   * @param string $default_page
+   * @param string $default_user_page
+   * @param string $script_dir
+   */
+  public function Init(string $default_page, string $default_user_page, string $script_dir)
+  {
+    $this->DefaultPage = $default_page;
+    $this->DefaultUserPage = $default_user_page;
 
-        define('CURRENT_PAGE', $full_path);
-        define('CURRENT_PAGE_NAME', $cur_page);
+    $t = isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] ? $_SERVER['DOCUMENT_ROOT'] : $script_dir;
+    if ($t[strlen($t) - 1] == '/') {
+      $t = substr($t, 0, strlen($t) - 1);
+    }
+    define('DOC_ROOT_PATH', $t);
 
-        $this->CurrentPage = $full_path;
-        $this->CurrentPageName = $cur_page;
+    define('SORT_BY', (string)$this->Request->sort_by ?? null);
+    define('SORT_DIR', (string)$this->Request->sort_dir ?? 'asc');
 
-        $page_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.php';
-        $code_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.code.php';
+    define('PAGE', $this->Request->page ?? 0);
+    define('PER_PAGE', $this->Request->per_page ?? 20);
 
-        $page = 'pages' . $this->CurrentPage . '.php';
-        $code = 'pages' . $this->CurrentPage . '.code.php';
+    $url = strtok($this->Server->REQUEST_URI, '?');
+
+    $this->Session->last_url = $url;
+
+    $qs = $this->Server->QUERY_STRING;
+    $ru = $this->Server->REQUEST_URI;
+
+    define('JSON_REQUEST', stristr($ru, '.json') !== false);
+
+    $page = str_replace('?' . $qs, '', $ru);
+    $page = str_replace('/' . $qs, '/', $page);
+
+    if (strstr($page, '/') === false)
+      $page .= '/';
+
+    if ($page[strlen($page) - 1] == '/') {
+      $page = substr($page, 0, strlen($page) - 1);
+    }
+
+    $full_path = $page != '/' ? $page : '/';
+    $t = explode('/', $full_path);
+    $cur_page = $t[sizeof($t) - 1];
+
+    if (!$cur_page) {
+      $cur_page = $this->CurrentUser ? $this->DefaultUserPage : $this->DefaultPage;
+      $full_path = '/' . $cur_page;
+      $cur_page = explode('/', $cur_page);
+      $cur_page = $cur_page[sizeof($cur_page) - 1];
+    }
+
+    $host = explode('.', HTTP_HOST);
+    $m = sizeof($host);
+
+    if (sizeof($host) >= 2) {
+      define('URL_DOMAIN', $host[$m - 2] . '.' . $host[$m - 1]);
+    } else {
+      define('URL_DOMAIN', $host[0]);
+    }
+
+    define('COOKIE_DOMAIN', '.' . URL_DOMAIN);
+
+    define('CURRENT_PAGE', $full_path);
+    define('CURRENT_PAGE_NAME', $cur_page);
+
+    $this->CurrentPage = $full_path;
+    $this->CurrentPageName = $cur_page;
+
+    $page_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.php';
+    $code_alt = 'pages' . $this->CurrentPage . '/' . $this->CurrentPageName . '.code.php';
+
+    $page = 'pages' . $this->CurrentPage . '.php';
+    $code = 'pages' . $this->CurrentPage . '.code.php';
 
 
-        $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt : null);
-        $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt : null);
+    $this->ControllerFile = file_exists($code) ? $code : (file_exists($code_alt) ? $code_alt : null);
+    $this->ViewFile = file_exists($page) ? $page : (file_exists($page_alt) ? $page_alt : null);
 
-        // Accept page.json.php and json.page.php
-        $this->IsJSON = false;
-        if (stristr($this->CurrentPageName, '.html') !== false) {
+    // Accept page.json.php and json.page.php
+    $this->IsJSON = false;
+    if (stristr($this->CurrentPageName, '.html') !== false) {
+      $this->ControllerFile = $this->ViewFile;
+      $this->ViewFile = null;
+      $this->IsJSON = false;
+    } else {
+      if (stristr($this->CurrentPageName, '.json') !== false) {
+        $this->ControllerFile = $this->ViewFile;
+        $this->ViewFile = null;
+        $this->IsJSON = true;
+      } else {
+        if (stristr($this->CurrentPageName, 'json.') !== false) {
+          $this->ControllerFile = $this->ViewFile;
+          $this->ViewFile = null;
+          $this->IsJSON = true;
+        } else {
+          if (stristr($this->CurrentPageName, '.xlsx') !== false) {
             $this->ControllerFile = $this->ViewFile;
             $this->ViewFile = null;
-            $this->IsJSON = false;
-        } else {
-            if (stristr($this->CurrentPageName, '.json') !== false) {
-                $this->ControllerFile = $this->ViewFile;
-                $this->ViewFile = null;
-                $this->IsJSON = true;
-            } else {
-                if (stristr($this->CurrentPageName, 'json.') !== false) {
-                    $this->ControllerFile = $this->ViewFile;
-                    $this->ViewFile = null;
-                    $this->IsJSON = true;
-                } else {
-                    if (stristr($this->CurrentPageName, '.xlsx') !== false) {
-                        $this->ControllerFile = $this->ViewFile;
-                        $this->ViewFile = null;
-                        $this->IsJSON = true;
-                    } else {
-                        if (stristr($this->CurrentPageName, '.pdf') !== false) {
-                            $this->ControllerFile = $this->ViewFile;
-                            $this->ViewFile = null;
-                            $this->IsJSON = true;
-                        }
-                    }
-                }
-            }
+            $this->IsJSON = true;
+          }
         }
-
-        $temp = explode('.', $this->CurrentPageName);
-        $this->PageClass = $temp[0];
-
-        $this->Verb = strtoupper($this->Request->verb ? $this->Request->verb : $this->Server->REQUEST_METHOD);
+      }
     }
 
-    public function SetURLs()
-    {
-        // this must be done after the settings file is loaded to support proxy situations
-        define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
+    $temp = explode('.', $this->CurrentPageName);
+    $this->PageClass = $temp[0];
 
-        if (isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
-            $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
+    $this->Verb = strtoupper($this->Request->verb ?: $this->Server->REQUEST_METHOD);
+  }
 
-            if (!HTTP::IsSecure() && defined('FORCE_SSL') && FORCE_SSL) {
-                HTTP::Redirect('https://' . HTTP_HOST);
-            }
+  public function SetURLs()
+  {
+    // this must be done after the settings file is loaded to support proxy situations
+    define('FULL_URL', (HTTP::IsSecure() ? 'https://' : 'http://') . HTTP_HOST . $this->Server->REQUEST_URI);
 
-            define('BASE_URL', $protocol . HTTP_HOST);
-        } else {
-            if (isset($_SERVER['HTTP_HOST'])) {
-                if (defined('FORCE_SSL') && FORCE_SSL) {
-                    HTTP::Redirect('https://' . HTTP_HOST);
-                }
-            }
-            if (!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
-                define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
-            }
+    if (isset($_SERVER['HTTPS'])) { // check if page being accessed by browser
+      $protocol = HTTP::IsSecure() ? 'https://' : 'http://';
+
+      if (!HTTP::IsSecure() && defined('FORCE_SSL') && FORCE_SSL) {
+        HTTP::Redirect('https://' . HTTP_HOST);
+      }
+
+      define('BASE_URL', $protocol . HTTP_HOST);
+    } else {
+      if (isset($_SERVER['HTTP_HOST'])) {
+        if (defined('FORCE_SSL') && FORCE_SSL) {
+          HTTP::Redirect('https://' . HTTP_HOST);
         }
+      }
+      if (!defined('BASE_URL')) { // allows the secure URL to be set in CRONS
+        define('BASE_URL', (defined('HTTP_HOST_IS_SECURE') && HTTP_HOST_IS_SECURE ? 'https://' : 'http://') . HTTP_HOST);
+      }
+    }
+  }
+
+  public function InitMenu()
+  {
+    $this->Navigation = new Navigation();
+
+    if (!$this->Session->user) {
+      $this->Navigation->Combine(MenuAccess::GetForRole(ROLE_ID_DEFAULT));
+    } else {
+      if (defined('ROLE_ID_DEFAULT_USER')) {
+        $this->Navigation->Combine(MenuAccess::GetForRole(ROLE_ID_DEFAULT_USER));
+
+      }
+      if (is_array($this->CurrentUser->Roles)) {
+        foreach ($this->CurrentUser->Roles as $role) {
+          $menu = MenuAccess::GetForRole($role);
+          $this->Navigation->Combine($menu);
+        }
+      }
     }
 
-    public function InitMenu()
-    {
-        $this->Navigation = new Navigation();
+    $this->Navigation->SetMenu(Menu::$Menu);
 
-        if (!$this->Session->user) {
-            $this->Navigation->Combine(MenuAccess::GetForRole(ROLE_ID_DEFAULT));
-        } else {
-            if (defined('ROLE_ID_DEFAULT_USER')) {
-                $this->Navigation->Combine(MenuAccess::GetForRole(ROLE_ID_DEFAULT_USER));
-
-            }
-            if (is_array($this->CurrentUser->Roles)) {
-                foreach ($this->CurrentUser->Roles as $role) {
-                    $menu = MenuAccess::GetForRole($role);
-                    $this->Navigation->Combine($menu);
-                }
-            }
-        }
-
-        $this->Navigation->SetMenu(Menu::$Menu);
-
-        $this->AccessDenied = !$this->Navigation->CheckPermissions(CURRENT_PAGE, true);
-    }
+    $this->AccessDenied = !$this->Navigation->CheckPermissions(CURRENT_PAGE, true);
+  }
 }

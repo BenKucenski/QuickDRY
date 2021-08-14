@@ -1,5 +1,8 @@
 <?php
 
+use QuickDRY\Utilities\Metrics;
+use QuickDRY\Utilities\SafeClass;
+
 class MSSQL_Queue extends SafeClass
 {
     private $_sql = [];
@@ -63,16 +66,17 @@ SET QUOTED_IDENTIFIER ON
      * @param SQL_Query $sp
      * @return array|null
      */
-    public function QueueSP(SQL_Query &$sp)
+    public function QueueSP(SQL_Query $sp): ?array
     {
         return $this->Queue($sp->SQL, $sp->Params);
     }
 
-    /**
-     * @param $sql
-     * @param array $params
-     */
-    public function Queue($sql, $params)
+  /**
+   * @param $sql
+   * @param array $params
+   * @return array|null
+   */
+    public function Queue($sql, array $params): ?array
     {
         $t = MSSQL::EscapeQuery($sql, $params);
         $this->_sql[] = $t;

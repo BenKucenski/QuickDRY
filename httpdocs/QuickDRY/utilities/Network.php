@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Utilities;
 
 /**
  * Class Network
@@ -75,11 +76,9 @@ class Network
      * @param $cidr
      * @return string
      */
-    public static function cidr2network($ip, $cidr)
+    public static function cidr2network($ip, $cidr): string
     {
-        $network = long2ip((ip2long($ip)) & ((-1 << (32 - (int)$cidr))));
-
-        return $network;
+      return long2ip((ip2long($ip)) & ((-1 << (32 - (int)$cidr))));
     }
 
     // convert netmask to cidr
@@ -89,7 +88,7 @@ class Network
      * @param $netmask
      * @return int
      */
-    private static function netmask2cidr($netmask)
+    private static function netmask2cidr($netmask): int
     {
         $bits = 0;
         $netmask = explode(".", $netmask);
@@ -111,7 +110,7 @@ class Network
      * @param $cidr
      * @return bool
      */
-    private static function cidr_match($ip, $network, $cidr)
+    private static function cidr_match($ip, $network, $cidr): bool
     {
         if(!is_numeric($cidr)) {
             $cidr = static::netmask2cidr($cidr);
@@ -129,7 +128,7 @@ class Network
      * @param $valid_ips
      * @return bool
      */
-    public static function ValidateIP($ip, $valid_ips)
+    public static function ValidateIP($ip, $valid_ips): bool
     {
         foreach($valid_ips as $valid_ip => $netmask) {
             if(Network::cidr_match($ip, $valid_ip, $netmask)) {

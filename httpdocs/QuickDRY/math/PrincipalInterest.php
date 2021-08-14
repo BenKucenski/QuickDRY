@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\SafeClass;
+
 /**
  * Class PrincipalInterest
  */
