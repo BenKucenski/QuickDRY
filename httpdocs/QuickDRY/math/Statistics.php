@@ -1,18 +1,19 @@
 <?php
+namespace QuickDRY\Math;
 
 use QuickDRY\Utilities\Debug;
 
 class Statistics
 {
-  public $m;
-  public $b;
-  public $r;
-  public $sd_x;
-  public $sd_y;
-  public $xm;
-  public $ym;
+  public float $m;
+  public float $b;
+  public float $r;
+  public float $sd_x;
+  public float $sd_y;
+  public float $xm;
+  public float $ym;
 
-  public function _rsquare($data, $x_key, $y_key)
+  public function _rsquare($data, $x_key, $y_key): bool
   {
     $xm = static::mean($data, $x_key);
     $ym = static::mean($data, $y_key);
@@ -58,7 +59,7 @@ class Statistics
     return $t / sizeof($list);
   }
 
-  public static function mb($xm, $ym, $data, $x_key, $y_key)
+  public static function mb($xm, $ym, $data, $x_key, $y_key): array
   {
     $mb = [];
 
@@ -74,7 +75,7 @@ class Statistics
     return $mb;
   }
 
-  public static function rsquare($data, $x_key, $y_key)
+  public static function rsquare($data, $x_key, $y_key): float
   {
     $xm = static::mean($data, $x_key);
     $ym = static::mean($data, $y_key);

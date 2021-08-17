@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Math;
 
 use QuickDRY\Utilities\SafeClass;
 
@@ -7,12 +8,12 @@ use QuickDRY\Utilities\SafeClass;
  */
 class PrincipalInterest extends SafeClass
 {
-    public $month;
-    public $principal;
-    public $interest;
-    public $principal_payment;
-    public $interest_payment;
-    public $rollover;
+    public ?int $month = null;
+    public ?float $principal = null;
+    public ?float $interest = null;
+    public ?float $principal_payment = null;
+    public ?float $interest_payment = null;
+    public ?float $rollover = null;
 
-    public $table;
+    public ?array $table = null;
 }

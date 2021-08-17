@@ -1,27 +1,30 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use ChangeLogHandler;
+use DateTime;
 use QuickDRY\Utilities\Dates;
-use QuickDRY\Utilities\Debug;
+use ReflectionException;
+use ReflectionObject;
 
 /**
  * Class SQL_Base
  * @property bool HasChanges
  * @property array Changes
+ * @property array history
  */
 class SQL_Base
 {
-  public static bool $_use_change_log = false;
-
+  protected static ?bool $_use_change_log = null;
   protected array $props = [];
-  protected static ?string $table = null;
-  protected static ?string $database = null;
+  protected static string $table;
+  protected static string $database;
 
   protected array $_change_log = [];
   protected ?array $_history = null;
-  protected ?bool $_from_db = null;
+  protected ?int $_from_db = null;
 
-  public bool $HasChanges;
+  public ?bool $HasChanges;
 
   public static bool $UseLog = false;
   public static array $Log = [];
@@ -220,7 +223,7 @@ class SQL_Base
 
   /**
    * @param $name
-   * @return array|mixed|null
+   * @return array|mixed|ChangeLogHandler[]|null
    */
   public function __get($name)
   {
@@ -240,11 +243,11 @@ class SQL_Base
   }
 
   /**
-   * @param string $name
-   * @param mixed $value
+   * @param $name
+   * @param $value
    * @return mixed
    */
-  public function __set(string $name, $value)
+  public function __set($name, $value)
   {
     switch ($name) {
       default:
@@ -253,7 +256,10 @@ class SQL_Base
     return $value;
   }
 
-  private function _history()
+  /**
+   * @return ChangeLogHandler[]|null
+   */
+  private function _history(): ?array
   {
     if (class_exists('ChangeLogHandler')) {
       return ChangeLogHandler::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
@@ -284,36 +290,36 @@ class SQL_Base
   }
 
   /**
-   * @param $where
+   * @param array|null $where
    *
    * @return mixed
    */
-  public static function Get($where)
+  public static function Get(array $where = null)
   {
     return static::_Get($where);
   }
 
   /**
-   * @param null $where
-   * @param null $order_by
-   * @param null $limit
+   * @param array|null $where
+   * @param array|null $order_by
+   * @param int|null $limit
    *
    * @return null
    */
-  public static function GetAll($where = null, $order_by = null, $limit = null)
+  public static function GetAll(array $where = null, array $order_by = null, int $limit = null): ?array
   {
     if (!is_null($order_by) && !is_array($order_by)) {
-      Debug::Halt('QuickDRY Error: GetAll $order_by must be an assoc array ["col"=>"asc,desc",...]', true);
+      Halt('QuickDRY Error: GetAll $order_by must be an assoc array ["col"=>"asc,desc",...]', true);
     }
 
     if (!is_null($where) && !is_array($where)) {
-      Debug::Halt('QuickDRY Error: GetAll $where must be an assoc array ["col"=>"val",...]', true);
+      Halt('QuickDRY Error: GetAll $where must be an assoc array ["col"=>"val",...]', true);
     }
 
     if (!is_null($order_by)) {
       foreach ($order_by as $col => $dir) {
         if (!self::check_props(trim($col))) {
-          Debug::Halt('QuickDRY Error: ' . $col . ' is not a valid order by column for ' . get_called_class());
+          Halt('QuickDRY Error: ' . $col . ' is not a valid order by column for ' . get_called_class());
           return null;
         }
       }
@@ -327,7 +333,7 @@ class SQL_Base
       foreach ($where as $col => $dir) {
         $col = str_replace('+', '', $col);
         if (!self::check_props(trim($col))) {
-          Debug::Halt('QuickDRY Error: ' . $col . ' is not a valid where column for ' . get_called_class());
+          Halt('QuickDRY Error: ' . $col . ' is not a valid where column for ' . get_called_class());
           return null;
         }
       }
@@ -347,16 +353,22 @@ class SQL_Base
   }
 
   /**
-   * @param null $where
-   * @param null $order_by
+   * @param array|null $where
+   * @param array|null $order_by
    * @param int $page
    * @param int $per_page
-   * @param null $left_join
-   * @param null $limit
+   * @param array|null $left_join
+   * @param int|null $limit
    *
    * @return null
    */
-  public static function GetAllPaginated($where = null, $order_by = null, int $page = 0, int $per_page = 0, $left_join = null, $limit = null)
+  public static function GetAllPaginated(
+    array $where = null,
+    array $order_by = null,
+    int $page = 0,
+    int $per_page = 0,
+    array $left_join = null,
+    int $limit = null)
   {
     return static::_GetAllPaginated($where, $order_by, $page, $per_page, $left_join, $limit);
   }
@@ -367,9 +379,8 @@ class SQL_Base
   public static function GetVars(): array
   {
     $vars = [];
-    foreach (static::$prop_definitions as $name => $def) {
+    foreach (static::$prop_definitions as $name => $def)
       $vars[$name] = null;
-    }
     return $vars;
   }
 
@@ -382,7 +393,7 @@ class SQL_Base
     if (array_key_exists($name, $this->props)) {
       return $this->props[$name];
     }
-    Debug::Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
+    Halt($name . ' is not a property of ' . get_class($this) . "\r\n");
     return null;
   }
 
@@ -410,24 +421,25 @@ class SQL_Base
   }
 
   /**
-   * @param string $name
-   * @param mixed $value
+   * @param $name
+   * @param $value
+   *
    */
-  protected function SetProperty(string $name, $value)
+  protected function SetProperty($name, $value)
   {
     if (!array_key_exists($name, $this->props)) {
-      Debug::Halt('QuickDRY Error: ' . $name . ' is not a property of ' . get_class($this) . "\r\n");
+      Halt('QuickDRY Error: ' . $name . ' is not a property of ' . get_class($this) . "\r\n");
     }
 
     if (is_array($value)) {
-      Debug::Halt(['QuickDRY Error: Value assigned to property cannot be an array.', $value]);
+      Halt(['QuickDRY Error: Value assigned to property cannot be an array.', $value]);
     }
 
     if (is_object($value)) {
       if ($value instanceof DateTime) {
         $value = Dates::Timestamp($value);
       } else {
-        Debug::Halt(['QuickDRY Error: Value assigned to property cannot be an object.', $value]);
+        Halt(['QuickDRY Error: Value assigned to property cannot be an object.', $value]);
       }
     }
 
@@ -497,7 +509,15 @@ class SQL_Base
    *
    * @return string
    */
-  public static function GetHeader(string $sort_by = '', string $dir = '', bool $modify = false, array $add = [], array $ignore = [], string $add_params = '', bool $sortable = true, array $column_order = []): string
+  public static function GetHeader(
+    string $sort_by = '',
+    string $dir = '',
+    bool $modify = false,
+    array $add = [],
+    array $ignore = [],
+    string $add_params = '',
+    bool $sortable = true,
+    array $column_order = []): string
   {
     return static::_GetHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order);
   }
@@ -511,15 +531,20 @@ class SQL_Base
    *
    * @return string
    */
-  public static function GetBareHeader(bool $modify = false, array $add = [], array $ignore = [], bool $sortable = true, array $column_order = []): string
+  public static function GetBareHeader(
+    bool $modify = false,
+    array $add = [],
+    array $ignore = [],
+    bool $sortable = true,
+    array $column_order = []): string
   {
     return static::_GetBareHeader(static::$prop_definitions, $modify, $add, $ignore, $sortable, $column_order);
   }
 
   /**
-   * @param        $props
-   * @param        $sort_by
-   * @param        $dir
+   * @param array $props
+   * @param string $sort_by
+   * @param string $dir
    * @param bool $modify
    * @param array $add
    * @param array $ignore
@@ -529,7 +554,16 @@ class SQL_Base
    *
    * @return string
    */
-  protected static function _GetHeader($props, $sort_by, $dir, bool $modify = false, array $add = [], array $ignore = [], string $add_params = '', bool $sortable = true, array $column_order = []): string
+  protected static function _GetHeader(
+    array $props,
+    string $sort_by,
+    string $dir,
+    bool $modify = false,
+    array $add = [],
+    array $ignore = [],
+    string $add_params = '',
+    bool $sortable = true,
+    array $column_order = []): string
   {
     $not_dir = $dir == 'asc' ? 'desc' : 'asc';
     $arrow = $dir == 'asc' ? '&uarr;' : '&darr;';
@@ -576,7 +610,7 @@ class SQL_Base
   }
 
   /**
-   * @param        $props
+   * @param array $props
    * @param bool $modify
    * @param array $add
    * @param array $ignore
@@ -585,7 +619,7 @@ class SQL_Base
    *
    * @return string
    */
-  protected static function _GetBareHeader($props, bool $modify = false, array $add = [], array $ignore = [], bool $sortable = true, array $column_order = []): string
+  protected static function _GetBareHeader(array $props, bool $modify = false, array $add = [], array $ignore = [], bool $sortable = true, array $column_order = []): string
   {
     $columns = [];
 
@@ -630,10 +664,18 @@ class SQL_Base
    * @param string $custom_link
    * @param string $row_style
    * @param array $column_order
-   *
+   * @param bool $no_delete
    * @return string
    */
-  public function ToRowLegacy(bool $modify = true, array $swap = [], array $add = [], array $ignore = [], string $custom_link = '', string $row_style = '', array $column_order = []): string
+  public function ToRowLegacy(
+    bool $modify = false,
+    array $swap = [],
+    array $add = [],
+    array $ignore = [],
+    string $custom_link = '',
+    string $row_style = '',
+    array $column_order = [],
+    bool $no_delete = false): string
   {
     $res = '<tr style="' . $row_style . '">';
     $columns = [];
@@ -656,7 +698,7 @@ class SQL_Base
       }
 
     if (sizeof($add) > 0)
-      foreach ($add as $header => $value) {
+      foreach ($add as $value) {
         if (is_array($value)) {
           $name = $value['value'];
           $value = $this->{$value['value']};
@@ -664,9 +706,8 @@ class SQL_Base
           $name = $value;
           $value = $this->$value;
         }
-        if (is_array($value)) {
+        if (is_array($value))
           $value = implode(',', $value);
-        }
         $class = 'data_text';
         if (is_numeric(str_replace('-', '', $value)))
           $class = 'data_num';
@@ -677,7 +718,7 @@ class SQL_Base
       foreach ($column_order as $name)
         $res .= $columns[$name];
     } else {
-      foreach ($columns as $name => $html)
+      foreach ($columns as $html)
         $res .= $html;
     }
 
@@ -686,7 +727,7 @@ class SQL_Base
    			<td class="data_text" style="white-space: nowrap;">
    				[ <a class="action_link" href="' . CURRENT_PAGE_URL . '/edit?id=' . $this->props['id'] . '">edit</a> ]
    			';
-      if ($modify !== NO_DELETE)
+      if (!$no_delete)
         $res .= '[ <a class="action_link" onclick="return confirm(\'Are you sure?\');" href="' . CURRENT_PAGE_URL . '/edit?a=delete&id=' . $this->props['id'] . '">delete</a> ]';
       $res .= '</td>';
     }
@@ -694,6 +735,11 @@ class SQL_Base
       $res .= '<td class="data_text"><a href="' . $custom_link['page'] . '?' . $custom_link['var'] . '=' . $this->props['id'] . '">' . $custom_link['title'] . '</a></td>';
     }
     return $res . '</tr>';
+  }
+
+  public function ValueToNiceValue(string $column_name, $value = null, bool $force_value = false)
+  {
+    return $value;
   }
 
   /**
@@ -706,7 +752,13 @@ class SQL_Base
    *
    * @return string
    */
-  public function ToRow(bool $modify = false, array $swap = [], array $add = [], array $ignore = [], string $custom_link = '', array $column_order = []): string
+  public function ToRow(
+    bool $modify = false,
+    array $swap = [],
+    array $add = [],
+    array $ignore = [],
+    string $custom_link = '',
+    array $column_order = []): string
   {
     $res = '<tr>';
     $columns = [];
@@ -745,7 +797,7 @@ class SQL_Base
       }
 
     if (sizeof($add) > 0)
-      foreach ($add as $header => $value) {
+      foreach ($add as $value) {
         if (is_array($value)) {
           $name = $value['value'];
           $value = $this->{$value['value']};
@@ -763,7 +815,7 @@ class SQL_Base
       foreach ($column_order as $name)
         $res .= $columns[$name];
     } else {
-      foreach ($columns as $name => $html)
+      foreach ($columns as $html)
         $res .= $html;
     }
 
@@ -798,11 +850,14 @@ class SQL_Base
   // when coming from database, don't trigger change log
   // strict will halt when the hash passed in contains columns not in the table definition
   /**
-   * @param      $row
+   * @param array $row
    * @param bool $trigger_change_log
    * @param bool $strict
    */
-  public function FromRow($row, bool $trigger_change_log = false, bool $strict = false)
+  public function FromRow(
+    array $row,
+    bool $trigger_change_log = false,
+    bool $strict = false)
   {
     global $User;
 
@@ -841,28 +896,28 @@ class SQL_Base
       }
 
       if ($trigger_change_log) {
-        $this->$name = $value;
+        $this->$name = isset($row[$name]) ? $value : ($value);
       } else {
-        $this->props[$name] = isset($row[$name]) ? $value : null;
+        $this->props[$name] = isset($row[$name]) ? $value : (null);
       }
     }
     if ($strict && sizeof($missing)) {
-      Debug::Halt([
-        'error' => 'QuickDRY Error: Missing Columns',
-        'Object' => get_class($this),
-        'Columns' => $missing,
-        'Values' => $row
-      ]);
+      Halt(['error' => 'QuickDRY Error: Missing Columns', 'Object' => get_class($this), 'Columns' => $missing, 'Values' => $row]);
     }
   }
 
+  public function Save(): ?array
+  {
+    return null;
+  }
+
   /**
-   * @param      $req
+   * @param array $req
    * @param bool $save
    * @param bool $keep_existing_values
-   * @return array
+   * @return bool|array
    */
-  public function FromRequest(&$req, bool $save = true, bool $keep_existing_values = true): ?array
+  public function FromRequest(array &$req, bool $save = true, bool $keep_existing_values = true)
   {
     foreach ($this->props as $name => $value) {
       $this->$name = $req[$name] ?? (!$keep_existing_values ? null : $this->props[$name]);
@@ -871,7 +926,7 @@ class SQL_Base
     if ($save) {
       return $this->Save();
     }
-    return [];
+    return true;
   }
 
   // occasionally we end up reusing a selection over and over on the same page
@@ -888,7 +943,15 @@ class SQL_Base
    * @param string $onchange
    * @return string
    */
-  protected static function _Select($selected, $id, $value, $order_by, string $display = "", $where = null, bool $show_none = true, string $onchange = ''): string
+  protected static function _Select(
+    $selected,
+    $id,
+    $value,
+    $order_by,
+    string $display = "",
+    $where = null,
+    bool $show_none = true,
+    string $onchange = ''): string
   {
     if (is_null($show_none)) {
       $show_none = true;
@@ -899,6 +962,10 @@ class SQL_Base
 
     $hash = md5(serialize([$type, $order_by, $where]));
     if (!isset(static::$_select_cache[$hash])) {
+      if(!method_exists($type, 'GetAll')) {
+        exit($type . '::GetAll');
+      }
+
       $items = $type::GetAll($where, is_array($order_by) ? $order_by : [$order_by => 'asc']);
       static::$_select_cache[$hash] = $items;
     } else
@@ -918,7 +985,15 @@ class SQL_Base
    * @param string $onchange
    * @return string
    */
-  protected static function _SelectItems($items, $selected, $id, $value, $order_by, string $display = "", bool $show_none = true, string $onchange = ''): string
+  protected static function _SelectItems(
+    $items,
+    $selected,
+    $id,
+    $value,
+    $order_by,
+    string $display = "",
+    bool $show_none = true,
+    string $onchange = ''): string
   {
     if (is_null($show_none)) {
       $show_none = true;
@@ -975,13 +1050,22 @@ class SQL_Base
    * @param        $value
    * @param        $order_by
    * @param string $display
-   * @param string $where
+   * @param string|null $where
    *
    * @return string
    */
-  protected static function _JQuerySelect($selected, $id, $value, $order_by = null, $display = "", $where = null): string
+  protected static function _JQuerySelect(
+    $selected,
+    $id,
+    $value,
+    $order_by = null,
+    string $display = "",
+    string $where = null): string
   {
     $type = get_called_class();
+    if(!method_exists($type, 'GetAll')) {
+      exit($type . '::GetAll');
+    }
 
     $items = $type::GetAll($where, $order_by);
 
@@ -998,7 +1082,7 @@ class SQL_Base
    *
    * @return string
    */
-  protected static function _JQuerySelectItems($items, $selected, $id, $value, string $display = "")
+  protected static function _JQuerySelectItems($items, $selected, $id, $value, string $display = ""): string
   {
     include_once 'controls/drag_select.js.php';
 
@@ -1085,12 +1169,21 @@ class SQL_Base
    *
    * @return string
    */
-  protected static function _EasySelect($selected, $id, $value, $order_by, string $display = "", string $where = '1=1'): string
+  protected static function _EasySelect(
+    $selected,
+    $id,
+    $value,
+    $order_by,
+    string $display = "",
+    string $where = '1=1'): string
   {
     $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
 
-    $items = [];
-    eval("\$items = " . $type . "::GetAll(\"$order_by\",\"asc\",\"$where\");");
+
+    if(!method_exists($type, 'GetAll')) {
+      exit("$type::GetAll");
+    }
+    $items = $type::GetAll($order_by,'asc',$where);
 
     return self::_EasySelectItems($items, $selected, $id, $value, $order_by, $display);
   }
@@ -1132,7 +1225,7 @@ class SQL_Base
     $select_remove .= '</select>';
     $select_add .= '</select>';
 
-    return '<table><tr><td valign="top"><b>Current Items</b><br/>(select to remove)<br/>' . $select_remove . '</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign="top"><b>Available Items</b><br/>(select to add)<br/>' . $select_add . '</td></tr></table>';
+    return '<table><tr><td style="vertical-align: top"><b>Current Items</b><br/>(select to remove)<br/>' . $select_remove . '</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td style="vertical-align: top;"><b>Available Items</b><br/>(select to add)<br/>' . $select_add . '</td></tr></table>';
 
   }
 

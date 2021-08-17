@@ -1,7 +1,7 @@
 <?php
 namespace pages\[[namespace]];
 
-use Navigation;
+use QuickDRY\Utilities\Navigation;
 ?>
 
 <div class="panel panel-default">

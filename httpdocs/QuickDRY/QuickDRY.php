@@ -181,12 +181,12 @@ function autoloader_QuickDRY($class)
     'JsonResult' => 'JSON/JsonResult.php',
     'JsonStatusResult' => 'JSON/JsonStatusResult.php',
 
-    'Debt' => 'math/Debt.php',
-    'PrincipalInterest' => 'math/PrincipalInterest.php',
-    'MathClass' => 'math/MathClass.php',
-    'UTMClass' => 'math/UTMClass.php',
-    'SnowballMath' => 'math/SnowballMath.php',
-    'Statistics' => 'math/Statistics.php',
+    'QuickDRY\Math\Debt' => 'math/Debt.php',
+    'QuickDRY\Math\PrincipalInterest' => 'math/PrincipalInterest.php',
+    'QuickDRY\Math\MathClass' => 'math/MathClass.php',
+    'QuickDRY\Math\UTMClass' => 'math/UTMClass.php',
+    'QuickDRY\Math\SnowballMath' => 'math/SnowballMath.php',
+    'QuickDRY\Math\Statistics' => 'math/Statistics.php',
 
   ];
 

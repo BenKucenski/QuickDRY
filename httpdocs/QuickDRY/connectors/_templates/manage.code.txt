@@ -1,7 +1,8 @@
 <?php
 namespace pages\[[namespace]];
 
-use BasePage;
+use QuickDRY\Web\BasePage;
+
 use [[c_name]];
 
 /**

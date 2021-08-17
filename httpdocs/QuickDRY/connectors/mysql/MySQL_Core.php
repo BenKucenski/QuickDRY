@@ -616,6 +616,7 @@ class MySQL_Core extends SQL_Base
       case 'bigint unsigned':
       case 'decimal(18,2)':
       case 'int(10)':
+      case 'uinit':
         return true;
 
       case 'date':
@@ -659,6 +660,7 @@ class MySQL_Core extends SQL_Base
         }
         return $value ? 1 : 0;
 
+      case 'unit':
       case 'decimal(18,2)':
       case 'double':
       case 'int(10)':

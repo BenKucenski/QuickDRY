@@ -24,9 +24,9 @@ class [[c_name]] extends db_[[c_name]]
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function Save()
+    public function Save(): ?array
     {
         [[HasUserLink]]
 

@@ -1,5 +1,10 @@
 <?php
 
+use QuickDRY\Connectors\SQL_Query;
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\HTTP;
+use QuickDRY\Web\ElementID;
+
 /**
  *
  * [[c_name]]
@@ -88,9 +93,9 @@ class db_[[c_name]] extends [[DatabaseClass]]
      * @param array $req
      * @param bool $save
      * @param bool $keep_existing_values
-     * @return bool|array
+     * @return null|array
      */
-    public function FromRequest(array &$req, bool $save = true, bool $keep_existing_values = false)
+    public function FromRequest(array &$req, bool $save = true, bool $keep_existing_values = false): ?array
     {
         return parent::FromRequest($req, $save, $keep_existing_values);
     }

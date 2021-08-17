@@ -1,4 +1,5 @@
 <?php
+namespace QuickDRY\Math;
 
 /**
  * Class UTMClass
@@ -6,21 +7,21 @@
 class UTMClass
 {
 // http://home.hiwaay.net/~taylorc/toolbox/geography/geoutm.html
-    public static $pi = 3.14159265358979;
+    public static float $pi = 3.14159265358979;
 
     /* Ellipsoid model constants (actual values here are for WGS84) */
-    public static $sm_a = 6378137.0;
-    public static $sm_b = 6356752.314;
-    public static $sm_EccSquared = 6.69437999013e-03;
+    public static float $sm_a = 6378137.0;
+    public static float $sm_b = 6356752.314;
+    public static float $sm_EccSquared = 6.69437999013e-03;
 
-    public static $UTMScaleFactor = 0.9996;
+    public static float $UTMScaleFactor = 0.9996;
 
 
     /**
      * @param $deg
      * @return float
      */
-    public static function DegToRad($deg)
+    public static function DegToRad($deg): float
     {
         return ($deg * self::$pi / 180.0);
     }
@@ -33,7 +34,7 @@ class UTMClass
      * @param $lon_b
      * @return float
      */
-    public static function GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
+    public static function GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b): float
     {
         $lat_a_r = self::DegToRad($lat_a);
         $lon_a_r = self::DegToRad($lon_a);
@@ -55,7 +56,7 @@ class UTMClass
      * @param $lon_b
      * @return float
      */
-    public static function GetMilesFromLatLon($lat_a, $lon_a, $lat_b, $lon_b)
+    public static function GetMilesFromLatLon($lat_a, $lon_a, $lat_b, $lon_b): float
     {
         return self::GetDistanceFromLatLon($lat_a, $lon_a, $lat_b, $lon_b) / 1.6093;
     }
@@ -236,7 +237,7 @@ class UTMClass
      * @param $lambda0
      * @return array
      */
-    public static function MapLatLonToXY($phi, $lambda, $lambda0)
+    public static function MapLatLonToXY($phi, $lambda, $lambda0): array
     {
         //var N, nu2, ep2, t, t2, l;
         //var l3coef, l4coef, l5coef, l6coef, l7coef, l8coef;
@@ -316,7 +317,7 @@ class UTMClass
      * @param $zone
      * @return array
      */
-    public static function LatLonToUTMXY($lat, $lon, $zone)
+    public static function LatLonToUTMXY($lat, $lon, $zone): array
     {
         $zone = self::UTMCentralMeridian($zone);
         $xy = self::MapLatLonToXY($lat, $lon, $zone);
@@ -363,7 +364,7 @@ class UTMClass
      * @param $xy_b
      * @return float
      */
-    public static function GetMiles($xy_a, $xy_b)
+    public static function GetMiles($xy_a, $xy_b): float
     {
         return self::GetDistance($xy_a, $xy_b) / 1.6093;
     }
@@ -375,7 +376,7 @@ class UTMClass
      * @param $bearing
      * @return array
      */
-    public static function AddKmToLatLon($lat, $lon, $distance, $bearing)
+    public static function AddKmToLatLon($lat, $lon, $distance, $bearing): array
     {
         $earthRadius = 6371;
         $lat1 = deg2rad($lat);
@@ -395,7 +396,7 @@ class UTMClass
      * @param $distance
      * @return array
      */
-    public static function GetBoundary($lat, $lon, $distance)
+    public static function GetBoundary($lat, $lon, $distance): array
     {
         $res = [];
 

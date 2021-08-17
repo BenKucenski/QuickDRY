@@ -480,7 +480,7 @@ host = ' . $this->DB_HOST . '
 				referenced_column_name AS column_name,
 				CONSTRAINT_NAME
 		FROM
-				info_schema.key_column_usage
+				information_schema.key_column_usage
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL
@@ -533,7 +533,7 @@ host = ' . $this->DB_HOST . '
 				referenced_column_name,
 				CONSTRAINT_NAME
 		FROM
-				info_schema.key_column_usage
+				information_schema.key_column_usage
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL

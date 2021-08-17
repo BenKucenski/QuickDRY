@@ -115,7 +115,7 @@ class SQLCodeGen extends SafeClass
       case 'tinyint unsigned':
       case 'bigint unsigned':
       case 'int unsigned':
-        return 'uint';
+        return 'int';
 
       case 'numeric':
       case 'tinyint':
