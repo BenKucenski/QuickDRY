@@ -15,7 +15,7 @@ class MySQL_Core extends SQL_Base
 {
   public static string $DB_HOST;
   public static string $DatabasePrefix;
-  public static bool $LowerCaseTable;
+  public static int $LowerCaseTable;
   public static string $DatabaseTypePrefix;
   public static array $_primary;
   public static array $_unique;
