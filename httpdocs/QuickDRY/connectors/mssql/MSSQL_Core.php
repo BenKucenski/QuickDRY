@@ -17,7 +17,7 @@ class MSSQL_Core extends SQL_Base
 
   protected static string $DatabaseTypePrefix = 'ms';
   protected static string $DatabasePrefix = '';
-  protected static bool $LowerCaseTable = false;
+  protected static int $LowerCaseTable = 0;
   protected static string $DB_HOST;
   protected bool $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 

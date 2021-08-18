@@ -8,7 +8,7 @@ use QuickDRY\Utilities\Log;
  */
 class MySQL_CodeGen extends SQLCodeGen
 {
-  public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MySQL_A', $GenerateJSON = true, $DestinationFolder = '../httpdocs')
+  public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = '', $GenerateJSON = true, $DestinationFolder = '../httpdocs')
   {
     $this->DatabaseTypePrefix = 'my';
 

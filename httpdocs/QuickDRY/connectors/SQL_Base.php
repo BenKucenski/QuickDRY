@@ -119,9 +119,9 @@ class SQL_Base
     $this->props = self::GetVars();
   }
 
-  private static function ColumnNameToNiceName(string $name): string
+  private static function ColumnNameToNiceName(string $column_name): string
   {
-    return $name;
+    return $column_name;
   }
 
   /**

@@ -121,11 +121,15 @@ class db_[[c_name]] extends [[DatabaseClass]]
     }
 
     /**
-     * @param UserClass $user
+     * @param UserClass|null $user
      * @return bool
      */
-    public function VisibleTo([[UserClass]] $user): bool
+    public function VisibleTo(?[[UserClass]] $user): bool
     {
+        if(is_null($user)) {
+            return false;
+        }
+
         if($user->Is(ROLE_ID_ADMIN)) {
             return true;
         }
@@ -136,11 +140,15 @@ class db_[[c_name]] extends [[DatabaseClass]]
     }
 
     /**
-     * @param UserClass $user
+     * @param UserClass|null $user
      * @return bool
      */
-    public function CanDelete([[UserClass]] $user): bool
+    public function CanDelete(?[[UserClass]] $user): bool
     {
+        if(is_null($user)) {
+            return false;
+        }
+
         if($user->Is(ROLE_ID_ADMIN)) {
             return true;
         }

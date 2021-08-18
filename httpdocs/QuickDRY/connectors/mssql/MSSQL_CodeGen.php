@@ -8,12 +8,12 @@ use QuickDRY\Utilities\Log;
  */
 class MSSQL_CodeGen extends SQLCodeGen
 {
-  public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = 'MSSQL_A', $GenerateJSON = true, $DestinationFolder = '../httpdocs')
+  public function Init($database, $database_constant, $user_class, $user_var, $user_id_column, $master_page, $lowercase_tables, $use_fk_column_name, $DatabaseClass = '', $GenerateJSON = true, $DestinationFolder = '../httpdocs')
   {
     $this->DatabaseTypePrefix = 'ms';
 
     if (!$DatabaseClass) {
-      $DatabaseClass = 'MSSQL_A';
+      $DatabaseClass = 'QuickDRY\Connectors\MSSQL_A';
     }
     if (!class_exists($DatabaseClass)) {
       exit($DatabaseClass . ' is invalid');
