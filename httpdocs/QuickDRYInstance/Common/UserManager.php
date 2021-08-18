@@ -1,20 +1,22 @@
 <?php
+namespace QuickDRYInstance\Common;
+
 class UserManager
 {
-    public function __construct()
-    {
-    }
+  public function __construct()
+  {
+  }
 
     public function LogIn($username, $password)
-    {
-        $username = strtolower(trim($username));
-        $password = trim($password);
+  {
+    $username = strtolower(trim($username));
+    $password = trim($password);
 
         // $user = myUserClass::LogIn($username, $password);
 
         if(!is_object($user)) {
             HTTP::RedirectError($user);
-        }
+    }
         $u = new UserClass();
         $u->id = $user->id;
         $u->Username = $username;
@@ -22,6 +24,6 @@ class UserManager
         $u->User = $user;
 
         return $u;
-    }
+  }
 }
 

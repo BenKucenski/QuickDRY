@@ -2,6 +2,8 @@
 
 namespace QuickDRY\Utilities;
 
+use QuickDRY\Connectors\Elastic_A;
+
 /**
  * Class Log
  */

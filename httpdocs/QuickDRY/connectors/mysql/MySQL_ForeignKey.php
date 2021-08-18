@@ -7,9 +7,15 @@ namespace QuickDRY\Connectors;
 class MySQL_ForeignKey
 {
   public ?string $table_name;
+
+  /* @var $column_name mixed */
   public $column_name;
+
   public ?string $foreign_table_name;
+
+  /* @var $foreign_column_name mixed */
   public $foreign_column_name;
+
   public ?string $FK_CONSTRAINT_NAME;
 
   /**

@@ -11,20 +11,6 @@ use QuickDRY\Utilities\Strings;
 
 const GUID_MSSQL = 'UPPER(SUBSTRING(master.dbo.fn_varbintohexstr(HASHBYTES(\'MD5\',cast(NEWID() as varchar(36)))), 3, 32)) ';
 
-if (!function_exists('sqlsrv_connect')) {
-  function sqlsrv_connect()
-  {
-    exit('sqlsrv_connect not loaded as an extension and is not actually available.');
-  }
-}
-
-if (!function_exists('sqlsrv_query')) {
-  function sqlsrv_query()
-  {
-    exit('sqlsrv_query not loaded as an extension and is not actually available.');
-  }
-}
-
 /**
  * Class MSSQL
  */

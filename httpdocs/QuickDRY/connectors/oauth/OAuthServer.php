@@ -3,9 +3,9 @@ namespace QuickDRY\Connectors;
 
 class OAuthServer
 {
-  protected $timestamp_threshold = 300; // in seconds, five minutes
-  protected $version = '1.0';             // hi blaine
-  protected $signature_methods = array();
+  protected int $timestamp_threshold = 300; // in seconds, five minutes
+  protected string $version = '1.0';             // hi blaine
+  protected array $signature_methods = array();
 
   protected $data_store;
 
@@ -25,8 +25,9 @@ class OAuthServer
   /**
    * process a request_token request
    * returns the request token on success
+   * @throws OAuthException
    */
-  public function fetch_request_token(&$request)
+  public function fetch_request_token($request)
   {
     $this->get_version($request);
 
@@ -47,7 +48,7 @@ class OAuthServer
    * returns the access token on success
    * @throws OAuthException
    */
-  public function fetch_access_token(&$request)
+  public function fetch_access_token($request)
   {
     $this->get_version($request);
 
@@ -67,11 +68,11 @@ class OAuthServer
    * verify an api call, checks all the parameters
    * @throws OAuthException
    */
-  public function verify_request(&$request)
+  public function verify_request($request): array
   {
     $this->get_version($request);
     $consumer = $this->get_consumer($request);
-    $token = $this->get_token($request, $consumer, "access");
+    $token = $this->get_token($request, $consumer);
     $this->check_signature($request, $consumer, $token);
     return array($consumer, $token);
   }
@@ -80,13 +81,14 @@ class OAuthServer
 
   /**
    * version 1
+   * @throws OAuthException
    */
   private function get_version($request): void
   {
     $version = $request->get_parameter("oauth_version");
     if (!$version) {
       // Service Providers MUST assume the protocol version to be 1.0 if this parameter is not present.
-      // Chapter 7.0 ("Accessing Protected Ressources")
+      // Chapter 7.0 ("Accessing Protected Resources")
       $version = '1.0';
     }
     if ($version !== $this->version) {
@@ -96,6 +98,7 @@ class OAuthServer
 
   /**
    * figure out the signature with some defaults
+   * @throws OAuthException
    */
   private function get_signature_method($request)
   {
@@ -122,6 +125,7 @@ class OAuthServer
 
   /**
    * try to find the consumer for the provided request's consumer key
+   * @throws OAuthException
    */
   private function get_consumer($request)
   {
@@ -143,6 +147,7 @@ class OAuthServer
 
   /**
    * try to find the token for the provided request's token key
+   * @throws OAuthException
    */
   private function get_token($request, $consumer, $token_type = "access")
   {
@@ -162,6 +167,7 @@ class OAuthServer
   /**
    * all-in-one function to check the signature on a request
    * should guess the signature method appropriately
+   * @throws OAuthException
    */
   private function check_signature($request, $consumer, $token)
   {

@@ -16,9 +16,9 @@ class FormClass
   /**
    * @param $id
    *
-   * @return null
+   * @return string|null
    */
-  public static function Get($id)
+  public static function Get($id): ?string
   {
     return static::$_options[$id] ?? null;
   }

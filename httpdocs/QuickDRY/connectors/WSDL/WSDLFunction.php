@@ -13,12 +13,12 @@ use QuickDRY\Utilities\SafeClass;
  */
 class WSDLFunction extends SafeClass
 {
-    public $Name;
-    public $Parameters;
-    public $Response;
-    public $Result;
-    public $Nillable;
-    public $Type;
+    public ?string $Name;
+    public ?array $Parameters;
+    public ?WSDLResponse $Response;
+    public ?WSDLResult $Result;
+    public ?string $Nillable;
+    public ?string $Type;
 
     public function AddParameter(WSDLParameter $param)
     {
@@ -28,7 +28,7 @@ class WSDLFunction extends SafeClass
         $this->Parameters[] = $param;
     }
 
-    public function AddResponse(WSDLParameter &$param, $name)
+    public function AddResponse(WSDLParameter $param, $name)
     {
         if(!$this->Response) {
             $this->Response = new WSDLResponse();
@@ -37,7 +37,7 @@ class WSDLFunction extends SafeClass
         $this->Response->AddParameter($param);
     }
 
-    public function AddResult(WSDLParameter &$param, $name)
+    public function AddResult(WSDLParameter $param, $name)
     {
         if(!$this->Result) {
             $this->Result = new WSDLResult();

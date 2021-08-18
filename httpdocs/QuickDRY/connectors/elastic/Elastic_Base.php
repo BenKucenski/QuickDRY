@@ -20,7 +20,7 @@ class Elastic_Base extends SafeClass
     }
   }
 
-  public function __get($name)
+  public function __get(string $name)
   {
     switch ($name) {
       default:

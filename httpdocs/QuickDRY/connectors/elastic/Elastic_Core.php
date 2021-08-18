@@ -3,6 +3,9 @@ namespace QuickDRY\Connectors;
 
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
+use Exception;
+use QuickDRY\Utilities\Metrics;
+use QuickDRY\Utilities\Strings;
 
 /**
  * Class Elastic_Core
@@ -12,7 +15,7 @@ class Elastic_Core extends Elastic_Base
   // http://domain:9200/_cat/indices?v&pretty
   // http://domain:9200/index/type/_search?q=*:*&pretty
 
-  protected static ?Elasticsearch\Client $client = null;
+  protected static ?Client $client = null;
 
   public static bool $use_log = false;
   public static array $log = [];
@@ -199,7 +202,7 @@ class Elastic_Core extends Elastic_Base
     return $list;
   }
 
-  protected static function _DeleteIndexType($index, $type)
+  protected static function _DeleteIndexType(string $index, string $type)
   {
     if (!static::_connect()) {
       return null;
@@ -212,7 +215,7 @@ class Elastic_Core extends Elastic_Base
     // return static::$client->indices()->deleteMapping($params);
   }
 
-  protected static function _DeleteIndex($index): ?array
+  protected static function _DeleteIndex(string $index): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -222,7 +225,7 @@ class Elastic_Core extends Elastic_Base
     return static::$client->indices()->delete($params);
   }
 
-  protected static function _CreateIndex($index, $json): ?array
+  protected static function _CreateIndex(string $index, string $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -233,7 +236,7 @@ class Elastic_Core extends Elastic_Base
     return static::$client->indices()->create($params);
   }
 
-  protected static function _UpdateIndex($index, $json): ?array
+  protected static function _UpdateIndex(string $index, string $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -245,7 +248,7 @@ class Elastic_Core extends Elastic_Base
   }
 
 
-  protected static function _DeleteRemoved($index, $type)
+  protected static function _DeleteRemoved(string $index, string $type)
   {
     if (!static::_connect()) {
       return null;
@@ -270,7 +273,7 @@ class Elastic_Core extends Elastic_Base
     }
   }
 
-  protected static function _CreateIndexType($index, $type, $json): ?array
+  protected static function _CreateIndexType(string $index, string $type, string $json): ?array
   {
     if (!static::_connect()) {
       return null;
@@ -354,7 +357,7 @@ class Elastic_Core extends Elastic_Base
     return $list;
   }
 
-  private static function _ScrollIndexTypeScrollID($index, $type, $where, $ScrollID, &$list, $map_function = null)
+  private static function _ScrollIndexTypeScrollID(string $index, string $type, $where, $ScrollID, &$list, $map_function = null)
   {
     if ($where && sizeof($where)) {
       $params = [];
@@ -403,7 +406,7 @@ class Elastic_Core extends Elastic_Base
     return $array['_scroll_id'] ?? null;
   }
 
-  protected static function _ScrollIndexType($index, $type, $where, $map_function = null): array
+  protected static function _ScrollIndexType(string $index, string $type, $where, $map_function = null): array
   {
     $list = [];
     $list['data'] = [];
@@ -416,7 +419,7 @@ class Elastic_Core extends Elastic_Base
   }
 
   protected static function _Search(
-    $index, $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
+    string $index, string $type, $where, $page = 0, $per_page = 20, $order_by = null, $fields = null
   ): array
   {
     $start_time = microtime(true);

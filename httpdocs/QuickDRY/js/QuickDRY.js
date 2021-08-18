@@ -112,7 +112,7 @@ var QuickDRY = {
             var elem_hidden = $('#' + elem_id + '_' + i + '_hidden');
 
             if (typeof (elem) == 'object') {
-                if (elem.prop("type") == 'checkbox') {
+                if (elem.prop("type") === 'checkbox') {
                     if (data.data[i] == 1) {
                         elem.prop('checked', true);
                     } else {

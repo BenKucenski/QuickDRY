@@ -43,10 +43,10 @@ class SafeClass
   }
 
   /**
-   * @param $name
+   * @param string $name
    * @return null
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     if ($this->_HaltOnError) {
       Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));

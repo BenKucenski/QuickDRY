@@ -1,6 +1,9 @@
 <?php
+
 namespace QuickDRY\Utilities;
 
+use DateTime;
+use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
@@ -281,19 +284,17 @@ class SimpleExcel extends SafeClass
    */
   private static function _SetSpreadsheetCellValue(
     Worksheet $sheet,
-    $sheet_column,
-    $sheet_row,
-    $value,
-    int $property_type = 0)
+              $sheet_column,
+              $sheet_row,
+              $value,
+    int       $property_type = 0)
   {
     if (!$value) {
       return;
     }
 
-    if (is_object($value)) {
-      if ($value instanceof DateTime) {
-        $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Dates::Datestamp($value, '') : Dates::Timestamp($value, '');
-      }
+    if ($value instanceof DateTime) {
+      $value = $property_type == SIMPLE_EXCEL_PROPERTY_TYPE_DATE ? Dates::Datestamp($value, '') : Dates::Timestamp($value, '');
     }
 
     if ($property_type == SIMPLE_EXCEL_PROPERTY_TYPE_AS_GIVEN) {

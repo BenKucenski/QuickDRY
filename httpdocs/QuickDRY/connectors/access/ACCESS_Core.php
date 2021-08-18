@@ -1,10 +1,13 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use DateTime;
+use Exception;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
-use QuickDRY\Web\Web;
+use QuickDRYInstance\Common\ChangeLog;
+use QuickDRYInstance\Common\UserClass;
 
 class ACCESS_Core extends SQL_Base
 {
@@ -238,12 +241,12 @@ class ACCESS_Core extends SQL_Base
   }
 
   /**
-   * @param UserClass $User
+   * @param UserClass|null $User
    * @return array|null
    */
-  public function Remove(UserClass $User): ?array
+  public function Remove(?UserClass $User): ?array
   {
-    if (!$this->CanDelete($User)) {
+    if (!$User || !$this->CanDelete($User)) {
       return ['error' => 'No Permission'];
     }
 
@@ -413,11 +416,7 @@ class ACCESS_Core extends SQL_Base
       $where_sql = implode(" AND ", $t);
     } else {
       if (is_null($col)) {
-        if (isset(static::$_primary[0])) {
-          $col = static::$_primary[0];
-        } else {
-          $col = 'id';
-        }
+        $col = static::$_primary[0] ?? 'id';
       }
       $where_sql = '' . $col . ' = @';
       $params[] = $id;
@@ -479,7 +478,7 @@ class ACCESS_Core extends SQL_Base
     $params = [];
 
     $sql_order = '';
-    if (!is_null($order_by) && is_array($order_by)) {
+    if (is_array($order_by)) {
       $sql_order = [];
       foreach ($order_by as $col => $dir) {
         $sql_order[] .= '' . trim($col) . ' ' . $dir;

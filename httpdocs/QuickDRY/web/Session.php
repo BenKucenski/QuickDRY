@@ -50,11 +50,11 @@ class Session
   }
 
   /**
-   * @param $name
+   * @param string $name
    *
    * @return mixed|string
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     return $this->Get($name);
   }

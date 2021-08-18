@@ -177,11 +177,7 @@ if (file_exists($Web->ControllerFile)) {
           if (!$Web->CurrentUser || !$Web->CurrentUser->id) {
             HTTP::RedirectNotice('Please Sign In', '/' . $Web->DefaultPage);
           } else {
-            if ($Web->CurrentUser) {
-              HTTP::RedirectNotice('', '/' . $Web->DefaultUserPage);
-            } else {
-              HTTP::RedirectError('Access Denied (2)');
-            }
+            HTTP::RedirectNotice('', '/' . $Web->DefaultUserPage);
           }
         }
       }

@@ -8,7 +8,10 @@ class MSSQL_ForeignKey
 {
   public string $database_name;
   public string $table_name;
+
+  /* @var $column_name mixed */
   public $column_name;
+
   public string $foreign_table_name;
   public array $foreign_column_name;
   public string $FK_CONSTRAINT_NAME;

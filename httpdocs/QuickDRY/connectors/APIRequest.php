@@ -2,39 +2,39 @@
 namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\Log;
+use stdClass;
 
 /**
- *
- * @author ben
- * @property string path
- * @property string raw
+ * @property array|null headers
+ * @property mixed res
+ * @property array|stdClass|string|null path
+ * @property array|stdClass|string|null data
  * @property string error
- * @property array data
- * @property string raw_post_data
- * @property stdClass[] res
  */
 class APIRequest
 {
-  private $_path = null;
-  private $_method = null;
-  private $_res = null;
-  private $_error = null;
-  private $_data = null;
-  private $_raw = null;
-  private $_headers = null;
+  private ?string $_path = null;
+  private ?string $_method = null;
+  private ?stdClass $_res = null;
+  private ?string $_error = null;
+  private ?array $_data = null;
+  private ?string $_raw = null;
+  private ?array $_headers = null;
   private $_cache_file = null;
-  private $_return_headers = null;
+  private ?array $_return_headers = null;
+
+  /* @var $_curl_info mixed */
   private $_curl_info = null;
 
-  public static $UseLog = false;
-  public static $CacheTimeoutSeconds;
-  public static $ShowURL;
+  public static bool $UseLog = false;
+  public static ?int $CacheTimeoutSeconds = null;
+  public static ?bool $ShowURL = null;
 
   /**
-   * @param $name
+   * @param string $name
    * @return null
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     switch ($name) {
       case 'method':
@@ -128,14 +128,19 @@ class APIRequest
   }
 
   /**
-   * @param $path
-   * @param null $data
-   * @param null $headers
+   * @param string $path
+   * @param array|null $data
+   * @param array|null $headers
    * @param bool $post
    * @param null $custom_method
    * @return bool|string
    */
-  private function _Request($path, $data = null, $headers = null, bool $post = true, $custom_method = null)
+  private function _Request(
+    string $path,
+    array $data = null,
+    array $headers = null,
+    bool $post = true,
+    $custom_method = null)
   {
     $file = null;
 
@@ -344,9 +349,9 @@ class APIRequest
     if (!$Web->Session) {
       return;
     }
-    $a = $Web->Session->api_log;
+    $a = $Web->Session->Get('api_log');
     $a[] = $this;
-    $Web->Session->api_log = $a;
+    $Web->Session->Set('api_log', $a);
   }
 
   /**

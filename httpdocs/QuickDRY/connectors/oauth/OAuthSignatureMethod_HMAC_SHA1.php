@@ -1,4 +1,5 @@
 <?php
+
 namespace QuickDRY\Connectors;
 
 /**
@@ -8,23 +9,26 @@ namespace QuickDRY\Connectors;
  * character (ASCII code 38) even if empty.
  *   - Chapter 9.2 ("HMAC-SHA1")
  */
-class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod {
-    function get_name() {
-        return "HMAC-SHA1";
-    }
+class OAuthSignatureMethod_HMAC_SHA1 extends OAuthSignatureMethod
+{
+  function get_name(): string
+  {
+    return "HMAC-SHA1";
+  }
 
-    public function build_signature($request, $consumer, $token) {
-        $base_string = $request->get_signature_base_string();
-        $request->base_string = $base_string;
+  public function build_signature(OAuthRequest $request, OAuthConsumer $consumer, ?OAuthToken $token): string
+  {
+    $base_string = $request->get_signature_base_string();
+    $request->base_string = $base_string;
 
-        $key_parts = array(
-            $consumer->secret,
-            ($token) ? $token->secret : ""
-        );
+    $key_parts = array(
+      $consumer->secret,
+      ($token) ? $token->secret : ""
+    );
 
-        $key_parts = OAuthUtil::urlencode_rfc3986($key_parts);
-        $key = implode('&', $key_parts);
+    $key_parts = OAuthUtil::urlencode_rfc3986($key_parts);
+    $key = implode('&', $key_parts);
 
-        return base64_encode(hash_hmac('sha1', $base_string, $key, true));
-    }
+    return base64_encode(hash_hmac('sha1', $base_string, $key, true));
+  }
 }

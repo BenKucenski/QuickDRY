@@ -1,8 +1,11 @@
 <?php
+
+use QuickDRY\Utilities\SafeClass;
+
 class WSDLParameter extends SafeClass
 {
-    public $MinOccurs;
-    public $MaxOccurs;
-    public $Name;
-    public $Type;
+    public ?int $MinOccurs = null;
+    public ?int $MaxOccurs = null;
+    public ?string $Name = null;
+    public ?string $Type = null;
 }

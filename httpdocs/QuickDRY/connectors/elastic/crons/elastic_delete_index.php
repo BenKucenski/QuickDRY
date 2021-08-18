@@ -1,6 +1,7 @@
 <?php
 // php elastic_delete_index.php -hhome -iindex -ttype
 
+use QuickDRY\Connectors\Elastic_A;
 use QuickDRY\Utilities\Debug;
 
 $shortopts = 'h:';
@@ -17,7 +18,7 @@ if (!$_HOST || !$_INDEX) {
   exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type>' . "\r\n");
 }
 
-require_once('../index.php');
+require_once __DIR__ . '/../index.php';
 
 $res = 'null';
 try {

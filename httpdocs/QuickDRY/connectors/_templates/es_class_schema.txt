@@ -14,7 +14,7 @@ class [[schemaname]] extends [[ConnectionClassName]]
 
 [[prop_code]]
 
-    public function __get($name)
+    public function __get(string $name)
     {
         switch ($name) {
         [[alias_get_code]]

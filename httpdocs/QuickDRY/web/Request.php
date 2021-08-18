@@ -51,11 +51,11 @@ class Request
   }
 
   /**
-   * @param $name
+   * @param string $name
    *
    * @return array|string|null
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     if (isset($_POST[$name])) {
       return is_array($_POST[$name]) ? $_POST[$name] : trim($_POST[$name]);

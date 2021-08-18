@@ -2,7 +2,7 @@
 namespace QuickDRY\Web;
 
 use QuickDRY\Utilities\SafeClass;
-use UserClass;
+use QuickDRYInstance\Common\UserClass;
 
 /**
  * Class BasePage
@@ -30,11 +30,11 @@ class BasePage extends SafeClass
     protected static array $Errors = [];
     public static ?string $MasterPage = null;
 
-    /**
-     * @param $name
-     * @return array|bool|Cookie|PDFMargins|Request|Server|Session|string|UserClass|null
-     */
-    public function __get($name)
+  /**
+   * @param string $name
+   * @return mixed
+   */
+    public function __get(string $name)
     {
         switch ($name) {
             case 'PDFMargins':

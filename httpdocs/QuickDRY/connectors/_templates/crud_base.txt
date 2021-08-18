@@ -1,10 +1,11 @@
 <?php
 namespace pages\[[namespace]];
 
-use BasePage;
-use ChangeLogClass;
-use Dates;
-use HTTP;
+use QuickDRY\Web\BasePage;
+use QuickDRY\Utilities\Dates;
+use QuickDRY\Utilities\HTTP;
+use QuickDRYInstance\Common\ChangeLogHistory;
+
 use [[c_name]];
 
 /**
@@ -12,8 +13,7 @@ use [[c_name]];
  */
 class [[table_nice_name]]Base extends BasePage
 {
-    /* @var $History ChangeLogClass[] */
-    public static ?array $History;
+    public static ?ChangeLogHistory $History = null;
 
     public static ?[[c_name]] $Item;
 
@@ -132,14 +132,14 @@ class [[table_nice_name]]Base extends BasePage
 
         self::$History = self::$Item->history;
 
-        if (!self::$History || !sizeof(self::$History)) {
+        if (!self::$History || !sizeof(self::$History->changes)) {
             HTTP::ExitJSON(['error' => 'No History Available'], HTTP_STATUS_NOT_FOUND);
         }
 
         $report = [];
 
-        $m = sizeof(self::$History);
-        foreach (self::$History as $i => $cl) {
+        $m = sizeof(self::$History->changes);
+        foreach (self::$History->changes as $i => $cl) {
             foreach ($cl->changes_list as $column => $change) {
                 if ([[c_name]]::IgnoreColumn($column)) {
                     continue;

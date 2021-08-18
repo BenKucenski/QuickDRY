@@ -1,6 +1,8 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use Exception;
+
 /**
  * adLDAP Exception Handler
  *

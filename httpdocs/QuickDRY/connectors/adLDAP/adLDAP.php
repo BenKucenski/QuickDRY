@@ -1,6 +1,7 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use Exception;
 use QuickDRY\Utilities\Debug;
 
 /**
@@ -92,10 +93,12 @@ class adLDAP
   /**
    * Connection and bind default variables
    *
-   * @var mixed
-   * @var mixed
    */
+
+  /* @var $_conn mixed */
   protected $_conn;
+
+  /* @var $_bind mixed */
   protected $_bind;
 
   /**
@@ -108,7 +111,7 @@ class adLDAP
    * @param string $_account_suffix
    * @return void
    */
-  public function set_account_suffix($_account_suffix)
+  public function set_account_suffix(string $_account_suffix)
   {
     $this->_account_suffix = $_account_suffix;
   }
@@ -118,7 +121,7 @@ class adLDAP
    *
    * @return string
    */
-  public function get_account_suffix()
+  public function get_account_suffix(): string
   {
     return $this->_account_suffix;
   }
@@ -139,7 +142,7 @@ class adLDAP
    *
    * @return string[]
    */
-  public function get_domain_controllers()
+  public function get_domain_controllers(): array
   {
     if (sizeof($this->_domain_controllers) == 0) {
       if (!is_array($this->_domain_controllers_str)) {
@@ -153,18 +156,18 @@ class adLDAP
   }
 
   /**
-   * Set the username of an account with higher priviledges
+   * Set the username of an account with higher privileges
    *
    * @param string $_ad_username
    * @return void
    */
-  public function set_ad_username($_ad_username)
+  public function set_ad_username(string $_ad_username)
   {
     $this->_ad_username = $_ad_username;
   }
 
   /**
-   * Get the username of the account with higher priviledges
+   * Get the username of the account with higher privileges
    *
    * This will throw an exception for security reasons
    */
@@ -177,18 +180,18 @@ class adLDAP
   }
 
   /**
-   * Set the password of an account with higher priviledges
+   * Set the password of an account with higher privileges
    *
    * @param string $_ad_password
    * @return void
    */
-  public function set_ad_password($_ad_password)
+  public function set_ad_password(string $_ad_password)
   {
     $this->_ad_password = $_ad_password;
   }
 
   /**
-   * Get the password of the account with higher priviledges
+   * Get the password of the account with higher privileges
    *
    * This will throw an exception for security reasons
    */
@@ -206,7 +209,7 @@ class adLDAP
    * @param bool $_real_primarygroup
    * @return void
    */
-  public function set_real_primarygroup($_real_primarygroup)
+  public function set_real_primarygroup(bool $_real_primarygroup)
   {
     $this->_real_primarygroup = $_real_primarygroup;
   }
@@ -216,7 +219,7 @@ class adLDAP
    *
    * @return bool
    */
-  public function get_real_primarygroup()
+  public function get_real_primarygroup(): bool
   {
     return $this->_real_primarygroup;
   }
@@ -227,7 +230,7 @@ class adLDAP
    * @param bool $_use_ssl
    * @return void
    */
-  public function set_use_ssl($_use_ssl)
+  public function set_use_ssl(bool $_use_ssl)
   {
     $this->_use_ssl = $_use_ssl;
   }
@@ -237,7 +240,7 @@ class adLDAP
    *
    * @return bool
    */
-  public function get_use_ssl()
+  public function get_use_ssl(): bool
   {
     return $this->_use_ssl;
   }
@@ -248,7 +251,7 @@ class adLDAP
    * @param bool $_use_tls
    * @return void
    */
-  public function set_use_tls($_use_tls)
+  public function set_use_tls(bool $_use_tls)
   {
     $this->_use_tls = $_use_tls;
   }
@@ -258,7 +261,7 @@ class adLDAP
    *
    * @return bool
    */
-  public function get_use_tls()
+  public function get_use_tls(): bool
   {
     return $this->_use_tls;
   }
@@ -269,7 +272,7 @@ class adLDAP
    * @param bool $_recursive_groups
    * @return void
    */
-  public function set_recursive_groups($_recursive_groups)
+  public function set_recursive_groups(bool $_recursive_groups)
   {
     $this->_recursive_groups = $_recursive_groups;
   }
@@ -279,7 +282,7 @@ class adLDAP
    *
    * @return bool
    */
-  public function get_recursive_groups()
+  public function get_recursive_groups(): bool
   {
     return $this->_recursive_groups;
   }
@@ -293,7 +296,7 @@ class adLDAP
    * @return bool
    * @throws Exception - if unable to bind to Domain Controller
    */
-  function __construct($options = [])
+  function __construct(array $options = [])
   {
     // You can specifically overide any of the default configuration options setup above
     if (count($options) > 0) {
@@ -347,7 +350,7 @@ class adLDAP
    * @return bool
    * @throws adLDAPException
    */
-  public function connect()
+  public function connect(): bool
   {
     // Connect to the AD/LDAP server as the username/password
     $dc = $this->random_controller();
@@ -394,13 +397,13 @@ class adLDAP
   /**
    * Validate a user's login credentials
    *
-   * @param string $username A user's AD username
-   * @param string $password A user's AD password
+   * @param string|null $username A user's AD username
+   * @param string|null $password A user's AD password
    * @param bool $prevent_rebind
    * @return bool
    * @throws adLDAPException
    */
-  public function authenticate($username, $password, $prevent_rebind = false)
+  public function authenticate(?string $username, ?string $password, bool $prevent_rebind = false): ?bool
   {
     // Prevent null binding
     if ($username === NULL || $password === NULL) {
@@ -435,7 +438,7 @@ class adLDAP
    * @param string $child The child group name
    * @return bool
    */
-  public function group_add_group($parent, $child)
+  public function group_add_group(string $parent, string $child): ?bool
   {
 
     // Find the parent group's dn
@@ -469,7 +472,7 @@ class adLDAP
    * @param string $user The user to add to the group
    * @return bool
    */
-  public function group_add_user($group, $user)
+  public function group_add_user(string $group, string $user): ?bool
   {
     // Adding a user is a bit fiddly, we need to get the full DN of the user
     // and add it using the full DN of the group
@@ -504,7 +507,7 @@ class adLDAP
    * @param string $contact_dn The DN of the contact to add
    * @return bool
    */
-  public function group_add_contact($group, $contact_dn)
+  public function group_add_contact(string $group, string $contact_dn): ?bool
   {
     // To add a contact we take the contact's DN
     // and add it using the full DN of the group
@@ -532,7 +535,7 @@ class adLDAP
    * @param array $attributes Default attributes of the group
    * @return bool
    */
-  public function group_create($attributes)
+  public function group_create(array $attributes)
   {
     if (!is_array($attributes)) {
       return ("Attributes must be an array");
@@ -578,7 +581,7 @@ class adLDAP
    * @param string $child The child group name
    * @return bool
    */
-  public function group_del_group($parent, $child)
+  public function group_del_group(string $parent, string $child): ?bool
   {
 
     // Find the parent dn
@@ -612,7 +615,7 @@ class adLDAP
    * @param string $user The AD user to remove from the group
    * @return bool
    */
-  public function group_del_user($group, $user)
+  public function group_del_user(string $group, string $user): ?bool
   {
 
     // Find the parent dn
@@ -645,7 +648,7 @@ class adLDAP
    * @param string $contact_dn The DN of a contact to remove from the group
    * @return bool
    */
-  public function group_del_contact($group, $contact_dn)
+  public function group_del_contact(string $group, string $contact_dn): ?bool
   {
 
     // Find the parent dn
@@ -669,10 +672,10 @@ class adLDAP
    * Return a list of groups in a group
    *
    * @param string $group The group to query
-   * @param bool $recursive Recursively get groups
+   * @param bool|null $recursive Recursively get groups
    * @return array
    */
-  public function groups_in_group($group, $recursive = NULL)
+  public function groups_in_group(string $group, bool $recursive = NULL): ?array
   {
     if (!$this->_bind) {
       return null;
@@ -722,10 +725,10 @@ class adLDAP
    * Return a list of members in a group
    *
    * @param string $group The group to query
-   * @param bool $recursive Recursively get group members
+   * @param bool|null $recursive Recursively get group members
    * @return array
    */
-  public function group_members($group, $recursive = NULL)
+  public function group_members(string $group, bool $recursive = NULL): ?array
   {
     if (!$this->_bind) {
       return null;
@@ -776,13 +779,13 @@ class adLDAP
 
   /**
    * Group Information.  Returns an array of information about a group.
-   * The group name is case sensitive
+   * The group name is case-sensitive
    *
-   * @param string $group_name The group name to retrieve info about
-   * @param array $fields Fields to retrieve
+   * @param string|null $group_name The group name to retrieve info about
+   * @param array|null $fields Fields to retrieve
    * @return array
    */
-  public function group_info($group_name, $fields = NULL)
+  public function group_info(?string $group_name, array $fields = NULL): ?array
   {
     if ($group_name === NULL) {
       return null;
@@ -807,10 +810,10 @@ class adLDAP
   /**
    * Return a complete list of "groups in groups"
    *
-   * @param string $group The group to get the list from
+   * @param string|null $group The group to get the list from
    * @return array
    */
-  public function recursive_groups($group)
+  public function recursive_groups(?string $group): ?array
   {
     if ($group === NULL) {
       return null;
@@ -826,7 +829,7 @@ class adLDAP
         $group_names = $this->nice_names($groups);
         $ret_groups = array_merge($ret_groups, $group_names); //final groups to return
 
-        foreach ($group_names as $id => $group_name) {
+        foreach ($group_names as $group_name) {
           $child_groups = $this->recursive_groups($group_name);
           $ret_groups = array_merge($ret_groups, $child_groups);
         }
@@ -845,7 +848,7 @@ class adLDAP
    * @param bool $sorted Whether to sort the results
    * @return array
    */
-  public function search_groups(string $samaccounttype = ADLDAP_SECURITY_GLOBAL_GROUP, bool $include_desc = false, $search = "*", $sorted = true): ?array
+  public function search_groups(string $samaccounttype = ADLDAP_SECURITY_GLOBAL_GROUP, bool $include_desc = false, string $search = "*", bool $sorted = true): ?array
   {
     if (!$this->_bind) {
       return null;
@@ -1014,11 +1017,11 @@ class adLDAP
   /**
    * Groups the user is a member of
    *
-   * @param string $username The username to query
+   * @param string|null $username The username to query
    * @param bool|null $recursive Recursive list of groups
    * @return array
    */
-  public function user_groups(string $username, bool $recursive = NULL): ?array
+  public function user_groups(?string $username, bool $recursive = NULL): ?array
   {
     if ($username === NULL) {
       return null;
@@ -1047,11 +1050,11 @@ class adLDAP
   /**
    * Find information about the users
    *
-   * @param string $username The username to query
+   * @param string|null $username The username to query
    * @param array|null $fields Array of parameters to query
    * @return array
    */
-  public function user_info(string $username, array $fields = NULL): ?array
+  public function user_info(?string $username, array $fields = NULL): ?array
   {
     if (is_null($username)) {
       return null;
@@ -1089,12 +1092,12 @@ class adLDAP
   /**
    * Determine if a user is in a specific group
    *
-   * @param string $username The username to query
-   * @param string $group The name of the group to check against
+   * @param string|null $username The username to query
+   * @param string|null $group The name of the group to check against
    * @param bool|null $recursive Check groups recursively
    * @return bool
    */
-  public function user_ingroup(string $username, string $group, bool $recursive = NULL): ?bool
+  public function user_ingroup(?string $username, ?string $group, bool $recursive = NULL): ?bool
   {
     if ($username === NULL) {
       return null;
@@ -1123,11 +1126,11 @@ class adLDAP
   /**
    * Determine a user's password expiry date
    *
-   * @param string $username The username to query
-   * @requires bcmath http://www.php.net/manual/en/book.bc.php
+   * @param string|null $username The username to query
    * @return array
+   * @requires bcmath http://www.php.net/manual/en/book.bc.php
    */
-  public function user_password_expiry(string $username): ?array
+  public function user_password_expiry(?string $username): ?array
   {
     if ($username === NULL) {
       return ['error' => 'Missing compulsory field [username]'];
@@ -1200,12 +1203,12 @@ class adLDAP
   /**
    * Modify a user
    *
-   * @param string $username The username to query
+   * @param string|null $username The username to query
    * @param array $attributes The attributes to modify.  Note if you set the enabled attribute you must not specify any other attributes
    * @return bool
    * @throws adLDAPException
    */
-  public function user_modify($username, $attributes)
+  public function user_modify(?string $username, array $attributes): ?bool
   {
     if ($username === NULL) {
       return null;
@@ -1254,10 +1257,10 @@ class adLDAP
   /**
    * Disable a user account
    *
-   * @param string $username The username to disable
+   * @param string|null $username The username to disable
    * @return bool
    */
-  public function user_disable($username)
+  public function user_disable(?string $username)
   {
     if ($username === NULL) {
       return ("Missing compulsory field [username]");
@@ -1278,10 +1281,10 @@ class adLDAP
   /**
    * Enable a user account
    *
-   * @param string $username The username to enable
+   * @param string|null $username The username to enable
    * @return bool
    */
-  public function user_enable(string $username)
+  public function user_enable(?string $username)
   {
     $result = null;
 
@@ -1304,12 +1307,12 @@ class adLDAP
   /**
    * Set the password of a user - This must be performed over SSL
    *
-   * @param string $username The username to modify
-   * @param string $password The new password
+   * @param string|null $username The username to modify
+   * @param string|null $password The new password
    * @return bool
    * @throws adLDAPException
    */
-  public function user_password(string $username, string $password): ?bool
+  public function user_password(?string $username, ?string $password): ?bool
   {
     if ($username === NULL) {
       return null;
@@ -1348,7 +1351,7 @@ class adLDAP
    * @param bool $sorted Sort the user accounts
    * @return array
    */
-  public function all_users($include_desc = false, $search = "*", $sorted = true)
+  public function all_users(bool $include_desc, string $search = "*", bool $sorted = true): ?array
   {
     if (!$this->_bind) {
       return null;
@@ -1431,11 +1434,11 @@ class adLDAP
   /**
    * Determine the list of groups a contact is a member of
    *
-   * @param string $distinguishedname The full DN of a contact
+   * @param string|null $distinguishedname The full DN of a contact
    * @param bool|null $recursive Recursively check groups
    * @return array
    */
-  public function contact_groups(string $distinguishedname, bool $recursive = NULL): ?array
+  public function contact_groups(?string $distinguishedname, bool $recursive = NULL): ?array
   {
     if ($distinguishedname === NULL) {
       return null;
@@ -1452,7 +1455,7 @@ class adLDAP
     $groups = $this->nice_names($info[0]["memberof"]); //presuming the entry returned is our contact
 
     if ($recursive === true) {
-      foreach ($groups as $id => $group_name) {
+      foreach ($groups as $group_name) {
         $extra_groups = $this->recursive_groups($group_name);
         $groups = array_merge($groups, $extra_groups);
       }
@@ -1464,11 +1467,11 @@ class adLDAP
   /**
    * Get contact information
    *
-   * @param string $distinguishedname The full DN of a contact
+   * @param string|null $distinguishedname The full DN of a contact
    * @param array|null $fields Attributes to be returned
    * @return array
    */
-  public function contact_info(string $distinguishedname, array $fields = NULL): ?array
+  public function contact_info(?string $distinguishedname, array $fields = NULL): ?array
   {
     if ($distinguishedname === NULL) {
       return null;
@@ -1501,12 +1504,12 @@ class adLDAP
   /**
    * Determine if a contact is a member of a group
    *
-   * @param string $distinguisedname The full DN of a contact
-   * @param string $group The group name to query
+   * @param string|null $distinguisedname The full DN of a contact
+   * @param string|null $group The group name to query
    * @param bool|null $recursive Recursively check groups
    * @return bool
    */
-  public function contact_ingroup(string $distinguisedname, string $group, bool $recursive = NULL): ?bool
+  public function contact_ingroup(?string $distinguisedname, ?string $group, bool $recursive = NULL): ?bool
   {
     if ($distinguisedname === NULL) {
       return null;
@@ -1535,11 +1538,11 @@ class adLDAP
   /**
    * Modify a contact
    *
-   * @param string $distinguishedname The contact to query
+   * @param string|null $distinguishedname The contact to query
    * @param array $attributes The attributes to modify.  Note if you set the enabled attribute you must not specify any other attributes
    * @return bool
    */
-  public function contact_modify(string $distinguishedname, array $attributes)
+  public function contact_modify(?string $distinguishedname, array $attributes)
   {
     if ($distinguishedname === NULL) {
       return ("Missing compulsory field [distinguishedname]");
@@ -1585,7 +1588,7 @@ class adLDAP
    * @param bool $sorted Whether to sort the results
    * @return array
    */
-  public function all_contacts($include_desc = false, $search = "*", $sorted = true)
+  public function all_contacts(bool $include_desc, string $search = "*", bool $sorted = true): ?array
   {
     if (!$this->_bind) {
       return null;
@@ -1620,15 +1623,15 @@ class adLDAP
    * Returns a folder listing for a specific OU
    * See http://adldap.sourceforge.net/wiki/doku.php?id=api_folder_functions
    *
-   * @param array $folder_name An array to the OU you wish to list.
+   * @param array|null $folder_name An array to the OU you wish to list.
    *                           If set to NULL will list the root, strongly recommended to set
    *                           $recursive to false in that instance!
    * @param string $dn_type The type of record to list.  This can be ADLDAP_FOLDER or ADLDAP_CONTAINER.
-   * @param bool $recursive Recursively search sub folders
-   * @param bool $type Specify a type of object to search for
+   * @param bool|null $recursive Recursively search sub folders
+   * @param bool|null $type Specify a type of object to search for
    * @return array
    */
-  public function folder_list($folder_name = NULL, $dn_type = ADLDAP_FOLDER, $recursive = NULL, $type = NULL)
+  public function folder_list(array $folder_name = NULL, string $dn_type = ADLDAP_FOLDER, bool $recursive = NULL, bool $type = NULL): ?array
   {
     if ($recursive === NULL) {
       $recursive = $this->_recursive_groups;
@@ -1678,16 +1681,12 @@ class adLDAP
 
     if ($recursive === true) {
       $sr = ldap_search($this->_conn, $searchou, $filter, ['objectclass', 'distinguishedname', 'samaccountname']);
-      $entries = @ldap_get_entries($this->_conn, $sr);
-      if (is_array($entries)) {
-        return $entries;
-      }
     } else {
       $sr = ldap_list($this->_conn, $searchou, $filter, ['objectclass', 'distinguishedname', 'samaccountname']);
-      $entries = @ldap_get_entries($this->_conn, $sr);
-      if (is_array($entries)) {
-        return $entries;
-      }
+    }
+    $entries = @ldap_get_entries($this->_conn, $sr);
+    if (is_array($entries)) {
+      return $entries;
     }
 
     return null;
@@ -1699,11 +1698,11 @@ class adLDAP
   /**
    * Get information about a specific computer
    *
-   * @param string $computer_name The name of the computer
-   * @param array $fields Attributes to return
+   * @param string|null $computer_name The name of the computer
+   * @param array|null $fields Attributes to return
    * @return array
    */
-  public function computer_info($computer_name, $fields = NULL)
+  public function computer_info(?string $computer_name, array $fields = NULL): ?array
   {
     if ($computer_name === NULL) {
       return null;
@@ -1725,12 +1724,12 @@ class adLDAP
   /**
    * Check if a computer is in a group
    *
-   * @param string $computer_name The name of the computer
-   * @param string $group The group to check
-   * @param bool $recursive Whether to check recursively
+   * @param string|null $computer_name The name of the computer
+   * @param string|null $group The group to check
+   * @param bool|null $recursive Whether to check recursively
    * @return bool
    */
-  public function computer_ingroup($computer_name, $group, $recursive = NULL)
+  public function computer_ingroup(?string $computer_name, ?string $group, bool $recursive = NULL): ?bool
   {
     if ($computer_name === NULL) {
       return null;
@@ -1759,11 +1758,11 @@ class adLDAP
   /**
    * Get the groups a computer is in
    *
-   * @param string $computer_name The name of the computer
-   * @param bool $recursive Whether to check recursively
+   * @param string|null $computer_name The name of the computer
+   * @param bool|null $recursive Whether to check recursively
    * @return array
    */
-  public function computer_groups($computer_name, $recursive = NULL)
+  public function computer_groups(?string $computer_name, bool $recursive = NULL): ?array
   {
     if ($computer_name === NULL) {
       return null;
@@ -1795,16 +1794,22 @@ class adLDAP
   /**
    * Create an Exchange account
    *
-   * @param string $username The username of the user to add the Exchange account to
-   * @param array $storagegroup The mailbox, Exchange Storage Group, for the user account, this must be a full CN
+   * @param string|null $username The username of the user to add the Exchange account to
+   * @param array|null $storagegroup The mailbox, Exchange Storage Group, for the user account, this must be a full CN
    *                            If the storage group has a different base_dn to the adLDAP configuration, set it using $base_dn
-   * @param string $emailaddress The primary email address to add to this user
-   * @param string $mailnickname The mail nick name.  If mail nickname is blank, the username will be used
+   * @param string|null $emailaddress The primary email address to add to this user
+   * @param string|null $mailnickname The mail nick name.  If mail nickname is blank, the username will be used
    * @param bool $usedefaults Indicates whether the store should use the default quota, rather than the per-mailbox quota.
-   * @param string $base_dn Specify an alternative base_dn for the Exchange storage grop
+   * @param string|null $base_dn Specify an alternative base_dn for the Exchange storage grop
    * @return bool
    */
-  public function exchange_create_mailbox($username, $storagegroup, $emailaddress, $mailnickname = NULL, $usedefaults = TRUE, $base_dn = NULL)
+  public function exchange_create_mailbox(
+    ?string $username,
+    ?array $storagegroup,
+    ?string $emailaddress,
+    string $mailnickname = NULL,
+    bool $usedefaults = TRUE,
+    string $base_dn = NULL)
   {
     $result = null;
 
@@ -1852,12 +1857,12 @@ class adLDAP
   /**
    * Add an address to Exchange
    *
-   * @param string $username The username of the user to add the Exchange account to
-   * @param string $emailaddress The email address to add to this user
+   * @param string|null $username The username of the user to add the Exchange account to
+   * @param string|null $emailaddress The email address to add to this user
    * @param bool $default Make this email address the default address, this is a bit more intensive as we have to demote any existing default addresses
    * @return bool
    */
-  public function exchange_add_address($username, $emailaddress, $default = FALSE)
+  public function exchange_add_address(?string $username, ?string $emailaddress, bool $default)
   {
     if ($username === NULL) {
       return ("Missing compulsory field [username]");
@@ -1892,11 +1897,7 @@ class adLDAP
       $modaddresses['proxyAddresses'][(sizeof($user[0]['proxyaddresses']) - 1)] = 'SMTP:' . $emailaddress;
 
       $result = @ldap_mod_replace($this->_conn, $user_dn, $modaddresses);
-      if ($result == false) {
-        return null;
-      }
 
-      return (true);
     } else {
       // We do not have to demote an email address from the default so we can just add the new proxy address
       $attributes['exchange_proxyaddress'] = $proxyvalue . $emailaddress;
@@ -1912,12 +1913,12 @@ class adLDAP
       // Take out the @ to see any errors, usually this error might occur because the address already
       // exists in the list of proxyAddresses
       $result = @ldap_mod_add($this->_conn, $user_dn, $add);
-      if ($result == false) {
-        return null;
-      }
 
-      return (true);
     }
+    if ($result == false) {
+      return null;
+    }
+    return (true);
   }
 
   /**
@@ -1925,11 +1926,11 @@ class adLDAP
    * If you remove a default address the account will no longer have a default,
    * we recommend changing the default address first
    *
-   * @param string $username The username of the user to add the Exchange account to
-   * @param string $emailaddress The email address to add to this user
+   * @param string|null $username The username of the user to add the Exchange account to
+   * @param string|null $emailaddress The email address to add to this user
    * @return bool
    */
-  public function exchange_del_address($username, $emailaddress)
+  public function exchange_del_address(?string $username, ?string $emailaddress)
   {
     if ($username === NULL) {
       return ("Missing compulsory field [username]");
@@ -1969,11 +1970,11 @@ class adLDAP
   /**
    * Change the default address
    *
-   * @param string $username The username of the user to add the Exchange account to
-   * @param string $emailaddress The email address to make default
+   * @param string|null $username The username of the user to add the Exchange account to
+   * @param string|null $emailaddress The email address to make default
    * @return bool
    */
-  public function exchange_primary_address($username, $emailaddress)
+  public function exchange_primary_address(?string $username, ?string $emailaddress)
   {
     if ($username === NULL) {
       return ("Missing compulsory field [username]");
@@ -2018,17 +2019,17 @@ class adLDAP
    * Mail enable a contact
    * Allows email to be sent to them through Exchange
    *
-   * @param string $distinguishedname The contact to mail enable
-   * @param string $emailaddress The email address to allow emails to be sent through
-   * @param string $mailnickname The mailnickname for the contact in Exchange.  If NULL this will be set to the display name
+   * @param string|null $distinguishedname The contact to mail enable
+   * @param string|null $emailaddress The email address to allow emails to be sent through
+   * @param string|null $mailnickname The mailnickname for the contact in Exchange.  If NULL this will be set to the display name
    * @return bool
    */
-  public function exchange_contact_mailenable($distinguishedname, $emailaddress, $mailnickname = NULL)
+  public function exchange_contact_mailenable(?string $distinguishedname, ?string $emailaddress, ?string $mailnickname = NULL)
   {
     if ($distinguishedname === NULL) {
       return ("Missing compulsory field [distinguishedname]");
     }
-    if ($emailaddress == -NULL) {
+    if ($emailaddress === NULL) {
       return ("Missing compulsory field [emailaddress]");
     }
 
@@ -2072,7 +2073,7 @@ class adLDAP
    *
    * return string
    */
-  public function get_last_error()
+  public function get_last_error(): string
   {
     return @ldap_error($this->_conn);
   }
@@ -2083,7 +2084,7 @@ class adLDAP
    * @param array $attributes Attributes to be queried
    * @return array
    */
-  protected function adldap_schema($attributes)
+  protected function adldap_schema(array $attributes): ?array
   {
 
     // LDAP doesn't like NULL attributes, only set them if they have values
@@ -2246,11 +2247,11 @@ class adLDAP
    * If someone can show otherwise, I'd like to know about it :)
    * this way is resource intensive and generally a pain in the @#%^
    *
-   * @param string $gid Group ID
+   * @param string|null $gid Group ID
    * @return string
    * @deprecated deprecated since version 3.1, see get get_primary_group
    */
-  protected function group_cn($gid)
+  protected function group_cn(?string $gid)
   {
     if ($gid === NULL) {
       return null;
@@ -2279,11 +2280,11 @@ class adLDAP
    * This is a re-write based on code submitted by Bruce which prevents the
    * need to search each security group to find the true primary group
    *
-   * @param string $gid Group ID
-   * @param string $usersid User's Object SID
+   * @param string|null $gid Group ID
+   * @param string|null $usersid User's Object SID
    * @return string
    */
-  protected function get_primary_group($gid, $usersid)
+  protected function get_primary_group(?string $gid, ?string $usersid): ?string
   {
     if ($gid === NULL || $usersid === NULL) {
       return null;
@@ -2304,7 +2305,7 @@ class adLDAP
    * @param string $binsid A Binary SID
    * @return string
    */
-  protected function getTextSID($binsid)
+  protected function getTextSID(string $binsid): string
   {
     $hex_sid = bin2hex($binsid);
     $rev = hexdec(substr($hex_sid, 0, 2));
@@ -2328,7 +2329,7 @@ class adLDAP
    * @param string $hex A hex code
    * @return string
    */
-  protected function little_endian($hex)
+  protected function little_endian(string $hex): string
   {
     $result = '';
     for ($x = strlen($hex) - 2; $x >= 0; $x = $x - 2) {
@@ -2344,7 +2345,7 @@ class adLDAP
    * @param string $username The username
    * @return string
    */
-  protected function user_dn($username)
+  protected function user_dn(string $username): ?string
   {
     $user = $this->user_info($username, ["cn"]);
     if ($user[0]["dn"] === NULL) {
@@ -2360,7 +2361,7 @@ class adLDAP
    * @param string $password The password to encode
    * @return string
    */
-  protected function encode_password($password): string
+  protected function encode_password(string $password): string
   {
     $password = "\"" . $password . "\"";
     $encoded = "";
@@ -2380,7 +2381,7 @@ class adLDAP
    * @return string
    * @author Port by Andreas Gohr <andi@splitbrain.org>
    */
-  protected function ldap_slashes($str)
+  protected function ldap_slashes(string $str): string
   {
     return str_replace('\\', '\\\\', $str);
 
@@ -2396,7 +2397,7 @@ class adLDAP
    *
    * @return string
    */
-  protected function random_controller()
+  protected function random_controller(): string
   {
     mt_srand(doubleval(microtime()) * 100000000); // For older PHP versions
     $this->get_domain_controllers();
@@ -2406,10 +2407,10 @@ class adLDAP
   /**
    * Account control options
    *
-   * @param array $options The options to convert to int
+   * @param array|null $options The options to convert to int
    * @return int
    */
-  protected function account_control($options)
+  protected function account_control(?array $options): int
   {
     $val = 0;
 
@@ -2486,7 +2487,7 @@ class adLDAP
    * @param array $groups
    * @return array
    */
-  protected function nice_names($groups)
+  protected function nice_names(array $groups): array
   {
 
     $group_array = [];
@@ -2512,7 +2513,7 @@ class adLDAP
    * @param string $dn The distinguished name to delete
    * @return bool
    */
-  protected function dn_delete($dn)
+  protected function dn_delete(string $dn): ?bool
   {
     $result = ldap_delete($this->_conn, $dn);
     if ($result != true) {
@@ -2528,7 +2529,7 @@ class adLDAP
    * @param bool $bool Boolean value
    * @return string
    */
-  protected function bool2str($bool)
+  protected function bool2str(bool $bool): string
   {
     return ($bool) ? 'TRUE' : 'FALSE';
   }

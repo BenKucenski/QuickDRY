@@ -8,7 +8,7 @@
 
 class [[classname]] extends [[schemaname]]
 {
-    public function __get($name)
+    public function __get(string $name)
     {
         switch ($name) {
         }

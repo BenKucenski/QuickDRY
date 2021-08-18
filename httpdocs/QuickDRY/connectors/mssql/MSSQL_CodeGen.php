@@ -1,6 +1,8 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use QuickDRY\Utilities\Log;
+
 /**
  * Class MSSQL_CodeGen
  */

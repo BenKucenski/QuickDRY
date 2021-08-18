@@ -1,33 +1,42 @@
 <?php
 namespace QuickDRY\Utilities;
 
+use DateTime;
+use DateTimeZone;
+use Exception;
+use QuickDRYInstance\Common\UserClass;
+
 /**
  * Class Dates
  */
 class Dates extends SafeClass
 {
-  /**
-   * @throws Exception
-   */
   public static function ConvertToUserDate($datetime, $timezone): string
   {
     $datetime = Dates::Timestamp($datetime);
     $tz = new DateTimeZone($timezone);
-    $date = new DateTime($datetime . ' GMT');
-    $date->setTimezone($tz);
-    return $date->format('Y-m-d H:i:s');
+    try {
+      $date = new DateTime($datetime . ' GMT');
+      $date->setTimezone($tz);
+      return $date->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+      Debug::Halt($e);
+      exit;
+    }
   }
 
-  /**
-   * @throws Exception
-   */
   public static function ConvertToServerDate($datetime, $timezone): string
   {
     $datetime = Dates::Timestamp($datetime);
     $tz = new DateTimeZone('GMT');
-    $date = new DateTime($datetime . ' ' . $timezone);
-    $date->setTimezone($tz);
-    return $date->format('Y-m-d H:i:s');
+    try {
+      $date = new DateTime($datetime . ' ' . $timezone);
+      $date->setTimezone($tz);
+      return $date->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+      Debug::Halt($e);
+      exit;
+    }
   }
 
   /**

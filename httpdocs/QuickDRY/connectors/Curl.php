@@ -180,7 +180,7 @@ class Curl
    * @param null $additional_headers
    * @return Curl
    */
-    public static function Get($path, $params = null, $username = null, $password = null, $additional_headers = null)
+    public static function Get($path, $params = null, $username = null, $password = null, $additional_headers = null): Curl
     {
         if (is_array($params)) {
             $params = http_build_query($params);

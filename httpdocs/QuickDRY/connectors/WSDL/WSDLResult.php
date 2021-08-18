@@ -9,8 +9,8 @@ use QuickDRY\Utilities\SafeClass;
  */
 class WSDLResult extends SafeClass
 {
-    public $Name;
-    public $Parameters;
+    public ?string $Name;
+    public ?array $Parameters;
 
     public function AddParameter(WSDLParameter $param)
     {

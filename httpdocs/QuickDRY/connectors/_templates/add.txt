@@ -1,3 +1,7 @@
+<?php
+use QuickDRY\Web\ElementID;
+?>
+
 <script src="/pages/json/[[JSONFolder]]/[[table_nice_name]]/controls/add.js"></script>
 
 <div class="modal fade" id="[[c_name]]_dialog" style="display: none;" tabindex="-1" role="dialog">

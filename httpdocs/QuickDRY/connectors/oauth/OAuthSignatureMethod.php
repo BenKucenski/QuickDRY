@@ -10,7 +10,7 @@ abstract class OAuthSignatureMethod {
      * Needs to return the name of the Signature Method (ie HMAC-SHA1)
      * @return string
      */
-    abstract public function get_name();
+    abstract public function get_name(): string;
 
     /**
      * Build up the signature
@@ -22,7 +22,10 @@ abstract class OAuthSignatureMethod {
      * @param OAuthToken $token
      * @return string
      */
-    abstract public function build_signature($request, $consumer, $token);
+    abstract public function build_signature(
+      OAuthRequest $request,
+      OAuthConsumer $consumer,
+      OAuthToken $token): string;
 
     /**
      * Verifies that a given signature is correct
@@ -32,7 +35,12 @@ abstract class OAuthSignatureMethod {
      * @param string $signature
      * @return bool
      */
-    public function check_signature($request, $consumer, $token, $signature) {
+    public function check_signature(
+      OAuthRequest $request,
+      OAuthConsumer $consumer,
+      OAuthToken $token,
+      string $signature): bool
+    {
         $built = $this->build_signature($request, $consumer, $token);
 
         // Check for zero length, although unlikely here

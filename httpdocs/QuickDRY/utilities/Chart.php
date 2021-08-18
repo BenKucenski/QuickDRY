@@ -2,7 +2,7 @@
 namespace QuickDRY\Utilities;
 
 
-use SafeClass;
+use QuickDRY\Utilities\SafeClass;
 
 class Chart extends SafeClass
 {

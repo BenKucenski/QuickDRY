@@ -1,8 +1,12 @@
 <?php
 namespace QuickDRY\Utilities;
 
+
+use Exception;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Settings;
+use PhpOffice\PhpWord\Shared\Html;
 
 class SimpleWordDoc extends SafeClass
 {
@@ -11,11 +15,11 @@ class SimpleWordDoc extends SafeClass
         if(!defined('WORD_TEMP_DIR')) {
             exit('QuickDRY Error: WORD_TEMP_DIR must be defined');
         }
-        PhpOffice\PhpWord\Settings::setTempDir(WORD_TEMP_DIR);
+        Settings::setTempDir(WORD_TEMP_DIR);
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
-        PhpOffice\PhpWord\Shared\Html::addHtml($section, $html, true, false);
+        Html::addHtml($section, $html, true, false);
 
         try {
             $objWriter = IOFactory::createWriter($phpWord);

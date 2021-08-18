@@ -38,11 +38,11 @@ class SimpleClass
   }
 
   /**
-   * @param $name
+   * @param string $name
    *
    * @return null
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     if (isset($this->_vars[$name])) {
       return is_array($this->_vars[$name]) ? $this->_vars[$name] : trim($this->_vars[$name]);

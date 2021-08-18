@@ -5,7 +5,8 @@ use Exception;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
-use UserClass;
+use QuickDRYInstance\Common\ChangeLog;
+use QuickDRYInstance\Common\UserClass;
 
 /**
  * Class MySQL_Core
@@ -214,7 +215,7 @@ class MySQL_Core extends SQL_Base
         $cl->table = static::$table;
         $cl->uuid = $uuid;
         $cl->changes = json_encode($this->_change_log);
-        $cl->user_id = is_object($User) ? $User->GetUUID() : null;
+        $cl->user_id = $User->GetUUID();
         $cl->created_at = Dates::Timestamp();
         $cl->object_type = static::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
         $cl->is_deleted = true;

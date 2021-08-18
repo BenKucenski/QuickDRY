@@ -12,6 +12,8 @@ namespace QuickDRY\Utilities;
  * http://www.opensource.org/licenses/MIT
  */
 
+use QuickDRYInstance\Common\FileClass;
+
 /**
  * Class UploadHandler
  */

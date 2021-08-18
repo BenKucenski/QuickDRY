@@ -20,19 +20,19 @@ class JsonStatusResult extends SafeClass
    * }
    ******************************************************************************************/
 
-  public $type;
-  public $title;
-  public $status;
-  public $traceId;
-  public $detail;
-  public $errors;
+  public ?string $type = null;
+  public ?string $title = null;
+  public ?string $status = null;
+  public ?string $traceId = null;
+  public ?string $detail = null;
+  public ?string $errors = null;
 
   /**
    * @param $value
    * @param null $traceId
    * @return JsonStatusResult
    */
-  public static function Success($value, $traceId = null)
+  public static function Success($value, $traceId = null): JsonStatusResult
   {
     return JsonStatusResult::Create(HTTP_STATUS_OK, $value, $traceId);
   }
@@ -76,7 +76,7 @@ class JsonStatusResult extends SafeClass
    * @param null $traceId
    * @return JsonStatusResult
    */
-  public static function CreateError($HTTP_RESPONSE_CODE, $Errors, $traceId = null)
+  public static function CreateError($HTTP_RESPONSE_CODE, $Errors, $traceId = null): JsonStatusResult
   {
     /********************************************************************************
      *

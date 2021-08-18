@@ -7,9 +7,9 @@ use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\HTTP;
 use QuickDRY\Utilities\Navigation;
 use QuickDRY\Utilities\SafeClass;
-use QuickDRYInstance\Menu;
-use QuickDRYInstance\MenuAccess;
-use UserClass;
+use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Menu\Menu;
+use QuickDRYInstance\Menu\MenuAccess;
 
 /**
  * Class Web
@@ -82,7 +82,10 @@ class Web extends SafeClass
   public ?string $PDFFooter = null;
   public ?string $PDFSimplePageNumbers = null;
   public ?PDFMargins $PDFMargins = null;
+
+  /* @var $PDFPostFunction mixed */
   public $PDFPostFunction;
+
   public ?string $PDFHash = null;
   public ?string $PDFRootDir = null;
   public ?string $PDFShrinkToFit = null;
@@ -125,15 +128,6 @@ class Web extends SafeClass
     }
 
     return in_array($this->MasterPage, $this->SecureMasterPages);
-  }
-
-  public function __get($name)
-  {
-    switch ($name) {
-      case 'url_export_xls':
-        return CURRENT_PAGE_URL . '?' . ($this->Server->QUERY_STRING ? $this->Server->QUERY_STRING . '&export=xls' : 'export=xls');
-    }
-    return parent::__get($name);
   }
 
   public function __construct()

@@ -38,7 +38,7 @@ class Navigation
    */
   public function CheckPermissions(string $_CUR_PAGE, bool $test = false): bool
   {
-    if ($_CUR_PAGE == '/' || $_CUR_PAGE == '' || $_CUR_PAGE == '/')
+    if ($_CUR_PAGE == '/' || $_CUR_PAGE == '')
       return true;
 
     if (is_array($_CUR_PAGE)) {

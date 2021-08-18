@@ -1,10 +1,13 @@
 <?php
 namespace QuickDRY\Connectors;
 
+use DateTime;
+use Exception;
+use QuickDRYInstance\Common\ChangeLog;
+use QuickDRYInstance\Common\UserClass;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
-use QuickDRY\Web\Web;
 
 class MSSQL_Core extends SQL_Base
 {
@@ -297,16 +300,16 @@ class MSSQL_Core extends SQL_Base
     return static::$connection->LastID();
   }
 
-  public function CanDelete(UserClass $user): bool
+  public function CanDelete(?UserClass $user): bool
   {
     return false;
   }
 
   /**
-   * @param UserClass $User
+   * @param UserClass|null $User
    * @return array|null
    */
-  public function Remove(UserClass $User): ?array
+  public function Remove(?UserClass $User): ?array
   {
     if (!$this->CanDelete($User)) {
       return ['error' => 'No Permission'];
@@ -480,11 +483,7 @@ class MSSQL_Core extends SQL_Base
       $where_sql = implode(" AND ", $t);
     } else {
       if (is_null($col)) {
-        if (isset(static::$_primary[0])) {
-          $col = static::$_primary[0];
-        } else {
-          $col = 'id';
-        }
+        $col = static::$_primary[0] ?? 'id';
       }
       $where_sql = '' . $col . ' = @';
       $params[] = $id;
@@ -546,7 +545,7 @@ class MSSQL_Core extends SQL_Base
     $params = [];
 
     $sql_order = '';
-    if (!is_null($order_by) && is_array($order_by)) {
+    if (is_array($order_by)) {
       $sql_order = [];
       foreach ($order_by as $col => $dir) {
         $sql_order[] .= '' . trim($col) . ' ' . $dir;
@@ -1005,7 +1004,7 @@ OFFSET ' . ($per_page * $page) . ' ROWS FETCH NEXT ' . $per_page . ' ROWS ONLY
     }
 
 
-    if (($unique_set && !sizeof($primary) && !$primary_set) || !$primary_set || $force_insert) {
+    if (!$primary_set || $force_insert) {
       $sql = "
 				INSERT INTO
 					[" . static::$database . "].dbo.[" . static::$table . "]
@@ -1085,12 +1084,10 @@ SET
 
       $sql .= implode(',', $props);
 
-      if ($primary_set) {
-        $sql .= '
+      $sql .= '
 WHERE
-    ' . implode(' AND ', $primary_sql) . '
+  ' . implode(' AND ', $primary_sql) . '
 ';
-      }
 
       if ($return_query) {
         return new SQL_Query($sql, $params);

@@ -1,5 +1,6 @@
 <?php
 // php elastic_alt.php -hhost -uhttp://elastic:9200/index/type/ -felastic_schema/schema.json
+use QuickDRY\Connectors\Curl;
 use QuickDRY\Utilities\Debug;
 
 $shortopts = 'h:';
@@ -16,7 +17,7 @@ if (!$_HOST || !$_URL || !$_FILE) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -u<url> -f<file> - json format>' . "\r\n");
 }
 
-require_once('../index.php');
+require_once __DIR__ . '/../index.php';
 
 $fp = fopen($_FILE,'r');
 if(!$fp) {

@@ -2,6 +2,7 @@
 // php elastic_create_index.php -hhome -iindex -ttype
 
 
+use QuickDRY\Connectors\Elastic_A;
 use QuickDRY\Utilities\Debug;
 
 $shortopts = 'h:';
@@ -20,7 +21,7 @@ if (!$_HOST || !$_INDEX || !$_FILE) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type> -f<file> - json format>' . "\r\n");
 }
 
-require_once('../index.php');
+require_once __DIR__ . '/../index.php';
 
 $fp = fopen($_FILE,'r');
 $schema = fread($fp, filesize($_FILE));

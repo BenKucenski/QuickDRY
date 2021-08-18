@@ -7,6 +7,7 @@ use QuickDRY\Utilities\Log;
 use QuickDRY\Utilities\Metrics;
 use QuickDRY\Utilities\SafeClass;
 
+
 /**f
  * Class MSSQL_Connection
  */
@@ -23,7 +24,10 @@ class MSSQL_Connection extends SafeClass
   private array $_LastConnection;
 
   protected array $db_conns = [];
+
+  /* @var $db mixed */
   protected $db = null;
+
   protected ?string $current_db = null;
 
   protected ?string $DB_HOST;
@@ -738,8 +742,8 @@ class MSSQL_Connection extends SafeClass
     return $indexes;
   }
 
-  private static $_UniqueKeys = null;
-  private static $_Indexes = null;
+  private static ?array $_UniqueKeys = null;
+  private static ?array $_Indexes = null;
 
   /**
    * @param $table_name

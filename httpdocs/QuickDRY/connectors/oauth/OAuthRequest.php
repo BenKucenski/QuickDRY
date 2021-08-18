@@ -1,21 +1,19 @@
 <?php
 namespace QuickDRY\Connectors;
 
-use OAuthUtil;
-
 class OAuthRequest
 {
-  protected $parameters;
-  protected $http_method;
-  protected $http_url;
+  protected array $parameters;
+  protected string $http_method;
+  protected string $http_url;
   // for debug purposes
-  public $base_string;
-  public static $version = '1.0';
-  public static $POST_INPUT = 'php://input';
+  public string $base_string;
+  public static string $version = '1.0';
+  public static string $POST_INPUT = 'php://input';
 
-  function __construct($http_method, $http_url, $parameters = NULL)
+  function __construct(string $http_method, string $http_url, array $parameters = NULL)
   {
-    $parameters = ($parameters) ? $parameters : array();
+    $parameters = ($parameters) ?: array();
     $parameters = array_merge(OAuthUtil::parse_parameters(parse_url($http_url, PHP_URL_QUERY)), $parameters);
     $this->parameters = $parameters;
     $this->http_method = $http_method;
@@ -26,17 +24,17 @@ class OAuthRequest
   /**
    * attempt to build up a request from what was passed to the server
    */
-  public static function from_request($http_method = NULL, $http_url = NULL, $parameters = NULL)
+  public static function from_request($http_method = NULL, $http_url = NULL, $parameters = NULL): OAuthRequest
   {
     $scheme = (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on")
       ? 'http'
       : 'https';
-    $http_url = ($http_url) ? $http_url : $scheme .
+    $http_url = ($http_url) ?: $scheme .
       '://' . $_SERVER['SERVER_NAME'] .
       ':' .
       $_SERVER['SERVER_PORT'] .
       $_SERVER['REQUEST_URI'];
-    $http_method = ($http_method) ? $http_method : $_SERVER['REQUEST_METHOD'];
+    $http_method = ($http_method) ?: $_SERVER['REQUEST_METHOD'];
 
     // We weren't handed any parameters, so let's find the ones relevant to
     // this request.
@@ -79,9 +77,14 @@ class OAuthRequest
   /**
    * pretty much a helper function to set up the request
    */
-  public static function from_consumer_and_token($consumer, $token, $http_method, $http_url, $parameters = NULL)
+  public static function from_consumer_and_token(
+    $consumer,
+    $token,
+    string $http_method,
+    string $http_url,
+    array $parameters = NULL): OAuthRequest
   {
-    $parameters = ($parameters) ? $parameters : array();
+    $parameters = ($parameters) ?: array();
     $defaults = array("oauth_version" => OAuthRequest::$version,
       "oauth_nonce" => OAuthRequest::generate_nonce(),
       "oauth_timestamp" => OAuthRequest::generate_timestamp(),

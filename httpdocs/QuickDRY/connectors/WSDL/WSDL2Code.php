@@ -12,9 +12,9 @@ use QuickDRY\Utilities\Strings;
  */
 class WSDL2Code extends SafeClass
 {
-  public $TargetNamespace;
-  public $Functions;
-  public $BaseDir;
+  public ?string $TargetNamespace;
+  public ?array $Functions;
+  public ?string $BaseDir;
 
   public function Generate(string $URL, string $ClassName, string $BaseDir = '../httpdocs')
   {
@@ -25,7 +25,7 @@ class WSDL2Code extends SafeClass
     $this->GenerateCode($ClassName);
   }
 
-  private function GenerateCode($ClassName)
+  private function GenerateCode(string $ClassName)
   {
     $function_code = [];
 

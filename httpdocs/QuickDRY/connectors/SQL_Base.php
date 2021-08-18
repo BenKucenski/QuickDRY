@@ -1,7 +1,9 @@
 <?php
+
 namespace QuickDRY\Connectors;
 
-use ChangeLogHandler;
+use QuickDRY\Web\ElementID;
+use QuickDRYInstance\Common\ChangeLogHistory;
 use DateTime;
 use QuickDRY\Utilities\Dates;
 use ReflectionException;
@@ -11,7 +13,7 @@ use ReflectionObject;
  * Class SQL_Base
  * @property bool HasChanges
  * @property array Changes
- * @property array history
+ * @property ChangeLogHistory history
  */
 class SQL_Base
 {
@@ -21,7 +23,7 @@ class SQL_Base
   protected static string $database;
 
   protected array $_change_log = [];
-  protected ?array $_history = null;
+  protected ?ChangeLogHistory $_history = null;
   protected ?int $_from_db = null;
 
   public ?bool $HasChanges;
@@ -222,10 +224,10 @@ class SQL_Base
   }
 
   /**
-   * @param $name
-   * @return array|mixed|ChangeLogHandler[]|null
+   * @param string $name
+   * @return array|mixed|ChangeLogHistory[]|null
    */
-  public function __get($name)
+  public function __get(string $name)
   {
     switch ($name) {
       case 'Changes':
@@ -243,11 +245,11 @@ class SQL_Base
   }
 
   /**
-   * @param $name
-   * @param $value
+   * @param string $name
+   * @param mixed $value
    * @return mixed
    */
-  public function __set($name, $value)
+  public function __set(string $name, $value)
   {
     switch ($name) {
       default:
@@ -257,12 +259,12 @@ class SQL_Base
   }
 
   /**
-   * @return ChangeLogHandler[]|null
+   * @return ChangeLogHistory|null
    */
-  private function _history(): ?array
+  private function _history(): ?ChangeLogHistory
   {
     if (class_exists('ChangeLogHandler')) {
-      return ChangeLogHandler::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
+      return ChangeLogHistory::GetHistory(static::$DB_HOST, static::$database, static::$table, $this->GetUUID());
     }
     return null;
   }
@@ -365,10 +367,10 @@ class SQL_Base
   public static function GetAllPaginated(
     array $where = null,
     array $order_by = null,
-    int $page = 0,
-    int $per_page = 0,
+    int   $page = 0,
+    int   $per_page = 0,
     array $left_join = null,
-    int $limit = null)
+    int   $limit = null)
   {
     return static::_GetAllPaginated($where, $order_by, $page, $per_page, $left_join, $limit);
   }
@@ -512,12 +514,12 @@ class SQL_Base
   public static function GetHeader(
     string $sort_by = '',
     string $dir = '',
-    bool $modify = false,
-    array $add = [],
-    array $ignore = [],
+    bool   $modify = false,
+    array  $add = [],
+    array  $ignore = [],
     string $add_params = '',
-    bool $sortable = true,
-    array $column_order = []): string
+    bool   $sortable = true,
+    array  $column_order = []): string
   {
     return static::_GetHeader(static::$prop_definitions, $sort_by, $dir, $modify, $add, $ignore, $add_params, $sortable, $column_order);
   }
@@ -532,10 +534,10 @@ class SQL_Base
    * @return string
    */
   public static function GetBareHeader(
-    bool $modify = false,
+    bool  $modify = false,
     array $add = [],
     array $ignore = [],
-    bool $sortable = true,
+    bool  $sortable = true,
     array $column_order = []): string
   {
     return static::_GetBareHeader(static::$prop_definitions, $modify, $add, $ignore, $sortable, $column_order);
@@ -555,18 +557,20 @@ class SQL_Base
    * @return string
    */
   protected static function _GetHeader(
-    array $props,
+    array  $props,
     string $sort_by,
     string $dir,
-    bool $modify = false,
-    array $add = [],
-    array $ignore = [],
+    bool   $modify = false,
+    array  $add = [],
+    array  $ignore = [],
     string $add_params = '',
-    bool $sortable = true,
-    array $column_order = []): string
+    bool   $sortable = true,
+    array  $column_order = []): string
   {
     $not_dir = $dir == 'asc' ? 'desc' : 'asc';
     $arrow = $dir == 'asc' ? '&uarr;' : '&darr;';
+
+    $res = '';
 
     $columns = [];
     if (!$add) {
@@ -595,13 +599,11 @@ class SQL_Base
         }
       }
 
-    $res = '<thead><tr>';
     if (sizeof($column_order) > 0) {
       foreach ($column_order as $order)
         $res .= $columns[$order];
     } else
-      foreach ($columns as $column)
-        $res .= $column;
+      $res = '<thead><tr>' . implode('', $columns);
 
     if ($modify)
       $res .= '<th>Action</th>';
@@ -621,6 +623,7 @@ class SQL_Base
    */
   protected static function _GetBareHeader(array $props, bool $modify = false, array $add = [], array $ignore = [], bool $sortable = true, array $column_order = []): string
   {
+    $res = '';
     $columns = [];
 
     foreach ($props as $name => $info)
@@ -642,13 +645,11 @@ class SQL_Base
         }
       }
 
-    $res = '<thead><tr>';
     if (sizeof($column_order) > 0) {
       foreach ($column_order as $order)
         $res .= $columns[$order];
     } else
-      foreach ($columns as $column)
-        $res .= $column;
+      $res = '<thead><tr>' . implode('', $columns);
 
     if ($modify)
       $res .= '<th>Action</th>' . "\r\n";
@@ -668,14 +669,14 @@ class SQL_Base
    * @return string
    */
   public function ToRowLegacy(
-    bool $modify = false,
-    array $swap = [],
-    array $add = [],
-    array $ignore = [],
+    bool   $modify = false,
+    array  $swap = [],
+    array  $add = [],
+    array  $ignore = [],
     string $custom_link = '',
     string $row_style = '',
-    array $column_order = [],
-    bool $no_delete = false): string
+    array  $column_order = [],
+    bool   $no_delete = false): string
   {
     $res = '<tr style="' . $row_style . '">';
     $columns = [];
@@ -753,14 +754,13 @@ class SQL_Base
    * @return string
    */
   public function ToRow(
-    bool $modify = false,
-    array $swap = [],
-    array $add = [],
-    array $ignore = [],
+    bool   $modify = false,
+    array  $swap = [],
+    array  $add = [],
+    array  $ignore = [],
     string $custom_link = '',
-    array $column_order = []): string
+    array  $column_order = []): string
   {
-    $res = '<tr>';
     $columns = [];
     if (is_null($swap)) {
       $swap = [];
@@ -815,8 +815,7 @@ class SQL_Base
       foreach ($column_order as $name)
         $res .= $columns[$name];
     } else {
-      foreach ($columns as $html)
-        $res .= $html;
+      $res = '<tr>' . implode('', $columns);
     }
 
     if ($modify) {
@@ -856,8 +855,8 @@ class SQL_Base
    */
   public function FromRow(
     array $row,
-    bool $trigger_change_log = false,
-    bool $strict = false)
+    bool  $trigger_change_log = false,
+    bool  $strict = false)
   {
     global $User;
 
@@ -934,7 +933,7 @@ class SQL_Base
 
   /**
    * @param        $selected
-   * @param        $id
+   * @param ElementID $id
    * @param        $value
    * @param        $order_by
    * @param string $display
@@ -945,7 +944,7 @@ class SQL_Base
    */
   protected static function _Select(
     $selected,
-    $id,
+    ElementID $id,
     $value,
     $order_by,
     string $display = "",
@@ -962,7 +961,7 @@ class SQL_Base
 
     $hash = md5(serialize([$type, $order_by, $where]));
     if (!isset(static::$_select_cache[$hash])) {
-      if(!method_exists($type, 'GetAll')) {
+      if (!method_exists($type, 'GetAll')) {
         exit($type . '::GetAll');
       }
 
@@ -977,7 +976,7 @@ class SQL_Base
   /**
    * @param        $items
    * @param        $selected
-   * @param        $id
+   * @param ElementID $id
    * @param        $value
    * @param        $order_by
    * @param string $display
@@ -988,7 +987,7 @@ class SQL_Base
   protected static function _SelectItems(
     $items,
     $selected,
-    $id,
+    ElementID $id,
     $value,
     $order_by,
     string $display = "",
@@ -999,12 +998,9 @@ class SQL_Base
       $show_none = true;
     }
 
-    if (!is_array($id))
-      $name = $id;
-    else {
-      $name = $id['name'];
-      $id = $id['id'];
-    }
+    $name = $id->name;
+    $id = $id->id;
+
     if ($display == "") {
       if (is_array($order_by)) {
         $display = array_keys($order_by)[0];
@@ -1063,7 +1059,7 @@ class SQL_Base
     string $where = null): string
   {
     $type = get_called_class();
-    if(!method_exists($type, 'GetAll')) {
+    if (!method_exists($type, 'GetAll')) {
       exit($type . '::GetAll');
     }
 
@@ -1180,10 +1176,10 @@ class SQL_Base
     $type = self::TableToClass(static::$DatabasePrefix, static::$table, static::$LowerCaseTable, static::$DatabaseTypePrefix);
 
 
-    if(!method_exists($type, 'GetAll')) {
+    if (!method_exists($type, 'GetAll')) {
       exit("$type::GetAll");
     }
-    $items = $type::GetAll($order_by,'asc',$where);
+    $items = $type::GetAll($order_by, 'asc', $where);
 
     return self::_EasySelectItems($items, $selected, $id, $value, $order_by, $display);
   }

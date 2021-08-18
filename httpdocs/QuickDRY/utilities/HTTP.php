@@ -1,6 +1,9 @@
 <?php
 namespace QuickDRY\Utilities;
 
+use JsonStatusResult;
+use QuickDRY\Web\HTTPStatus;
+
 /**
  * Class HTTP
  */

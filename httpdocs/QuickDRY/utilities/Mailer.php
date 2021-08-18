@@ -24,16 +24,6 @@ class Mailer extends SafeClass
   public PHPMailer $mail;
 
   /**
-   * @param $name
-   * @return array|int|mixed|null
-   */
-  public function __get($name)
-  {
-    return parent::__get($name);
-  }
-
-
-  /**
    *
    * @param string $to_email
    * @param string $to_name
@@ -44,7 +34,14 @@ class Mailer extends SafeClass
    * @param string|null $from_name
    * @return Mailer
    */
-  public static function Queue(string $to_email, string $to_name, string $subject, string $message, array $attachments = null, string $from_email = null, string $from_name = null): Mailer
+  public static function Queue(
+    string $to_email,
+    string $to_name,
+    string $subject,
+    string $message,
+    array $attachments = null,
+    string $from_email = null,
+    string $from_name = null): Mailer
   {
     $t = new self();
     $t->to_email = $to_email;
@@ -142,7 +139,7 @@ class Mailer extends SafeClass
       }
 
       $attachments = unserialize($this->headers);
-      if (!is_null($attachments) && is_array($attachments)) {
+      if (is_array($attachments)) {
         foreach ($attachments as $name => $path) {
 
           if ($name === 'report_id') {

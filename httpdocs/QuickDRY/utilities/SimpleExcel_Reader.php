@@ -1,6 +1,7 @@
 <?php
 namespace QuickDRY\Utilities;
 
+use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 

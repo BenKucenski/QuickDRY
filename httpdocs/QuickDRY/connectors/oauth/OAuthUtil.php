@@ -20,7 +20,8 @@ class OAuthUtil {
     // This decode function isn't taking into consideration the above
     // modifications to the encoding process. However, this method doesn't
     // seem to be used anywhere so leaving it as is.
-    public static function urldecode_rfc3986($string) {
+    public static function urldecode_rfc3986(string $string): string
+    {
         return urldecode($string);
     }
 
@@ -29,7 +30,8 @@ class OAuthUtil {
     // Can filter out any non-oauth parameters if needed (default behaviour)
     // May 28th, 2010 - method updated to tjerk.meesters for a speed improvement.
     //                  see http://code.google.com/p/oauth/issues/detail?id=163
-    public static function split_header($header, $only_allow_oauth_parameters = true) {
+    public static function split_header($header, $only_allow_oauth_parameters = true): array
+    {
         $params = array();
         if (preg_match_all('/('.($only_allow_oauth_parameters ? 'oauth_' : '').'[a-z_-]*)=(:?"([^"]*)"|([^,]*))/', $header, $matches)) {
             foreach ($matches[1] as $i => $h) {

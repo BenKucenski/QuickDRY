@@ -114,15 +114,13 @@ class SQLCodeGen extends SafeClass
 
       case 'tinyint unsigned':
       case 'bigint unsigned':
-      case 'int unsigned':
-        return 'int';
-
-      case 'numeric':
-      case 'tinyint':
-      case 'smallint':
-      case 'bigint':
-      case 'bit':
       case 'long':
+      case 'bit':
+      case 'bigint':
+      case 'smallint':
+      case 'tinyint':
+      case 'numeric':
+      case 'int unsigned':
         return 'int';
 
       case 'money':
@@ -599,7 +597,7 @@ class SQLCodeGen extends SafeClass
     if (!sizeof($primary)) {
       return;
     }
-    $namespace = 'json\\' . $this->DatabasePrefix . '_' . $this->Database;
+    $namespace = 'json\\' . $this->DatabaseTypePrefix . '_' . $this->Database;
 
     $get_params = [];
     $missing_params = [];

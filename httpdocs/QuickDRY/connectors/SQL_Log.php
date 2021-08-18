@@ -8,10 +8,10 @@ use QuickDRY\Utilities\SafeClass;
  */
 class SQL_Log extends SafeClass
 {
-    public $source;
-    public $query;
-    public $params;
-    public $start_time;
-    public $end_time;
-    public $duration;
+    public ?string $source = null;
+    public ?string $query = null;
+    public ?array $params = null;
+    public ?string $start_time = null;
+    public ?string $end_time = null;
+    public ?float $duration = null;
 }

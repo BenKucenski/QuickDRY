@@ -147,9 +147,10 @@ function autoloader_QuickDRY($class)
     'QuickDRY\Utilities\SimpleExcel_Reader' => 'utilities/SimpleExcel_Reader.php',
     'QuickDRY\Utilities\ExceptionHandler' => 'utilities/ExceptionHandler.php',
     'QuickDRY\Utilities\SimpleWordDoc' => 'utilities/SimpleWordDoc.php',
+    'QuickDRY\Utilities\ChangeLogAbstract' => 'utilities/ChangeLogAbstract.php',
+    'QuickDRY\Utilities\ChangeLogHistoryAbstract' => 'utilities/ChangeLogHistoryAbstract.php',
 
     'QuickDRY\Connectors\SQLCodeGen' => 'connectors/SQLCodeGen.php',
-    'QuickDRY\Connectors\ChangeLog' => 'connectors/ChangeLog.php',
     'QuickDRY\Connectors\CoreClass' => 'connectors/CoreClass.php',
     'QuickDRY\Connectors\SQL_Base' => 'connectors/SQL_Base.php',
     'QuickDRY\Connectors\SQL_Query' => 'connectors/SQL_Query.php',

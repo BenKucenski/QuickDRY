@@ -1,6 +1,10 @@
 <?php
 namespace QuickDRY\Utilities;
 
+use DateTime;
+use Exception;
+use stdClass;
+
 /**
  * Class Strings
  */
