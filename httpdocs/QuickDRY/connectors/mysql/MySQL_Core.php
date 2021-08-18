@@ -13,13 +13,13 @@ use QuickDRYInstance\Common\UserClass;
  */
 class MySQL_Core extends SQL_Base
 {
-  public static string $DB_HOST;
-  public static string $DatabasePrefix;
-  public static int $LowerCaseTable;
-  public static string $DatabaseTypePrefix;
-  public static array $_primary;
-  public static array $_unique;
-  public static array $prop_definitions;
+  protected static string $DB_HOST;
+  protected static string $DatabasePrefix;
+  protected static int $LowerCaseTable;
+  protected static string $DatabaseTypePrefix;
+  protected static array $_primary;
+  protected static array $_unique;
+  protected static array $prop_definitions;
 
   protected bool $PRESERVE_NULL_STRINGS = false;  // when true, if a property is set to the string 'null' it will be inserted as 'null' rather than null
 

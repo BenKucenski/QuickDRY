@@ -96,9 +96,9 @@ class db_[[c_name]] extends [[DatabaseClass]]
      * @param array $req
      * @param bool $save
      * @param bool $keep_existing_values
-     * @return null|array
+     * @return bool|array
      */
-    public function FromRequest(array &$req, bool $save = true, bool $keep_existing_values = false): ?array
+    public function FromRequest(array $req, bool $save = true, bool $keep_existing_values = false)
     {
         return parent::FromRequest($req, $save, $keep_existing_values);
     }
