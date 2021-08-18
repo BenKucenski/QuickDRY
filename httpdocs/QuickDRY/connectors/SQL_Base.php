@@ -119,6 +119,11 @@ class SQL_Base
     $this->props = self::GetVars();
   }
 
+  private static function ColumnNameToNiceName(string $name): string
+  {
+    return $name;
+  }
+
   /**
    * @return bool
    */
@@ -761,6 +766,8 @@ class SQL_Base
     string $custom_link = '',
     array  $column_order = []): string
   {
+    $res = '';
+
     $columns = [];
     if (is_null($swap)) {
       $swap = [];
@@ -916,7 +923,7 @@ class SQL_Base
    * @param bool $keep_existing_values
    * @return bool|array
    */
-  public function FromRequest(array &$req, bool $save = true, bool $keep_existing_values = true)
+  public function FromRequest(array $req, bool $save = true, bool $keep_existing_values = true)
   {
     foreach ($this->props as $name => $value) {
       $this->$name = $req[$name] ?? (!$keep_existing_values ? null : $this->props[$name]);

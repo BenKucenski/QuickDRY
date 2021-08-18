@@ -1,5 +1,5 @@
 <?php
-define('SESSION_NAME','sessionname');
+const SESSION_NAME = 'sessionname';
 session_name(SESSION_NAME);
 session_start();
 
@@ -13,4 +13,5 @@ define('BASEDIR', str_replace('\\','/',dirname(__FILE__)).'/');
 
 date_default_timezone_set('GMT');
 
-define('META_TITLE','Site Name');
+const META_TITLE = 'Site Name';
+const SHOW_ERRORS = 1;

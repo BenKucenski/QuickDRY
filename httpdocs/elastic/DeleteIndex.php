@@ -1,16 +1,19 @@
 <?php
 // php elastic_delete_index.php -hhome -iindex -ttype
 
-$shortopts = '';
-$shortopts .= 'h:';
+use QuickDRY\Connectors\Elastic_A;
+use QuickDRY\Utilities\Log;
+use QuickDRY\Utilities\SafeClass;
+
+$shortopts = 'h:';
 $shortopts .= 'i:';
 $shortopts .= 't::';
 
 $options = getopt($shortopts);
 
-$_HOST = isset($options['h']) ? $options['h'] : '';
-$_INDEX = isset($options['i']) ? $options['i'] : '';
-$_TYPE = isset($options['t']) ? $options['t'] : '';
+$_HOST = $options['h'] ?? '';
+$_INDEX = $options['i'] ?? '';
+$_TYPE = $options['t'] ?? '';
 
 if (!$_HOST || !$_INDEX) {
     exit('USAGE: php ' . __FILE__ . ' -h<host> -i<index> -t<type>' . "\r\n");

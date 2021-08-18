@@ -1139,7 +1139,7 @@ class adLDAP
       return null;
     }
     if (!function_exists('bcmod')) {
-      return ['error' => "Missing function support [bcmod] http://www.php.net/manual/en/book.bc.php"];
+      return ['error' => "Missing function support [bcmod] https://www.php.net/manual/en/book.bc.php"];
     }
 
     $userinfo = $this->user_info($username, ["pwdlastset", "useraccountcontrol"]);

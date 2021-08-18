@@ -6,9 +6,12 @@ use QuickDRY\Utilities\SafeClass;
 
 /**
  * Class FileClass
+ *
+ * @property string server_location
  */
 class FileClass extends SafeClass
 {
+  public ?string $id = null;
   public ?int $user_id = null;
   public ?string $file_name = null;
   public ?string $file_type = null;

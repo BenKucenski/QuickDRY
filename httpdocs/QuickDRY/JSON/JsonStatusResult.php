@@ -26,6 +26,7 @@ class JsonStatusResult extends SafeClass
   public ?string $traceId = null;
   public ?string $detail = null;
   public ?string $errors = null;
+  public ?int $statusCode = null;
 
   /**
    * @param $value

@@ -20,7 +20,10 @@
     "ext-ldap": "*",
     "ext-simplexml": "*",
     "ext-bcmath": "*",
-    "ext-xml": "*"
+    "ext-xml": "*",
+    "ext-odbc": "*",
+    "ext-sqlite3": "*",
+    "ext-openssl": "*"
   },
   "name": "bdk/pursepoor",
   "description": ""

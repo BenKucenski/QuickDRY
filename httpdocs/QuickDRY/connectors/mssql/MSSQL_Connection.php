@@ -827,7 +827,7 @@ ORDER BY
    * @return array
    */
 
-  private static $_ForeignKeys = null;
+  private static ?array $_ForeignKeys = null;
 
   // https://stackoverflow.com/questions/483193/how-can-i-list-all-foreign-keys-referencing-a-given-table-in-sql-server
   // Note: SYS Tables are far more reliable for this.  Using the information schema table, you will not accurately get
@@ -880,7 +880,7 @@ ORDER BY obj.name, fkc.referenced_column_id
     return self::$_ForeignKeys[$this->current_db][$table_name];
   }
 
-  private static $_LinkedTables = null;
+  private static ?array $_LinkedTables = null;
 
   public function GetLinkedTables($table_name)
   {

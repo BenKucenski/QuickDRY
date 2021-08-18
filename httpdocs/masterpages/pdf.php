@@ -1,10 +1,13 @@
-<html>
+<?php
+global $Web;
+?>
+<html lang="">
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=10"/>
     <meta charset="UTF-8">
 
-    <title><?php echo isset($_META_TITLE) ? $_META_TITLE : META_TITLE; ?></title>
+    <title><?php echo $_META_TITLE ?? META_TITLE; ?></title>
 
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />

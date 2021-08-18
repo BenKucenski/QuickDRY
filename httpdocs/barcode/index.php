@@ -1,4 +1,8 @@
 <?php
+
+use QuickDRY\Utilities\BarcodeClass;
+use QuickDRY\Web\Request;
+
 require_once '../QuickDRY/Web/Request.php';
 require_once '../QuickDRY/utilities/BarcodeClass.php';
 
@@ -6,18 +10,18 @@ define('BASEDIR', str_replace('\\','/',dirname(__FILE__)).'/');
 
 $Request = new Request();
 
-$width = $Request->w;
-$height = $Request->h;
-$code = $Request->c;
+$width = $Request->Get('w');
+$height = $Request->Get('h');
+$code = $Request->Get('c');
 
 if(!$width) { // fix for IIS if Web.config doesn't work
     $matches = [];
     $pattern = '/(\d+)\/(\d+)\/(.*?)\.png/si';
     $query = $_SERVER['REQUEST_URI'];
     preg_match($pattern, $query, $matches);
-    $width = isset($matches[1]) ? $matches[1] : 0;
-    $height = isset($matches[2]) ? $matches[2] : 0;
-    $code = isset($matches[3]) ? $matches[3] : 0;
+    $width = $matches[1] ?? 0;
+    $height = $matches[2] ?? 0;
+    $code = $matches[3] ?? 0;
 }
 
 if(!$code) {

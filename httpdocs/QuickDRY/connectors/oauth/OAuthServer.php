@@ -7,9 +7,9 @@ class OAuthServer
   protected string $version = '1.0';             // hi blaine
   protected array $signature_methods = array();
 
-  protected $data_store;
+  protected ?OAuthDataStore $data_store = null;
 
-  function __construct($data_store)
+  function __construct(OAuthDataStore $data_store)
   {
     $this->data_store = $data_store;
   }
@@ -27,7 +27,7 @@ class OAuthServer
    * returns the request token on success
    * @throws OAuthException
    */
-  public function fetch_request_token($request)
+  public function fetch_request_token(OAuthRequest $request): ?OAuthToken
   {
     $this->get_version($request);
 
@@ -48,7 +48,7 @@ class OAuthServer
    * returns the access token on success
    * @throws OAuthException
    */
-  public function fetch_access_token($request)
+  public function fetch_access_token($request): ?OAuthToken
   {
     $this->get_version($request);
 
@@ -127,7 +127,7 @@ class OAuthServer
    * try to find the consumer for the provided request's consumer key
    * @throws OAuthException
    */
-  private function get_consumer($request)
+  private function get_consumer(?OAuthRequest $request): OAuthConsumer
   {
     $consumer_key = $request instanceof OAuthRequest
       ? $request->get_parameter("oauth_consumer_key")
@@ -149,7 +149,7 @@ class OAuthServer
    * try to find the token for the provided request's token key
    * @throws OAuthException
    */
-  private function get_token($request, $consumer, $token_type = "access")
+  private function get_token(?OAuthRequest $request, OAuthConsumer $consumer, string $token_type = "access"): OAuthToken
   {
     $token_field = $request instanceof OAuthRequest
       ? $request->get_parameter('oauth_token')
@@ -169,7 +169,7 @@ class OAuthServer
    * should guess the signature method appropriately
    * @throws OAuthException
    */
-  private function check_signature($request, $consumer, $token)
+  private function check_signature(?OAuthRequest $request, ?OAuthConsumer $consumer, OAuthToken $token)
   {
     // this should probably be in a different method
     $timestamp = $request instanceof OAuthRequest
@@ -199,8 +199,9 @@ class OAuthServer
 
   /**
    * check that the timestamp is new enough
+   * @throws OAuthException
    */
-  private function check_timestamp($timestamp)
+  private function check_timestamp(int $timestamp)
   {
     if (!$timestamp)
       throw new OAuthException(
@@ -218,8 +219,9 @@ class OAuthServer
 
   /**
    * check that the nonce is not repeated
+   * @throws OAuthException
    */
-  private function check_nonce($consumer, $token, $nonce, $timestamp)
+  private function check_nonce(OAuthConsumer $consumer, OAuthToken $token, $nonce, int $timestamp)
   {
     if (!$nonce)
       throw new OAuthException(

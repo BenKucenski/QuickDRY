@@ -20,7 +20,7 @@ class APIRequest
   private ?array $_data = null;
   private ?string $_raw = null;
   private ?array $_headers = null;
-  private $_cache_file = null;
+  private ?string $_cache_file = null;
   private ?array $_return_headers = null;
 
   /* @var $_curl_info mixed */

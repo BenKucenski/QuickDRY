@@ -4,7 +4,7 @@ namespace QuickDRYInstance\Menu;
 
 class MenuAccess
 {
-    private static $_MENU_ACCESS = [
+    private static array $_MENU_ACCESS = [
         '/' => [ROLE_ID_NOT_LOGGED_IN, ROLE_ID_DEFAULT],
         '/signin' => [ROLE_ID_NOT_LOGGED_IN],
         '/lost_password' => [ROLE_ID_NOT_LOGGED_IN],

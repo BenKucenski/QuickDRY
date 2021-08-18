@@ -18,7 +18,10 @@ class UserClass extends SafeClass
   public int $id;
   public string $Username;
   public array $Roles;
-  public my_HappystatusUserClass $User;
+
+  // replace with your actual user class
+  /* @var $User mixed */
+  public $User;
 
   /**
    * @param string $name

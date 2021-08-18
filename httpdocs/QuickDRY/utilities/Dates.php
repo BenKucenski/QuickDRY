@@ -377,7 +377,7 @@ class Dates extends SafeClass
   {
     $time = self::DateToInt($time);
 
-    return self::Timestamp($time - $User->hours_diff * 3600);
+    return self::Timestamp($time - $User->User->hours_diff * 3600);
   }
 
   /**

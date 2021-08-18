@@ -16,7 +16,7 @@ class USPSAPI extends SafeClass
     $params = [];
     $params['API'] = 'Verify';
     $params['XML'] = '<AddressValidateRequest USERID="' . USPS_API_USERID . '"><Address ID="0"><Address1></Address1><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State><Zip5></Zip5><Zip4></Zip4></Address></AddressValidateRequest>';
-    $url = 'http://production.shippingapis.com/ShippingAPITest.dll';
+    $url = 'https://production.shippingapis.com/ShippingAPITest.dll';
     $res = Curl::Post($url, $params, true);
     Debug::Halt($res);
 

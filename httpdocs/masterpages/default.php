@@ -1,8 +1,11 @@
-<html>
+<?php
+global $Web;
+?>
+<html lang="">
 
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=10" />
-	<title><?php echo isset($_META_TITLE) ? $_META_TITLE : META_TITLE; ?></title>
+	<title><?php echo $_META_TITLE ?? META_TITLE; ?></title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css" />
@@ -76,7 +79,7 @@
 
 	<div class="row" style="margin: 15px;">
 		<div style="text-align: center; font-size: 16pt;">
-			<?php if(defined('META_LOGO') && META_LOGO) { ?><img src="/images/logo.png"/><br/><?php } ?>
+			<?php if(defined('META_LOGO') && META_LOGO) { ?><img src="/images/logo.png" alt=""/><br/><?php } ?>
 			Copyright <?php echo date('Y'); ?> <?php echo META_TITLE; ?>
 		</div>
 	</div>
@@ -91,12 +94,12 @@
 <script>
 	DOMAIN = "<?php echo COOKIE_DOMAIN; ?>";
 	$(document).ready(function(){
-		<?php if($Web->Session->notice) { ?>
-		NoticeDialog('Notice', "<?php echo $Web->Session->notice; ?>");
-		<?php $Web->Session->notice = ''; } ?>
-		<?php if($Web->Session->error) { ?>
-		NoticeDialog('Error', "<?php echo $Web->Session->error; ?>");
-		<?php $Web->Session->error = ''; } ?>
+		<?php if($Web->Session->Get('notice')) { ?>
+		NoticeDialog('Notice', "<?php echo $Web->Session->Get('notice'); ?>");
+		<?php $Web->Session->Set('notice',''); } ?>
+		<?php if($Web->Session->Get('error')) { ?>
+		NoticeDialog('Error', "<?php echo $Web->Session->Get('error'); ?>");
+		<?php $Web->Session->Set('error',''); } ?>
 
 		ShowTab();
 	});

@@ -20,8 +20,8 @@ class Curl
     public int $StatusCode;
 
     public string $URL;
-    public $Params;
-    public $SentHeader;
+    public ?array $Params;
+    public ?array $SentHeader;
 
     public static bool $FollowLocation = true;
 

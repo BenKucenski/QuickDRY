@@ -118,7 +118,7 @@ class OAuthRequest
     return $this->parameters[$name] ?? null;
   }
 
-  public function get_parameters()
+  public function get_parameters(): array
   {
     return $this->parameters;
   }
@@ -132,7 +132,7 @@ class OAuthRequest
    * The request parameters, sorted and concatenated into a normalized string.
    * @return string
    */
-  public function get_signable_parameters()
+  public function get_signable_parameters(): string
   {
     // Grab all parameters
     $params = $this->parameters;
@@ -153,7 +153,7 @@ class OAuthRequest
    * and the parameters (normalized), each urlencoded
    * and the concated with &.
    */
-  public function get_signature_base_string()
+  public function get_signature_base_string(): string
   {
     $parts = array(
       $this->get_normalized_http_method(),
@@ -169,7 +169,7 @@ class OAuthRequest
   /**
    * just uppercases the http method
    */
-  public function get_normalized_http_method()
+  public function get_normalized_http_method(): string
   {
     return strtoupper($this->http_method);
   }
@@ -178,7 +178,7 @@ class OAuthRequest
    * parses the url and rebuilds it to be
    * scheme://host/path
    */
-  public function get_normalized_http_url()
+  public function get_normalized_http_url(): string
   {
     $parts = parse_url($this->http_url);
 
@@ -197,7 +197,7 @@ class OAuthRequest
   /**
    * builds a url usable for a GET request
    */
-  public function to_url()
+  public function to_url(): string
   {
     $post_data = $this->to_postdata();
     $out = $this->get_normalized_http_url();
@@ -210,7 +210,7 @@ class OAuthRequest
   /**
    * builds the data one would send in a POST request
    */
-  public function to_postdata()
+  public function to_postdata(): string
   {
     return OAuthUtil::build_http_query($this->parameters);
   }
@@ -220,7 +220,7 @@ class OAuthRequest
    * @return string
    * @throws OAuthException
    */
-  public function to_header($realm = null)
+  public function to_header($realm = null): string
   {
     $first = true;
     if ($realm) {
@@ -271,7 +271,7 @@ class OAuthRequest
   /**
    * util function: current timestamp
    */
-  private static function generate_timestamp()
+  private static function generate_timestamp(): int
   {
     return time();
   }
