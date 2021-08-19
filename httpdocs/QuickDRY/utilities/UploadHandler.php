@@ -185,11 +185,11 @@ class UploadHandler
   }
 
   /**
-   * @param $fileArray
-   * @param null $user_id
+   * @param array $fileArray
+   * @param int|null $user_id
    * @return array
    */
-  public static function UploadFiles($fileArray, $user_id = null): array
+  public static function UploadFiles(array $fileArray, int $user_id = null): array
   {
     $file = new FileClass();
     $file->user_id = $user_id;

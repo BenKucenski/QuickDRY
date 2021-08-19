@@ -15,9 +15,9 @@ const TWILIO_MODE_LIVE = 1;
 class Twilio extends SafeClass
 {
   private static int $mode = TWILIO_MODE_LIVE;
-  private static string $sid = TWILIO_SID;
-  private static string $token = TWILIO_TOKEN;
-  private static string $from_number = TWILIO_FROM_NUMBER;
+  private static ?string $sid = TWILIO_SID;
+  private static ?string $token = TWILIO_TOKEN;
+  private static ?string $from_number = TWILIO_FROM_NUMBER;
 
   private static function Log(
     string $phone_number,

@@ -35,12 +35,10 @@ class adLDAP
   /**
    * Array of domain controllers. Specifiy multiple controllers if you
    * would like the class to balance the LDAP queries amongst multiple servers
-   *
-   * @var array
    */
 
-  protected $_domain_controllers_str = LDAP_DOMAIN_CONTROLLERS;
-  protected $_domain_controllers = [];
+  protected ?string $_domain_controllers_str = LDAP_DOMAIN_CONTROLLERS;
+  protected array $_domain_controllers = [];
 
   /**
    * Optional account with higher privileges for searching
