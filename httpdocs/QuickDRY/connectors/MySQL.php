@@ -32,7 +32,7 @@ class MySQL extends SafeClass
     }
 
     $count = 0;
-    return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
+    return preg_replace_callback("/{{(.*?)}}/i", function ($result)
     use ($params, &$count, $conn, $sql) {
       if (isset($result[1])) {
 
