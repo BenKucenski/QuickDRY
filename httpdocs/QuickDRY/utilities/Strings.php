@@ -243,7 +243,7 @@ class Strings extends SafeClass
             $php_stmt_att = $php_stmt . '[$x_tag]' . $add . '[$key] = $value;';
             eval($php_stmt_att);
           } catch (Exception $ex) {
-            CleanHalt([$xml_array, $ex]);
+            Debug::Halt([$xml_array, $ex]);
           }
         }
       }

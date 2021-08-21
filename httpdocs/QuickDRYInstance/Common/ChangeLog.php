@@ -7,8 +7,8 @@ use QuickDRY\Utilities\ChangeLogAbstract;
 class ChangeLog extends ChangeLogAbstract
 {
 
+
   public function Save()
   {
-    // TODO: Implement Save() method.
   }
 }

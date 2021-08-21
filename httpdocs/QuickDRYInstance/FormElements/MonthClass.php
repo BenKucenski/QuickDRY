@@ -1,8 +1,10 @@
 <?php
+
 namespace QuickDRYInstance\FormElements;
 
 use QuickDRY\Web\ElementID;
 use QuickDRY\Web\FormClass;
+
 
 /**
  * Class MonthClass
@@ -36,17 +38,18 @@ class MonthClass extends FormClass
   }
 
   /**
-   * @param       $selected
+   * @param string|null $selected
    * @param ElementID|null $id
    *
    * @return string
    */
-  public static function Select($selected, ElementID $id = null): string
+  public static function Select(
+    string $selected = null,
+    ElementID $id = null): string
   {
     if (is_null($id)) {
       $id = new ElementID('month');
     }
     return self::SelectItems(self::$_options, $selected, $id, 'form-control');
-
   }
 }

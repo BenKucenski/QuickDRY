@@ -7,7 +7,7 @@ use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\HTTP;
 use QuickDRY\Utilities\Navigation;
 use QuickDRY\Utilities\SafeClass;
-use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Common\QuickDRYUser;
 use QuickDRYInstance\Menu\Menu;
 use QuickDRYInstance\Menu\MenuAccess;
 
@@ -44,7 +44,7 @@ use QuickDRYInstance\Menu\MenuAccess;
  * @property string PDFRootDir
  * @property string DOCXPageOrientation
  * @property string DOCXFileName
- * @property UserClass CurrentUser
+ * @property QuickDRYUser CurrentUser
  * @property string DefaultURL
  * @property string url_export_xls
  * @property string Namespace;
@@ -61,7 +61,7 @@ class Web extends SafeClass
   public Session $Session;
   public Cookie $Cookie;
   public Server $Server;
-  public ?UserClass $CurrentUser = null;
+  public ?QuickDRYUser $CurrentUser = null;
   public ?Navigation $Navigation = null;
   public ?bool $AccessDenied = null;
   public ?string $MasterPage = null;

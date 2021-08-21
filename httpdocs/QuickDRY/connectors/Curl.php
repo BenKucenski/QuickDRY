@@ -19,9 +19,9 @@ class Curl
     public CurlHeader $Header;
     public int $StatusCode;
 
-    public string $URL;
-    public ?array $Params;
-    public ?array $SentHeader;
+    public ?string $URL = null;
+    public ?string $Params = null;
+    public ?array $SentHeader = null;
 
     public static bool $FollowLocation = true;
 

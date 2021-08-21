@@ -1,10 +1,10 @@
 <?php
 
-use QuickDRYInstance\Common\UserClass;
 use QuickDRY\Connectors\SQL_Query;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\HTTP;
 use QuickDRY\Web\ElementID;
+use QuickDRYInstance\Common\QuickDRYUser;
 
 /**
  *
@@ -105,9 +105,9 @@ class db_[[c_name]] extends [[DatabaseClass]]
 
     /**
      * @param $search
-     * @param UserClass $user
+     * @param QuickDRYUser $user
      */
-    public static function Suggest($search, [[UserClass]] $user)
+    public static function Suggest($search, QuickDRYUser $user)
     {
         HTTP::ExitJSON(['error' => 'Suggest not implemented', 'search' => $search, 'user' => $user]);
     }
@@ -121,10 +121,10 @@ class db_[[c_name]] extends [[DatabaseClass]]
     }
 
     /**
-     * @param UserClass|null $user
+     * @param QuickDRYUser|null $user
      * @return bool
      */
-    public function VisibleTo(?[[UserClass]] $user): bool
+    public function VisibleTo(?QuickDRYUser $user): bool
     {
         if(is_null($user)) {
             return false;
@@ -140,10 +140,10 @@ class db_[[c_name]] extends [[DatabaseClass]]
     }
 
     /**
-     * @param UserClass|null $user
+     * @param QuickDRYUser|null $user
      * @return bool
      */
-    public function CanDelete(?[[UserClass]] $user): bool
+    public function CanDelete(?QuickDRYUser $user): bool
     {
         if(is_null($user)) {
             return false;

@@ -4,7 +4,7 @@ namespace QuickDRY\Connectors;
 use DateTime;
 use Exception;
 use QuickDRYInstance\Common\ChangeLog;
-use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Common\QuickDRYUser;
 use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
@@ -300,16 +300,16 @@ class MSSQL_Core extends SQL_Base
     return static::$connection->LastID();
   }
 
-  public function CanDelete(?UserClass $user): bool
+  public function CanDelete(?QuickDRYUser $user): bool
   {
     return false;
   }
 
   /**
-   * @param UserClass|null $User
+   * @param QuickDRYUser|null $User
    * @return array|null
    */
-  public function Remove(?UserClass $User): ?array
+  public function Remove(?QuickDRYUser $User): ?array
   {
     if (!$this->CanDelete($User)) {
       return ['error' => 'No Permission'];

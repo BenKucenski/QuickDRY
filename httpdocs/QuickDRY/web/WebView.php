@@ -313,7 +313,7 @@ if (file_exists('masterpages/' . $Web->MasterPage . '.php')) {
         $handler::Handle($Web->CurrentPage, $Web->CurrentPageName);
         exit;
       }
-      CleanHalt([$Web, $_SERVER]);
+      Debug::Halt([$Web, $_SERVER]);
       exit($Web->CurrentPageName . ' not found - 2');
     }
   }

@@ -2,7 +2,6 @@
 namespace QuickDRYInstance\Common;
 
 
-
 use QuickDRY\Utilities\Log;
 use QuickDRY\Utilities\SafeClass;
 

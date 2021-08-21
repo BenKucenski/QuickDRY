@@ -4,6 +4,7 @@ namespace QuickDRY\Connectors;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use Exception;
+use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Metrics;
 use QuickDRY\Utilities\Strings;
 
@@ -61,7 +62,7 @@ class Elastic_Core extends Elastic_Base
       $vars = [$this->ToArray(true)];
       $res = static::_Insert(static::$_index, static::$_type, $vars);
       if (!isset($res['items'][0]['index']['_id'])) {
-        CleanHalt($res['items']);
+        Debug::Halt($res['items']);
       }
       $this->_id = $res['items'][0]['index']['_id'];
     } else {

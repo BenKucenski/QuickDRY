@@ -220,7 +220,7 @@ class SQL_Base
       $php .= ' * @property ' . $type . ' ' . $var . "\r\n";
 
     $php .= ' */';
-    $code = preg_replace('/<\?php\s+\/\*\*.*?\*\//si', '', $orig_code);
+    $code = preg_replace('/\<\?php\s+\/\*\*.*?\*\//si', '', $orig_code);
     $code = $php . $code;
 
     $fp = fopen($filename, 'w');

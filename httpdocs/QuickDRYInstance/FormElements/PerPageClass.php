@@ -1,4 +1,5 @@
 <?php
+
 namespace QuickDRYInstance\FormElements;
 
 use QuickDRY\Web\ElementID;
@@ -17,14 +18,17 @@ class PerPageClass extends FormClass
   ];
 
   /**
-   * @param       $selected
+   * @param string|null $selected
    * @param ElementID|null $id
    * @param string $onchange
    * @return string
    */
-  public static function Select($selected, ElementID $id = null, string $onchange = ''): string
+  public static function Select(
+    string $selected = null,
+    ElementID $id = null,
+    string $onchange = ''): string
   {
-    if (is_null($id)) {
+    if(is_null($id)) {
       $id = new ElementID('per_page');
     }
     return self::SelectItems(self::$_options, $selected, $id, $onchange);

@@ -1,18 +1,14 @@
 <?php
+
 namespace QuickDRYInstance\Common;
 
-
-use QuickDRY\Utilities\ChangeLogAbstract;
 use QuickDRY\Utilities\ChangeLogHistoryAbstract;
+
 
 class ChangeLogHistory extends ChangeLogHistoryAbstract
 {
   /* @var $history ChangeLog[] */
   public ?array $changes = null;
-
-  public static function Save(ChangeLogAbstract &$change_log)
-  {
-  }
 
   public static function GetHistory($DB_HOST, $database, $table, $uuid): ChangeLogHistory
   {
@@ -23,11 +19,8 @@ class ChangeLogHistory extends ChangeLogHistoryAbstract
     $history->uuid = $uuid;
     $history->changes = [];
 
-    return $history;
-  }
 
-  public function GetUser()
-  {
-    // TODO: Implement GetUser() method.
+
+    return $history;
   }
 }

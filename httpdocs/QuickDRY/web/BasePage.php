@@ -2,7 +2,7 @@
 namespace QuickDRY\Web;
 
 use QuickDRY\Utilities\SafeClass;
-use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Common\QuickDRYUser;
 
 /**
  * Class BasePage
@@ -24,7 +24,7 @@ class BasePage extends SafeClass
     public static ?Session $Session = null;
     public static ?Cookie $Cookie = null;
     public static ?Server $Server = null;
-    public static ?UserClass $CurrentUser = null;
+    public static ?QuickDRYUser $CurrentUser = null;
     public static ?bool $IncludeMenu = null;
     public static ?array $PostData = null;
     protected static array $Errors = [];
@@ -171,10 +171,10 @@ class BasePage extends SafeClass
      * @param Request $Request
      * @param Session $Session
      * @param Cookie $Cookie
-     * @param UserClass|null $CurrentUser
+     * @param QuickDRYUser|null $CurrentUser
      * @param Server|null $Server
      */
-    public function __construct(Request $Request, Session $Session, Cookie $Cookie, UserClass $CurrentUser = null, Server $Server = null)
+    public function __construct(Request $Request, Session $Session, Cookie $Cookie, QuickDRYUser $CurrentUser = null, Server $Server = null)
     {
         static::Construct($Request, $Session, $Cookie, $CurrentUser, $Server);
     }
@@ -218,10 +218,10 @@ class BasePage extends SafeClass
      * @param Request $Request
      * @param Session $Session
      * @param Cookie $Cookie
-     * @param UserClass|null $CurrentUser
+     * @param QuickDRYUser|null $CurrentUser
      * @param Server|null $Server
      */
-    public static function Construct(Request $Request, Session $Session, Cookie $Cookie, UserClass $CurrentUser = null, Server $Server = null)
+    public static function Construct(Request $Request, Session $Session, Cookie $Cookie, QuickDRYUser $CurrentUser = null, Server $Server = null)
     {
         static::$Request = $Request;
         static::$Cookie = $Cookie;

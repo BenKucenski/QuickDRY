@@ -1,4 +1,5 @@
 <?php
+
 namespace QuickDRYInstance\FormElements;
 
 use QuickDRY\Web\ElementID;
@@ -15,12 +16,15 @@ class RoleClass extends FormClass
   ];
 
   /**
-   * @param        $selected
+   * @param string|null $selected
    * @param ElementID|null $id
    * @return string
    */
-  public static function Select($selected, ElementID $id = null): string
+  public static function Select(string $selected = null, ElementID $id = null): string
   {
-    return self::SelectItems(self::$_options, $selected, $id ?? new ElementID('role'), 'form-control');
+    if(is_null($id)) {
+      $id = new ElementID('role');
+    }
+    return self::SelectItems(self::$_options, $selected, $id, 'form-control');
   }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use QuickDRY\Utilities\Debug;
+
 class EasySQLite extends SQLite3
 {
   public string $file;
@@ -36,7 +38,7 @@ class EasySQLite extends SQLite3
     }
     $res = $this->query($sql);
     if ($this->lastErrorCode()) {
-      CleanHalt([
+      Debug::Halt([
         'sql' => $sql
         , 'params' => $params
         , 'lastErrorMsg' => $this->lastErrorMsg()

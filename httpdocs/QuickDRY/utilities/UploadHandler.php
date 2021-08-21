@@ -204,7 +204,7 @@ class UploadHandler
       $file->entity_id = $fileArray['entity_id'];
       $file->entity_type = $fileArray['entity_type_id'];
     }
-    $file->Save();
+    $id = $file->Save();
 
     if (!file_exists($file->server_location)) {
       move_uploaded_file($fileArray['tmp_name'], $file->server_location);
@@ -215,7 +215,7 @@ class UploadHandler
       'thumbnail_url' => '',
       'name' => $file->file_name,
       'size' => $file->file_size,
-      'id' => $file->id,
+      'id' => $id,
       'entity_id' => $fileArray['entity_id'],
       'entity_type_id' => $fileArray['entity_type_id'],
     ];

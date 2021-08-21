@@ -1,10 +1,12 @@
 <?php
 require_once 'Defines.php';
 
-
 function autoloader_QuickDRY_Instance($class)
 {
+
   $class_map = [
+    'QuickDRYInstance\FormElements\FlowUnitOptions' => 'FormElements/FlowUnitOptions.php',
+    'QuickDRYInstance\FormElements\RoundUpReadyOptions' => 'FormElements/RoundUpReadyOptions.php',
     'QuickDRYInstance\FormElements\GenderClass' => 'FormElements/GenderClass.php',
     'QuickDRYInstance\FormElements\MonthClass' => 'FormElements/MonthClass.php',
     'QuickDRYInstance\FormElements\PerPageClass' => 'FormElements/PerPageClass.php',
@@ -16,7 +18,7 @@ function autoloader_QuickDRY_Instance($class)
     'QuickDRYInstance\Common\ChangeLogHistory' => 'Common/ChangeLogHistory.php',
     'QuickDRYInstance\Common\FileClass' => 'Common/FileClass.php',
     'QuickDRYInstance\Common\CronLog' => 'Common/CronLog.php',
-    'QuickDRYInstance\Common\UserClass' => 'Common/UserClass.php',
+    'QuickDRYInstance\Common\QuickDRYUser' => 'Common/QuickDRYUser.php',
     'QuickDRYInstance\Common\UserManager' => 'Common/UserManager.php',
 
     'QuickDRYInstance\Menu\Menu' => 'Menu/Menu.php',
@@ -29,6 +31,7 @@ function autoloader_QuickDRY_Instance($class)
 
   $file = $class_map[$class];
   $file = 'QuickDRYInstance/' . $file;
+
 
   if (file_exists($file)) { // web
     require_once $file;

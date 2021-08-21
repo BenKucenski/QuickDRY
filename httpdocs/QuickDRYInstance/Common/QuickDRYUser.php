@@ -1,56 +1,62 @@
 <?php
+
 namespace QuickDRYInstance\Common;
 
 use Exception;
-
 use QuickDRY\Connectors\adLDAP;
 use QuickDRY\Utilities\SafeClass;
+use stdClass;
 
 /**
  * Class UserClass
  *
- * @property int id
+ * @property string id
  * @property string Username
  * @property array Roles
  */
-class UserClass extends SafeClass
+class QuickDRYUser extends SafeClass
 {
-  public int $id;
-  public string $Username;
-  public array $Roles;
-
-  // replace with your actual user class
-  /* @var $User mixed */
-  public $User;
+  public ?int $id = null;
+  public ?string $Username = null;
+  public ?array $Roles = null;
+  public ?stdClass $User = null;
 
   /**
-   * @param string $name
-   * @return null|string
+   * @param $name
+   * @return mixed
    */
-  public function __get(string $name)
+  public function __get($name)
   {
     switch ($name) {
       case 'login':
         return $this->Username;
     }
-    return parent::__get($name);
+    return $this->User->$name;
+  }
+
+  public function __set($name, $value)
+  {
+    $this->User->$name = $value;
+  }
+
+  public function Save(): ?array
+  {
+    return null;
   }
 
   /**
-   * @param $username
-   * @param $password
-   * @return null|UserClass
+   * @param string $username
+   * @param string $password
+   * @return null|QuickDRYUser
    */
-  public static function DoLogin($username, $password): ?UserClass
+  public static function DoLogin(string $username, string $password): ?QuickDRYUser
   {
     // https://stackoverflow.com/questions/6222641/how-to-php-ldap-search-to-get-user-ou-if-i-dont-know-the-ou-for-base-dn
-
-    $ldap = null;
-
     try {
       $ldap = new adLDAP();
     } catch (Exception $ex) {
       Halt($ex);
+      exit;
     }
 
     $ldap->set_use_tls(defined('LDAP_USE_TLS') ? LDAP_USE_TLS : false);
@@ -95,9 +101,9 @@ class UserClass extends SafeClass
    * @param $username
    * @param $password
    * @param null $default_host
-   * @return null|UserClass
+   * @return null|QuickDRYUser
    */
-  public static function LogInLDAP($username, $password, $default_host = null): ?UserClass
+  public static function LogInLDAP($username, $password, $default_host = null): ?QuickDRYUser
   {
     if (!defined('LDAP_ADMIN_USER')) {
       Halt('QuickDRY Error: LDAP_ADMIN_USER must be defined in settings');
@@ -123,23 +129,6 @@ class UserClass extends SafeClass
     }
 
     return self::DoLogin($username, $password);
-  }
-
-  /**
-   * @param $roles
-   * @return bool
-   */
-  public function Is($roles): bool
-  {
-    if (!is_array($roles)) {
-      $roles = [$roles];
-    }
-    foreach ($roles as $role) {
-      if (in_array($role, $this->Roles)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**

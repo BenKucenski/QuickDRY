@@ -4,7 +4,7 @@ namespace QuickDRY\Utilities;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Common\QuickDRYUser;
 
 /**
  * Class Dates
@@ -370,10 +370,10 @@ class Dates extends SafeClass
 
   /**
    * @param $time
-   * @param UserClass $User
+   * @param QuickDRYUser $User
    * @return string
    */
-  public static function FromUserTimeToGMT($time, UserClass $User): ?string
+  public static function FromUserTimeToGMT($time, QuickDRYUser $User): ?string
   {
     $time = self::DateToInt($time);
 

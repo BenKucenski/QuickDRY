@@ -989,7 +989,7 @@ WHERE
       return $t;
     });
     if (isset($res['error'])) {
-      CleanHalt($res);
+      Debug::Halt($res);
     }
     return $res;
   }
@@ -1013,7 +1013,7 @@ ORDER BY type_desc, OBJECT_NAME(sm.object_id)
       return new MSSQL_Definition($row);
     });
     if (isset($res['error'])) {
-      CleanHalt($res);
+      Debug::Halt($res);
     }
     return $res;
   }
@@ -1037,7 +1037,7 @@ select
       return new MSSQL_StoredProc($row);
     });
     if (isset($res['error'])) {
-      CleanHalt($res);
+      Debug::Halt($res);
     }
     return $res;
   }

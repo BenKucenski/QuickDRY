@@ -74,7 +74,7 @@ class Log extends SafeClass
     $msg = [$msg];
     $res = Elastic_A::Insert('cron', 'log', $msg);
     if ($res['error']) {
-      CleanHalt($res);
+      Debug::Halt($res);
     }
   }
 }

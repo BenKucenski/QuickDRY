@@ -2,6 +2,7 @@
 
 namespace QuickDRYInstance\Common;
 
+
 use QuickDRY\Utilities\SafeClass;
 
 /**
@@ -11,23 +12,22 @@ use QuickDRY\Utilities\SafeClass;
  */
 class FileClass extends SafeClass
 {
-  public ?string $id = null;
-  public ?int $user_id = null;
-  public ?string $file_name = null;
-  public ?string $file_type = null;
-  public ?string $file_hash = null;
-  public ?int $file_size = null;
-  public ?string $file_ext = null;
-  public ?string $created_at = null;
+  public int $user_id;
+  public string $file_name;
+  public string $file_type;
+  public string $file_hash;
+  public int $file_size;
+  public string $file_ext;
+  public string $created_at;
 
-  public ?int $entity_id = null;
-  public ?string $entity_type = null;
+  public int $entity_id;
+  public string $entity_type;
 
   /**
-   * @param string $name
+   * @param $name
    * @return null|string
    */
-  public function __get(string $name)
+  public function __get($name)
   {
     switch ($name) {
       case 'server_location':
@@ -56,8 +56,8 @@ class FileClass extends SafeClass
     return $dir . $hash . '.' . $ext;
   }
 
-  public function Save()
+  public function Save(): int
   {
-    // TODO: add database table to store these records into
+    return 0;
   }
 }

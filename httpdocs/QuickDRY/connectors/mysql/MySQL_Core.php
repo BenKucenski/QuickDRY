@@ -6,7 +6,7 @@ use QuickDRY\Utilities\Dates;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\Strings;
 use QuickDRYInstance\Common\ChangeLog;
-use QuickDRYInstance\Common\UserClass;
+use QuickDRYInstance\Common\QuickDRYUser;
 
 /**
  * Class MySQL_Core
@@ -136,10 +136,10 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param UserClass $user
+   * @param QuickDRYUser $user
    * @return bool
    */
-  public function CanDelete(UserClass $user): bool
+  public function CanDelete(QuickDRYUser $user): bool
   {
     return false;
   }
@@ -198,10 +198,10 @@ class MySQL_Core extends SQL_Base
   }
 
   /**
-   * @param UserClass $User
+   * @param QuickDRYUser $User
    * @return array|null
    */
-  public function Remove(UserClass $User): ?array
+  public function Remove(QuickDRYUser $User): ?array
   {
     if (!$this->CanDelete($User)) {
       return null;

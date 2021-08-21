@@ -232,7 +232,9 @@ host = ' . $this->DB_HOST . '
         if (!static::$keep_files) {
           unlink($fname);
         }
-        unlink($file);
+        if(file_exists($file)) {
+          unlink($file);
+        }
 
         Metrics::Stop('MySQL: ' . $query_hash);
       } else {
