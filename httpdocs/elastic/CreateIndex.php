@@ -4,8 +4,7 @@ use QuickDRY\Connectors\Elastic_A;
 use QuickDRY\Utilities\Debug;
 use QuickDRY\Utilities\SafeClass;
 
-$shortopts = '';
-$shortopts .= 'h:';
+$shortopts = 'h:';
 $shortopts .= 'i:';
 $shortopts .= 't:';
 $shortopts .= 'f:';
