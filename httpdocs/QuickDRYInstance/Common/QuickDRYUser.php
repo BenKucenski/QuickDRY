@@ -139,4 +139,21 @@ class QuickDRYUser extends SafeClass
     // used by change log to identify who made the change
     return $this->Username;
   }
+  
+  /**
+   * @param $roles
+   * @return bool
+   */
+  public function Is($roles): bool
+  {
+    if (!is_array($roles)) {
+      $roles = [$roles];
+    }
+    foreach ($roles as $role) {
+      if (in_array($role, $this->Roles)) {
+        return true;
+      }
+    }
+    return false;
+  }  
 }
