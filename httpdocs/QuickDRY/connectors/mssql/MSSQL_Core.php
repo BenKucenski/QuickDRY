@@ -11,9 +11,9 @@ use QuickDRY\Utilities\Strings;
 
 class MSSQL_Core extends SQL_Base
 {
-  public static array $prop_definitions = [];
-  public static array $_primary = [];
-  public static array $_unique = [];
+  protected static array $prop_definitions = [];
+  protected static array $_primary = [];
+  protected static array $_unique = [];
 
   protected static string $DatabaseTypePrefix = 'ms';
   protected static string $DatabasePrefix = '';

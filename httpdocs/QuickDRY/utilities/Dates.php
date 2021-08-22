@@ -121,16 +121,18 @@ class Dates extends SafeClass
   /**
    * @param $year
    * @param $DayInYear
-   *
    * @return string
-   * @throws Exception
    */
   public static function DayOfYearToDate($year, $DayInYear): ?string
   {
     // http://webdesign.anmari.com/1956/calculate-date-from-day-of-year-in-php/
 
     $DayInYear = floor($DayInYear);
-    $d = new DateTime($year . '-01-01');
+    try {
+      $d = new DateTime($year . '-01-01');
+    } catch (Exception $e) {
+      Debug::Halt($e);
+    }
     date_modify($d, '+' . ($DayInYear - 1) . ' days');
     return self::Datestamp($d->getTimestamp());
   }
