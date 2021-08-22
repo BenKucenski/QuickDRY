@@ -10,6 +10,12 @@ use stdClass;
  */
 class Strings extends SafeClass
 {
+  public static function RemoveQuotes($str)
+  {
+    // https://stackoverflow.com/questions/9734758/remove-quotes-from-start-and-end-of-string-in-php
+    return preg_replace('~^[\'"]?(.*?)[\'"]?$~', '$1', $str);
+  }
+
   public static function ExcelTitleOnly($str): string
   {
     return self::Truncate(preg_replace('/\s+/si', ' ', preg_replace('/[^a-z0-9\s]/si', ' ', trim($str))), 31, false, false);
