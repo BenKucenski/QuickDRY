@@ -919,7 +919,7 @@ class Strings extends SafeClass
    *
    * @return string
    */
-  public static function SmartNumberFormat($num, int $dec = 2, string $null = '-'): string
+  public static function SmartNumberFormat($num, int $dec = 2, string $null = '-'): ?string
   {
     if (!is_numeric($dec))
       return $num;
@@ -935,7 +935,7 @@ class Strings extends SafeClass
    * @param string $comma
    * @return string
    */
-  public static function FormNumberFormat($num, int $dec = 2, string $comma = ''): string
+  public static function FormNumberFormat($num, int $dec = 2, string $comma = ''): ?string
   {
     if (!is_numeric($num))
       return $num;
