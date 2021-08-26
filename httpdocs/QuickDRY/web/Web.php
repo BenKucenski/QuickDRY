@@ -191,6 +191,17 @@ class Web extends SafeClass
     }
   }
 
+  public function __get($name)
+  {
+    switch ($name) {
+      case 'url_export_xls':
+        return CURRENT_PAGE_URL . '?' . ($this->Server->QUERY_STRING ? $this->Server->QUERY_STRING . '&export=xls' : 'export=xls');
+      case 'url_export_pdf':
+        return CURRENT_PAGE_URL . '?' . ($this->Server->QUERY_STRING ? $this->Server->QUERY_STRING . '&export=pdf' : 'export=pdf');
+    }
+    return parent::__get($name);
+  }
+
   /**
    * @param string $default_page
    * @param string $default_user_page
