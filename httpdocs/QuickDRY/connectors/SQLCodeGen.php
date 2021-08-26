@@ -452,7 +452,7 @@ class SQLCodeGen extends SafeClass
       'HasUserLink' => $HasUserLink ? '
         global $Web;
         if($this->id) {
-            if($this->user_id !== $Web->CurrentUser->id) {
+            if ($this->user_id != $Web->CurrentUser->id) {
                 $res[\'error\'] = [\'No Permission\'];
                 return $res;
             }
