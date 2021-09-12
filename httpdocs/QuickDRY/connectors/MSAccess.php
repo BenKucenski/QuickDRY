@@ -124,17 +124,10 @@ function autoloader_QuickDRY_ACCESS($class)
     return;
   }
 
-  $file = $class_map[$class];
-  $file = 'QuickDRY/connectors/' . $file;
+  $file = __DIR__ . '/' . $class_map[$class];
 
-  if (file_exists($file)) { // web
+  if (file_exists($file)) {
     require_once $file;
-  } else {
-    if (file_exists('../' . $file)) { // cron folder
-      require_once '../' . $file;
-    } else { // scripts folder
-      require_once '../httpdocs/' . $file;
-    }
   }
 }
 

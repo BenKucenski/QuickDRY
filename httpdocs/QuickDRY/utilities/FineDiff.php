@@ -94,7 +94,11 @@ function autoloader_QuickDRY_FineDiff($class)
     return;
   }
 
-  require_once __DIR__ . '/' . $class_map[$class];
+  $file = __DIR__ . '/' . $class_map[$class];
+
+  if (file_exists($file)) {
+    require_once $file;
+  }
 }
 
 

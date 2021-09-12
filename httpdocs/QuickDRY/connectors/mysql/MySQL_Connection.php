@@ -53,8 +53,13 @@ class MySQL_Connection
    */
   public function CheckDatabase($db_base): bool
   {
-    $sql = 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = {{}}';
-    $res = $this->Query($sql, [$db_base]);
+    $sql = '
+SELECT 
+       SCHEMA_NAME 
+FROM INFORMATION_SCHEMA.SCHEMATA
+WHERE SCHEMA_NAME = :SCHEMA_NAME
+';
+    $res = $this->Query($sql, ['SCHEMA_NAME' => $db_base]);
 
     return isset($res['data'][0]['SCHEMA_NAME']);
   }

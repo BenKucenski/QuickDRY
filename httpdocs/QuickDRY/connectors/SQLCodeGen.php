@@ -189,7 +189,7 @@ class SQLCodeGen extends SafeClass
     $template = file_get_contents(__DIR__ . '/_templates/autoloader.txt');
     $vars = [
       'autoloader_class' => $autoloader_class,
-      'mod_map' => implode("\r\n\t\t", $mod_map),
+      'mod_map' => implode("\r\n        ", $mod_map),
       'DestinationFolder' => $this->DestinationFolder,
     ];
 
@@ -452,7 +452,7 @@ class SQLCodeGen extends SafeClass
       'HasUserLink' => $HasUserLink ? '
         global $Web;
         if($this->id) {
-            if ($this->user_id != $Web->CurrentUser->id) {
+            if($this->user_id !== $Web->CurrentUser->id) {
                 $res[\'error\'] = [\'No Permission\'];
                 return $res;
             }

@@ -8,17 +8,13 @@ function [[autoloader_class]](string $class) {
     ];
 
     if(!isset($class_map[$class])) {
-        return;
+      return;
     }
 
-    if (file_exists($class_map[$class])) { // web
-        require_once $class_map[$class];
-    } else {
-        if (file_exists('../' . $class_map[$class])) { // cron folder
-            require_once '../' . $class_map[$class];
-        } else { // scripts folder
-           require_once '[[DestinationFolder]]/' . $class_map[$class];
-        }
+    $file = __DIR__ . '/../' . $class_map[$class];
+
+    if (file_exists($file)) {
+        require_once $file;
     }
 }
 

@@ -24,7 +24,7 @@ class MySQL extends SafeClass
       Debug::Halt('QuickDRY Error: No MySQL Connection');
     }
     $matches = [];
-    preg_match_all('/:(\w+)\s+/si', $sql, $matches);
+    preg_match_all('/:(\w+)[\s+,)]/si', $sql, $matches);
     if(sizeof($matches[1])) {
       foreach($matches[1] as $ph) {
         $sql = str_replace(':' . $ph, '{{' . $ph . '}}', $sql);
@@ -32,7 +32,7 @@ class MySQL extends SafeClass
     }
 
     $count = 0;
-    return preg_replace_callback("/\{\{(.*?)\}\}/i", function ($result)
+    return preg_replace_callback("/{{(.*?)}}/i", function ($result)
     use ($params, &$count, $conn, $sql) {
       if (isset($result[1])) {
 
@@ -87,17 +87,10 @@ function autoloader_QuickDRY_MySQL($class)
     return;
   }
 
-  $file = $class_map[$class];
-  $file = 'QuickDRY/connectors/' . $file;
+  $file = __DIR__ . '/' . $class_map[$class];
 
   if (file_exists($file)) { // web
     require_once $file;
-  } else {
-    if (file_exists('../' . $file)) { // cron folder
-      require_once '../' . $file;
-    } else { // scripts folder
-      require_once '../httpdocs/' . $file;
-    }
   }
 }
 

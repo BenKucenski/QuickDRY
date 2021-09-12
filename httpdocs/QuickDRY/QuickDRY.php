@@ -195,33 +195,10 @@ function autoloader_QuickDRY($class)
     return;
   }
 
-  $file = $class_map[$class];
-  $file = 'QuickDRY/' . $file;
+  $file = __DIR__ . '/' . $class_map[$class];
 
-  if (file_exists($file)) { // web
+  if (file_exists($file)) {
     require_once $file;
-  } else {
-    if (file_exists('../' . $file)) { // cron folder
-      require_once '../' . $file;
-    } else { // scripts folder
-      if (file_exists('../httpdocs/' . $file)) {
-        require_once '../httpdocs/' . $file;
-      } else {
-        ob_start();
-        debug_print_backtrace();
-        $trace = ob_get_contents();
-        ob_end_clean();
-
-        // Remove first item from backtrace as it's this function which
-        // is redundant.
-        if (strlen($trace) < 1024 * 64) {
-          $trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '', $trace, 1);
-        }
-
-
-        exit(print_r([getcwd(), '../httpdocs/' . $file, $trace], true));
-      }
-    }
   }
 }
 
