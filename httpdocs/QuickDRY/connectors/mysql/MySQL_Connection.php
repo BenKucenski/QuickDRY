@@ -491,7 +491,7 @@ host = ' . $this->DB_HOST . '
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL
-		ORDER BY column_name
+		ORDER BY referenced_table_name, table_name, column_name
 
 		';
       $res = $this->Query($sql);
@@ -544,7 +544,7 @@ host = ' . $this->DB_HOST . '
 		WHERE
 				referenced_table_schema = \'' . $this->current_db . '\'
 		  		AND referenced_table_name IS NOT NULL
-		ORDER BY column_name
+		ORDER BY referenced_table_name, table_name, column_name
 
 		';
       $res = $this->Query($sql);

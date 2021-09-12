@@ -327,6 +327,7 @@ class SQLCodeGen extends SafeClass
 
     /* @var $refs MSSQL_ForeignKey[]|MySQL_ForeignKey[] */
     $refs = $DatabaseClass::GetLinkedTables($table_name);
+
     $fk_counts = [];
     foreach ($refs as $fk) {
       if (is_array($fk->column_name)) {
