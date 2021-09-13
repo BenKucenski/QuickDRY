@@ -14,7 +14,7 @@ class MSSQL_Queue extends SafeClass
   public bool $IgnoreDuplicateError = false;
   private int $QueueLimit;
 
-  public function __construct($MSSQL_CLASS = 'MSSQL_A', $HaltOnError = true, $QueueLimit = 500)
+  public function __construct($MSSQL_CLASS = MSSQL_A::class, $HaltOnError = true, $QueueLimit = 500)
   {
     $this->MSSQL_CLASS = $MSSQL_CLASS;
     $this->HaltOnError = $HaltOnError;
