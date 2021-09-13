@@ -2,6 +2,7 @@
 namespace QuickDRY\Utilities;
 
 use DateTime;
+use ReflectionProperty;
 use stdClass;
 
 /**
@@ -101,6 +102,7 @@ class SafeClass
   /**
    * @param array $row
    * @param bool $convert_objects
+   * @throws \ReflectionException
    */
   public function FromRow(array $row, bool $convert_objects = false)
   {
@@ -120,7 +122,25 @@ class SafeClass
         $this->_Aliases['_' . $a] = $k;
         $k = '_' . $a;
       }
-      $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
+
+      $rp = new ReflectionProperty($this, $k);
+      $type = $rp->getType()->getName();
+      switch($type)
+      {
+        case 'string':
+          $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
+          break;
+        case 'int':
+          $this->$k = is_array($v) || is_object($v) ? $v : (int)Strings::FixJSON($v);
+          break;
+        case 'float':
+          $this->$k = is_array($v) || is_object($v) ? $v : (float)Strings::FixJSON($v);
+          break;
+
+        default:
+          Debug::Halt($type);
+      }
+
     }
     if ($this->HasMissingProperties()) {
       if ($halt_on_error) {
