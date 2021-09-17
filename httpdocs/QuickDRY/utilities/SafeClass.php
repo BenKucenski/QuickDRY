@@ -2,6 +2,7 @@
 namespace QuickDRY\Utilities;
 
 use DateTime;
+use Exception;
 use ReflectionProperty;
 use stdClass;
 
@@ -127,6 +128,13 @@ class SafeClass
       $type = $rp->getType()->getName();
       switch($type)
       {
+        case 'DateTime':
+          try {
+            $this->$k = new DateTime(Dates::Timestamp($v));
+          } catch(Exception $ex) {
+            $this->$k = null;
+          }
+          break;
         case 'string':
           $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
           break;
