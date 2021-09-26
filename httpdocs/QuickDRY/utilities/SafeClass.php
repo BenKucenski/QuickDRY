@@ -136,7 +136,7 @@ class SafeClass
           }
           break;
         case 'string':
-          $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
+      $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
           break;
         case 'int':
           $this->$k = is_array($v) || is_object($v) ? $v : (int)Strings::FixJSON($v);
@@ -147,7 +147,7 @@ class SafeClass
 
         default:
           Debug::Halt($type);
-      }
+    }
 
     }
     if ($this->HasMissingProperties()) {

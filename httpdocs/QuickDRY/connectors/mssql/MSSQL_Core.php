@@ -456,7 +456,7 @@ class MSSQL_Core extends SQL_Base
    *
    * @return mixed
    */
-  protected static function _Get($id, $col = null)
+  protected static function _Get($id, $col = null): ?array
   {
     $params = [];
     if (is_array($id)) {

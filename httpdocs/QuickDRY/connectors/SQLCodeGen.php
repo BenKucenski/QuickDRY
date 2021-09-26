@@ -110,6 +110,7 @@ class SQLCodeGen extends SafeClass
       case 'uniqueidentifier':
       case 'longtext':
       case 'longblob':
+      case 'blob':
         return 'string';
 
       case 'tinyint unsigned':
@@ -598,7 +599,7 @@ class SQLCodeGen extends SafeClass
     if (!sizeof($primary)) {
       return;
     }
-    $namespace = 'json\\' . $this->DatabaseTypePrefix . '_' . $this->Database;
+    $namespace = 'json\\' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
 
     $get_params = [];
     $missing_params = [];
@@ -851,7 +852,7 @@ class SQLCodeGen extends SafeClass
       return;
     }
 
-    $namespace = 'manage\\' . $this->DatabasePrefix . '_' . $this->Database;
+    $namespace = 'manage\\' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
 
     $template = file_get_contents(__DIR__ . '/_templates/manage.txt');
     $vars = [
