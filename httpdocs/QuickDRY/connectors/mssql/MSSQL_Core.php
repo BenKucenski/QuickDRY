@@ -454,7 +454,7 @@ class MSSQL_Core extends SQL_Base
    * @param      $id
    * @param null $col
    *
-   * @return mixed
+   * @return array|null
    */
   protected static function _Get($id, $col = null): ?array
   {

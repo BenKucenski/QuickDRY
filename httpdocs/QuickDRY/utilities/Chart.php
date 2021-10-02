@@ -2,8 +2,6 @@
 namespace QuickDRY\Utilities;
 
 
-use QuickDRY\Utilities\SafeClass;
-
 class Chart extends SafeClass
 {
 	public float $width;

@@ -328,7 +328,6 @@ class SQLCodeGen extends SafeClass
 
     /* @var $refs MSSQL_ForeignKey[]|MySQL_ForeignKey[] */
     $refs = $DatabaseClass::GetLinkedTables($table_name);
-
     $fk_counts = [];
     foreach ($refs as $fk) {
       if (is_array($fk->column_name)) {
@@ -852,7 +851,7 @@ class SQLCodeGen extends SafeClass
       return;
     }
 
-    $namespace = 'manage\\' . $this->DatabaseTypePrefix . '_' . strtolower($this->DatabasePrefix);
+    $namespace = 'manage\\' . $this->DatabasePrefix . '_' . $this->Database;
 
     $template = file_get_contents(__DIR__ . '/_templates/manage.txt');
     $vars = [

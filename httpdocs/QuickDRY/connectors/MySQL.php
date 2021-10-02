@@ -24,7 +24,7 @@ class MySQL extends SafeClass
       Debug::Halt('QuickDRY Error: No MySQL Connection');
     }
     $matches = [];
-    preg_match_all('/:(\w+)[\s+,)]/si', $sql, $matches);
+    preg_match_all('/:(\w+)[\s+,;)]/si', $sql, $matches);
     if(sizeof($matches[1])) {
       foreach($matches[1] as $ph) {
         $sql = str_replace(':' . $ph, '{{' . $ph . '}}', $sql);

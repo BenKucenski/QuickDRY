@@ -1036,7 +1036,7 @@ class adLDAP
     $groups = $this->nice_names($info[0]["memberof"]); // Presuming the entry returned is our guy (unique usernames)
 
     if ($recursive === true) {
-      foreach ($groups as $id => $group_name) {
+      foreach ($groups as $group_name) {
         $extra_groups = $this->recursive_groups($group_name);
         $groups = array_merge($groups, $extra_groups);
       }
@@ -1777,7 +1777,7 @@ class adLDAP
     $groups = $this->nice_names($info[0]["memberof"]); //presuming the entry returned is our guy (unique usernames)
 
     if ($recursive === true) {
-      foreach ($groups as $id => $group_name) {
+      foreach ($groups as $group_name) {
         $extra_groups = $this->recursive_groups($group_name);
         $groups = array_merge($groups, $extra_groups);
       }

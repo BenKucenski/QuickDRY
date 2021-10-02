@@ -53,7 +53,7 @@ class SafeClass
     if ($this->_HaltOnError) {
       Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
     } else {
-      $this->_MissingProperties[$name] = 'public $' . $name . ';';
+      $this->_MissingProperties[$name] = 'public ?string $' . $name . ' = null;';
     }
     return null;
   }
@@ -68,7 +68,7 @@ class SafeClass
     if ($this->_HaltOnError) {
       Halt('QuickDRY Error: public $' . $name . '; is not a property of ' . get_class($this));
     } else {
-      $this->_MissingProperties[$name] = 'public $' . $name . ';';
+      $this->_MissingProperties[$name] = 'public ?string $' . $name . ' = null;';
     }
     return $value;
   }
@@ -103,7 +103,6 @@ class SafeClass
   /**
    * @param array $row
    * @param bool $convert_objects
-   * @throws \ReflectionException
    */
   public function FromRow(array $row, bool $convert_objects = false)
   {
@@ -124,38 +123,42 @@ class SafeClass
         $k = '_' . $a;
       }
 
-      $rp = new ReflectionProperty($this, $k);
-      $type = $rp->getType()->getName();
-      switch($type)
-      {
-        case 'DateTime':
-          try {
-            $this->$k = new DateTime(Dates::Timestamp($v));
-          } catch(Exception $ex) {
-            $this->$k = null;
+      try {
+        $rp = new ReflectionProperty($this, $k);
+        $type = $rp->getType()->getName();
+        switch ($type) {
+          case 'DateTime':
+            try {
+              $this->$k = new DateTime(Dates::Timestamp($v));
+            } catch (Exception $ex) {
+              $this->$k = null;
+            }
+            break;
+          case 'string':
+            $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
+            break;
+          case 'int':
+            $this->$k = is_array($v) || is_object($v) ? $v : (int)Strings::FixJSON($v);
+            break;
+          case 'float':
+            $this->$k = is_array($v) || is_object($v) ? $v : (float)Strings::FixJSON($v);
+            break;
+
+          default:
+            Debug::Halt($type);
+        }
+
+        if ($this->HasMissingProperties()) {
+          if ($halt_on_error) {
+            Halt($this->GetMissingProperties());
           }
-          break;
-        case 'string':
-      $this->$k = is_array($v) || is_object($v) ? $v : Strings::FixJSON($v);
-          break;
-        case 'int':
-          $this->$k = is_array($v) || is_object($v) ? $v : (int)Strings::FixJSON($v);
-          break;
-        case 'float':
-          $this->$k = is_array($v) || is_object($v) ? $v : (float)Strings::FixJSON($v);
-          break;
+        }
+        $this->HaltOnError($halt_on_error);
 
-        default:
-          Debug::Halt($type);
-    }
-
-    }
-    if ($this->HasMissingProperties()) {
-      if ($halt_on_error) {
-        Halt($this->GetMissingProperties());
+      } catch (Exception $e) {
+        Debug::Halt($e);
       }
     }
-    $this->HaltOnError($halt_on_error);
   }
 
   /**
@@ -187,28 +190,46 @@ class SafeClass
 
   /**
    * @param SafeClass[] $items
+   * @return SimpleExcel
+   */
+  public static function ToExcel(array $items): ?SimpleExcel
+  {
+    if (!sizeof($items)) {
+      return null;
+    }
+    $class = get_called_class();
+    $cols = array_keys(get_object_vars($items[0]));
+    $se = new SimpleExcel();
+    $se->Report = $items;
+    $se->Title = $class;
+    $se->Columns = [];
+    foreach ($cols as $col) {
+      $se->Columns[$col] = new SimpleExcel_Column(null, $col);
+    }
+    return $se;
+  }
+
+  /**
+   * @param SafeClass[] $items
    * @param string $class
    * @param string $style
    * @param bool $numbered
    * @param int $limit
    * @return string
    */
-  public static function ToHTML(array &$items, string $class = '', string $style = '', bool $numbered = false, int $limit = 0): string
+  public static function ToHTML(
+    array $items,
+    string $class = '',
+    string $style = '',
+    bool $numbered = false,
+    int $limit = 0
+  ): string
   {
     if (!sizeof($items)) {
       return '';
     }
 
-    $obj_class = get_called_class();
-    $cols = array_keys(get_object_vars($items[0]));
-
-    $se = new SimpleExcel();
-    $se->Report = $items;
-    $se->Title = $obj_class;
-    $se->Columns = [];
-    foreach ($cols as $col) {
-      $se->Columns[$col] = new SimpleExcel_Column(null, $col);
-    }
+    $se = self::ToExcel($items);
 
     $html = '<table class="' . $class . '" style="' . $style . '"><thead><tr>';
     if ($numbered) {
