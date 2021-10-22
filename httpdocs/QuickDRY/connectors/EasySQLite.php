@@ -1,6 +1,8 @@
 <?php
+namespace QuickDRY\Connectors;
 
 use QuickDRY\Utilities\Debug;
+use SQLite3;
 
 class EasySQLite extends SQLite3
 {
