@@ -1,4 +1,7 @@
 <?php
+
+use QuickDRY\Connectors\MSSQL_CodeGen;
+
 $opts = 'h::';
 $opts .= 'd::';
 $opts .= 'c::';
